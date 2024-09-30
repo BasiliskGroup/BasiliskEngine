@@ -314,6 +314,35 @@ class Node():
             top_right, bottom_left = glm.max(top_right, node_top_right), glm.min(bottom_left, node_bottom_left)
         
         return top_right, bottom_left
+    
+    def apply_offset_force(self, force:glm.vec3, offset:glm.vec3, delta_time:float):
+        """
+        Applies the acceleration, translational and rotational, from an offset force
+        """
+        if not self.physics_body: return
+        
+        # translation
+        self.physics_body.velocity += force / self.physics_body.mass * delta_time
+        
+        # rotation
+        torque = glm.cross(offset, force)
+        self.apply_torque(torque, delta_time)
+            
+    def apply_torque(self, torque:glm.vec3, delta_time:float):
+        """
+        Applies rotational acceleration from torque
+        """
+        if not self.physics_body: return
+        
+        # compute change in rotational velocity
+        omega  = self.physics_body.rotational_velocity * self.physics_body.axis_of_rotation
+        omega += self.inverse_inertia * torque * delta_time
+        
+        if (rotational_velocity := glm.length(omega)) < 1e-7:
+            self.physics_body.rotational_velocity = 0
+        else:
+            self.physics_body.rotational_velocity = rotational_velocity
+            self.physics_body.axis_of_rotation    = glm.normalize(omega)
             
     # position
     @property
