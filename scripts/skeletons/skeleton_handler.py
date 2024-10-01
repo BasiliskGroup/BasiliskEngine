@@ -58,7 +58,6 @@ class Bone():
             rotation = glm.quat(joint.child_bone.node.rotation) * joint.child_bone.original_inv_quat # TODO may be causing ginble lock
             joint.rotate_child_offset(rotation)
             
-            
         # apply restrictions
         for joint in self.joints: joint.restrict(self.node, joint.child_bone.node, delta_time)
             
