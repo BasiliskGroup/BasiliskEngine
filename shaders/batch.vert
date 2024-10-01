@@ -7,11 +7,12 @@ layout (location = 2) in vec3 in_normal;
 layout (location = 3) in vec3 obj_position;
 layout (location = 4) in vec3 obj_rotation;
 layout (location = 5) in vec3 obj_scale;
-layout (location = 6) in vec2 obj_texture;
+layout (location = 6) in int  obj_material;
 
 out vec2 uv;
-out float shading;
-out vec2 textureID;
+flat out int  materialID;
+out vec3 normal;
+out vec3 position;
 
 uniform mat4 m_proj;
 uniform mat4 m_view;
@@ -42,10 +43,10 @@ void main() {
 
     mat4 m_model = m_trans * m_rot * m_scale;
 
+    position = (m_model * vec4(in_position, 1.0)).xyz;
+    normal = normalize(mat3(transpose(inverse(m_model))) * in_normal);
     uv = in_uv;
-    vec3 normal = normalize(mat3(transpose(inverse(m_model))) * in_normal);  
-    shading = ((dot(vec3(.5, .25, .75), normal) + 1) / 2) * .75 + .25;
-    textureID = obj_texture;
+    materialID = obj_material;
 
     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
 }
