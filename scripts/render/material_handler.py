@@ -9,10 +9,15 @@ class MaterialHandler:
         self.material_ids   = {}
 
         self.add("base", color=(0.8, 0.8, 0.8))
+        self.add("red", color=(0.8, 0.1, 0.1))
+        self.add("green", color=(0.1, 0.8, 0.1))
+        self.add("blue", color=(0.1, 0.1, 0.8))
+
+        print(self.material_ids)
 
     def add(self, name, color: tuple=(1, 1, 1), specular: float=1, specular_exponent: float=32, alpha: float=1, albedo_map=None, specular_map=None, normal_map=None):
         mtl = Material(self, color, specular, specular_exponent, alpha, albedo_map, specular_map, normal_map)
-        self.material_ids[name] = len(self.material_ids)
+        self.material_ids[name] = len(self.materials)
         self.materials[name] = mtl
 
     def get(self, value):
@@ -21,9 +26,9 @@ class MaterialHandler:
 
     def write(self, program):
         program = self.programs[program]
-        for i, mtl in enumerate(list(self.materials.values())):
-            mtl.write(program, self.texture_ids, i)
-            self.material_ids[mtl] = i
+        for mtl_name in list(self.materials.keys()):
+            mtl = self.materials[mtl_name]
+            mtl.write(program, self.texture_ids, self.material_ids[mtl_name])
 
 class Material:
     def __init__(self, handler, color: tuple, specular:float, specular_exponent: float, alpha: float, albedo_map=None, specular_map=None, normal_map=None) -> None:
@@ -57,6 +62,7 @@ class Material:
             self.has_normal_map  = True
 
     def write(self, program, texture_ids, i=0):
+        print(self.color, i)
         program[f'materials[{i}].color'           ].write(self.color)
         program[f'materials[{i}].specular'        ].write(self.specular)
         program[f'materials[{i}].specularExponent'].write(self.specular_exponent)

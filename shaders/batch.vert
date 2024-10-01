@@ -7,7 +7,7 @@ layout (location = 2) in vec3 in_normal;
 layout (location = 3) in vec3 obj_position;
 layout (location = 4) in vec3 obj_rotation;
 layout (location = 5) in vec3 obj_scale;
-layout (location = 6) in int  obj_material;
+layout (location = 6) in float obj_material;
 
 out vec2 uv;
 flat out int  materialID;
@@ -46,7 +46,7 @@ void main() {
     position = (m_model * vec4(in_position, 1.0)).xyz;
     normal = normalize(mat3(transpose(inverse(m_model))) * in_normal);
     uv = in_uv;
-    materialID = obj_material;
+    materialID = int(obj_material);
 
     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
 }

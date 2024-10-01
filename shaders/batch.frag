@@ -48,11 +48,11 @@ struct Material {
     float alpha;
 
     int hasAlbedoMap;
-    int hasSpecularMap;
+    //int hasSpecularMap;
     int hasNormalMap;
 
     vec2 albedoMap;
-    vec2 specularMap;
+    //vec2 specularMap;
     vec2 normalMap;
 };
 
@@ -137,5 +137,6 @@ void main() {
 
     fragColor = vec4(light_result, mtl.alpha);
     //fragColor.rgb *= 0.0001;
-    //fragColor.rgb += viewDir;
+    //fragColor.a = 1.0;
+    //fragColor.rgb += materialID / 4.0;
 }

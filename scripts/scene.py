@@ -38,6 +38,7 @@ class Scene:
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
         
+
         self.skeleton_handler.add(
             node=self.node_handler.add(
                 position=(0, 10, 0),
@@ -57,7 +58,7 @@ class Scene:
                             position=(0, 12, 0),
                             scale=(1.5, 0.5, 0.5),
                             rotation=(0, 0, 0),
-                            model=self.model_handler.add(vbo='cube', material='base'),
+                            model=self.model_handler.add(vbo='cube', material='blue'),
                             collider=self.collider_handler.add(vbo='cube', static=False),
                             physics_body=self.physics_body_handler.add(mass=5),
                             name='chest'
@@ -71,7 +72,7 @@ class Scene:
                                         position=(0, 14, 0),
                                         scale=(0.5, 0.5, 0.5),
                                         rotation=(0, 0, 0),
-                                        model=self.model_handler.add(vbo='cube', material='base'),
+                                        model=self.model_handler.add(vbo='cube', material='green'),
                                         collider=self.collider_handler.add(vbo='cube', static=False),
                                         physics_body=self.physics_body_handler.add(mass=5),
                                         name='head'
@@ -151,7 +152,7 @@ class Scene:
             scale=(40, 1, 40),
             rotation=(0, 0, 0),
             nodes=[],
-            model=self.model_handler.add('cube', 'base'),
+            model=self.model_handler.add('cube', 'red'),
             collider=self.collider_handler.add(vbo='cube', static=True),
             physics_body=None,
             name='box'

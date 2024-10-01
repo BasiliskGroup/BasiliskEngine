@@ -72,6 +72,7 @@ class ModelHandler:
             # Get all needed information from the vbo and the model
             vertex_data = np.copy(self.vbos[model.vbo].vertex_data)
             model_data = np.array([*model.position, *model.rotation, *model.scale, model.material])
+            print(model.material)
 
             # Create an empty array to hold the model's mesh data
             object_data = np.zeros(shape=(vertex_data.shape[0], 18), dtype='f4')
@@ -100,7 +101,7 @@ class ModelHandler:
 
         # Create the vbo and the vao from mesh data
         vbo = self.ctx.buffer(batch_data)
-        vao = self.ctx.vertex_array(self.program, [(vbo, '3f 2f 3f 3f 3f 3f 1i', *['in_position', 'in_uv', 'in_normal', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_material'])], skip_errors=True)
+        vao = self.ctx.vertex_array(self.program, [(vbo, '3f 2f 3f 3f 3f 3f 1f', *['in_position', 'in_uv', 'in_normal', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_material'])], skip_errors=True)
 
         # Store batched chunk mesh in the batches dict
         self.batches[chunk_key] = (vbo, vao)
