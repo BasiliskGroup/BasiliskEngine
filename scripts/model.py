@@ -25,6 +25,8 @@ class Model:
         self.position = vec3(position, self.update_position)
         self.rotation = vec3(rotation, self.update_rotation)
         self.scale    = vec3(scale   , self.update_scale)  
+        
+        self.base_volume = 8
 
     @property
     def position(self): return self._position
@@ -111,3 +113,6 @@ class Model:
 
     def __repr__(self) -> str:
         return f'<Object: {self.position[0]},{self.position[1]},{self.position[2]}>'
+    
+    def get_volume(self) -> float:
+        return self.base_volume * self.scale.x * self.scale.y * self.scale.z

@@ -220,7 +220,7 @@ class Node():
             
         elif self.model:
             
-            unique_points = self.model.handler.vbos[self.model.vbo].unique_points
+            unique_points = self.model._Model__handler.vbos[self.model.vbo].unique_points
             
             for p in unique_points: 
                 inertia_tensor[0][0] += p[1] * p[1] + p[2] * p[2]
