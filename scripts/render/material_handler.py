@@ -9,9 +9,6 @@ class MaterialHandler:
         self.material_ids   = {}
 
         self.add("base", color=(0.8, 0.8, 0.8))
-        self.add("red", color=(0.8, 0.1, 0.1))
-        self.add("green", color=(0.1, 0.8, 0.1))
-        self.add("blue", color=(0.1, 0.1, 0.8))
         
         self.add("baby_blue", color=(175/255, 248/255, 255/255))
         self.add("black", color=(0, 0, 0))
@@ -19,8 +16,7 @@ class MaterialHandler:
         self.add("grey", color=(184/255, 184/255, 184/255))
         self.add("red_pink", color=(252/255, 3/255, 94/255))
         self.add("yellow", color=(255/255, 245/255, 56/255))
-
-        print(self.material_ids)
+        self.add("white", color=(1, 1, 1))
 
     def add(self, name, color: tuple=(1, 1, 1), specular: float=1, specular_exponent: float=32, alpha: float=1, albedo_map=None, specular_map=None, normal_map=None):
         mtl = Material(self, color, specular, specular_exponent, alpha, albedo_map, specular_map, normal_map)
@@ -69,7 +65,6 @@ class Material:
             self.has_normal_map  = True
 
     def write(self, program, texture_ids, i=0):
-        print(self.color, i)
         program[f'materials[{i}].color'           ].write(self.color)
         program[f'materials[{i}].specular'        ].write(self.specular)
         program[f'materials[{i}].specularExponent'].write(self.specular_exponent)

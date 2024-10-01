@@ -72,7 +72,6 @@ class ModelHandler:
             # Get all needed information from the vbo and the model
             vertex_data = np.copy(self.vbos[model.vbo].vertex_data)
             model_data = np.array([*model.position, *model.rotation, *model.scale, model.material])
-            print(model.material)
 
             # Create an empty array to hold the model's mesh data
             object_data = np.zeros(shape=(vertex_data.shape[0], 18), dtype='f4')
