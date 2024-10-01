@@ -77,7 +77,7 @@ class Engine:
                 pg.mouse.set_visible(False)
 
         # Update Project
-        self.project.update(self.dt)
+        self.project.update(self.dt * 0.5)
 
     def render(self) -> None:
         """

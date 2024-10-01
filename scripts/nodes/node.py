@@ -4,9 +4,13 @@ from scripts.generic.data_types import vec3
 from scripts.generic.math_functions import get_model_matrix, get_rotation_matrix
     
 class Node():
-    def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model=None, collider=None, physics_body=None, name:str='node'):
+    def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model=None, collider=None, physics_body=None, name:str='node', camera=None):
         # handler
         self.node_handler = node_handler
+        
+        # other
+        self.name = name
+        self.camera = camera
         
         # transforms
         self.position     = glm.vec3(position) if position else glm.vec3(0.0)
@@ -39,8 +43,10 @@ class Node():
         self.aligned_inertia = self.define_inverse_inertia()
         self.inverse_inertia = self.get_inverse_inertia()
         
-        # info
-        self.name = name
+        # scripting
+        self.on_tick      = None
+        self.on_touch     = None
+        self.on_collision = None # like touch but will have threashold
     
     # initialization
     def init_physics_body(self): 
@@ -63,7 +69,7 @@ class Node():
         self.physics_body = None
     
     # updating
-    def update(self, delta_time:float):
+    def update(self, delta_time:float, ticked:bool=False):
         """
         Updates the position of this node based on the it's phsyics body and syncromizes all this children to its new data. 
         """
@@ -81,6 +87,8 @@ class Node():
         self.geometric_center = glm.vec3([*glm.mul(self.model_matrix, (*self.geometric_offset, 1))][:3]) # TODO get correct udpate with rotation
         
         self.sync_data() 
+        
+        if ticked and self.on_tick: self.on_tick()
         
         self.after_update()
             
@@ -210,14 +218,35 @@ class Node():
             
             inertia_tensor /= len(self.collider.unique_points) / self.collider.get_volume() * total_volume
             
+        elif self.model:
+            
+            unique_points = self.model.handler.vbos[self.model.vbo].unique_points
+            
+            for p in unique_points: 
+                inertia_tensor[0][0] += p[1] * p[1] + p[2] * p[2]
+                inertia_tensor[1][1] += p[0] * p[0] + p[2] * p[2]
+                inertia_tensor[2][2] += p[0] * p[0] + p[1] * p[1]
+                inertia_tensor[0][1] -= p[0] * p[1]
+                inertia_tensor[0][2] -= p[0] * p[2]
+                inertia_tensor[1][2] -= p[1] * p[2]
+                
+            inertia_tensor[1][0] = inertia_tensor[0][1]
+            inertia_tensor[2][0] = inertia_tensor[0][2]
+            inertia_tensor[2][1] = inertia_tensor[1][2]
+            
+            inertia_tensor /= len(unique_points) / self.model.get_volume() * total_volume
+            
         # define the inertia of all children
         for node in self.nodes: node.define_inverse_inertia(total_volume)
         
         # sum child inertia tensors
         inertia_data = [(node.get_inverse_inertia(), node.position) for node in self.nodes]
         for inverse_child_inertia, displacement in inertia_data:
+            if not inverse_child_inertia: continue
             child_inertia   = glm.inverse(inverse_child_inertia)
             inertia_tensor += child_inertia + (glm.dot(displacement, displacement) * glm.mat3x3() - glm.outerProduct(displacement, displacement))
+            
+        if inertia_tensor == glm.mat3x3(0.0): return None
             
         return glm.inverse(inertia_tensor)
     
@@ -225,6 +254,8 @@ class Node():
         """
         Returns the inverse inertia tensor with the proper scaling and rotations
         """
+        if not self.aligned_inertia: return None
+        
         # gets the new inverse inertia if rotation has been changed. 
         if self.update_inertia: 
             rotation_matrix      = get_rotation_matrix(self.rotation) 
@@ -288,6 +319,7 @@ class Node():
         """
         volume = 0
         if self.collider:       volume += self.collider.get_volume()
+        elif self.model:        volume += self.model.get_volume()
         for node in self.nodes: volume += node.get_volume()
         return volume
     

@@ -103,7 +103,7 @@ class RotatorJoint(BallJoint):
 class HingeJoint(BallJoint):
     def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, axis:glm.vec3=None):
         super().__init__(child_bone, parent_offset, child_offset, spring_constant)
-        self.axis = axis
+        self.axis = glm.normalize(axis) if glm.length(axis) > 1e-7 else glm.vec3(0, 1, 0)
         self.original_axis = glm.vec3(axis)
         
     def rotate_parent_offset(self, rotation: glm.quat):
@@ -115,11 +115,33 @@ class HingeJoint(BallJoint):
         rotated_quat = glm.inverse(rotation) * glm.quat(0, *self.original_axis) * rotation
         self.axis    = glm.vec3(rotated_quat.x, rotated_quat.y, rotated_quat.z)
         
+        if glm.length(self.axis) < 1e-7: self.axis = glm.vec3(0, 1, 0)
+        else: self.axis = glm.normalize(self.axis)
+        
     def restrict(self, parent, child, delta_time:float):
         """
         Restrict joint by ball spring, then align with parent axis. 
         """
-        super().restrict(parent, child, delta_time, self.axis)
+        super().restrict(parent, child, delta_time)
+        
+        # get target quaternion
+        child_proj  = self.child_offset - glm.dot(self.child_offset, self.axis) * self.axis
+        parent_proj = self.parent_offset - glm.dot(self.parent_offset, self.axis) * self.axis
+        
+        axis  = glm.cross(child_proj, parent_proj)
+        angle = glm.acos(abs(glm.dot(child_proj, parent_proj)))
+        
+        target = glm.angleAxis(angle, axis)
+
+        # get projected chlid omega
+        error_quat  = glm.inverse(target) * glm.quat(0, *self.child_offset)
+        axis, angle = glm.axis(error_quat), glm.angle(error_quat)
+        
+        # get torque
+        torque  = self.spring_constant * angle * axis
+        torque -= glm.dot(torque, self.axis) * self.axis
+        
+        child.apply_torque(torque, delta_time)
 
 # child cannot move or be rotated. ex pistons
 class PistonJoint(BallJoint):

@@ -158,7 +158,7 @@ class ModelVBO(BaseVBO):
         self.format = self.model.format
         self.attribs = self.model.attribs
         self.triangles = None
-        self.unique_points = None
+        self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
 
     def get_vbo(self):
         """
