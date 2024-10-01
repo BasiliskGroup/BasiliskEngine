@@ -12,6 +12,13 @@ class MaterialHandler:
         self.add("red", color=(0.8, 0.1, 0.1))
         self.add("green", color=(0.1, 0.8, 0.1))
         self.add("blue", color=(0.1, 0.1, 0.8))
+        
+        self.add("baby_blue", color=(175/255, 248/255, 255/255))
+        self.add("black", color=(0, 0, 0))
+        self.add("dark_grey", color=(74/255, 74/255, 74/255))
+        self.add("grey", color=(184/255, 184/255, 184/255))
+        self.add("red_pink", color=(252/255, 3/255, 94/255))
+        self.add("yellow", color=(255/255, 245/255, 56/255))
 
         print(self.material_ids)
 
