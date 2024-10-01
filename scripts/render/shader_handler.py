@@ -13,7 +13,9 @@ class ShaderHandler:
         self.uniform_attribs = {}
 
         self.programs['default'] = self.load_program('default')
+        self.programs['frame'] = self.load_program('frame')
         self.programs['batch'] = self.load_program('batch')
+        self.programs['sky'] = self.load_program('sky')
 
     def load_program(self, name: str='default') -> mgl.Program:
         """

@@ -16,7 +16,10 @@ class TextureHandler:
 
         # Dictionary containing all texture's data. This is not the texture itself.
         self.textures = {}
+        # Maps the texture name to the ID in the texture array
         self.texture_ids = {}
+        # Dictionary containing the pygame surfaces of textures. Keys are names, not IDs
+        self.texture_surfaces = {}
 
         # Dictionary containing all texture arrays
         self.sizes = (128, 256, 512, 1024, 2048)
@@ -49,7 +52,7 @@ class TextureHandler:
             self.texture_arrays[size] = self.ctx.texture_array((size, size, len(size_data[size])), 3, data)
             # Mipmaps
             self.texture_arrays[size].build_mipmaps()
-            self.texture_arrays[size].filter = (mgl.NEAREST_MIPMAP_NEAREST, mgl.NEAREST)
+            self.texture_arrays[size].filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
             # AF
             self.texture_arrays[size].anisotropy = 32.0
 
@@ -66,6 +69,8 @@ class TextureHandler:
 
         # Loads image using pygame
         texture = pg.image.load(path).convert()
+
+        self.texture_surfaces[file[1:-4]] = texture.copy()
 
         # Get the closest size
         original_size = texture.get_size()[0]

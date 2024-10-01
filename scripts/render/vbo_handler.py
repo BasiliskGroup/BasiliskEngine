@@ -117,7 +117,39 @@ class CubeVBO(BaseVBO):
         vertex_data = np.hstack([vertex_data, tex_coord_data])
         vertex_data = np.hstack([vertex_data, normals])
         return vertex_data
-    
+
+
+class PlaneVBO(BaseVBO):
+    def __init__(self, ctx):
+        super().__init__(ctx)
+        self.format = '3f 2f'
+        self.attribs = ['in_position', 'in_texcoord']
+
+    def get_vertex_data(self):
+        verticies = np.array([  [-1, 0, -1],  # Bottom Left
+                                [ 1, 0, -1],  # Bottom Right
+                                [ 1, 0,  1],  # Top Right
+                                [-1, 0,  1],  # Top Left
+                                ])
+        indicies = [(3, 0, 1),
+                    (2, 3, 1)]
+
+        vertex_data = self.get_data(verticies, indicies)
+
+        tex_coord_verticies =   [
+                                (0, 0), # Bottom Left
+                                (1, 0), # Bottom Right
+                                (1, 1), # Top Right
+                                (0, 1)  # Top Left
+                                ]
+        tex_coord_indicies = [(3, 0, 1),
+                              (2, 3, 1)]
+        tex_coord_data = self.get_data(tex_coord_verticies, tex_coord_indicies)
+
+
+        vertex_data = np.hstack([vertex_data, tex_coord_data])
+        return vertex_data
+
 
 class FrameVBO(BaseVBO):
     def __init__(self, ctx):
@@ -158,7 +190,7 @@ class ModelVBO(BaseVBO):
         self.format = self.model.format
         self.attribs = self.model.attribs
         self.triangles = None
-        self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
+        self.unique_points = []
 
     def get_vbo(self):
         """
@@ -167,6 +199,9 @@ class ModelVBO(BaseVBO):
         
         self.vertex_data = self.get_vertex_data()
         vbo = self.ctx.buffer(self.vertex_data)
+
+        self.unique_points = []
+        self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
 
         return vbo
 

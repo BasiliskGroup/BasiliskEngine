@@ -24,19 +24,19 @@ class Project:
         # Use scene
         self.current_scene.use()
 
-    def update(self, delta_time) -> None:
+    def update(self, delta_time, camera=True) -> None:
         """
         Updates the current scene        
         """
-        self.physics_handler.update(delta_time)
-        self.current_scene.update()
+        if delta_time: self.physics_handler.update(delta_time)
+        self.current_scene.update(camera)
 
-    def render(self) -> None:
+    def render(self, display=True) -> None:
         """
         Renders the current scene        
         """
 
-        self.current_scene.render()
+        self.current_scene.render(display)
 
     def set_scene(self, scene: str) -> None:
         """

@@ -71,10 +71,10 @@ class ModelHandler:
         for model in chunk:
             # Get all needed information from the vbo and the model
             vertex_data = np.copy(self.vbos[model.vbo].vertex_data)
-            model_data = np.array([*model.position, *model.rotation, *model.scale, *model.texture])
+            model_data = np.array([*model.position, *model.rotation, *model.scale, model.material])
 
             # Create an empty array to hold the model's mesh data
-            object_data = np.zeros(shape=(vertex_data.shape[0], 19), dtype='f4')
+            object_data = np.zeros(shape=(vertex_data.shape[0], 18), dtype='f4')
 
             # Add the vbo and object information to the mesh
             object_data[:,:8] = vertex_data
@@ -100,7 +100,7 @@ class ModelHandler:
 
         # Create the vbo and the vao from mesh data
         vbo = self.ctx.buffer(batch_data)
-        vao = self.ctx.vertex_array(self.program, [(vbo, '3f 2f 3f 3f 3f 3f 2f', *['in_position', 'in_uv', 'in_normal', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_texture'])], skip_errors=True)
+        vao = self.ctx.vertex_array(self.program, [(vbo, '3f 2f 3f 3f 3f 3f 1i', *['in_position', 'in_uv', 'in_normal', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_material'])], skip_errors=True)
 
         # Store batched chunk mesh in the batches dict
         self.batches[chunk_key] = (vbo, vao)
@@ -132,7 +132,7 @@ class ModelHandler:
 
         return (render_range_x, render_range_y, render_range_z)
 
-    def add(self, vbo: str="cube", texture: str="box", position: tuple=(0, 0, 0), rotation: tuple=(0, 0, 0), scale: tuple=(1, 1, 1)) -> Model:
+    def add(self, vbo: str="cube", material: str="base", position: tuple=(0, 0, 0), rotation: tuple=(0, 0, 0), scale: tuple=(1, 1, 1)) -> Model:
         """
         Add a model to the scene.
         Returns the model instance.
@@ -157,7 +157,7 @@ class ModelHandler:
             self.chunks[chunk] = []
 
         # Create a new model from the given parameters
-        new_model = Model(self, vbo, self.texture_ids[texture], position, rotation, scale)
+        new_model = Model(self, vbo, material, position, rotation, scale)
 
         # Add the model to the models list and to its correct chunk list
         self.models.append(new_model)

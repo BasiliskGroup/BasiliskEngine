@@ -10,7 +10,7 @@ FAR = 350
 SPEED = 50
 SENSITIVITY = 0.15
 
-class Camera():
+class Camera:
     """
     Camera object to get view and projection matricies. Movement built in
     """
