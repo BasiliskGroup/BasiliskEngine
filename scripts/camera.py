@@ -97,3 +97,14 @@ class Camera:
 
     def get_projection_matrix(self) -> glm.mat4x4:
         return glm.perspective(glm.radians(FOV), self.aspect_ratio, NEAR, FAR)
+    
+class FollowCamera(Camera):
+    def __init__(self, engine, radius, yaw=-90, pitch=0):
+        self.radius = radius
+        super().__init__(engine, (0, 0, 0), yaw, pitch)
+        
+    def move(self):
+        pass # does nothing since movement is locked to parent
+    
+    def get_view_matrix(self) -> glm.mat4x4:
+        return glm.lookAt(self.position - self.forward * self.radius, self.position, self.up)
