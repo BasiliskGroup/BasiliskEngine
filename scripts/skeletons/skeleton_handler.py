@@ -68,4 +68,4 @@ class Bone():
         self.restrict_bones(delta_time)
         for joint in self.joints: joint.child_bone.update(delta_time)
         
-        if ticked and self.on_tick: self.on_tick()
+        if ticked and self.on_tick: exec(self.on_tick)

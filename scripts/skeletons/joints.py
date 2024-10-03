@@ -3,9 +3,11 @@ from scripts.nodes.node import Node
 
 # child free to move within radius, child must point at offset
 class BallJoint(): 
-    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5): # parent and child not saved for splitting
+    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, fixed=False): # parent and child not saved for splitting
         # child bone
         self.child_bone = child_bone
+        
+        self.fixed = fixed
         
         # offsets from node position
         self.parent_offset          = glm.vec3(parent_offset)
@@ -20,12 +22,19 @@ class BallJoint():
         
     def restrict(self, parent:Node, child:Node, delta_time:float) -> glm.vec3:
         """
-        Restricts the child to the parent using rk4
+        Restricts the child to the parent
         """
+        
         # calculate offset information
         origin       = parent.position + self.parent_offset
         child_point  = child.position + self.child_offset
         displacement = child_point - origin
+        
+        # quick restrict if fixed
+        if self.fixed:
+            child.position = origin - self.child_offset
+            print(self.parent_offset, parent.position)
+            return glm.vec3(0, 0, 0)
         
         magnitude = glm.length(displacement)
         if magnitude < 1e-7: return # no movement needed
@@ -77,8 +86,8 @@ class BallJoint():
         
 # child is locked in place but can rotate on given axis
 class RotatorJoint(BallJoint):
-    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5):
-        super().__init__(child_bone, parent_offset, child_offset, spring_constant)
+    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, fixed=False):
+        super().__init__(child_bone, parent_offset, child_offset, spring_constant, fixed)
         
     def restrict(self, parent, child, delta_time:float): 
         """
@@ -101,8 +110,8 @@ class RotatorJoint(BallJoint):
         
 # child free to move within radius but can only rotate on given axis
 class HingeJoint(BallJoint):
-    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, axis:glm.vec3=None):
-        super().__init__(child_bone, parent_offset, child_offset, spring_constant)
+    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, axis:glm.vec3=None, fixed=False):
+        super().__init__(child_bone, parent_offset, child_offset, spring_constant, fixed)
         self.axis = glm.normalize(axis) if glm.length(axis) > 1e-7 else glm.vec3(0, 1, 0)
         self.original_axis = glm.vec3(axis)
         
@@ -145,5 +154,5 @@ class HingeJoint(BallJoint):
 
 # child cannot move or be rotated. ex pistons
 class PistonJoint(BallJoint):
-    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5):
-        super().__init__(child_bone, parent_offset, child_offset, spring_constant)
+    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, fixed=False):
+        super().__init__(child_bone, parent_offset, child_offset, spring_constant, fixed)

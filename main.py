@@ -120,3 +120,7 @@ if __name__ == '__main__':
     engine = Engine()
     # Starts engine
     engine.start()
+    
+    
+    # int i;
+    # int* ptr = &i;

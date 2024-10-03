@@ -1,4 +1,6 @@
 import glm
+import pygame as pg
+from scripts.camera import *
 from scripts.collisions.collider import Collider
 from scripts.generic.data_types import vec3
 from scripts.generic.math_functions import get_model_matrix, get_rotation_matrix
@@ -36,7 +38,7 @@ class Node():
         self.physics_body     = physics_body
         
         # align children
-        self.sync_data()
+        self.major_sync_data()
         self.define_geometric_center()
         
         # after children sync init
@@ -74,21 +76,20 @@ class Node():
         Updates the position of this node based on the it's phsyics body and syncromizes all this children to its new data. 
         """
         self.before_update()
+        
+        self.define_inverse_inertia() # TODO remove line for debugging
             
         # update physics body
         if self.physics_body:
             delta_position = self.physics_body.get_delta_position(delta_time)
-            self.position             += delta_position
-            # self.physics_body.rotation = glm.quat(self.rotation) # TODO watch this line, it may cause gimble lock
-            self.rotation              = self.physics_body.get_new_rotation(delta_time)
+            self.position += delta_position
+            self.rotation  = self.physics_body.get_new_rotation(delta_time)
             
         # update variables from last movement
-        self.model_matrix     = get_model_matrix(self.position, self.scale, self.rotation)
+        self.sync_data() 
         self.geometric_center = glm.vec3([*glm.mul(self.model_matrix, (*self.geometric_offset, 1))][:3]) # TODO get correct udpate with rotation
         
-        self.sync_data() 
-        
-        if ticked and self.on_tick: self.on_tick()
+        if ticked and self.on_tick: exec(self.on_tick)
         
         self.after_update()
             
@@ -110,6 +111,8 @@ class Node():
             quat = child * parent
             rotation = glm.eulerAngles(quat)
             
+            self.model_matrix = get_model_matrix(position, self.scale * scale, rotation)
+            
             if self.model: 
                 self.model.position = vec3(position)
                 self.model.scale    = vec3(self.scale * scale)
@@ -119,13 +122,19 @@ class Node():
                 self.collider.position = position
                 self.collider.scale    = self.scale * scale
                 self.collider.rotation = rotation
+                
+            if isinstance(self.camera, FollowCamera):
+                self.camera.position = position
         
             # child nodes
             for node in self.nodes: 
+                print(self.name)
                 new_position = glm.mul(self.model_matrix, (*node.position, 1))
                 node.sync_data(glm.vec3([*new_position][:3]), self.scale * scale, rotation) # TODO check if this works
             
         else: 
+            
+            self.model_matrix = get_model_matrix(self.position, self.scale, self.rotation)
             
             # attribute children
             if self.model: 
@@ -137,6 +146,9 @@ class Node():
                 self.collider.position = self.position
                 self.collider.scale    = self.scale
                 self.collider.rotation = self.rotation
+                
+            if self.camera:
+                self.camera.position = self.position
             
             # child nodes
             for node in self.nodes: 
@@ -154,6 +166,15 @@ class Node():
                 
             self.collider.update_aabb()
             self.collider.collider_handler.to_update.add(self.collider)
+            
+    def major_sync_data(self):
+        
+        self.sync_data()
+        self.define_geometric_center()
+        
+        # after children sync init
+        self.aligned_inertia = self.define_inverse_inertia()
+        self.inverse_inertia = self.get_inverse_inertia()
     
     # getter methods 
     def get_colliders(self):
@@ -180,7 +201,7 @@ class Node():
         models = []
         for node in self.nodes: 
             name, model = node.get_models_with_path()
-            names       += name
+            names      += name
             models     += model
         return [f'{self.name}>{name}' for name in names], models
     
@@ -191,62 +212,78 @@ class Node():
         self.nodes.append(node)
     
     # physics function
-    def define_inverse_inertia(self, total_volume=0) -> glm.mat3x3:
+    def define_inverse_inertia(self, density=0) -> glm.mat3x3:
         """
         Defines the inertia tensor for the node if the node has a collider
         """
         # determine the density of the node
-        if total_volume == 0: total_volume = self.get_volume()
-            
-        # define current level inertia tensor
-        inertia_tensor = glm.mat3x3(0.0)
+        if density == 0: density = self.physics_body.mass / self.get_volume() if self.physics_body else 1
+        mass = self.physics_body.mass if self.physics_body else 1
         
-        if self.collider: 
-            
-            # computes CONVEX inertia tensor
-            for p in self.collider.unique_points: 
-                inertia_tensor[0][0] += p[1] * p[1] + p[2] * p[2]
-                inertia_tensor[1][1] += p[0] * p[0] + p[2] * p[2]
-                inertia_tensor[2][2] += p[0] * p[0] + p[1] * p[1]
-                inertia_tensor[0][1] -= p[0] * p[1]
-                inertia_tensor[0][2] -= p[0] * p[2]
-                inertia_tensor[1][2] -= p[1] * p[2]
-                
-            inertia_tensor[1][0] = inertia_tensor[0][1]
-            inertia_tensor[2][0] = inertia_tensor[0][2]
-            inertia_tensor[2][1] = inertia_tensor[1][2]
-            
-            inertia_tensor /= len(self.collider.unique_points) / self.collider.get_volume() * total_volume
-            
-        elif self.model:
-            
-            unique_points = self.model._Model__handler.vbos[self.model.vbo].unique_points
-            
-            for p in unique_points: 
-                inertia_tensor[0][0] += p[1] * p[1] + p[2] * p[2]
-                inertia_tensor[1][1] += p[0] * p[0] + p[2] * p[2]
-                inertia_tensor[2][2] += p[0] * p[0] + p[1] * p[1]
-                inertia_tensor[0][1] -= p[0] * p[1]
-                inertia_tensor[0][2] -= p[0] * p[2]
-                inertia_tensor[1][2] -= p[1] * p[2]
-                
-            inertia_tensor[1][0] = inertia_tensor[0][1]
-            inertia_tensor[2][0] = inertia_tensor[0][2]
-            inertia_tensor[2][1] = inertia_tensor[1][2]
-            
-            inertia_tensor /= len(unique_points) / self.model.get_volume() * total_volume
-            
-        # define the inertia of all children
-        for node in self.nodes: node.define_inverse_inertia(total_volume)
+        x = 2 * self.scale.x
+        y = 2 * self.scale.y
+        z = 2 * self.scale.z
         
-        # sum child inertia tensors
-        inertia_data = [(node.get_inverse_inertia(), node.position) for node in self.nodes]
-        for inverse_child_inertia, displacement in inertia_data:
-            if not inverse_child_inertia: continue
-            child_inertia   = glm.inverse(inverse_child_inertia)
-            inertia_tensor += child_inertia + (glm.dot(displacement, displacement) * glm.mat3x3() - glm.outerProduct(displacement, displacement))
+        return glm.inverse(mass / 12 * glm.mat3x3(y ** 2 + z ** 2, 0, 0, 0, x**2 + z**2, 0, 0, 0, x**2 + y**2))
             
-        if inertia_tensor == glm.mat3x3(0.0): return None
+        # # define current level inertia tensor
+        # inertia_tensor = glm.mat3x3(0.0)
+        
+        # if self.collider: 
+        #     # computes CONVEX inertia tensor
+        #     for p in self.collider.unique_points: 
+                
+        #         x = p[0] * self.collider.scale.x
+        #         y = p[1] * self.collider.scale.y
+        #         z = p[2] * self.collider.scale.z
+                
+        #         inertia_tensor[0][0] += y * y + z * z
+        #         inertia_tensor[1][1] += x * x + z * z
+        #         inertia_tensor[2][2] += x * x + y * y
+        #         inertia_tensor[0][1] -= x * y
+        #         inertia_tensor[0][2] -= x * z
+        #         inertia_tensor[1][2] -= y * z
+                
+        #     inertia_tensor[1][0] = inertia_tensor[0][1]
+        #     inertia_tensor[2][0] = inertia_tensor[0][2]
+        #     inertia_tensor[2][1] = inertia_tensor[1][2]
+            
+        #     inertia_tensor *= density * self.collider.get_volume() / len(self.collider.unique_points)
+            
+        # elif self.model:
+            
+        #     unique_points = self.model._Model__handler.vbos[self.model.vbo].unique_points
+        #     for p in unique_points: 
+                
+        #         x = p[0] * self.model.scale.x
+        #         y = p[1] * self.model.scale.y
+        #         z = p[2] * self.model.scale.z
+                
+        #         inertia_tensor[0][0] += y * y + z * z
+        #         inertia_tensor[1][1] += x * x + z * z
+        #         inertia_tensor[2][2] += x * x + y * y
+        #         inertia_tensor[0][1] -= x * y
+        #         inertia_tensor[0][2] -= x * z
+        #         inertia_tensor[1][2] -= y * z
+                
+        #     inertia_tensor[1][0] = inertia_tensor[0][1]
+        #     inertia_tensor[2][0] = inertia_tensor[0][2]
+        #     inertia_tensor[2][1] = inertia_tensor[1][2]
+            
+        #     inertia_tensor *= density * self.model.get_volume() / len(unique_points)
+            
+        # # define the inertia of all children
+        # for node in self.nodes: node.define_inverse_inertia(density)
+        
+        # # sum child inertia tensors
+        # for node in self.nodes:
+        #     inverse_child_inertia = node.get_inverse_inertia()
+        #     displacement = node.position
+        #     if not inverse_child_inertia: continue
+        #     child_inertia   = glm.inverse(inverse_child_inertia)
+        #     inertia_tensor += child_inertia + (glm.dot(displacement, displacement) * glm.mat3x3() - glm.outerProduct(displacement, displacement))
+            
+        # if inertia_tensor == glm.mat3x3(0.0): return 
             
         return glm.inverse(inertia_tensor)
     
