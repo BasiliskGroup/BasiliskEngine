@@ -79,8 +79,8 @@ def calculate_contact_point(points1, points2, polytope, face, normal):
     # Interpolate the contact points on the original shapes
     contact_point1 = u * support1_a + v * support1_b + w * support1_c
     contact_point2 = u * support2_a + v * support2_b + w * support2_c
-
-    return contact_point1 # Optionally, you can return contact_point2 as well
+    
+    return min(contact_point1, contact_point2, key=lambda cp: glm.length(cp))
 
 def get_furthest_point(points:list, direction_vector:glm.vec3) -> glm.vec3: # may need to be normalized
     """finds furthest point in given direction"""
