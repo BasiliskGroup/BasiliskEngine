@@ -6,7 +6,7 @@ from scripts.generic.data_types import vec3
 from scripts.generic.math_functions import get_model_matrix, get_rotation_matrix
     
 class Node():
-    def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model=None, collider=None, physics_body=None, name:str='node', camera=None):
+    def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str=None, collider=None, physics_body=None, name:str='node', camera=None):
         # handler
         self.node_handler = node_handler
         
@@ -33,7 +33,7 @@ class Node():
         
         # children
         self.nodes:list[Node] = nodes if nodes else []
-        self.model            = model
+        self.model            = node_handler.scene.model_handler.add(vbo=model, material=material) if model else None
         self.collider         = collider
         self.physics_body     = physics_body
         
@@ -442,7 +442,7 @@ class Node():
         self.update_rotation_matrix = True
         if isinstance(value, glm.quat) and self.physics_body: self.physics_body.rotation = value
         self._rotation              = value
-        
+    
     # nodes
     @property
     def collider(self): return self._collider

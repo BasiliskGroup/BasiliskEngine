@@ -46,7 +46,8 @@ class Scene:
                 scale=(uniform(1, 5), uniform(1, 5), uniform(1, 5)),
                 rotation=(0, 0, 0),
                 nodes=[],
-                model=self.model_handler.add('cube', 'brick'),
+                model='cube',
+                material='brick',
                 collider=self.collider_handler.add(vbo='cube', static=False),
                 physics_body=self.physics_body_handler.add(mass=20),
                 name='box'
@@ -57,7 +58,8 @@ class Scene:
             scale=(40, 1, 40),
             rotation=(0, 0, 0),
             nodes=[],
-            model=self.model_handler.add('cube', 'base'),
+            model='cube', 
+            material='base',
             collider=self.collider_handler.add(vbo='cube', static=True),
             physics_body=None,
             name='box'
@@ -69,7 +71,8 @@ class Scene:
             position=glm.vec3(0.5, -0.5, 0),
             scale=(0.3, 0.5, 0.3),
             rotation=(0, 0, 0),
-            model=self.model_handler.add(vbo='cube', material='white'),
+            model='cube', 
+            material='white',
             physics_body=self.physics_body_handler.add(mass=50),
             name='left foot',
             
@@ -78,19 +81,22 @@ class Scene:
                 self.node_handler.add(
                     position=(0, -0.6, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='leg puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.5, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='yellow'),
+                    model='cube', 
+                    material='yellow',
                     name='leg puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.4, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='leg puff'
                 )
             ]
@@ -100,7 +106,8 @@ class Scene:
             position=glm.vec3(-0.5, -0.5, 0),
             scale=(0.3, 0.5, 0.3),
             rotation=(0, 0, 0),
-            model=self.model_handler.add(vbo='cube', material='white'),
+            model='cube',
+            material='white',
             physics_body=self.physics_body_handler.add(mass=50),
             name='right foot',
             
@@ -109,19 +116,22 @@ class Scene:
                 self.node_handler.add(
                     position=(0, -0.6, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='leg puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.5, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='yellow'),
+                    model='cube', 
+                    material='yellow',
                     name='leg puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.4, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube',
+                    material='baby_blue',
                     name='leg puff'
                 )
             ]
@@ -153,7 +163,8 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                     position=glm.vec3(0, 0.5, 0),
                     scale=(1, 0.5, 1),
                     rotation=(0, 0, 0),
-                    model=self.model_handler.add(vbo='cube', material='white'),
+                    model='cube', 
+                    material='white',
                 ),
                 right_foot,
                 left_foot
@@ -167,7 +178,8 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             position=cock_pos + glm.vec3(0, 3.5, 0),
             scale=(1, 0.5, 1),
             rotation=(0, 0, 0),
-            model=self.model_handler.add(vbo='cube', material='white'),
+            model='cube', 
+            material='white',
             collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=20),
             name='middle',
@@ -177,37 +189,43 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                     position=glm.vec3(0, 0, 1),
                     scale=(0.8, 0.8, 0.01),
                     rotation=(0, 0, 0),
-                    model=self.model_handler.add(vbo='cube', material='grey'),
+                    model='cube', 
+                    material='grey',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0, 0.1, 1),
                     scale=(0.6, 0.6, 0.015),
                     rotation=(0, 0, 0),
-                    model=self.model_handler.add(vbo='cube', material='white'),
+                    model='cube', 
+                    material='white',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0, 0.1, 1),
                     scale=(0.6, 0.3, 0.02),
                     rotation=(0, 0, 0),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0, 0.1, 1),
                     scale=(0.35, 0.15, 0.025),
                     rotation=(0, 0, 0),
-                    model=self.model_handler.add(vbo='cube', material='black'),
+                    model='cube', 
+                    material='black',
                 ),
                 self.node_handler.create(
                     position=(0.2, 0.1, 1.02),
                     scale=(0.08, 0.03, 0.08),
                     rotation=(glm.pi()/2, 0, 0),
-                    model=self.model_handler.add(vbo='cylinder', material='white'),
+                    model='cylinder', 
+                    material='white',
                 ),
                 self.node_handler.create(
                     position=(-0.2, 0.1, 1.02),
                     scale=(0.08, 0.03, 0.08),
                     rotation=(glm.pi()/2, 0, 0),
-                    model=self.model_handler.add(vbo='cylinder', material='white'),
+                    model='cylinder', 
+                    material='white',
                 ),
             ]
         )
@@ -216,7 +234,8 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             position=cock_pos + glm.vec3(0, 4.5, 0),
             scale=(1, 0.5, 1),
             rotation=(0, 0, 0),
-            model=self.model_handler.add(vbo='cube', material='baby_blue'),
+            model='cube', 
+            material='baby_blue',
             collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=20),
             name='top',
@@ -227,43 +246,50 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                     position=glm.vec3(0.5, 0.2, 1),
                     scale=(0.3, 0.1, 0.05),
                     rotation=(0, 0, -0.1),
-                    model=self.model_handler.add(vbo='cube', material='red_pink'),
+                    model='cube', 
+                    material='red_pink',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0.51, 0, 1),
                     scale=(0.3, 0.1, 0.05),
                     rotation=(0, 0, -0.1),
-                    model=self.model_handler.add(vbo='cube', material='white'),
+                    model='cube', 
+                    material='white',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0.52, -0.2, 1),
                     scale=(0.3, 0.1, 0.05),
                     rotation=(0, 0, -0.1),
-                    model=self.model_handler.add(vbo='cube', material='red_pink'),
+                    model='cube', 
+                    material='red_pink',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0.5, 0.15, 1),
                     scale=(0.1, 0.03, 0.055),
                     rotation=(0, 0, 0.1),
-                    model=self.model_handler.add(vbo='cube', material='black'),
+                    model='cube', 
+                    material='black',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0.5, -0.05, 1),
                     scale=(0.03, 0.2, 0.055),
                     rotation=(0, 0, 0.1),
-                    model=self.model_handler.add(vbo='cube', material='black'),
+                    model='cube', 
+                    material='black',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0.425, -0.15, 1),
                     scale=(0.05, 0.03, 0.055),
                     rotation=(0, 0, 0.6),
-                    model=self.model_handler.add(vbo='cube', material='black'),
+                    model='cube', 
+                    material='black',
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0.5, 0.25, 1.05),
                     scale=(0.05, 0.1, 0.05),
                     rotation=(glm.pi()/2, 0, 0),
-                    model=self.model_handler.add(vbo='cylinder', material='grey'),
+                    model='cylinder', 
+                    material='grey',
                 ),
                 # buttons
                 
@@ -274,7 +300,8 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             position=cock_pos + glm.vec3(1.3, 3.5, 0),
             scale=(0.3, 1.25, 0.3),
             rotation=(0, 0, 0),
-            model=self.model_handler.add(vbo='cube', material='white'),
+            model='cube',
+            material='white',
             collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=20),
             name='left arm',
@@ -284,19 +311,22 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                 self.node_handler.add(
                     position=(0, -0.64, 0),
                     scale=(1.1, 0.03, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='arm puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.7, 0),
                     scale=(1.1, 0.03, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='yellow'),
+                    model='cube', 
+                    material='yellow',
                     name='arm puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.76, 0),
                     scale=(1.1, 0.03, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='arm puff'
                 ),
             ]
@@ -306,7 +336,8 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             position=cock_pos + glm.vec3(-1.3, 3.5, 0),
             scale=(0.3, 1.25, 0.3),
             rotation=(0, 0, 0),
-            model=self.model_handler.add(vbo='cube', material='white'),
+            model='cube',
+            material='white',
             collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=20),
             name='right arm',
@@ -316,19 +347,22 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                 self.node_handler.add(
                     position=(0, -0.64, 0),
                     scale=(1.1, 0.03, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='arm puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.7, 0),
                     scale=(1.1, 0.03, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='yellow'),
+                    model='cube', 
+                    material='yellow',
                     name='arm puff'
                 ),
                 self.node_handler.add(
                     position=(0, -0.76, 0),
                     scale=(1.1, 0.03, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='arm puff'
                 ),
             ]
@@ -338,7 +372,8 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             position=cock_pos + glm.vec3(0, 5.7, 0),
             scale=(0.7, 0.7, 0.7),
             rotation=(0, 0, 0),
-            model=self.model_handler.add(vbo='cube', material='white'),
+            model='cube', 
+            material='white',
             collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=20),
             name='head',
@@ -348,31 +383,36 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                 self.node_handler.create(
                     position=(1, 0, 0),
                     scale=(0.2, 0.5, 0.5),
-                    model=self.model_handler.add(vbo='cube', material='grey'),
+                    model='cube', 
+                    material='grey',
                     name='cutter base'
                 ),
                 self.node_handler.create(
                     position=(1.1, 1, 0),
                     scale=(0.05, 0.5, 0.05),
-                    model=self.model_handler.add(vbo='cube', material='dark_grey'),
+                    model='cube', 
+                    material='dark_grey',
                     name='cutter antenna'
                 ),
                 self.node_handler.create(
                     position=(1.1, 1.5, 0),
                     scale=(0.1, 0.1, 0.1),
-                    model=self.model_handler.add(vbo='cube', material='red_pink'),
+                    model='cube', 
+                    material='red_pink',
                     name='cutter bulb'
                 ),
                 self.node_handler.create(
                     position=(1.35, 0.2, 0),
                     scale=(0.15, 0.15, 0.7),
-                    model=self.model_handler.add(vbo='cube', material='grey'),
+                    model='cube', 
+                    material='grey',
                     name='cutter barrel'
                 ),
                 self.node_handler.create(
                     position=(1.35, 0.2, 0.66),
                     scale=(0.1, 0.1, 0.1),
-                    model=self.model_handler.add(vbo='cube', material='red_pink'),
+                    model='cube', 
+                    material='red_pink',
                     name='cutter emitter'
                 ),
                 
@@ -380,35 +420,40 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                 self.node_handler.create(
                     position=(0, -0.3, 1.02),
                     scale=(0.4, 0.1, 0.1),
-                    model=self.model_handler.add(vbo='cube', material='black'),
+                    model='cube', 
+                    material='black',
                     name='mouth'
                 ),
                 self.node_handler.create(
                     position=(0.6, 0, 1.02),
                     scale=(0.2, 0.1, 0.2),
                     rotation=(glm.pi()/2, 0, 0),
-                    model=self.model_handler.add(vbo='cylinder', material='black'),
+                    model='cylinder', 
+                    material='black',
                     name='left eye'
                 ),
                 self.node_handler.create(
                     position=(0.63, 0.03, 1.03),
                     scale=(0.1, 0.1, 0.1),
                     rotation=(glm.pi()/2, 0, 0),
-                    model=self.model_handler.add(vbo='cylinder', material='white'),
+                    model='cylinder', 
+                    material='white',
                     name='left pupil'
                 ),
                 self.node_handler.create(
                     position=(-0.6, 0, 1.02),
                     scale=(0.2, 0.1, 0.2),
                     rotation=(glm.pi()/2, 0, 0),
-                    model=self.model_handler.add(vbo='cylinder', material='black'),
+                    model='cylinder', 
+                    material='black',
                     name='right eye'
                 ),
                 self.node_handler.create(
                     position=(-0.57, 0.03, 1.03),
                     scale=(0.1, 0.1, 0.1),
                     rotation=(glm.pi()/2, 0, 0),
-                    model=self.model_handler.add(vbo='cylinder', material='white'),
+                    model='cylinder', 
+                    material='white',
                     name='right pupil'
                 ),
                 
@@ -416,19 +461,22 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                 self.node_handler.create(
                     position=(0, 0.5, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='lower band'
                 ),
                 self.node_handler.create(
                     position=(0, 0.6, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='yellow'),
+                    model='cube',
+                    material='yellow',
                     name='middle band'
                 ),
                 self.node_handler.create(
                     position=(0, 0.7, 0),
                     scale=(1.1, 0.05, 1.1),
-                    model=self.model_handler.add(vbo='cube', material='baby_blue'),
+                    model='cube', 
+                    material='baby_blue',
                     name='upper band'
                 ),
             ]
