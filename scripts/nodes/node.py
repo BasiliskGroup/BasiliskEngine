@@ -128,7 +128,6 @@ class Node():
         
             # child nodes
             for node in self.nodes: 
-                print(self.name)
                 new_position = glm.mul(self.model_matrix, (*node.position, 1))
                 node.sync_data(glm.vec3([*new_position][:3]), self.scale * scale, rotation) # TODO check if this works
             
