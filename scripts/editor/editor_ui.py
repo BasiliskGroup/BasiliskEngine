@@ -1,11 +1,13 @@
 import pygame as pg
 import moderngl as mgl
 import glm
+from PIL import Image
 from scripts.editor.viewport import Viewport
 from scripts.editor.hierarchy import Hierarchy
 from scripts.editor.inspector import Inspector
 from scripts.editor.toolbar import Toolbar
 from scripts.editor.project_view import ProjectFilesView
+from scripts.image_generator.image_generator import ImageGenerator
 
 
 class EditorUI:
@@ -41,6 +43,9 @@ class EditorUI:
         self.inspector          = Inspector(editor, self)
         self.toolbar            = Toolbar(editor)
         self.project_files_view = ProjectFilesView(editor)
+
+        self.image_gen = ImageGenerator(self.ctx)
+        self.model_images = self.image_gen.generate_vbos(list(self.editor.engine.project.current_scene.vao_handler.vbo_handler.vbos.values()))
 
     def render(self):
         """

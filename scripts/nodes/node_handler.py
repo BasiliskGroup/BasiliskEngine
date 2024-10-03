@@ -27,7 +27,7 @@ class NodeHandler():
         for node in self.nodes: node.update(delta_time, ticked)
     
     # create and add to top level nodes                    
-    def add(self, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str=None, collider=None, physics_body=None, name:str='node', camera=None):
+    def add(self, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None):
         """
         Adds a node to the top level array and returns it. 
         """
@@ -38,7 +38,7 @@ class NodeHandler():
         return node
     
     # # just create
-    def create(self, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model=None, material:str=None, collider=None, physics_body=None, name:str='node', camera=None):
+    def create(self, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None):
         """
         Only creates a collectino and returns it, does not add to top level array. 
         """

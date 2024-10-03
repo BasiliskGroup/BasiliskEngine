@@ -19,11 +19,7 @@ class VAOHandler:
         self.generate_framebuffer()
 
         self.vaos = {}
-        self.add_vao()
         self.add_vao('frame', 'frame', 'frame')
-        self.add_vao('cow', 'default', 'cow')
-        self.add_vao('bunny', 'default', 'bunny')
-        self.add_vao('lucy', 'default', 'lucy')
 
     def add_vao(self, name: str='cube', program_key: str='default', vbo_key: str='cube'):
         """
@@ -31,7 +27,7 @@ class VAOHandler:
         """
         # Get program an vbo
         program = self.shader_handler.programs[program_key]
-        vbo = self.vbo_handler.vbos[vbo_key]
+        vbo = self.vbo_handler.frame_vbo if vbo_key == 'frame' else self.vbo_handler.vbos[vbo_key]
 
         # Make the VAO
         vao = self.ctx.vertex_array(program, [(vbo.vbo, vbo.format, *vbo.attribs)], skip_errors=True)

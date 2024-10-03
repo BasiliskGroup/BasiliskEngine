@@ -14,7 +14,7 @@ class VBOHandler:
         self.directory = directory
         self.vbos = {}
         self.vbos['cube'] = CubeVBO(self.ctx)
-        self.vbos['frame'] = FrameVBO(self.ctx)
+        self.frame_vbo = FrameVBO(self.ctx)
 
         for file in os.listdir(self.directory):
             filename = os.fsdecode(file)

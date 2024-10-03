@@ -33,44 +33,22 @@ class ProjectFilesView:
         self.editor.font.render_text(self.surf, (self.padding + 15, self.list_item_height * 3.5), "Shaders" , size=0)
 
         if self.menu == "Models":
-            self.render_list(list(self.engine.project.current_scene.vao_handler.vbo_handler.vbos.keys()))
+            self.render_image_grid(self.editor.ui.model_images)
         if self.menu == "Textures":
-            self.render_textures()
+            self.render_image_grid(self.engine.project.texture_handler.texture_surfaces.values())
 
         pg.draw.rect(self.surf, self.editor.ui.outline, (0, 0, self.dim[0], self.dim[1]), 1)
 
-    def render_list(self, items):
-        if not items: return
-
+    def render_image_grid(self, images, size=100):
         left = self.editor.viewport_dim.left * self.engine.win_size[0]
-        self.grid_y = self.dim[1] // (self.list_item_height * 2)
-        self.grid_x = 8
-        width, height = (self.dim[0] - left - self.padding * 2) // self.grid_x, self.list_item_height * 2
-
-        i = 0
-        for y in range(self.grid_y):
-            for x in range(self.grid_x):
-                pg.draw.rect(self.surf, self.editor.ui.secondary, (left + self.padding + width * x, self.padding + height * y, width - self.padding * 2, height - self.padding * 2))
-                self.editor.font.render_text(self.surf, (left + width * (x + 0.5), height * (y + 0.5)), items[i], size=0, center_width=True)
-                
-                i += 1
-                if i == len(items): break
-            if i == len(items): break
-
-    def render_textures(self):
-        textures = self.engine.project.texture_handler.texture_surfaces.values()
-
-        left = self.editor.viewport_dim.left * self.engine.win_size[0]
-        # width, height = (self.dim[1] // 2), (self.dim[1] // 2)
-        width, height = 100, 100
+        width, height = size, size
         self.grid_y = self.dim[1] // height
         self.grid_x = (self.dim[0] - left) // width
 
-        for i, texture in enumerate(textures):
+        for i, image in enumerate(images):
             x, y = i % self.grid_x, i // self.grid_x
-            # pg.draw.rect(self.surf, self.editor.ui.secondary, (left + x * width + self.padding, y * height + self.padding, width - self.padding * 2, height - self.padding * 2))
-            texture = pg.transform.scale(texture, (width - self.padding * 2, height - self.padding * 2))
-            self.surf.blit(texture, (left + x * width + self.padding, y * height + self.padding))
+            image = pg.transform.scale(image, (width - self.padding * 2, height - self.padding * 2))
+            self.surf.blit(image, (left + x * width + self.padding, y * height + self.padding))
 
     def get_input(self) -> None:
         if self.engine.prev_mouse_buttons[0] and not self.engine.mouse_buttons[0]:
@@ -97,7 +75,7 @@ class ProjectFilesView:
                 # Adds a model to the scene
                 if self.menu == "Models" and index < len(self.engine.project.current_scene.vao_handler.vbo_handler.vbos.keys()):
                     model = list(self.engine.project.current_scene.vao_handler.vbo_handler.vbos.keys())[index]
-                    self.engine.project.current_scene.node_handler.add(model=self.engine.project.current_scene.model_handler.add(model, 'base'), name=model)
+                    self.engine.project.current_scene.node_handler.add(model=model, name=model)
                     self.editor.ui.refresh()
 
                 elif self.menu == "Textures" and index < len(self.engine.project.current_scene.vao_handler.vbo_handler.vbos.keys()):
