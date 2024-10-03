@@ -14,6 +14,7 @@ class ProjectFilesView:
         self.padding = 3
         self.grid_x, self.grid_y = 8, 3
         self.list_item_height = 30
+        self.image_size = 100
         self.menu = "Models"
 
 
@@ -39,9 +40,9 @@ class ProjectFilesView:
 
         pg.draw.rect(self.surf, self.editor.ui.outline, (0, 0, self.dim[0], self.dim[1]), 1)
 
-    def render_image_grid(self, images, size=100):
+    def render_image_grid(self, images):
         left = self.editor.viewport_dim.left * self.engine.win_size[0]
-        width, height = size, size
+        width, height = self.image_size, self.image_size
         self.grid_y = self.dim[1] // height
         self.grid_x = (self.dim[0] - left) // width
 
@@ -75,7 +76,7 @@ class ProjectFilesView:
                 # Adds a model to the scene
                 if self.menu == "Models" and index < len(self.engine.project.current_scene.vao_handler.vbo_handler.vbos.keys()):
                     model = list(self.engine.project.current_scene.vao_handler.vbo_handler.vbos.keys())[index]
-                    self.engine.project.current_scene.node_handler.add(model=model, name=model)
+                    self.engine.project.current_scene.node_handler.add(model=model, material='brick', name=model)
                     self.editor.ui.refresh()
 
                 elif self.menu == "Textures" and index < len(self.engine.project.current_scene.vao_handler.vbo_handler.vbos.keys()):
@@ -90,7 +91,9 @@ class ProjectFilesView:
 
 
     def scroll(self, value) -> None:
-        ...
+        if self.engine.keys[pg.K_LCTRL]:
+            self.image_size = max(self.image_size + value * 10, 10)
+        self.editor.ui.refresh()
 
     def set_surf(self) -> None:
         """Sets the viewport surface for drawing onto."""

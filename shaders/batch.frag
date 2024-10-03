@@ -69,7 +69,7 @@ vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 
     // diffuse
     float diff = max((dot(normal, lightDir) + 1) / 2, 0.0);
     // specular
-    vec3 reflectDir = reflect(-lightDir, normal);
+    vec3 reflectDir = reflect(normalize(-light.direction * (int(mtl.hasNormalMap) * 2 - 1)), normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), mtl.specularExponent);
     // result
     vec3 ambient  = light.ambient  * albedo * light.color * mtl.color;

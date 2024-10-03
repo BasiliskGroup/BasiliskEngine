@@ -39,6 +39,12 @@ class Scene:
         spacing = 6
 
         self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
+
+        self.selected_model = self.model_handler.add("sphere", "base", (-6, 35, 0), (0, 0, 0), (3, 3, 3))
+        self.selected_model = self.model_handler.add("sphere", "baby_blue", (0, 35, 0), (0, 0, 0), (3, 3, 3))
+        self.selected_model = self.model_handler.add("sphere", "norm", (6, 35, 0), (0, 0, 0), (3, 3, 3))
+        self.selected_model = self.model_handler.add("sphere", "brick", (12, 35, 0), (0, 0, 0), (3, 3, 3))
+
         
         for _ in range(20):
             self.node_handler.add(

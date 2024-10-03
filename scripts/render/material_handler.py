@@ -9,7 +9,8 @@ class MaterialHandler:
         self.material_ids   = {}
 
         self.add("base", color=(0.8, 0.8, 0.8))
-        self.add("brick", color=(0.8, 0.8, 0.8), normal_map='normal_map')
+        self.add("norm", color=(0.8, 0.8, 0.8), normal_map='normal_map')
+        self.add("brick", color=(0.8, 0.8, 0.8), albedo_map='brick', normal_map='brick_normal')
         
         self.add("baby_blue", color=(175/255, 248/255, 1))
         self.add("black", color=(0, 0, 0))
@@ -19,7 +20,7 @@ class MaterialHandler:
         self.add("red_pink", color=(252/255, 3/255, 94/255))
         self.add("yellow", color=(1, 245/255, 56/255))
         self.add("white", color=(1, 1, 1))
-        self.add("green", color=(19/255, 1, 0))
+        # self.add("green", color=(19/255, 1, 0))
 
     def add(self, name, color: tuple=(1, 1, 1), specular: float=1, specular_exponent: float=32, alpha: float=1, albedo_map=None, specular_map=None, normal_map=None):
         mtl = Material(self, color, specular, specular_exponent, alpha, albedo_map, specular_map, normal_map)

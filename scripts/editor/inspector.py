@@ -41,6 +41,7 @@ class Inspector:
 
         if self.selected_node: self.render_title()
         if self.selected_node: self.render_transform_component()
+        if self.selected_node: self.render_mtl_component()
 
         for box in self.attribute_boxes:
             self.render_attribute_box(*box)
@@ -81,6 +82,26 @@ class Inspector:
         self.attribute_boxes.append((node.scale   , (start_x + w * 0 + padding, start_y + h * 2 + padding, *size), 'x'))
         self.attribute_boxes.append((node.scale   , (start_x + w * 1 + padding, start_y + h * 2 + padding, *size), 'y'))
         self.attribute_boxes.append((node.scale   , (start_x + w * 2 + padding, start_y + h * 2 + padding, *size), 'z'))
+
+        self.component_height += h * 4
+
+    def render_mtl_component(self):
+        start_x, start_y = 45, self.component_height
+        w, h = (self.dim[0] - start_x - 15) // 3, self.item_height
+        padding = self.padding
+        node = self.selected_node
+        size = w - padding * 2, h - padding * 2
+
+        # mtl_handler = self.engine.project.current_scene.material_handler
+        # mtl = mtl_handler.material_ids[node.model.material]
+        # mtl = list(mtl_handler.materials.values())[mtl]
+        # print("Mtl: ", mtl)
+
+        # Color
+        self.editor.font.render_text(self.surf, (padding, start_y + h * 0 + h/2), 'Color', size=0)
+        self.attribute_boxes.append((node.position, (start_x + w * 0 + padding, start_y + h * 0 + padding, *size), 'r'))
+        self.attribute_boxes.append((node.position, (start_x + w * 1 + padding, start_y + h * 0 + padding, *size), 'g'))
+        self.attribute_boxes.append((node.position, (start_x + w * 2 + padding, start_y + h * 0 + padding, *size), 'b'))
 
         self.component_height += h * 4
 
