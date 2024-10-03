@@ -136,7 +136,4 @@ void main() {
     }
 
     fragColor = vec4(light_result, mtl.alpha);
-    //fragColor.rgb *= 0.0001;
-    //fragColor.a = 1.0;
-    //fragColor.rgb += materialID / 4.0;
 }

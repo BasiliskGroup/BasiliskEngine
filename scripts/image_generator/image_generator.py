@@ -58,7 +58,7 @@ class ImageGenerator():
             self.model = vbo
 
         if len(self.model.vertex_data[0] == 8):
-            data = self.model.vertex_data
+            data = self.model.vertex_data.copy()
             data[:,3:6] = data[:,5:8]
             data = np.array(data[:,:6], dtype='f4')
         else:

@@ -33,6 +33,7 @@ class Engine:
         self.clock = pg.time.Clock()
         self.time = 0
         self.dt = 0
+        self.runtime_multiplier = 0
         # Project handler
         self.project = Project(self)
         # Editor
@@ -62,9 +63,12 @@ class Engine:
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.editor.window_resize()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_p:
+                    self.runtime_multiplier = int(not self.runtime_multiplier)
 
         # Update Project
-        self.project.update(0, camera=False)
+        self.project.update(self.dt * self.runtime_multiplier, camera=False)
         self.editor.update()
 
         self.prev_keys = self.keys
