@@ -10,7 +10,7 @@ class Hierarchy:
 
         # Selection attributes
         self.scroll_value = 0
-        self.selected_object_index = 0
+        self.selected_node_index = 0
 
         # Display attributes
         self.top_buffer = 50
@@ -27,16 +27,16 @@ class Hierarchy:
         # Clear the window
         self.surf.fill(self.editor.ui.primary)
 
-        # Draw the names of the objects in the scene
-        objects = self.engine.project.current_scene.node_handler.nodes
-        for i in range(min(self.dim[1] // self.list_item_height + 1, len(objects) - max(self.scroll_value // self.list_item_height, 0))):
-            self.render_list_item(objects[i + max(self.scroll_value // self.list_item_height, 0)].name, i, highlight=(self.selected_object_index==(i + max(self.scroll_value // self.list_item_height, 0))))
+        # Draw the names of the nodes in the scene
+        nodes = self.engine.project.current_scene.node_handler.nodes
+        for i in range(min(self.dim[1] // self.list_item_height + 1, len(nodes) - max(self.scroll_value // self.list_item_height, 0))):
+            self.render_list_item(nodes[i + max(self.scroll_value // self.list_item_height, 0)].name, i, highlight=(self.selected_node_index==(i + max(self.scroll_value // self.list_item_height, 0))))
 
         # Draw Scroll Bar
         padding = 3
         self.scroll_bar_width = 15
         self.scroll_bar_height = self.dim[1] - self.top_buffer - 20
-        if len(objects): self.slider_height = self.scroll_bar_height // len(objects)
+        if len(nodes): self.slider_height = self.scroll_bar_height // len(nodes)
         else: self.slider_height = self.scroll_bar_height
         pg.draw.rect(self.surf, self.editor.ui.secondary, (padding, self.top_buffer, self.scroll_bar_width - padding * 2, self.dim[1] - self.top_buffer - 10))
         pg.draw.rect(self.surf, self.editor.ui.accent,    (padding, self.top_buffer + (max(self.scroll_value // self.list_item_height, 0) * self.slider_height), self.scroll_bar_width - padding * 2, self.slider_height))
@@ -57,7 +57,7 @@ class Hierarchy:
             # Get the mouse position in the window
             mouse_x, mouse_y = self.engine.mouse_position[0], self.engine.mouse_position[1] - self.editor.viewport_dim.top * self.engine.win_size[1]
             # Get the list item index the mouse is in
-            self.selected_object_index = int(max(self.scroll_value // self.list_item_height + (mouse_y - self.top_buffer) // self.list_item_height, -1))
+            self.selected_node_index = int(max(self.scroll_value // self.list_item_height + (mouse_y - self.top_buffer) // self.list_item_height, -1))
             # Update the UI texture
             self.editor.ui.refresh()
 

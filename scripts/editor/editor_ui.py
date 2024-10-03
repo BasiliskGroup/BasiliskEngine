@@ -70,6 +70,8 @@ class EditorUI:
             self.program['viewportRect'].write(glm.vec4(dim.left, dim.bottom, dim.width, dim.height))
             self.do_update_texture = False
 
+            self.editor.engine.project.current_scene.node_handler.update(0)
+
         # Render the UI texture
         self.ctx.screen.use()
         self.vao.render()
