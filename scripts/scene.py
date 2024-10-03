@@ -40,7 +40,7 @@ class Scene:
 
         self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
         
-        for _ in range(0):
+        for _ in range(20):
             self.node_handler.add(
                 position=(randint(-20, 20), 10, randint(-20, 20)),
                 scale=(uniform(1, 5), uniform(1, 5), uniform(1, 5)),
