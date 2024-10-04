@@ -206,4 +206,12 @@ class ModelVBO(BaseVBO):
 
     def get_vertex_data(self):
         self.model = load_model(self.path)
-        return self.model.vertex_data
+
+        if len(self.model.vertex_data[0]) == 8:
+            vertex_data = self.model.vertex_data.copy()
+        else:
+            vertex_data = np.zeros(shape=(len(self.model.vertex_data), 8))
+            vertex_data[:,:3] = self.model.vertex_data[:,:3]
+            vertex_data[:,5:] = self.model.vertex_data[:,3:]
+        
+        return vertex_data

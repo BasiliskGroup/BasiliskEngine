@@ -57,7 +57,7 @@ class Hierarchy:
             # Get the mouse position in the window
             mouse_x, mouse_y = self.engine.mouse_position[0], self.engine.mouse_position[1] - self.editor.viewport_dim.top * self.engine.win_size[1]
             # Get the list item index the mouse is in
-            self.selected_node_index = int(max(self.scroll_value // self.list_item_height + (mouse_y - self.top_buffer) // self.list_item_height, -1))
+            self.selected_node_index = int(max(self.scroll_value // (self.list_item_height) + (mouse_y - self.top_buffer) // self.list_item_height, -1))
             # Update the UI texture
             self.editor.ui.refresh()
 

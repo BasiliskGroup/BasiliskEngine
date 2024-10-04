@@ -92,18 +92,52 @@ class Inspector:
         node = self.selected_node
         size = w - padding * 2, h - padding * 2
 
-        # mtl_handler = self.engine.project.current_scene.material_handler
-        # mtl = mtl_handler.material_ids[node.model.material]
-        # mtl = list(mtl_handler.materials.values())[mtl]
-        # print("Mtl: ", mtl)
+        if not node.model: return
+
+        mtl_handler = self.engine.project.current_scene.material_handler
+        for mtl_name in mtl_handler.material_ids:
+            if node.model.material != mtl_handler.material_ids[mtl_name]: continue
+            mtl = mtl_handler.materials[mtl_name]
+            break
 
         # Color
         self.editor.font.render_text(self.surf, (padding, start_y + h * 0 + h/2), 'Color', size=0)
-        self.attribute_boxes.append((node.position, (start_x + w * 0 + padding, start_y + h * 0 + padding, *size), 'r'))
-        self.attribute_boxes.append((node.position, (start_x + w * 1 + padding, start_y + h * 0 + padding, *size), 'g'))
-        self.attribute_boxes.append((node.position, (start_x + w * 2 + padding, start_y + h * 0 + padding, *size), 'b'))
+        self.attribute_boxes.append((mtl.color, (start_x + w * 0 + padding, start_y + h * 0 + padding, *size), 'x'))
+        self.attribute_boxes.append((mtl.color, (start_x + w * 1 + padding, start_y + h * 0 + padding, *size), 'y'))
+        self.attribute_boxes.append((mtl.color, (start_x + w * 2 + padding, start_y + h * 0 + padding, *size), 'z'))
+        
+        # Specular
+        self.editor.font.render_text(self.surf, (padding, start_y + h * 1 + h/2), 'Spec', size=0)
+        self.attribute_boxes.append((mtl.specular, (start_x + w * 0 + padding, start_y + h * 1 + padding, size[0] * 1.5 + padding, size[1]), 'value'))
+        self.attribute_boxes.append((mtl.specular_exponent, (start_x + w * 1.5 + padding, start_y + h * 1 + padding, size[0] * 1.5 + padding, size[1]), 'value'))
+       
+        # Alpha
+        self.editor.font.render_text(self.surf, (padding, start_y + h * 2 + h/2), 'Alpha', size=0)
+        self.attribute_boxes.append((mtl.alpha, (start_x + w * 0 + padding, start_y + h * 2 + padding, size[0] * 3 + padding * 4, size[1]), 'value'))
+        
+        # Albedo/Normal Map
+        self.editor.font.render_text(self.surf, (    self.dim[0] / 4, start_y + h * 3 + h/2), 'Texture', size=0, center_width=True)
+        self.editor.font.render_text(self.surf, (3 * self.dim[0] / 4, start_y + h * 3 + h/2), 'Normal',  size=0, center_width=True)
 
-        self.component_height += h * 4
+        img_padding = 3
+        img_size = max(min(self.dim[0] / 2 - img_padding * 2, 100), 1)
+
+        if mtl.albedo_map:
+            img = self.engine.project.texture_handler.texture_surfaces[mtl.albedo_map]
+            img = pg.transform.scale(img, (img_size, img_size))
+            self.surf.blit(img, ((self.dim[0]/2 - img_size) / 2, start_y + h * 4))
+        else:
+            color = (max(min(mtl.color[0] * 255, 255), 0), max(min(mtl.color[1] * 255, 255), 0), max(min(mtl.color[2] * 255, 255), 0))
+            pg.draw.rect(self.surf, color, ((self.dim[0]/2 - img_size) / 2, start_y + h * 4, img_size, img_size))
+
+        if mtl.normal_map:
+            img = self.engine.project.texture_handler.texture_surfaces[mtl.normal_map]
+            img = pg.transform.scale(img, (img_size, img_size))
+            self.surf.blit(img, (self.dim[0]/2 + (self.dim[0]/2 - img_size) / 2, start_y + h * 4))
+        else:
+            pg.draw.rect(self.surf, (0, 0, 0), (self.dim[0]/2 + (self.dim[0]/2 - img_size) / 2, start_y + h * 4, img_size, img_size), 2)
+
+        self.component_height += h * 4 + img_size
 
     def render_attribute_box(self, node, rect, attrib_name):
         """
@@ -158,6 +192,8 @@ class Inspector:
         setattr(obj, attrib, input_value)
         self.input.selected_attrib = (None, None)
         self.input.input_string = ''
+
+        self.editor.viewport_resize()
 
     def scroll(self, value) -> None:
         ...

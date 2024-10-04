@@ -9,8 +9,8 @@ class MaterialHandler:
         self.material_ids   = {}
 
         self.add("base", color=(0.8, 0.8, 0.8))
-        self.add("norm", color=(0.8, 0.8, 0.8), normal_map='normal_map')
-        self.add("brick", color=(0.8, 0.8, 0.8), albedo_map='brick', normal_map='brick_normal')
+        self.add("norm", color=(0.8, 0.8, 0.8))
+        self.add("brick", color=(0.8, 0.8, 0.8))
         
         self.add("baby_blue", color=(175/255, 248/255, 1))
         self.add("black", color=(0, 0, 0))
