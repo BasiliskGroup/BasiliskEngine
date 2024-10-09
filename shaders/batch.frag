@@ -121,7 +121,8 @@ void main() {
     vec3 normalDirection = normal;
     if (bool(mtl.hasNormalMap)) {
         textureID = mtl.normalMap;
-        normalDirection = normalize(normal + texture(textureArrays[int(round(textureID.x))].array, vec3(uv, round(textureID.y))).rgb);
+        vec3 nomral_map_fragment = texture(textureArrays[int(round(textureID.x))].array, vec3(uv, round(textureID.y))).rgb;
+        normalDirection = normalize(normal + nomral_map_fragment * 2.0 - 1.0);
     }
 
     vec3 viewDir = vec3(normalize(cameraPosition - position));

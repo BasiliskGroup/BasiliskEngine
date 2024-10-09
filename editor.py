@@ -45,7 +45,7 @@ class Engine:
         """
 
         # Update time
-        self.dt = self.clock.tick(60) / 1000
+        self.dt = self.clock.tick() / 1000
         self.time += self.dt
         pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
         # Pygame events
