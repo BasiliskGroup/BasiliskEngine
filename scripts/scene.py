@@ -9,6 +9,7 @@ from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
 from scripts.skeletons.joints import * # Every joint
 from scripts.file_manager.load_scene import load_scene
+from scripts.skeletons.animation import *
 from random import randint, uniform
 
 class Scene:
@@ -23,7 +24,7 @@ class Scene:
         self.ctx = self.engine.ctx
 
         # Makes a free cam
-        self.camera = FollowCamera(self.engine, radius = 20)
+        self.camera = FollowCamera(self.engine, radius = 40)
 
         # Gets handlers from parent project
         self.vao_handler = self.project.vao_handler
@@ -39,10 +40,10 @@ class Scene:
         
         load_scene(self, "saves/sample_scene.bsk")
         
-        for _ in range(20):
+        for _ in range(0):
             self.node_handler.add(
                 position=(randint(-20, 20), 10, randint(-20, 20)),
-                scale=(uniform(1, 5), uniform(1, 5), uniform(1, 5)),
+                scale=(uniform(1, 10), uniform(1, 10), uniform(1, 10)),
                 rotation=(0, 0, 0),
                 nodes=[],
                 model='cube',
@@ -64,34 +65,43 @@ class Scene:
             name='box'
         )
         
+        with open(f'user_scripts/bottom_on_frame.py') as file:
+            bottom_on_frame = file.read()
+            
+        with open(f'user_scripts/face_camera.py') as file:
+            face_camera = file.read()
+            
+        with open(f'user_scripts/walking_animation.py') as file:
+            walking_animation = file.read()
+        
         cock_pos = glm.vec3(0, -2, 0)
         
-        left_foot=self.node_handler.create(
-            position=glm.vec3(0.5, -0.5, 0),
-            scale=(0.3, 0.5, 0.3),
+        left_foot=self.node_handler.add(
+            position=cock_pos + glm.vec3(0.5, 0.25, 0),
+            scale=(0.3, 0.25, 0.3),
             rotation=(0, 0, 0),
             model='cube', 
             material='white',
-            physics_body=self.physics_body_handler.add(mass=50),
+            physics_body=self.physics_body_handler.add(mass=10),
             name='left foot',
             
             nodes=[
                 # leg puff
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.6, 0),
                     scale=(1.1, 0.05, 1.1),
                     model='cube', 
                     material='baby_blue',
                     name='leg puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.5, 0),
                     scale=(1.1, 0.05, 1.1),
                     model='cube', 
                     material='yellow',
                     name='leg puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.4, 0),
                     scale=(1.1, 0.05, 1.1),
                     model='cube', 
@@ -101,32 +111,44 @@ class Scene:
             ]
         )
         
-        right_foot=self.node_handler.create(
-            position=glm.vec3(-0.5, -0.5, 0),
-            scale=(0.3, 0.5, 0.3),
+        left_foot.on_frame=face_camera
+        
+        left_knee=self.node_handler.add(
+            position=cock_pos + glm.vec3(0.5, 0.75, 0),
+            scale=(0.3, 0.7, 0.3),
+            rotation=(0, 0, 0),
+            model='cube', 
+            material='white',
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='left foot',
+        )
+        
+        right_foot=self.node_handler.add(
+            position=cock_pos + glm.vec3(-0.5, 0.25, 0),
+            scale=(0.3, 0.25, 0.3),
             rotation=(0, 0, 0),
             model='cube',
             material='white',
-            physics_body=self.physics_body_handler.add(mass=50),
+            physics_body=self.physics_body_handler.add(mass=10),
             name='right foot',
             
             nodes=[
                 # leg puff
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.6, 0),
                     scale=(1.1, 0.05, 1.1),
                     model='cube', 
                     material='baby_blue',
                     name='leg puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.5, 0),
                     scale=(1.1, 0.05, 1.1),
                     model='cube', 
                     material='yellow',
                     name='leg puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.4, 0),
                     scale=(1.1, 0.05, 1.1),
                     model='cube',
@@ -136,22 +158,23 @@ class Scene:
             ]
         )
         
-        bottom_on_tick = '''
-velocity = 10 * self.node_handler.scene.engine.dt
-keys = self.node_handler.scene.engine.keys
-if keys[pg.K_w]: self.position += glm.normalize(glm.vec3(self.nodes[0].camera.forward.x, 0, self.nodes[0].camera.forward.z)) * velocity
-if keys[pg.K_s]: self.position -= glm.normalize(glm.vec3(self.nodes[0].camera.forward.x, 0, self.nodes[0].camera.forward.z)) * velocity
-if keys[pg.K_a]: self.position -= self.nodes[0].camera.right * velocity
-if keys[pg.K_d]: self.position += self.nodes[0].camera.right * velocity
-if keys[pg.K_SPACE]: self.position += self.nodes[0].camera.UP * velocity
-if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
-        '''
+        right_foot.on_tick=face_camera
         
-        bottom=self.node_handler.add(
-            position=cock_pos + glm.vec3(0, 2, 0),
-            scale=(1, 1, 1),
+        right_knee=self.node_handler.add(
+            position=cock_pos + glm.vec3(-0.5, 0.75, 0),
+            scale=(0.3, 0.7, 0.3),
             rotation=(0, 0, 0),
-            collider=self.collider_handler.add(vbo='cube', static=False),
+            model='cube', 
+            material='white',
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='left foot',
+        )
+
+        bottom=self.node_handler.add(
+            position=cock_pos + glm.vec3(0, 0.5, 0),
+            scale=(1, 1.5, 1),
+            rotation=(0, 0, 0),
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
             physics_body=self.physics_body_handler.add(mass=2000),
             nodes=[
                 self.node_handler.create(
@@ -160,26 +183,24 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                 ),
                 self.node_handler.create(
                     position=glm.vec3(0, 0.5, 0),
-                    scale=(1, 0.5, 1),
+                    scale=(1, 0.25, 1),
                     rotation=(0, 0, 0),
                     model='cube', 
                     material='white',
-                ),
-                right_foot,
-                left_foot
+                )
             ],
             name='bottom'
         )
         
-        bottom.on_tick = bottom_on_tick
+        bottom.on_frame = bottom_on_frame
         
         middle=self.node_handler.add(
-            position=cock_pos + glm.vec3(0, 3.5, 0),
+            position=cock_pos + glm.vec3(0, 2.5, 0),
             scale=(1, 0.5, 1),
             rotation=(0, 0, 0),
             model='cube', 
             material='white',
-            collider=self.collider_handler.add(vbo='cube', static=False),
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
             physics_body=self.physics_body_handler.add(mass=20),
             name='middle',
             
@@ -229,13 +250,15 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             ]
         )
         
+        middle.on_frame = face_camera
+        
         top=self.node_handler.add(
-            position=cock_pos + glm.vec3(0, 4.5, 0),
+            position=cock_pos + glm.vec3(0, 3.5, 0),
             scale=(1, 0.5, 1),
             rotation=(0, 0, 0),
             model='cube', 
             material='baby_blue',
-            collider=self.collider_handler.add(vbo='cube', static=False),
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
             physics_body=self.physics_body_handler.add(mass=20),
             name='top',
             
@@ -295,33 +318,35 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             ]
         )
         
+        top.on_frame = face_camera
+        
         left_arm=self.node_handler.add(
-            position=cock_pos + glm.vec3(1.3, 3.5, 0),
+            position=cock_pos + glm.vec3(1.3, 2.5, 0),
             scale=(0.3, 1.25, 0.3),
             rotation=(0, 0, 0),
             model='cube',
             material='white',
-            collider=self.collider_handler.add(vbo='cube', static=False),
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
             physics_body=self.physics_body_handler.add(mass=20),
             name='left arm',
             
             nodes=[
                 # arm puff
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.64, 0),
                     scale=(1.1, 0.03, 1.1),
                     model='cube', 
                     material='baby_blue',
                     name='arm puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.7, 0),
                     scale=(1.1, 0.03, 1.1),
                     model='cube', 
                     material='yellow',
                     name='arm puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.76, 0),
                     scale=(1.1, 0.03, 1.1),
                     model='cube', 
@@ -332,32 +357,32 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
         )
         
         right_arm=self.node_handler.add(
-            position=cock_pos + glm.vec3(-1.3, 3.5, 0),
+            position=cock_pos + glm.vec3(-1.3, 2.5, 0),
             scale=(0.3, 1.25, 0.3),
             rotation=(0, 0, 0),
             model='cube',
             material='white',
-            collider=self.collider_handler.add(vbo='cube', static=False),
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
             physics_body=self.physics_body_handler.add(mass=20),
             name='right arm',
             
             nodes=[
                 # arm puff
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.64, 0),
                     scale=(1.1, 0.03, 1.1),
                     model='cube', 
                     material='baby_blue',
                     name='arm puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.7, 0),
                     scale=(1.1, 0.03, 1.1),
                     model='cube', 
                     material='yellow',
                     name='arm puff'
                 ),
-                self.node_handler.add(
+                self.node_handler.create(
                     position=(0, -0.76, 0),
                     scale=(1.1, 0.03, 1.1),
                     model='cube', 
@@ -368,12 +393,12 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
         )
         
         head=self.node_handler.add(
-            position=cock_pos + glm.vec3(0, 5.7, 0),
+            position=cock_pos + glm.vec3(0, 4.7, 0),
             scale=(0.7, 0.7, 0.7),
             rotation=(0, 0, 0),
             model='cube', 
             material='white',
-            collider=self.collider_handler.add(vbo='cube', static=False),
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
             physics_body=self.physics_body_handler.add(mass=20),
             name='head',
             
@@ -481,39 +506,39 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
             ]
         )
         
-        john_skeleton_bottom=self.skeleton_handler.add(
+        john_bottom=self.skeleton_handler.add(
             node=bottom,
             joints=[
                 BallJoint(
                     parent_offset=(0, 1, 0),
                     child_offset=(0, -0.5, 0),
-                    child_bone=self.skeleton_handler.add(
+                    child_bone=self.skeleton_handler.create(
                         node=middle,
                         joints=[
                             BallJoint(
                                 parent_offset=(0, 0.5, 0),
                                 child_offset=(0, -0.5, 0),
-                                child_bone=self.skeleton_handler.add(
+                                child_bone=self.skeleton_handler.create(
                                     node=top,
                                     joints=[
-                                        BallJoint(
+                                        RotatorJoint(
                                             parent_offset=(0, 0.5, 0),
                                             child_offset=(0, -0.7, 0),
-                                            child_bone=self.skeleton_handler.add(
+                                            child_bone=self.skeleton_handler.create(
                                                 node=head
                                             )
                                         ),
                                         BallJoint(
                                             parent_offset=(-1, 0, 0),
-                                            child_offset=(0.3, 1, 0),
-                                            child_bone=self.skeleton_handler.add(
+                                            child_offset=(0, 1, 0),
+                                            child_bone=self.skeleton_handler.create(
                                                 node=right_arm
                                             )
                                         ),
                                         BallJoint(
                                             parent_offset=(1, 0, 0),
-                                            child_offset=(-0.3, 1, 0),
-                                            child_bone=self.skeleton_handler.add(
+                                            child_offset=(0, 1, 0),
+                                            child_bone=self.skeleton_handler.create(
                                                 node=left_arm
                                             )
                                         )
@@ -522,15 +547,47 @@ if keys[pg.K_LSHIFT]: self.position -= self.nodes[0].camera.UP * velocity
                             )
                         ]
                     )
-                )
+                ),
+                BallJoint(
+                    parent_offset=(-0.6, 0.1, 0),
+                    child_offset=(0, 0.3, 0),
+                    spring_constant=1e4,
+                    child_bone=self.skeleton_handler.create(
+                        node=left_knee,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, -0.3, 0),
+                                child_offset=(0, 0.5, 0),
+                                spring_constant = 1e4,
+                                child_bone=self.skeleton_handler.create(
+                                    node=left_foot
+                                )
+                            )
+                        ]
+                    )
+                ),
+                BallJoint(
+                    parent_offset=(0.6, 0.1, 0),
+                    child_offset=(0, 0.3, 0),
+                    spring_constant=1e4,
+                    child_bone=self.skeleton_handler.create(
+                        node=right_knee,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, -0.3, 0),
+                                child_offset=(0, 0.5, 0),
+                                spring_constant = 1e4,
+                                child_bone=self.skeleton_handler.create(
+                                    node=right_foot
+                                )
+                            )
+                        ]
+                    )
+                ),
             ]
         )
         
-        bottom_on_tick='''
-        
-        '''
-        
-        john_skeleton_bottom.on_tick = bottom_on_tick
+        john_bottom.on_frame = walking_animation
         
         self.collider_handler.construct_bvh()
                 

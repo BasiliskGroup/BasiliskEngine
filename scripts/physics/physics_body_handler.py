@@ -29,6 +29,7 @@ class PointPhysicsBody():
         
         # sets velocity and returns position to collection
         self.velocity += delta_velocity
+        self.velocity -= self.velocity * 0.1 * delta_time
         return delta_position
 
 class PhysicsBody(PointPhysicsBody):
@@ -46,7 +47,7 @@ class PhysicsBody(PointPhysicsBody):
         if abs(self.rotational_velocity) < 1e-5: return glm.eulerAngles(self.rotation)
         
         # get change in angle
-        theta = -self.rotational_velocity * delta_time # negative for ccw which is positive
+        theta = -self.rotational_velocity * delta_time * 0.5 # negative for ccw which is positive
         
         # calculate rotation quaternion
         axis_world = glm.normalize(self.axis_of_rotation) if glm.length(self.axis_of_rotation) > 0 else glm.vec3(1, 0, 0)
@@ -54,4 +55,5 @@ class PhysicsBody(PointPhysicsBody):
         
         # calculate and return using quaternions
         self.rotation = self.rotation * rq
+        self.rotational_velocity -= 0.1 * delta_time
         return glm.eulerAngles(self.rotation)

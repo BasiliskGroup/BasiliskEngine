@@ -18,13 +18,16 @@ class NodeHandler():
         Updates all top level nodes.
         """
         # update nodes
-        ticked = False
-        self.tick_time += time.time()
+        
+            
+        for node in self.nodes: node.update(delta_time)
+        
+    def tick(self, delta_time:float):
+        
+        self.tick_time += delta_time
         if self.tick_time > self.tick_iterval:
             self.tick_time = 0
-            ticked = True
-            
-        for node in self.nodes: node.update(delta_time, ticked)
+            for node in self.nodes: node.tick()
     
     # create and add to top level nodes                    
     def add(self, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None):

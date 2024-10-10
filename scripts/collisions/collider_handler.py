@@ -17,9 +17,9 @@ class ColliderHandler():
         self.transform_handler = TransformHandler(self.scene)
         self.to_update = set([])
         
-    def add(self, position:glm.vec3=None, scale:glm.vec3=None, rotation:glm.vec3=None, vbo:str='cube', static = True, elasticity:float=0.1, kinetic_friction:float=0.4, static_friction:float=0.8):
+    def add(self, position:glm.vec3=None, scale:glm.vec3=None, rotation:glm.vec3=None, vbo:str='cube', static = True, elasticity:float=0.1, kinetic_friction:float=0.4, static_friction:float=0.8, group:str=None):
         """adds new collider with corresponding object"""
-        self.colliders.append(Collider(self, position, scale, rotation, vbo, static, elasticity, kinetic_friction, static_friction))
+        self.colliders.append(Collider(self, position, scale, rotation, vbo, static, elasticity, kinetic_friction, static_friction, group))
         return self.colliders[-1]
     
     def resolve_collisions(self):
@@ -31,8 +31,12 @@ class ColliderHandler():
         
         # ensure that collisions are only checked once per pair
         for collider1, collider_list in needs_narrow.items():
+            to_remove = set([])
             for collider2 in collider_list:
+                if collider1.group is not None and collider2.group is not None and collider1.group == collider2.group: to_remove.add(collider2) 
                 if collider2 in needs_narrow and collider1 in needs_narrow[collider2]: needs_narrow[collider2].remove(collider1)
+            for collider in to_remove:
+                collider_list.remove(collider)
                 
         # narrow collisions
         self.resolve_narrow_collisions(collider_vertices, needs_narrow)
@@ -40,8 +44,6 @@ class ColliderHandler():
     def resolve_narrow_collisions(self, collider_vertices, needs_narrow) -> dict:
         for collider1, possible_colliders in needs_narrow.items():
             for collider2 in possible_colliders:
-                
-                # print(collider_vertices[collider2])
                 
                 # check if already collided
                 normal, distance, contact_points = get_narrow_collision(collider_vertices[collider1], collider_vertices[collider2], collider1.position, collider2.position)
