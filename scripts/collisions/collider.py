@@ -3,7 +3,7 @@ from scripts.generic.math_functions import get_aabb_collision
 from scripts.generic.math_functions import get_model_matrix
 
 class Collider():
-    def __init__(self, collider_handler, position:glm.vec3=None, scale:glm.vec3=None, rotation:glm.vec3=None, vbo:str='cube', static = True, elasticity:float=0.1, kinetic_friction:float=0.4, static_friction:float=0.7) -> None:
+    def __init__(self, collider_handler, position:glm.vec3=None, scale:glm.vec3=None, rotation:glm.vec3=None, vbo:str='cube', static = True, elasticity:float=0.1, kinetic_friction:float=0.4, static_friction:float=0.7, group:str=None) -> None:
         # parents
         self.node             = None
         self.collider_handler = collider_handler
@@ -23,6 +23,7 @@ class Collider():
         self.update_aabb()
         self.parent = None
         self.need_vertices = True
+        self.group = group
         # physics
         self.base_volume      = 8
         self.static           = static

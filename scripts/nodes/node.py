@@ -1,5 +1,5 @@
 import glm
-import pygame as pg
+import pygame as pg # imported for scripting
 from scripts.camera import *
 from scripts.collisions.collider import Collider
 from scripts.generic.data_types import vec3
@@ -9,6 +9,9 @@ class Node():
     def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None):
         # handler
         self.node_handler = node_handler
+        self.collider     = collider
+        self.physics_body = physics_body
+        self.model        = node_handler.scene.model_handler.add(vbo=model, material=material) if model else None
         
         # other
         self.name = name
@@ -33,11 +36,9 @@ class Node():
         
         # children
         self.nodes:list[Node] = nodes if nodes else []
-        self.model            = node_handler.scene.model_handler.add(vbo=model, material=material) if model else None
-        self.collider         = collider
-        self.physics_body     = physics_body
         
         # align children
+        self.forces = []
         self.major_sync_data()
         self.define_geometric_center()
         
@@ -49,29 +50,17 @@ class Node():
         self.on_tick      = None
         self.on_touch     = None
         self.on_collision = None # like touch but will have threashold
+        self.on_frame     = None
     
     # initialization
     def init_physics_body(self): 
         """
-        Gives this node a physics body if it already has one and removes all bodies from children. 
+        Sets physics body quaternion to 
         """
-        temp_physics_body = self.physics_body # holds physics body in temp variable to save it after physics body destruction
-        
-        self.remove_physics_bodies()
-        
-        # reinitialize self physics body
-        self.physics_body = temp_physics_body
         if self.physics_body: self.physics_body.rotation = glm.quat(self.rotation)
-        
-    def remove_physics_bodies(self):
-        """
-        Removes all the physics bodies from its children and itself.
-        """
-        for node in self.nodes: node.remove_physics_bodies()
-        self.physics_body = None
     
     # updating
-    def update(self, delta_time:float, ticked:bool=False):
+    def update(self, delta_time:float):
         """
         Updates the position of this node based on the it's phsyics body and syncromizes all this children to its new data. 
         """
@@ -89,9 +78,15 @@ class Node():
         self.sync_data() 
         self.geometric_center = glm.vec3([*glm.mul(self.model_matrix, (*self.geometric_offset, 1))][:3]) # TODO get correct udpate with rotation
         
-        if ticked and self.on_tick: exec(self.on_tick)
+        #if ticked and self.on_tick: exec(self.on_tick)
         
         self.after_update()
+
+        if self.on_frame: exec(self.on_frame)
+        
+    def tick(self):
+        
+        if self.on_tick: exec(self.on_tick)
             
     def sync_data(self, position:glm.vec3=None, scale:glm.vec3=None, rotation:glm.vec3=None):
         """
@@ -124,7 +119,7 @@ class Node():
                 self.collider.rotation = rotation
                 
             if isinstance(self.camera, FollowCamera):
-                self.camera.position = position
+                self.camera.anchor = position
         
             # child nodes
             for node in self.nodes: 
@@ -146,8 +141,8 @@ class Node():
                 self.collider.scale    = self.scale
                 self.collider.rotation = self.rotation
                 
-            if self.camera:
-                self.camera.position = self.position
+            if isinstance(self.camera, FollowCamera):
+                self.camera.anchor = self.position
             
             # child nodes
             for node in self.nodes: 
@@ -219,11 +214,11 @@ class Node():
         if density == 0: density = self.physics_body.mass / self.get_volume() if self.physics_body else 1
         mass = self.physics_body.mass if self.physics_body else 1
         
-        x = 2 * self.scale.x
-        y = 2 * self.scale.y
-        z = 2 * self.scale.z
+        x = 1 * self.scale.x
+        y = 1 * self.scale.y
+        z = 1 * self.scale.z
         
-        return glm.inverse(mass / 12 * glm.mat3x3(y ** 2 + z ** 2, 0, 0, 0, x**2 + z**2, 0, 0, 0, x**2 + y**2))
+        return glm.inverse(mass / 12 * glm.mat3x3([y**2 + z ** 2, 0, 0], [0, x**2 + z**2, 0], [0, 0, x**2 + y**2]))
             
         # # define current level inertia tensor
         # inertia_tensor = glm.mat3x3(0.0)
@@ -316,6 +311,8 @@ class Node():
         """
         Updates previous data if data exceeds error value
         """
+        self.forces = []
+        
         # position
         if self.update_position and self.is_same_vec(self.prev_position, self.position): 
             self.position        = glm.vec3(self.prev_position)
@@ -388,6 +385,7 @@ class Node():
         Applies the acceleration, translational and rotational, from an offset force
         """
         if not self.physics_body: return
+        self.forces.append(force)
         
         # translation
         self.physics_body.velocity += force / self.physics_body.mass * delta_time
@@ -440,7 +438,7 @@ class Node():
     def rotation(self, value):
         self.update_rotation        = True
         self.update_rotation_matrix = True
-        if isinstance(value, glm.quat) and self.physics_body: self.physics_body.rotation = value
+        if self.physics_body: self.physics_body.rotation = glm.quat(value)
         self._rotation              = value
     
     # nodes

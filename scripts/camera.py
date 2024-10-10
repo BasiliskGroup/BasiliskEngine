@@ -7,14 +7,14 @@ NEAR = 0.1
 FAR = 350
 
 # Camera movement constants
-SPEED = 50
+SPEED = 25
 SENSITIVITY = 0.15
 
 class Camera:
     """
     Camera object to get view and projection matricies. Movement built in
     """
-    def __init__(self, engine, position=(0, 0, 35), yaw=-90, pitch=0) -> None:
+    def __init__(self, engine, position=(0, 0, 20), yaw=-90, pitch=0) -> None:
         # Stores the engine to acces viewport and inputs
         self.engine = engine
         # The initial aspect ratio of the screen
@@ -100,6 +100,7 @@ class Camera:
     
 class FollowCamera(Camera):
     def __init__(self, engine, radius, yaw=-90, pitch=0):
+        self.anchor = glm.vec3(0, 0, 0)
         self.radius = radius
         super().__init__(engine, (0, 0, 0), yaw, pitch)
         
@@ -107,4 +108,5 @@ class FollowCamera(Camera):
         pass # does nothing since movement is locked to parent
     
     def get_view_matrix(self) -> glm.mat4x4:
-        return glm.lookAt(self.position - self.forward * self.radius, self.position, self.up)
+        self.position = self.anchor - self.forward * self.radius
+        return glm.lookAt(self.position, self.anchor, self.up)

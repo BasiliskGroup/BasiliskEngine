@@ -12,7 +12,6 @@ class Engine:
         """
         Initialize the Pygame window and GL context
         """
-
         # Pygame initialization
         pg.init()
         # Window size
@@ -77,7 +76,7 @@ class Engine:
                 pg.mouse.set_visible(False)
 
         # Update Project
-        self.project.update(self.dt * 1)
+        self.project.update(self.dt)
 
     def render(self) -> None:
         """

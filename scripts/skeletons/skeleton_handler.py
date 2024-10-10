@@ -1,6 +1,7 @@
 import glm
+import pygame as pg # imported for scipting
 from scripts.skeletons.joints import *
-import time
+from scripts.skeletons.animation import *
 
 class SkeletonHandler():
     def __init__(self, scene, skeletons:list=None):
@@ -14,13 +15,14 @@ class SkeletonHandler():
         """
         Updates all the skeletons on the top level/root list. 
         """
-        ticked = False
-        self.tick_time += time.time()
+        for bone in self.skeletons: bone.update(delta_time)
+        
+    def tick(self, delta_time:float):
+        
+        self.tick_time += delta_time
         if self.tick_time > self.tick_iterval:
             self.tick_time = 0
-            ticked = True
-        
-        for bone in self.skeletons: bone.update(delta_time, ticked)
+            for bone in self.skeletons: bone.tick()
         
     def add(self, node, joints=None):
         """
@@ -45,6 +47,7 @@ class Bone():
         
         # scripting
         self.on_tick = None
+        self.on_frame = None
         
     def restrict_bones(self, delta_time:float) -> None:
         """
@@ -59,13 +62,18 @@ class Bone():
             joint.rotate_child_offset(rotation)
             
         # apply restrictions
-        for joint in self.joints: joint.restrict(self.node, joint.child_bone.node, delta_time)
+        for joint in self.joints: 
+            if len(joint.animations) > 0: joint.animate(joint.child_bone.node, delta_time)
+            else: joint.restrict(self.node, joint.child_bone.node, delta_time)
             
-    def update(self, delta_time:float, ticked:bool=False):
+    def update(self, delta_time:float):
         """
         Restricts bones and restricts children from joints. 
         """
         self.restrict_bones(delta_time)
         for joint in self.joints: joint.child_bone.update(delta_time)
         
-        if ticked and self.on_tick: exec(self.on_tick)
+        if self.on_frame: exec(self.on_frame)
+        
+    def tick(self):
+        if self.on_tick: exec(self.on_tick)

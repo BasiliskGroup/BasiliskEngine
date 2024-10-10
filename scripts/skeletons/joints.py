@@ -1,5 +1,6 @@
 import glm
 from scripts.nodes.node import Node
+from scripts.skeletons.animation import Animation
 
 # child free to move within radius, child must point at offset
 class BallJoint(): 
@@ -7,7 +8,9 @@ class BallJoint():
         # child bone
         self.child_bone = child_bone
         
+        # rigging
         self.fixed = fixed
+        self.animations : list[Animation] = [] # animation queue
         
         # offsets from node position
         self.parent_offset          = glm.vec3(parent_offset)
@@ -19,6 +22,31 @@ class BallJoint():
         
         # spring 
         self.spring_constant = spring_constant
+        
+    def animate(self, child:Node, delta_time:float) -> glm.vec3:
+        """
+        Applies the force required for an animation on a child
+        """
+        # gets animation data
+        if len(self.animations) == 0: return # no animation queued
+        if not self.animations[0].is_running: self.animations[0].is_running = True
+        position, rotation, time_remaining = self.animations[0].get_key_frame()
+        self.animations[0].update(delta_time)
+        if not self.animations[0].is_running: self.animations.pop(0)
+        
+        if not child.physics_body or time_remaining < 1e-2: return
+        # get constant forces from physics engine
+        if position:
+            velocity = (position - child.position) / time_remaining
+            child.physics_body.velocity = velocity
+        
+        if rotation:
+            if glm.dot(rotation, child.physics_body.rotation) < 0: rotation *= -1
+            diff_quat = glm.inverse(rotation) * child.physics_body.rotation #glm.slerp(child.physics_body.rotation, rotation, time_remaining)
+            angle, axis = glm.angle(diff_quat) / time_remaining, glm.axis(diff_quat)
+            
+            child.physics_body.rotational_velocity = angle
+            child.physics_body.axis_of_rotation = axis
         
     def restrict(self, parent:Node, child:Node, delta_time:float) -> glm.vec3:
         """
@@ -57,7 +85,7 @@ class BallJoint():
             dampen = -c * relative_velocity * direction
             
             # applies the spring force
-            force_total = (force_spring + dampen) * (0.5 if child.physics_body and parent.physics_body else 1)
+            force_total = (force_spring + dampen) #* (0.5 if child.physics_body and parent.physics_body else 1)
             
             if child.physics_body: child.apply_offset_force(force_total, self.child_offset, delta_time)
             if parent.physics_body: parent.apply_offset_force(-force_total, self.parent_offset, delta_time)
@@ -99,7 +127,10 @@ class RotatorJoint(BallJoint):
         # calculate axis angle
         normal_parent, normal_child = glm.normalize(self.parent_offset), glm.normalize(self.child_offset)
         axis  = glm.cross(normal_parent, normal_child)
-        theta = glm.acos(abs(glm.dot(normal_child, normal_parent)))
+        
+        if glm.length(axis) < 1e-6: return
+        
+        theta = glm.acos(glm.clamp(glm.dot(normal_child, normal_parent), -1, 1))
         
         # compute effective torque
         torque  = self.spring_constant * theta * axis
