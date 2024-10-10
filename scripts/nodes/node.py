@@ -419,6 +419,7 @@ class Node():
     
     @position.setter
     def position(self, value):
+        if isinstance(value, tuple): value = glm.vec3(*value)
         self.update_position = True
         self._position       = value
     
@@ -429,6 +430,7 @@ class Node():
     
     @scale.setter
     def scale(self, value):
+        if isinstance(value, tuple): value = glm.vec3(*value)
         self.update_scale = True
         self._scale       = value
         
@@ -438,6 +440,7 @@ class Node():
     
     @rotation.setter
     def rotation(self, value):
+        if isinstance(value, tuple): value = glm.vec3(*value)
         self.update_rotation        = True
         self.update_rotation_matrix = True
         if isinstance(value, glm.quat) and self.physics_body: self.physics_body.rotation = value

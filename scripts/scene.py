@@ -8,6 +8,7 @@ from scripts.render.light_handler import LightHandler
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
 from scripts.skeletons.joints import * # Every joint
+from scripts.file_manager.load_scene import load_scene
 from random import randint, uniform
 
 class Scene:
@@ -36,15 +37,7 @@ class Scene:
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
         
-        spacing = 6
-
-        self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
-
-        self.selected_model = self.model_handler.add("sphere", "base", (-6, 35, 0), (0, 0, 0), (3, 3, 3))
-        self.selected_model = self.model_handler.add("sphere", "baby_blue", (0, 35, 0), (0, 0, 0), (3, 3, 3))
-        self.selected_model = self.model_handler.add("sphere", "norm", (6, 35, 0), (0, 0, 0), (3, 3, 3))
-        self.selected_model = self.model_handler.add("sphere", "brick", (12, 35, 0), (0, 0, 0), (3, 3, 3))
-
+        load_scene(self, "saves/sample_scene.bsk")
         
         for _ in range(20):
             self.node_handler.add(

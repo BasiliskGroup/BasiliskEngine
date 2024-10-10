@@ -75,10 +75,10 @@ Given in radian euler angles. The default value is `(0, 0, 0)`
 Default value is `(1, 1, 1)`
 
 #### `mesh = "mesh_name"`
-Default value is `"Cube"`
+Default value is `"cube"`
 
 #### `material = "Material_Name"`
-Default value is `"Base"`
+Default value is `"base"`
 
 #### `collider = ???`
 Default value is "None"

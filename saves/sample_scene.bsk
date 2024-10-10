@@ -1,0 +1,33 @@
+bsk 0.0.1
+
+# Scene Descriptor
+[bsk_scene name="Sample Scene" version=1]
+
+# Materials
+[material name="base" color=(.8, .8, .8)]
+[material name="brick" texture="brick" normal_map="brick_normal"]
+[material name="norm" color=(.8, .8, .8)]
+[material name="baby_blue" color=(.69, .97, 1)]
+[material name="black" color=(0, 0, 0)]
+[material name="dark_grey" color=(.29, .29, .29)]
+[material name="grey" color=(.72, .72, .72)]
+[material name="red_pink" color=(.99, .01, .38)]
+[material name="yellow" color=(1, .96, .22)]
+[material name="white" color=(1, 1, 1)]
+
+# Nodes
+[node name="cube" id="cube_1" parent="."]
+mesh = "cube"
+material = "base"
+position = (1, 1, 1)
+rotation = (3.14, 0, 0)
+
+[node name="ball" id="ball_1" parent="cube_1"]
+mesh = "sphere"
+material = "brick"
+position = (1, 2, 1)
+scale = (.25, .5, .25)
+
+[node name="cow" id="cow_1" parent="."]
+mesh = "cow"
+position = (5, 25, 5)

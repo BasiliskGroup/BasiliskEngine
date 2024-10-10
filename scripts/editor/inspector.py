@@ -122,8 +122,8 @@ class Inspector:
         img_padding = 3
         img_size = max(min(self.dim[0] / 2 - img_padding * 2, 100), 1)
 
-        if mtl.albedo_map:
-            img = self.engine.project.texture_handler.texture_surfaces[mtl.albedo_map]
+        if mtl.texture:
+            img = self.engine.project.texture_handler.texture_surfaces[mtl.texture]
             img = pg.transform.scale(img, (img_size, img_size))
             self.surf.blit(img, ((self.dim[0]/2 - img_size) / 2, start_y + h * 4))
         else:
