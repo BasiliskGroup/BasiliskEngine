@@ -98,6 +98,10 @@ class Camera:
     def get_projection_matrix(self) -> glm.mat4x4:
         return glm.perspective(glm.radians(FOV), self.aspect_ratio, NEAR, FAR)
     
+    def get_params(self) -> tuple:
+        return self.engine, self.position, self.yaw, self.pitch
+    
+# camera that will be attached to node
 class FollowCamera(Camera):
     def __init__(self, engine, radius, yaw=-90, pitch=0):
         self.anchor = glm.vec3(0, 0, 0)
@@ -110,3 +114,13 @@ class FollowCamera(Camera):
     def get_view_matrix(self) -> glm.mat4x4:
         self.position = self.anchor - self.forward * self.radius
         return glm.lookAt(self.position, self.anchor, self.up)
+    
+class StaticCamera(Camera):
+    def __init__(self, engine, position=(0, 0, 20), yaw=-90, pitch=0):
+        super().__init__(engine, position, yaw, pitch)
+        
+    def rotate(self):
+        pass
+    
+    def move(self):
+        pass

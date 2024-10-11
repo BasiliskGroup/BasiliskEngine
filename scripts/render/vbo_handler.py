@@ -76,7 +76,6 @@ class BaseVBO:
         self.unique_points = np.array(self.unique_points, dtype='f4')
 
         return vbo
-
     
 class CubeVBO(BaseVBO):
     def __init__(self, ctx):
@@ -88,14 +87,14 @@ class CubeVBO(BaseVBO):
         verticies = [(-1, -1, 1), ( 1, -1,  1), (1,  1,  1), (-1, 1,  1),
                      (-1,  1,-1), (-1, -1, -1), (1, -1, -1), ( 1, 1, -1)]
         
-        indicies = [(0, 2, 3), (0, 1, 2),
+        self.indicies = [(0, 2, 3), (0, 1, 2),
                     (1, 7, 2), (1, 6, 7),
                     (6, 5, 4), (4, 7, 6),
                     (3, 4, 5), (3, 5, 0),
                     (3, 7, 4), (3, 2, 7),
                     (0, 6, 1), (0, 5, 6)]
 
-        vertex_data = self.get_data(verticies, indicies)
+        vertex_data = self.get_data(verticies, self.indicies)
 
         tex_coord_verticies = [(0, 0), (1, 0), (1, 1), (0, 1)]
         tex_coord_indicies = [(0, 2, 3), (0, 1, 2),
@@ -191,6 +190,7 @@ class ModelVBO(BaseVBO):
         self.attribs = self.model.attribs
         self.triangles = None
         self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
+        self.indicies = []
 
     def get_vbo(self):
         """

@@ -15,10 +15,11 @@ class PhysicsBodyHandler():
         return self.physics_bodies[-1]
     
 class PointPhysicsBody():
-    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float = 1, velocity:glm.vec3 = None) -> None:
-        self.mass                 = mass
+    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float = 1, velocity:glm.vec3 = None, decay:float=0.1) -> None:
+        self.mass     = mass
+        self.decay    = decay
+        self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.physics_body_handler = physics_body_handler
-        self.velocity             = velocity if velocity else glm.vec3(0, 0, 0)
         
     def get_delta_position(self, delta_time:float) -> glm.vec3:
         """
@@ -29,12 +30,12 @@ class PointPhysicsBody():
         
         # sets velocity and returns position to collection
         self.velocity += delta_velocity
-        self.velocity -= self.velocity * 0.1 * delta_time
+        self.velocity -= self.velocity * self.decay * delta_time
         return delta_position
 
 class PhysicsBody(PointPhysicsBody):
-    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float = 1, velocity:glm.vec3 = None, rotational_velocity:int = 0, axis_of_rotation:glm.vec3 = None) -> None:
-        super().__init__(physics_body_handler, mass, velocity)
+    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float=1, velocity:glm.vec3=None, rotational_velocity:int=0, axis_of_rotation:glm.vec3=None, decay:float=0.1):
+        super().__init__(physics_body_handler, mass, velocity, decay)
         self.rotational_velocity = rotational_velocity
         self.axis_of_rotation    = glm.vec3(axis_of_rotation) if axis_of_rotation else glm.vec3(1, 0, 0)
         self.rotation            = glm.quat((0, 0, 0)) # will be reset in collection's after init
@@ -55,5 +56,5 @@ class PhysicsBody(PointPhysicsBody):
         
         # calculate and return using quaternions
         self.rotation = self.rotation * rq
-        self.rotational_velocity -= 0.1 * delta_time
+        self.rotational_velocity -= self.decay * delta_time
         return glm.eulerAngles(self.rotation)

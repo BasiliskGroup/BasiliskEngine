@@ -187,6 +187,15 @@ class Node():
         for node in self.nodes: models += node.get_models()
         return models
     
+    def get_nodes(self, has_model:bool=False, has_collider:bool=False, has_physics_body:bool=False) -> list:
+        """
+        Gets self and child nodes if they meet the filter
+        """
+        nodes = []
+        if (not has_model or self.model) and (not has_collider or self.collider) and (not has_physics_body or self.physics_body): nodes.append(self)
+        for node in self.nodes: nodes.extend(node.get_nodes(has_model, has_collider, has_physics_body))
+        return nodes
+    
     def get_models_with_path(self):
         """
         Gets the models and their names from this node's children. 
@@ -206,7 +215,7 @@ class Node():
         self.nodes.append(node)
     
     # physics function
-    def define_inverse_inertia(self, density=0) -> glm.mat3x3:
+    def define_inverse_inertia(self, density:float=0) -> glm.mat3x3:
         """
         Defines the inertia tensor for the node if the node has a collider
         """
@@ -442,7 +451,7 @@ class Node():
         self.update_rotation        = True
         self.update_rotation_matrix = True
         if self.physics_body: self.physics_body.rotation = glm.quat(value)
-        self._rotation              = value
+        self._rotation = value
     
     # nodes
     @property

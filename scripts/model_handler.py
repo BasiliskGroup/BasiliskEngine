@@ -129,7 +129,6 @@ class ModelHandler:
         render_range_z[1] -= self.view_distance * (270 - fov < self.scene.camera.yaw < 270 + fov) - 1
         render_range_z[0] += self.view_distance * (90 - fov < self.scene.camera.yaw < 90 + fov) - 1
 
-
         return (render_range_x, render_range_y, render_range_z)
 
     def add(self, vbo: str="cube", material: str="base", position: tuple=(0, 0, 0), rotation: tuple=(0, 0, 0), scale: tuple=(1, 1, 1)) -> Model:

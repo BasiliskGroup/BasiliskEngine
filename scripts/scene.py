@@ -1,4 +1,4 @@
-from scripts.camera import * # Every camera
+from scripts.camera import *
 from scripts.collisions.collider_handler import ColliderHandler
 from scripts.model_handler import ModelHandler
 from scripts.nodes.node_handler import NodeHandler
@@ -7,10 +7,15 @@ from scripts.render.material_handler import MaterialHandler
 from scripts.render.light_handler import LightHandler
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
+<<<<<<< HEAD
 from scripts.skeletons.joints import * # Every joint
 from scripts.file_manager.load_scene import load_scene
 from scripts.skeletons.animation import *
+=======
+from scripts.skeletons.joints import *
+>>>>>>> 7343241 (Preped scene script for filling)
 from random import randint, uniform
+from scripts.generic.math_functions import get_model_matrix
 
 class Scene:
     def __init__(self, engine, project) -> None:
@@ -38,7 +43,27 @@ class Scene:
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
         
+<<<<<<< HEAD
         load_scene(self, "saves/sample_scene.bsk")
+=======
+        spacing = 6
+
+        self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
+
+        self.selected_model = self.model_handler.add("sphere", "base", (-6, 35, 0), (0, 0, 0), (3, 3, 3))
+        self.selected_model = self.model_handler.add("sphere", "baby_blue", (0, 35, 0), (0, 0, 0), (3, 3, 3))
+        self.selected_model = self.model_handler.add("sphere", "norm", (6, 35, 0), (0, 0, 0), (3, 3, 3))
+        self.selected_model = self.model_handler.add("sphere", "brick", (12, 35, 0), (0, 0, 0), (3, 3, 3))
+        
+        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = file.read()
+        with open(f'user_scripts/face_camera.py')       as file: face_camera       = file.read()
+        with open(f'user_scripts/walking_animation.py') as file: walking_animation = file.read()
+        with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = file.read()
+
+        with open(f'user_scripts/scene_on_init.py') as file: exec(file.read())
+        self.on_tick = None # TODO add functionality
+        self.on_frame = scene_on_frame
+>>>>>>> 7343241 (Preped scene script for filling)
         
         for _ in range(0):
             self.node_handler.add(
@@ -64,15 +89,6 @@ class Scene:
             physics_body=None,
             name='box'
         )
-        
-        with open(f'user_scripts/bottom_on_frame.py') as file:
-            bottom_on_frame = file.read()
-            
-        with open(f'user_scripts/face_camera.py') as file:
-            face_camera = file.read()
-            
-        with open(f'user_scripts/walking_animation.py') as file:
-            walking_animation = file.read()
         
         cock_pos = glm.vec3(0, -2, 0)
         
@@ -115,7 +131,7 @@ class Scene:
         
         left_knee=self.node_handler.add(
             position=cock_pos + glm.vec3(0.5, 0.75, 0),
-            scale=(0.3, 0.7, 0.3),
+            scale=(0.03, 0.07, 0.03),
             rotation=(0, 0, 0),
             model='cube', 
             material='white',
@@ -162,7 +178,7 @@ class Scene:
         
         right_knee=self.node_handler.add(
             position=cock_pos + glm.vec3(-0.5, 0.75, 0),
-            scale=(0.3, 0.7, 0.3),
+            scale=(0.03, 0.07, 0.03),
             rotation=(0, 0, 0),
             model='cube', 
             material='white',
@@ -312,9 +328,7 @@ class Scene:
                     rotation=(glm.pi()/2, 0, 0),
                     model='cylinder', 
                     material='grey',
-                ),
-                # buttons
-                
+                )
             ]
         )
         
@@ -613,6 +627,7 @@ class Scene:
         self.model_handler.update()
         self.vao_handler.shader_handler.update_uniforms()
         if camera: self.camera.update()
+        if self.on_frame: exec(self.on_frame)
 
     def render(self, display=True):
         """
@@ -637,3 +652,73 @@ class Scene:
         """
 
         self.vao_handler.release()
+        
+    def get_model_node_at(self, x:int, y:int, distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False):
+        """
+        Gets the closest node at the pixel position
+        """
+        best_model = None
+        best_node  = None
+        pixel_position = glm.vec2(x, y)
+        
+        for root in self.node_handler.nodes:
+            nodes = root.get_nodes(True, has_collider, has_physics_body)
+            for node in nodes: 
+                temp_model = best_model
+                best_model = self.is_best_model(best_model, pixel_position, node.model, distance)
+                if best_model != temp_model:
+                    best_node = node
+                
+        return best_node
+        
+    def get_model_at(self, x:int, y:int, distance:float=1e5):
+        """
+        Gets the closest model at pixel position
+        """
+        # gets the clicked model
+        best_model = None
+        pixel_position = glm.vec2(x, y)
+        
+        for model in self.model_handler.models:
+            best_model = self.is_best_model(best_model, pixel_position, model, distance)
+
+        return best_model
+    
+    def is_best_model(self, best_model, pixel_position, model, distance):
+        if glm.dot(model.position - self.camera.position, self.camera.forward) < 0: return best_model # continue if model center behind camera TODO may not be the best
+
+        # get model matrix 
+        matrix = get_model_matrix(model.position, model.scale, model.rotation)
+        model_vertices = self.model_handler.vbos[model.vbo].unique_points
+        
+        for triangle in self.model_handler.vbos[model.vbo].indicies:
+            points = []
+            for point in [model_vertices[t] for t in triangle]:
+                
+                # remove points behind the clip plane
+                vertex = glm.vec4(*point, 1.0)
+                clip_space = self.camera.m_proj * self.camera.m_view * matrix * vertex
+                if clip_space.z <= -clip_space.w or clip_space.w == 0: break
+                
+                # add point in 2d space
+                ndc = clip_space / clip_space.w
+                points.append(glm.vec2(
+                    int((ndc.x + 1) * 0.5 * self.engine.win_size[0]),
+                    int((1 - ndc.y) * 0.5 * self.engine.win_size[1])    
+                ))
+            else: 
+                # determine if pixel point is inside triangle
+                v = [p - points[2] for p in [points[0], points[1], pixel_position]]
+                dot00, dot01, dot02, dot11, dot12 = glm.dot(v[0], v[0]), glm.dot(v[0], v[1]), glm.dot(v[0], v[2]), glm.dot(v[1], v[1]), glm.dot(v[1], v[2])
+                determinant = (dot00 * dot11 - dot01 * dot01)
+                if abs(determinant) < 1e-8: continue
+                u = (dot11 * dot02 - dot01 * dot12) / determinant
+                v = (dot00 * dot12 - dot01 * dot02) / determinant
+
+                # check if point is in the triangle
+                test_distance = glm.length(model.position - self.camera.position)
+                if u >= 0 and v >= 0 and u + v <= 1 and test_distance < distance: 
+                    best_model = model
+                    distance = test_distance
+                    
+        return best_model
