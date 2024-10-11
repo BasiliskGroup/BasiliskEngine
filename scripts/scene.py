@@ -7,13 +7,10 @@ from scripts.render.material_handler import MaterialHandler
 from scripts.render.light_handler import LightHandler
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
-<<<<<<< HEAD
 from scripts.skeletons.joints import * # Every joint
 from scripts.file_manager.load_scene import load_scene
 from scripts.skeletons.animation import *
-=======
 from scripts.skeletons.joints import *
->>>>>>> 7343241 (Preped scene script for filling)
 from random import randint, uniform
 from scripts.generic.math_functions import get_model_matrix
 
@@ -43,9 +40,7 @@ class Scene:
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
         
-<<<<<<< HEAD
         load_scene(self, "saves/sample_scene.bsk")
-=======
         spacing = 6
 
         self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
@@ -63,7 +58,6 @@ class Scene:
         with open(f'user_scripts/scene_on_init.py') as file: exec(file.read())
         self.on_tick = None # TODO add functionality
         self.on_frame = scene_on_frame
->>>>>>> 7343241 (Preped scene script for filling)
         
         for _ in range(0):
             self.node_handler.add(
