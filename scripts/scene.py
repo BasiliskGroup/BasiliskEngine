@@ -50,12 +50,15 @@ class Scene:
         self.selected_model = self.model_handler.add("sphere", "norm", (6, 35, 0), (0, 0, 0), (3, 3, 3))
         self.selected_model = self.model_handler.add("sphere", "brick", (12, 35, 0), (0, 0, 0), (3, 3, 3))
         
-        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = file.read()
-        with open(f'user_scripts/face_camera.py')       as file: face_camera       = file.read()
-        with open(f'user_scripts/walking_animation.py') as file: walking_animation = file.read()
-        with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = file.read()
-
-        with open(f'user_scripts/scene_on_init.py') as file: exec(file.read())
+        with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
+        exec(scene_on_init)
+        
+        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = compile(file.read(), 'bottom_on_frame', 'exec')
+        with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
+        with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
+        with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
+        with open(f'user_scripts/head_on_frame.py')    as file: scene_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
+        
         self.on_tick = None # TODO add functionality
         self.on_frame = scene_on_frame
         
@@ -75,6 +78,18 @@ class Scene:
         self.node_handler.add(
             position=(0, -4, 0),
             scale=(40, 1, 40),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='base',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='box'
+        )
+        
+        self.node_handler.add(
+            position=(6, 0, 0),
+            scale=(1, 1, 1),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
@@ -125,7 +140,7 @@ class Scene:
         
         left_knee=self.node_handler.add(
             position=cock_pos + glm.vec3(0.5, 0.75, 0),
-            scale=(0.03, 0.07, 0.03),
+            scale=(0.3, 0.7, 0.3),
             rotation=(0, 0, 0),
             model='cube', 
             material='white',
@@ -172,7 +187,7 @@ class Scene:
         
         right_knee=self.node_handler.add(
             position=cock_pos + glm.vec3(-0.5, 0.75, 0),
-            scale=(0.03, 0.07, 0.03),
+            scale=(0.3, 0.7, 0.3),
             rotation=(0, 0, 0),
             model='cube', 
             material='white',
@@ -334,7 +349,7 @@ class Scene:
             rotation=(0, 0, 0),
             model='cube',
             material='white',
-            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=20),
             name='left arm',
             
@@ -370,7 +385,7 @@ class Scene:
             rotation=(0, 0, 0),
             model='cube',
             material='white',
-            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=20),
             name='right arm',
             
@@ -537,14 +552,14 @@ class Scene:
                                             )
                                         ),
                                         BallJoint(
-                                            parent_offset=(-1, 0, 0),
+                                            parent_offset=(-1.5, 0, 0),
                                             child_offset=(0, 1, 0),
                                             child_bone=self.skeleton_handler.create(
                                                 node=right_arm
                                             )
                                         ),
                                         BallJoint(
-                                            parent_offset=(1, 0, 0),
+                                            parent_offset=(1.5, 0, 0),
                                             child_offset=(0, 1, 0),
                                             child_bone=self.skeleton_handler.create(
                                                 node=left_arm

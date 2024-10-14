@@ -129,8 +129,9 @@ class RotatorJoint(BallJoint):
         axis  = glm.cross(normal_parent, normal_child)
         
         if glm.length(axis) < 1e-6: return
-        
         theta = glm.acos(glm.clamp(glm.dot(normal_child, normal_parent), -1, 1))
+        
+        if abs(glm.dot(normal_child, normal_parent)) > 1: print(glm.dot(normal_child, normal_parent)) # TODO temp line
         
         # compute effective torque
         torque  = self.spring_constant * theta * axis
@@ -139,7 +140,7 @@ class RotatorJoint(BallJoint):
         # apply torque
         child.apply_torque(torque, delta_time)
         
-# child free to move within radius but can only rotate on given axis
+# child free to move within radius but can only rotate on given axis TODO test and debug
 class HingeJoint(BallJoint):
     def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, axis:glm.vec3=None, fixed=False):
         super().__init__(child_bone, parent_offset, child_offset, spring_constant, fixed)
