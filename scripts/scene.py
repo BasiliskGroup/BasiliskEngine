@@ -57,7 +57,7 @@ class Scene:
         with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
         with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
         with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
-        with open(f'user_scripts/head_on_frame.py')    as file: scene_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
+        with open(f'user_scripts/head_on_frame.py')    as file: head_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
         
         self.on_tick = None # TODO add functionality
         self.on_frame = scene_on_frame
@@ -88,7 +88,7 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(6, 0, 0),
+            position=(-6, 0, -6),
             scale=(1, 1, 1),
             rotation=(0, 0, 0),
             nodes=[],

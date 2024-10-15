@@ -61,7 +61,7 @@ class BallJoint():
         # quick restrict if fixed
         if self.fixed:
             child.position = origin - self.child_offset
-            print(self.parent_offset, parent.position)
+            # print(self.parent_offset, parent.position)
             return glm.vec3(0, 0, 0)
         
         magnitude = glm.length(displacement)
@@ -131,7 +131,7 @@ class RotatorJoint(BallJoint):
         if glm.length(axis) < 1e-6: return
         theta = glm.acos(glm.clamp(glm.dot(normal_child, normal_parent), -1, 1))
         
-        if abs(glm.dot(normal_child, normal_parent)) > 1: print(glm.dot(normal_child, normal_parent)) # TODO temp line
+        # if abs(glm.dot(normal_child, normal_parent)) > 1: print(glm.dot(normal_child, normal_parent)) # TODO temp line
         
         # compute effective torque
         torque  = self.spring_constant * theta * axis

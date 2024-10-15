@@ -215,3 +215,26 @@ class ModelVBO(BaseVBO):
             vertex_data[:,5:] = self.model.vertex_data[:,3:]
         
         return vertex_data
+    
+class RuntimeVBO(BaseVBO):
+    def __init__(self, ctx, unique_points, indices):
+        self.unique_points = unique_points
+        self.indices = indices
+        super().__init__(ctx)
+        self.format = '3f 2f 3f'
+        self.attribs = ['in_position', 'in_uv', 'in_normal']
+        
+    def get_vertex_data(self):
+
+        vertex_data = self.get_data(self.unique_points, self.indices)
+
+        tex_coord_verticies = [(0, 0), (1, 0), (1, 1), (0, 1)]
+        tex_coord_indicies = [(0, 1, 2) for _ in range(len(self.unique_points))]
+        tex_coord_data = self.get_data(tex_coord_verticies, tex_coord_indicies)
+
+        normals = [np.cross(triangle[0] - triangle[1], triangle[0] - triangle[2]) for triangle in self.indices]
+        normals = np.array(normals, dtype='f4').reshape(36, 3)
+
+        vertex_data = np.hstack([vertex_data, tex_coord_data])
+        vertex_data = np.hstack([vertex_data, normals])
+        return vertex_data
