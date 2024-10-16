@@ -57,28 +57,21 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
             if not glm.dot(glm.cross(ab, ac), world_points[indices[0]] - origin): indices[0], indices[2] = indices[2], indices[0]
             return indices
         
-        @staticmethod
-        def point_to_3d(u:glm.vec3, v:glm.vec3, cam_pos:glm.vec3, points:list[glm.vec2]) -> glm.vec3:
-            """converts a list of points on a plane to their 3d representation"""
-            return cam_pos + point.x * u + point.y * v
-        
         # get the real location of points
         model_matrix = get_model_matrix(model.position, model.scale, model.rotation)
         world_points = []
-        for unique_point in vbo.unique_points:
-            world_point = model_matrix * ([float(p) for p in unique_point] + [0])
-            world_points.append(glm.vec3(world_point[0], world_point[1], world_point[2]))
+        for unique_point in [(-1, -1, 1), ( 1, -1,  1), (1,  1,  1), (-1, 1,  1), (-1,  1,-1), (-1, -1, -1), (1, -1, -1), ( 1, 1, -1)]:
+            world_point = model_matrix * glm.vec4(*unique_point, 1)
+            world_points.append(glm.vec3(world_point))
         
         # sorts triangles on their plane sides
         sorted_triangles = {'below' : [], 'above' : [], 'middle' : []}
         for triangle in vbo.indicies:
-            is_above = point_is_above(world_points[triangle[0]], self.camera.position, plane_normal)
-            for index in triangle[1:]:
-                if point_is_above(world_points[index], self.camera.position, plane_normal) != is_above:
-                    sorted_triangles['middle'].append(triangle)
-                    break
-            else:
-                sorted_triangles['above' if is_above else 'below'].append(list(triangle))
+            count = 0
+            for i in triangle: count += point_is_above(world_points[i], self.camera.position, plane_normal)
+            if not count:    sorted_triangles['below'].append(list(triangle))
+            elif count == 3: sorted_triangles['above'].append(list(triangle))
+            else:            sorted_triangles['middle'].append(list(triangle))
                 
         # cuts middle triangles
         trapezoids = {'below' : [], 'above' : []}
@@ -95,13 +88,12 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
                 # find plane intersection
                 vec = world_points[middle[(i + 1) % 3]] - world_points[middle[i]]
                 den = glm.dot(vec, plane_normal)
-                if den == 0: ... # TODO find way to add safety
                 t   = glm.dot(self.camera.position - world_points[middle[i]], plane_normal) / den
                 intersection = world_points[middle[i]] + t * vec
                 
                 # determine if intersection has already been added
                 for wp_index, wp in enumerate(world_points[edge_index:]):
-                    if all([abs(wp[i] - intersection[i]) < 1e-4 for i in range(3)]):  # if points are close enough
+                    if all([abs(wp[i] - intersection[i]) < 1e-3 for i in range(3)]):  # if points are close enough
                         cut_indices.append(wp_index + edge_index)
                         break
                 else: 
@@ -112,9 +104,8 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
             # determine which point is different
             for i in range(3):
                 if aboves[i] == aboves[(i + 1) % 3] or aboves[i] == aboves[(i + 2) % 3]: continue
-                sorted_triangles['above' if aboves[i] else 'below'].append(orient_triangle(world_points, [middle[i], cut_indices[0], cut_indices[1]], node.position))
+                sorted_triangles['above' if aboves[i] else 'below'].append(orient_triangle(world_points, [middle[i], cut_indices[0], cut_indices[1]], model.position))
                 trapezoids['below' if aboves[i] else 'above'].append((middle[(i + 1) % 3], middle[(i + 2) % 3], cut_indices[0], cut_indices[1]))
-        # print('trapezoids:', trapezoids)
         
         # fill in center
         # gets linearly independent vector and generate basis
@@ -154,39 +145,35 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
                 center /= 3
                 
                 opposite = max([t for t in trapezoid[:3]], key = lambda wp=t, world_points=world_points, center=center, trapezoid=trapezoid: glm.dot(world_points[wp], center - world_points[trapezoid[3]]))
-                # print(len(world_points))
-                # print(trapezoid)
-                # print([i for i in trapezoid if i != opposite])
                 sorted_triangles[key].append(orient_triangle(world_points, [i for i in trapezoid if i != opposite], self.camera.position))
-
-        # print('triangles:', sorted_triangles)
+        
+        print('above:', sorted_triangles['above'])
+        
+        # deep copy above and below triangle lists
+        for key in ['above', 'below']:
+            for i, triangle in enumerate(sorted_triangles[key]):
+                sorted_triangles[key][i] = [*triangle]
         
         # prune unused points from each vbo
         unique_points = {'above' : world_points[:], 'below' : world_points[:]}
         for key in unique_points.keys():
             index = 0
             while index < len(unique_points[key]):
-                
                 exists = False
+                
                 for triangle in sorted_triangles[key]:
-                    # print(index, triangle[0], triangle[1], triangle[2])
                     if any([index == triangle[i] for i in range(3)]):
                         exists = True
                         break
                 
                 if not exists:
                     unique_points[key].pop(index)
-                    for triangle in sorted_triangles[key]:
-                        # print(triangle)
-                        for i in range(3):
-                            if triangle[i] >= index:
-                                triangle[i] -= 1
-                        # print(triangle)
+                    for i, triangle in enumerate(sorted_triangles[key]):
+                        for j in range(3):
+                            if triangle[j] >= index: sorted_triangles[key][i][j] -= 1
+                    print(index)
                     index -= 1
-                    # print(f'removed {index + 1}')
                 index += 1
-        
-        # print('triangles:', sorted_triangles)
             
         # display points in world
         for wp in world_points:
@@ -210,19 +197,19 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
         
             if in_above and in_below:
                 self.model_handler.add(
-                    position=wp,
+                    position=wp + glm.vec3(0, 3, 0),
                     scale=(0.3, 0.3, 0.3),
                     material="yellow"
                 )
             elif in_below:
                 self.model_handler.add(
-                    position=wp + glm.vec3(0, 0.01, 0),
+                    position=wp + glm.vec3(0, 3.01, 0),
                     scale=(0.3, 0.3, 0.3),
                     material="baby_blue"
                 )
             elif in_above:
                 self.model_handler.add(
-                    position=wp + glm.vec3(0, 0.02, 0),
+                    position=wp + glm.vec3(0, 3.02, 0),
                     scale=(0.3, 0.3, 0.3),
                     material="red_pink"
                 )
@@ -230,6 +217,7 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
         
         for key in ['below', 'above']:
             for triangle in sorted_triangles[key]:
+                center = glm.vec3(0, 0, 0)
                 for i in range(3):
                     one = unique_points[key][triangle[i]]
                     two = unique_points[key][triangle[(i + 1) % 3]]
@@ -238,10 +226,22 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
                     count = 10
                     for c in range(count):
                         self.model_handler.add(
-                            position=one + vec * (c + 1) / (count + 2),
+                            position=one + vec * (c + 1) / (count + 2) + glm.vec3(0, 0.01, 0) * (key == 'below') + glm.vec3(0, 3, 0),
                             scale=(0.1, 0.1, 0.1),
                             material='baby_blue' if key == 'below' else 'red_pink'
                         )
+                        
+                    center += one
+                center /= 3
+                self.model_handler.add(
+                    position=center + glm.vec3(0, 3, 0),
+                    scale=(0.2, 0.2, 0.2),
+                    rotation=(glm.pi()/4, 0, glm.pi()/4),
+                    material='baby_blue' if key == 'below' else 'red_pink'
+                )
+                
+        print('above:', sorted_triangles['above'])
+        # print('below:', sorted_triangles['below'])
     
         # steps
         # sort triangles /
@@ -250,16 +250,16 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
         # fill interior
         # build vbo 
         # fill trapezoids
-        # TODO prune unused points
+        # prune unused points
         # convert cut points to vbo
         # reform both sides and save vbos
     
         # convert edge world points to vbo points
-        edge_vbo_points  = []
-        inv_model_matrix = glm.inverse(model_matrix)
-        for world_point in world_points[edge_index:]:
-            vbo_point = inv_model_matrix * ([float(p) for p in world_point] + [0])
-            edge_vbo_points.append(glm.vec3(vbo_point[0], vbo_point[1], vbo_point[2]))
+        # edge_vbo_points  = []
+        # inv_model_matrix = glm.inverse(model_matrix)
+        # for world_point in world_points[edge_index:]:
+        #     vbo_point = inv_model_matrix * ([float(p) for p in world_point] + [0])
+        #     edge_vbo_points.append(glm.vec3(vbo_point[0], vbo_point[1], vbo_point[2]))
     
         print('model:', node.model)
         print('node', node)
