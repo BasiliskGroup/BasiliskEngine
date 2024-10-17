@@ -1,4 +1,5 @@
 from user_scripts.delaunay import delunay_triangulation, Point
+import random
 
 mouse_position = glm.vec2([int(self.project.engine.mouse_position[i]) for i in range(2)])
 
@@ -37,7 +38,7 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
     print('normal:', plane_normal)
         
     # identify what has been clicked
-    node = self.get_model_node_at(*self.click_anchor)
+    node = self.get_model_node_at(*self.click_anchor, has_collider = True, has_physics_body = True, material='yellow')
     skeleton = self.skeleton_handler.get_node_skeleton(node)
     
     # sort triangles
@@ -54,7 +55,7 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
         @staticmethod
         def orient_triangle(world_points:list[glm.vec3], indices:list[int], origin:glm.vec3) -> list[int]:
             ab, ac = world_points[indices[1]] - world_points[indices[0]], world_points[indices[2]] - world_points[indices[0]]
-            if not glm.dot(glm.cross(ab, ac), world_points[indices[0]] - origin): indices[0], indices[2] = indices[2], indices[0]
+            if glm.dot(glm.cross(ab, ac), origin - world_points[indices[0]]) < 0: indices[0], indices[2] = indices[2], indices[0]
             return indices
         
         # get the real location of points
@@ -147,8 +148,6 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
                 opposite = max([t for t in trapezoid[:3]], key = lambda wp=t, world_points=world_points, center=center, trapezoid=trapezoid: glm.dot(world_points[wp], center - world_points[trapezoid[3]]))
                 sorted_triangles[key].append(orient_triangle(world_points, [i for i in trapezoid if i != opposite], self.camera.position))
         
-        print('above:', sorted_triangles['above'])
-        
         # deep copy above and below triangle lists
         for key in ['above', 'below']:
             for i, triangle in enumerate(sorted_triangles[key]):
@@ -171,95 +170,40 @@ elif self.clicked and not self.project.engine.mouse_keys[0]:
                     for i, triangle in enumerate(sorted_triangles[key]):
                         for j in range(3):
                             if triangle[j] >= index: sorted_triangles[key][i][j] -= 1
-                    print(index)
                     index -= 1
                 index += 1
+        
+        # generate vbos and create new nodes
+        inv_model_matrix = glm.inverse(model_matrix)
+        for key in unique_points.keys():
             
-        # display points in world
-        for wp in world_points:
-            in_above, in_below = False, False
+            # get difference in geometric centers
+            maximum = glm.max(unique_points[key])
+            minimum = glm.min(unique_points[key])
+            center  = (maximum + minimum) / 2
+            vbo_center = glm.vec3(inv_model_matrix * glm.vec4(*center, 1))
             
-            for triangle in sorted_triangles['below']:
-                for p in triangle:
-                    if wp == unique_points['below'][p]:
-                        in_below = True
-                        break
-                else: continue
-                break
+            # convert to vbo space
+            for i, point in enumerate(unique_points[key]): unique_points[key][i] = glm.vec3(inv_model_matrix * glm.vec4(*point, 1)) - vbo_center
+            
+            # generate node
+            uuid = self.vao_handler.vbo_handler.create_vbo(unique_points[key], sorted_triangles[key])
+            
+            # split node
+            self.node_handler.add(
+                position=center,
+                scale=node.scale,
+                rotation=node.rotation,
+                material=node.material,
+                collider=self.collider_handler.add(vbo=uuid, static=False),
+                physics_body=self.physics_body_handler.add(mass=node.physics_body.mass / 2), # TODO get split mass (estimate)
+                model=uuid, 
+            )
+            
+        # TODO split skeleton
         
-            for triangle in sorted_triangles['above']:
-                for p in triangle:
-                    if wp == unique_points['above'][p]:
-                        in_above = True
-                        break
-                else: continue
-                break
-        
-            if in_above and in_below:
-                self.model_handler.add(
-                    position=wp + glm.vec3(0, 3, 0),
-                    scale=(0.3, 0.3, 0.3),
-                    material="yellow"
-                )
-            elif in_below:
-                self.model_handler.add(
-                    position=wp + glm.vec3(0, 3.01, 0),
-                    scale=(0.3, 0.3, 0.3),
-                    material="baby_blue"
-                )
-            elif in_above:
-                self.model_handler.add(
-                    position=wp + glm.vec3(0, 3.02, 0),
-                    scale=(0.3, 0.3, 0.3),
-                    material="red_pink"
-                )
-            else: print(f'uh oh {wp}')
-        
-        for key in ['below', 'above']:
-            for triangle in sorted_triangles[key]:
-                center = glm.vec3(0, 0, 0)
-                for i in range(3):
-                    one = unique_points[key][triangle[i]]
-                    two = unique_points[key][triangle[(i + 1) % 3]]
-                    vec = two - one
-                    
-                    count = 10
-                    for c in range(count):
-                        self.model_handler.add(
-                            position=one + vec * (c + 1) / (count + 2) + glm.vec3(0, 0.01, 0) * (key == 'below') + glm.vec3(0, 3, 0),
-                            scale=(0.1, 0.1, 0.1),
-                            material='baby_blue' if key == 'below' else 'red_pink'
-                        )
-                        
-                    center += one
-                center /= 3
-                self.model_handler.add(
-                    position=center + glm.vec3(0, 3, 0),
-                    scale=(0.2, 0.2, 0.2),
-                    rotation=(glm.pi()/4, 0, glm.pi()/4),
-                    material='baby_blue' if key == 'below' else 'red_pink'
-                )
-                
-        print('above:', sorted_triangles['above'])
-        # print('below:', sorted_triangles['below'])
-    
-        # steps
-        # sort triangles /
-        # split middle triangles /
-        # find cut points /
-        # fill interior
-        # build vbo 
-        # fill trapezoids
-        # prune unused points
-        # convert cut points to vbo
-        # reform both sides and save vbos
-    
-        # convert edge world points to vbo points
-        # edge_vbo_points  = []
-        # inv_model_matrix = glm.inverse(model_matrix)
-        # for world_point in world_points[edge_index:]:
-        #     vbo_point = inv_model_matrix * ([float(p) for p in world_point] + [0])
-        #     edge_vbo_points.append(glm.vec3(vbo_point[0], vbo_point[1], vbo_point[2]))
+        # remove split node
+        self.node_handler.remove(node)
     
         print('model:', node.model)
         print('node', node)

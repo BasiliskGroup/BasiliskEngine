@@ -43,12 +43,12 @@ class Scene:
         load_scene(self, "saves/sample_scene.bsk")
         spacing = 6
 
-        self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
 
-        self.selected_model = self.model_handler.add("sphere", "base", (-6, 35, 0), (0, 0, 0), (3, 3, 3))
-        self.selected_model = self.model_handler.add("sphere", "baby_blue", (0, 35, 0), (0, 0, 0), (3, 3, 3))
-        self.selected_model = self.model_handler.add("sphere", "norm", (6, 35, 0), (0, 0, 0), (3, 3, 3))
-        self.selected_model = self.model_handler.add("sphere", "brick", (12, 35, 0), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("sphere", "base", (-6, 35, 0), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("sphere", "baby_blue", (0, 35, 0), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("sphere", "norm", (6, 35, 0), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("sphere", "brick", (12, 35, 0), (0, 0, 0), (3, 3, 3))
         
         with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
         exec(scene_on_init)
@@ -57,7 +57,6 @@ class Scene:
         with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
         with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
         with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
-        with open(f'user_scripts/head_on_frame.py')    as file: head_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
         
         self.on_tick = None # TODO add functionality
         self.on_frame = scene_on_frame
@@ -69,11 +68,13 @@ class Scene:
                 rotation=(0, 0, 0),
                 nodes=[],
                 model='cube',
-                material='brick',
+                material='yellow',
                 collider=self.collider_handler.add(vbo='cube', static=False),
                 physics_body=self.physics_body_handler.add(mass=20),
                 name='box'
             )
+            
+        # level 1 #################################################################################################
         
         self.node_handler.add(
             position=(0, -4, 0),
@@ -81,25 +82,51 @@ class Scene:
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
-            material='base',
+            material='brick',
             collider=self.collider_handler.add(vbo='cube', static=True),
             physics_body=None,
-            name='box'
+            name='floor'
         )
         
         self.node_handler.add(
-            position=(-6, 0, -6),
-            scale=(1, 1, 1),
+            position=(0, 7, -35),
+            scale=(40, 10, 5),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
-            material='base',
+            material='brick',
             collider=self.collider_handler.add(vbo='cube', static=True),
             physics_body=None,
+            name='platform'
+        )
+        
+        self.node_handler.add(
+            position=(0, 7, 0),
+            scale=(10, 10, 10),
+            model='cube',
+            material='yellow',
+            collider=self.collider_handler.add(vbo='cube', static=False),
+            physics_body=self.physics_body_handler.add(mass=100),
             name='box'
         )
         
-        cock_pos = glm.vec3(0, -2, 0)
+        # level 2 ##################################################################################################
+        
+        self.node_handler.add(
+            position=(0, 16, -80),
+            scale=(40, 1, 40),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='floor'
+        )
+        
+        # john bitcock #############################################################################################
+        
+        cock_pos = glm.vec3(0, -2, 30)
         
         left_foot=self.node_handler.add(
             position=cock_pos + glm.vec3(0.5, 0.25, 0),
@@ -662,7 +689,7 @@ class Scene:
 
         self.vao_handler.release()
         
-    def get_model_node_at(self, x:int, y:int, distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False):
+    def get_model_node_at(self, x:int, y:int, distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None):
         """
         Gets the closest node at the pixel position
         """
@@ -671,7 +698,7 @@ class Scene:
         pixel_position = glm.vec2(x, y)
         
         for root in self.node_handler.nodes:
-            nodes = root.get_nodes(True, has_collider, has_physics_body)
+            nodes = root.get_nodes(True, has_collider, has_physics_body, material)
             for node in nodes: 
                 temp_model = best_model
                 best_model = self.is_best_model(best_model, pixel_position, node.model, distance)

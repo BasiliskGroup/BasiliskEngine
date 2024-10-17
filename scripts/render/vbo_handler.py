@@ -3,6 +3,7 @@ import numpy as np
 from pyobjloader import load_model
 #from scripts.model import load_model
 from numba import njit
+from uuid import uuid4
 
 
 class VBOHandler:
@@ -30,7 +31,14 @@ class VBOHandler:
         """
 
         [vbo.vbo.release() for vbo in self.vbos.values()]
-
+        
+    def create_vbo(self, vertices, indices) -> str:
+        """
+        Creates a RuntimeVBO using the given data. 
+        """
+        uuid = str(uuid4())
+        self.vbos[uuid] = RuntimeVBO(self.ctx, vertices, indices)
+        return uuid
 
 class BaseVBO:
     """
@@ -217,24 +225,38 @@ class ModelVBO(BaseVBO):
         return vertex_data
     
 class RuntimeVBO(BaseVBO):
-    def __init__(self, ctx, unique_points, indices):
+    def __init__(self, ctx, unique_points, indicies):
         self.unique_points = unique_points
-        self.indices = indices
+        self.indicies = indicies
         super().__init__(ctx)
         self.format = '3f 2f 3f'
         self.attribs = ['in_position', 'in_uv', 'in_normal']
         
     def get_vertex_data(self):
+        
+        unique_points = [*self.unique_points, *self.unique_points]
+        start = len(self.unique_points)
+        indicies = self.indicies[:]
+        for index in self.indicies: indicies.append([i + start for i in index])
 
-        vertex_data = self.get_data(self.unique_points, self.indices)
+        vertex_data = self.get_data(unique_points, indicies)
 
         tex_coord_verticies = [(0, 0), (1, 0), (1, 1), (0, 1)]
-        tex_coord_indicies = [(0, 1, 2) for _ in range(len(self.unique_points))]
+        tex_coord_indicies = [(0, 1, 2) for _ in range(len(indicies))]
         tex_coord_data = self.get_data(tex_coord_verticies, tex_coord_indicies)
 
-        normals = [np.cross(triangle[0] - triangle[1], triangle[0] - triangle[2]) for triangle in self.indices]
-        normals = np.array(normals, dtype='f4').reshape(36, 3)
+        normals = []
+        for i, triangle in enumerate(indicies):
+            points  = [np.array(unique_points[triangle[i]]) for i in range(3)]
+            normal  = np.cross(points[1] - points[0], points[2] - points[0]) if i < len(self.indicies) else np.cross(points[1] - points[2], points[0] - points[2])
+            normal /= np.linalg.norm(normal)
+            normal  = normal.tolist()
+            
+            normals.extend([normal for _ in range(3)])
+            
+        normals = np.array(normals, dtype='f4').reshape(len(indicies) * 3, 3)
 
         vertex_data = np.hstack([vertex_data, tex_coord_data])
         vertex_data = np.hstack([vertex_data, normals])
+        
         return vertex_data

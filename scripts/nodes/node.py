@@ -12,6 +12,7 @@ class Node():
         self.collider     = collider
         self.physics_body = physics_body
         self.model        = node_handler.scene.model_handler.add(vbo=model, material=material) if model else None
+        self.material     = material
         
         # other
         self.name = name
@@ -187,12 +188,12 @@ class Node():
         for node in self.nodes: models += node.get_models()
         return models
     
-    def get_nodes(self, has_model:bool=False, has_collider:bool=False, has_physics_body:bool=False) -> list:
+    def get_nodes(self, has_model:bool=False, has_collider:bool=False, has_physics_body:bool=False, material:str=None) -> list:
         """
         Gets self and child nodes if they meet the filter
         """
         nodes = []
-        if (not has_model or self.model) and (not has_collider or self.collider) and (not has_physics_body or self.physics_body): nodes.append(self)
+        if (not has_model or self.model) and (not has_collider or self.collider) and (not has_physics_body or self.physics_body) and (not material or self.material == material): nodes.append(self)
         for node in self.nodes: nodes.extend(node.get_nodes(has_model, has_collider, has_physics_body))
         return nodes
     
