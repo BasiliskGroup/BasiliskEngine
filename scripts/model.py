@@ -5,7 +5,7 @@ CHUNK_SIZE = 40
 
 
 class Model:
-    def __init__(self, handler, vbo, material='Base', position: tuple=(0, 0, 0), rotation: tuple=(0, 0, 0), scale: tuple=(1, 1, 1)) -> None:
+    def __init__(self, handler, vbo, material='base', position: tuple=(0, 0, 0), rotation: tuple=(0, 0, 0), scale: tuple=(1, 1, 1)) -> None:
         # Rendering specifications
         self.__handler = handler
         self.vbo     = vbo

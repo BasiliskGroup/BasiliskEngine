@@ -16,13 +16,13 @@ class VBOHandler:
         self.vbos['cube'] = CubeVBO(self.ctx)
         self.frame_vbo = FrameVBO(self.ctx)
 
-        for file in os.listdir(self.directory):
-            filename = os.fsdecode(file)
+        # for file in os.listdir(self.directory):
+        #     filename = os.fsdecode(file)
 
-            if not filename.endswith(".obj"): continue
+        #     if not filename.endswith(".obj"): continue
 
-            obj_file = os.path.join(directory, filename)
-            self.vbos[file[:-4]] = ModelVBO(self.ctx, obj_file)
+        #     obj_file = os.path.join(directory, filename)
+        #     self.vbos[file[:-4]] = ModelVBO(self.ctx, obj_file)
 
     def release(self):
         """

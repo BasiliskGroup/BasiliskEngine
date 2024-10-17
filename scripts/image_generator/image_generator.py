@@ -147,8 +147,6 @@ class ImageGenerator():
         Returns an image of the model
         """
 
-        images = []
-
         filename = os.fsdecode(file)
         if not filename.endswith(".obj"): return -1
 
@@ -158,6 +156,7 @@ class ImageGenerator():
 
         data = self.framebuffer.read(components=3, alignment=1)
         img = pg.image.frombytes(data, self.framebuffer.size, 'RGB')
+        img = pg.transform.flip(img, flip_x=False, flip_y=True)
         return img
     
     def generate_vbos(self, vbos: list) -> list:

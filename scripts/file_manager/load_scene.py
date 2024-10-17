@@ -1,185 +1,76 @@
-class Line:
-    def __init__(self, line_type, identifier, attribs) -> None:
-        self.line_type = line_type
-        self.identifier = identifier
-        self.attribs = attribs
-
-    def __repr__(self) -> str:
-        return f"<{self.line_type} : {self.identifier}>"
-
-def load_scene(scene, file: str):
-    """
-    Loads a scene file onto an existing scene, if given, or a new scene which is returned.
-    """
-
-    lines = get_lines(file)
-    if not lines[0].startswith("bsk"): raise RuntimeError('Cannot load file ' + file + ' because it is not of type "bsk"')
-
-    scene_decriptor = convert_line(lines[1])
-
-    if scene_decriptor.identifier != "bsk_scene": raise RuntimeError("Scene file " + file + " must have a scene descriptor")
-
-    current_item = None
-    for line in lines[2:]:
-        line = convert_line(line)
-
-        if line.line_type == "declaration":
-            current_item = add_delcaration(scene, line)
-
-        else:
-            apply_modifier(scene, line, current_item)
+import json
+from scripts.render.vbo_handler import ModelVBO
 
 
-def add_delcaration(scene, line):
-    current_object = None
-
-    match line.identifier:
-        case "material":
-            current_object = create_material(scene, line)
-        case "node":
-            current_object = create_node(scene, line)
-
-    return current_object
-
-
-def apply_modifier(scene, line, current_object):
-    value = line.attribs[line.identifier]
-    match line.identifier:
-        case "position":
-            current_object.position = value
-        case "rotation":
-            current_object.rotation = value
-        case "scale":
-            current_object.scale = value
-        case "mesh":
-            current_object.model = scene.node_handler.scene.model_handler.add(vbo=value)
-        case "material":
-            current_object.model.material = value
-
-
-def create_material(scene, line):
-    scene.material_handler.add(**line.attribs)
-    return None
-
-
-def create_node(scene, line):
-    node = scene.node_handler.add(name=line.attribs["name"])
-
-    return node
-
-
-def get_lines(file: str) -> list[str]:
-    """
-    Returns a list of strings of all the lines in the given file.
-    Automatically removes comments and empty lines.
-    """
+def load_scene(scene, local_file_name=None, abs_file_path=None):
+    if local_file_name:
+        with open(f'saves\{local_file_name}.gltf') as file:
+            scene_data = json.load(file)
+    else:
+        with open(abs_file_path) as file:
+            scene_data = json.load(file)
     
-    with open(file, 'r') as file:
-        lines = list(file)
+    vbos = scene.vao_handler.vbo_handler.vbos
+    for buffer in scene_data["buffers"]:
+        obj_file = f"models\{buffer['uri']}"
+        try:
+            vbos[buffer["uri"][:-4]] = ModelVBO(scene.ctx, obj_file)
+        except FileNotFoundError:
+            print(f"Attempted to load {obj_file} for the scene, but it was not in the models folder")
 
-    line_index = 0
-    while line_index < len(lines):
-        lines[line_index] = lines[line_index].strip()
+    for image in scene_data["images"]:
+        try:
+            scene.project.texture_handler.load_texture(image['uri'][:-4], '/' + image['uri'])
+        except FileNotFoundError:
+            print(f"Attempted to load {image['uri']} for the scene, but it was not in the textures folder")
 
-        # Get rid of empty lines
-        if len(lines[line_index]) < 1:
-            lines.pop(line_index)
-            continue
-        # Get rid of comment lines
-        if lines[line_index][0] == '#':
-            lines.pop(line_index)
-            continue
+    scene.material_handler.materials.clear()
+    for mtl in scene_data["materials"]:
+        kwargs = {}
+        kwargs["name"] = mtl["name"]
+        if "pbrMetallicRoughness" in mtl:
+            if "baseColorFactor" in mtl["pbrMetallicRoughness"]: 
+                kwargs["color"] = mtl["pbrMetallicRoughness"]["baseColorFactor"][:3]
+                kwargs["alpha"] = mtl["pbrMetallicRoughness"]["baseColorFactor"][3]
+            
+            if "metallicFactor" in mtl["pbrMetallicRoughness"]:
+                kwargs["specular"] = mtl["pbrMetallicRoughness"]["metallicFactor"]
+            if "roughnessFactor" in mtl["pbrMetallicRoughness"]:
+                kwargs["specular_exponent"] = mtl["pbrMetallicRoughness"]["roughnessFactor"]
+            
+            if "baseColorTexture" in mtl["pbrMetallicRoughness"]:
+                texture = mtl["pbrMetallicRoughness"]["baseColorTexture"]["index"]
+                texture = scene_data["textures"][texture]["sampler"]
+                texture = scene_data["images"][texture]["uri"][:-4]
+                kwargs["texture"] = texture
 
+        if "normalTexture" in mtl:
+            texture = mtl["normalTexture"]["index"]
+            texture = scene_data["textures"][texture]["sampler"]
+            texture = scene_data["images"][texture]["uri"][:-4]
+            kwargs["normal_map"] = texture
 
-        line_index += 1
+        scene.material_handler.add(**kwargs)
 
-    return lines
+    scene.node_handler.nodes.clear()
+    scene.model_handler.models.clear()
+    scene.model_handler.chunks.clear()
+    scene.model_handler.batches.clear()
+    for node in scene_data["nodes"]:
+        kwargs = {}
+        kwargs["name"] = node["name"]
 
-def convert_line(line):
-    """
-    Converts a line string into a Line class instance with information seperated out. 
-    """
+        if "translation" in node:
+            kwargs["position"] = node["translation"]
+        if "rotation" in node:
+            kwargs["rotation"] = node["rotation"]
+        if "scale" in node:
+            kwargs["scale"] = node["scale"]
 
-    # Modifier Line
-    if not line.startswith('['):
-        token = line
+        if "mesh" in node:
+            if node["mesh"] == "cube": kwargs["model"] = "cube"
+            else: kwargs["model"] = scene_data["buffers"][node["mesh"]]["uri"][:-4]
 
-        attrib, value = token.split('=')
-        attrib = attrib.strip()
-        value = convert_value(value.strip())
-
-        return Line("modifier", attrib, {attrib : value})
-        
-    # Declaration Line
-    tokens = get_tokens(line)
-    line = line[1:-1]
-    attrib_values = {}
-
-    for token in tokens:
-        if "=" in token:
-            attrib, value = token.split('=')
-            attrib_values[attrib.strip()] = convert_value(value.strip())
-        else:
-            identifier = token
-
-    return Line("declaration", identifier, attrib_values)
-
-
-def get_tokens(line: str) -> list[str]:
-    """
-    Returns the tokens of a line
-    """
-    
-    # A list of all the tokens
-    tokens = []
-
-    if not line.startswith('['):
-        return line
-
-    line = line[1:-1]
-
-    # State variables
-    in_quotes = False
-    token = ""
-
-    # Loop through the line
-    for i in range(len(line)):
-        char = line[i]
-
-        # Add a token at a space if it isnt in a quote
-        if char == " " and not in_quotes:
-            tokens.append(token)
-            token = ""
-            i += 1
-        
-        # Flip the in_quotes bit if char is a double quote
-        elif char == '"' or char == '(' or char == ')':
-            in_quotes = not in_quotes
-
-        # Increment 
-        token = token + char
-        i += 1
-    
-    # Add the token found at the end
-    tokens.append(token)
-
-    return tokens
-
-
-def convert_value(value: str):
-    """
-    Converts a value string into the correct data type
-    """
-
-    # String
-    if value.startswith('"'):
-        return value[1:-1]
-    
-    # Tuple
-    elif value.startswith('('):
-        values = []
-        [values.append(float(tuple_value.strip())) for tuple_value in value[1:-1].split(',')]
-        return tuple(values)
-    
-    # Float
-    return float(value)
+        if "material" in node:
+            kwargs["material"] = scene_data["materials"][node["material"]]["name"]
+        scene.node_handler.add(**kwargs)

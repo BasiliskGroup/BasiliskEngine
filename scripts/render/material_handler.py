@@ -1,4 +1,5 @@
 import glm
+import numpy as np
 
 class MaterialHandler:
     def __init__(self, scene) -> None:
@@ -8,8 +9,11 @@ class MaterialHandler:
         self.materials      = {}
         self.material_ids   = {}
 
-    def add(self, name="base", color: tuple=(1, 1, 1), specular: float=1, specular_exponent: float=32, alpha: float=1, texture=None, specular_map=None, normal_map=None):
-        mtl = Material(self, color, specular, specular_exponent, alpha, texture, specular_map, normal_map)
+        #self.add('cow', texture="cow")
+        #self.add('brick', texture='brick', normal_map='brick_normal')
+
+    def add(self, name="base", color: tuple=(1, 1, 1), specular: float=1, specular_exponent: float=32, alpha: float=1, texture=None, normal_map=None):
+        mtl = Material(self, color, specular, specular_exponent, alpha, texture, normal_map)
         self.material_ids[name] = len(self.materials)
         self.materials[name] = mtl
 
@@ -19,12 +23,38 @@ class MaterialHandler:
 
     def write(self, program):
         program = self.programs[program]
+        self.make_texture(program)
         for mtl_name in list(self.materials.keys()):
             mtl = self.materials[mtl_name]
             mtl.write(program, self.texture_ids, self.material_ids[mtl_name])
 
+    def make_texture(self, program):
+        if not len(self.materials): return
+
+        # (3i, 1i, 1i, 1i, 3i, 3i)
+        texture_data = np.zeros(shape=(len(self.materials), 12), dtype="f")
+
+        texture_ids = self.scene.project.texture_handler.texture_ids
+
+        for i, mtl in enumerate(list(self.materials.values())):
+            texture_data[i][:3]  = mtl.color.x, mtl.color.y, mtl.color.z
+            texture_data[i][3]   = mtl.specular.value
+            texture_data[i][4]   = mtl.specular_exponent.value
+            texture_data[i][5]   = mtl.alpha.value
+            texture_data[i][6]   = mtl.has_texture.value
+            texture_data[i][7:9] = texture_ids[mtl.texture] if mtl.texture else [0, 0]
+            texture_data[i][9]   = mtl.has_normal_map.value
+            texture_data[i][10:] = texture_ids[mtl.normal_map] if mtl.normal_map else [0, 0]
+
+        texture_buffer = self.scene.ctx.buffer(texture_data)
+
+        self.mtl_texture = self.scene.ctx.texture((texture_buffer.size, 1), components=1, data=texture_buffer.read())
+
+        program[f'materialsTexture'] = 9
+        self.mtl_texture.use(location=9)
+
 class Material:
-    def __init__(self, handler, color: tuple, specular:float, specular_exponent: float, alpha: float, texture=None, specular_map=None, normal_map=None) -> None:
+    def __init__(self, handler, color: tuple, specular:float, specular_exponent: float, alpha: float, texture=None, normal_map=None) -> None:
         self.handler = handler
         # Numberic attributes
         self.color:             glm.vec3    = color
@@ -34,25 +64,18 @@ class Material:
 
         # Texture Maps
         if not texture:
-            self.texture     = None
             self.has_texture = False
+            self.texture     = None
         else:
-            self.texture: str = texture
             self.has_texture  = True
-
-        if not specular_map:
-            self.specular_map     = None
-            self.has_specular_map = False
-        else:
-            self.specular_map: str = specular_map
-            self.has_specular_map  = True
+            self.texture: str = texture
 
         if not normal_map:
-            self.normal_map     = None
             self.has_normal_map = False
+            self.normal_map     = None
         else:
-            self.normal_map: str = normal_map
             self.has_normal_map  = True
+            self.normal_map: str = normal_map
 
     def write(self, program, texture_ids, i=0):
         program[f'materials[{i}].color'           ].write(self.color)
@@ -61,11 +84,9 @@ class Material:
         program[f'materials[{i}].alpha'           ].write(self.alpha)
 
         program[f'materials[{i}].hasAlbedoMap'  ].write(self.has_texture)
-        #program[f'materials[{i}].hasSpecularMap'].write(self.has_specular_map)
         program[f'materials[{i}].hasNormalMap'  ].write(self.has_normal_map)
 
         if self.has_texture  : program[f'materials[{i}].albedoMap'  ].write(glm.vec2(texture_ids[self.texture]))
-        #if self.has_specular_map: program[f'materials[{i}].specularMap'].write(glm.vec2(texture_ids[self.specular_map]))
         if self.has_normal_map  : program[f'materials[{i}].normalMap'  ].write(glm.vec2(texture_ids[self.normal_map]))
 
     @property
@@ -126,7 +147,11 @@ class Material:
         self._has_normal_map = glm.int32(int(value))
     @texture.setter
     def texture(self, value):
+        if value: self.has_texture = True
+        else: self.has_texture = False
         self._texture = value
     @normal_map.setter
     def normal_map(self, value):
+        if value: self.has_normal_map = True
+        else: self.has_normal_map = False
         self._normal_map = value

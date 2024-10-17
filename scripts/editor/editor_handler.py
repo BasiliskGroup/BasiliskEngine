@@ -1,10 +1,13 @@
 import numpy as np
-import moderngl as mgl
+import pygame as pg
 from scripts.editor.editor_ui import EditorUI
 from scripts.editor.editor_input import InputHandler
 from scripts.editor.font_renderer import FontRenderer
 from scripts.editor.viewport_dimensions import ViewportDimensions
 from scripts.camera import Camera
+from scripts.render.vbo_handler import ModelVBO
+import time
+from scripts.file_manager.drag_file import drag_file
 
 
 class Editor:
@@ -49,6 +52,24 @@ class Editor:
         
         self.input.update()
 
+        for event in self.engine.events:
+            if event.type == pg.DROPFILE:
+                file_path = str(drag_file(event.file))
+
+                i = len(file_path) - 1
+                while file_path[i] != '/' and file_path[i] != "\\" and i: i -= 1
+                name = file_path[i+1:]
+
+                if file_path.endswith(".obj"):
+                    vbos = self.engine.project.current_scene.vao_handler.vbo_handler.vbos
+                    vbos[name[:-4]] = ModelVBO(self.engine.ctx, "models/" + name)
+                    self.ui.model_images.append(self.ui.image_gen.generate_file(name))
+                elif file_path.endswith(".png") or file_path.endswith(".jpg"):
+                    self.engine.project.texture_handler.load_texture(name[:-4], '/' + name)
+                    self.engine.project.texture_handler.generate_texture_arrays()
+                    self.engine.project.texture_handler.write_textures("batch")
+
+
     def load_vao(self):
         """
         Loads a vbo, program, and vao for rendering UI. VAO is independent from the engine.
@@ -74,19 +95,16 @@ class Editor:
         Called when the window or viewport is resized. Resets the viewports and camera.
         """
         
-        self.use_canera()
+        self.use_camera()
         self.ui.window_resize()
 
-        # self.ui.set_viewports()
-        # self.ui.set_surface_texture()
-
     def viewport_resize(self):
-        self.use_canera()
+        self.use_camera()
         self.ui.set_viewports()
         self.ui.program['engineTexture'] = 1
         self.engine.project.current_scene.vao_handler.frame_texture.use(location=1)
 
-    def use_canera(self):
+    def use_camera(self):
         """
         Updates the aspect ratio and projection matrix of the camera.
         """

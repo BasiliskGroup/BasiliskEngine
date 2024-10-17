@@ -8,8 +8,10 @@ flat in int materialID;
 in vec3 normal;
 in vec3 position;
 
-
 uniform vec3 cameraPosition;
+
+
+float mtlRed;
 
 
 struct textArray {
@@ -63,6 +65,8 @@ uniform PointLight pointLights[maxLights];
 
 #define maxMaterials 10
 uniform Material materials[maxMaterials];
+uniform sampler2D materialsTexture;
+
 
 vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 albedo) {
     vec3 lightDir = normalize(-light.direction);
@@ -136,5 +140,8 @@ void main() {
         //}
     }
 
+    mtlRed = texture(materialsTexture, vec2(materialID * 12, 1)).r  * 255;
+
     fragColor = vec4(light_result, mtl.alpha);
+    fragColor.rgb += vec3(mtlRed) / 1000;
 }
