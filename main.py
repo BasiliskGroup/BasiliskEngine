@@ -49,7 +49,7 @@ class Engine:
         self.events = pg.event.get()
         self.keys = pg.key.get_pressed()
         self.mouse_position = pg.mouse.get_pos()
-        self.mouse_keys = pg.mouse.get_pressed()
+        self.mouse_buttons = pg.mouse.get_pressed()
         # Loop through window events
         for event in self.events:
             if event.type == pg.QUIT:

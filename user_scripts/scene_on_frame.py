@@ -3,7 +3,7 @@ import random
 
 mouse_position = glm.vec2([int(self.project.engine.mouse_position[i]) for i in range(2)])
 
-if not self.clicked and self.project.engine.mouse_keys[0]: # if left click
+if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
     self.click_anchor = mouse_position
     self.clicked = True
     
@@ -11,7 +11,7 @@ if not self.clicked and self.project.engine.mouse_keys[0]: # if left click
     def rotate(): pass
     self.camera.rotate = rotate
 
-elif self.clicked and not self.project.engine.mouse_keys[0]:
+elif self.clicked and not self.project.engine.mouse_buttons[0]:
     # get the dpos of the mouse 
     self.click_position = mouse_position
     self.clicked = False
