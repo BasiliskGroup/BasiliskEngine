@@ -1,4 +1,4 @@
-from scripts.camera import * # Every camera
+from scripts.camera import *
 from scripts.collisions.collider_handler import ColliderHandler
 from scripts.model_handler import ModelHandler
 from scripts.nodes.node_handler import NodeHandler
@@ -12,7 +12,9 @@ from scripts.file_manager.save_scene import save_scene
 from scripts.file_manager.load_scene import load_scene
 from scripts.file_manager.get_file import save_file_selector, load_file_selector
 from scripts.skeletons.animation import *
+from scripts.skeletons.joints import *
 from random import randint, uniform
+from scripts.generic.math_functions import get_model_matrix
 
 class Scene:
     def __init__(self, engine, project) -> None:
@@ -41,6 +43,25 @@ class Scene:
         self.light_handler = LightHandler(self)
         
         # load_scene(self, "saves/sample_scene.bsk")
+        spacing = 6
+
+        # self.selected_model = self.model_handler.add("cow", "base", (4 * spacing, 4 * spacing, 4 * spacing), (0, 0, 0), (3, 3, 3))
+
+        # self.selected_model = self.model_handler.add("sphere", "base", (-6, 35, 0), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("sphere", "baby_blue", (0, 35, 0), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("sphere", "norm", (6, 35, 0), (0, 0, 0), (3, 3, 3))
+        # self.selected_model = self.model_handler.add("sphere", "brick", (12, 35, 0), (0, 0, 0), (3, 3, 3))
+        
+        with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
+        exec(scene_on_init)
+        
+        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = compile(file.read(), 'bottom_on_frame', 'exec')
+        with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
+        with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
+        with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
+        
+        self.on_tick = None # TODO add functionality
+        self.on_frame = scene_on_frame
         load_scene(self, "test_save")
         print(self.material_handler.materials)
         for node in self.node_handler.nodes:
@@ -55,34 +76,65 @@ class Scene:
         #         rotation=(0, 0, 0),
         #         nodes=[],
         #         model='cube',
-        #         material='brick',
+        #         material='yellow',
         #         collider=self.collider_handler.add(vbo='cube', static=False),
         #         physics_body=self.physics_body_handler.add(mass=20),
         #         name='box'
         #     )
-        
-        # self.node_handler.add(
-        #     position=(0, -4, 0),
-        #     scale=(40, 1, 40),
-        #     rotation=(0, 0, 0),
-        #     nodes=[],
-        #     model='cube', 
-        #     material='base',
-        #     collider=self.collider_handler.add(vbo='cube', static=True),
-        #     physics_body=None,
-        #     name='box'
-        # )
-        
-        # with open(f'user_scripts/bottom_on_frame.py') as file:
-        #     bottom_on_frame = file.read()
             
-        # with open(f'user_scripts/face_camera.py') as file:
-        #     face_camera = file.read()
-            
-        # with open(f'user_scripts/walking_animation.py') as file:
-        #     walking_animation = file.read()
+        # level 1 #################################################################################################
         
-        # cock_pos = glm.vec3(0, -2, 0)
+        self.node_handler.add(
+            position=(0, -4, 0),
+            scale=(40, 1, 40),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='floor'
+        )
+        
+        self.node_handler.add(
+            position=(0, 7, -35),
+            scale=(40, 10, 5),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='platform'
+        )
+        
+        self.node_handler.add(
+            position=(0, 7, 0),
+            scale=(10, 10, 10),
+            model='cube',
+            material='yellow',
+            collider=self.collider_handler.add(vbo='cube', static=False),
+            physics_body=self.physics_body_handler.add(mass=100),
+            name='box'
+        )
+        
+        # level 2 ##################################################################################################
+        
+        self.node_handler.add(
+            position=(0, 16, -80),
+            scale=(40, 1, 40),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='floor'
+        )
+        
+        # john bitcock #############################################################################################
+        
+        cock_pos = glm.vec3(0, -2, 0)
         
         # left_foot=self.node_handler.add(
         #     position=cock_pos + glm.vec3(0.5, 0.25, 0),
@@ -270,73 +322,73 @@ class Scene:
         #     physics_body=self.physics_body_handler.add(mass=20),
         #     name='top',
             
-        #     nodes=[
-        #         # id
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, 0.2, 1),
-        #             scale=(0.3, 0.1, 0.05),
-        #             rotation=(0, 0, -0.1),
-        #             model='cube', 
-        #             material='red_pink',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.51, 0, 1),
-        #             scale=(0.3, 0.1, 0.05),
-        #             rotation=(0, 0, -0.1),
-        #             model='cube', 
-        #             material='white',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.52, -0.2, 1),
-        #             scale=(0.3, 0.1, 0.05),
-        #             rotation=(0, 0, -0.1),
-        #             model='cube', 
-        #             material='red_pink',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, 0.15, 1),
-        #             scale=(0.1, 0.03, 0.055),
-        #             rotation=(0, 0, 0.1),
-        #             model='cube', 
-        #             material='black',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, -0.05, 1),
-        #             scale=(0.03, 0.2, 0.055),
-        #             rotation=(0, 0, 0.1),
-        #             model='cube', 
-        #             material='black',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.425, -0.15, 1),
-        #             scale=(0.05, 0.03, 0.055),
-        #             rotation=(0, 0, 0.6),
-        #             model='cube', 
-        #             material='black',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, 0.25, 1.05),
-        #             scale=(0.05, 0.1, 0.05),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='grey',
-        #         ),
-        #         # buttons
+            nodes=[
+                # id
+                self.node_handler.create(
+                    position=glm.vec3(0.5, 0.2, 1),
+                    scale=(0.3, 0.1, 0.05),
+                    rotation=(0, 0, -0.1),
+                    model='cube', 
+                    material='red_pink',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.51, 0, 1),
+                    scale=(0.3, 0.1, 0.05),
+                    rotation=(0, 0, -0.1),
+                    model='cube', 
+                    material='white',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.52, -0.2, 1),
+                    scale=(0.3, 0.1, 0.05),
+                    rotation=(0, 0, -0.1),
+                    model='cube', 
+                    material='red_pink',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.5, 0.15, 1),
+                    scale=(0.1, 0.03, 0.055),
+                    rotation=(0, 0, 0.1),
+                    model='cube', 
+                    material='black',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.5, -0.05, 1),
+                    scale=(0.03, 0.2, 0.055),
+                    rotation=(0, 0, 0.1),
+                    model='cube', 
+                    material='black',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.425, -0.15, 1),
+                    scale=(0.05, 0.03, 0.055),
+                    rotation=(0, 0, 0.6),
+                    model='cube', 
+                    material='black',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.5, 0.25, 1.05),
+                    scale=(0.05, 0.1, 0.05),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='grey',
+                ),
+                # buttons
                 
-        #     ]
-        # )
+            ]
+        )
         
         # top.on_frame = face_camera
         
-        # left_arm=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(1.3, 2.5, 0),
-        #     scale=(0.3, 1.25, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube',
-        #     material='white',
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='left arm',
+        left_arm=self.node_handler.add(
+            position=cock_pos + glm.vec3(1.3, 2.5, 0),
+            scale=(0.3, 1.25, 0.3),
+            rotation=(0, 0, 0),
+            model='cube',
+            material='white',
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='left arm',
             
         #     nodes=[
         #         # arm puff
@@ -364,15 +416,15 @@ class Scene:
         #     ]
         # )
         
-        # right_arm=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(-1.3, 2.5, 0),
-        #     scale=(0.3, 1.25, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube',
-        #     material='white',
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='right arm',
+        right_arm=self.node_handler.add(
+            position=cock_pos + glm.vec3(-1.3, 2.5, 0),
+            scale=(0.3, 1.25, 0.3),
+            rotation=(0, 0, 0),
+            model='cube',
+            material='white',
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='right arm',
             
         #     nodes=[
         #         # arm puff
@@ -514,86 +566,86 @@ class Scene:
         #     ]
         # )
         
-        # john_bottom=self.skeleton_handler.add(
-        #     node=bottom,
-        #     joints=[
-        #         BallJoint(
-        #             parent_offset=(0, 1, 0),
-        #             child_offset=(0, -0.5, 0),
-        #             child_bone=self.skeleton_handler.create(
-        #                 node=middle,
-        #                 joints=[
-        #                     BallJoint(
-        #                         parent_offset=(0, 0.5, 0),
-        #                         child_offset=(0, -0.5, 0),
-        #                         child_bone=self.skeleton_handler.create(
-        #                             node=top,
-        #                             joints=[
-        #                                 RotatorJoint(
-        #                                     parent_offset=(0, 0.5, 0),
-        #                                     child_offset=(0, -0.7, 0),
-        #                                     child_bone=self.skeleton_handler.create(
-        #                                         node=head
-        #                                     )
-        #                                 ),
-        #                                 BallJoint(
-        #                                     parent_offset=(-1, 0, 0),
-        #                                     child_offset=(0, 1, 0),
-        #                                     child_bone=self.skeleton_handler.create(
-        #                                         node=right_arm
-        #                                     )
-        #                                 ),
-        #                                 BallJoint(
-        #                                     parent_offset=(1, 0, 0),
-        #                                     child_offset=(0, 1, 0),
-        #                                     child_bone=self.skeleton_handler.create(
-        #                                         node=left_arm
-        #                                     )
-        #                                 )
-        #                             ]
-        #                         )
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #         BallJoint(
-        #             parent_offset=(-0.6, 0.1, 0),
-        #             child_offset=(0, 0.3, 0),
-        #             spring_constant=1e4,
-        #             child_bone=self.skeleton_handler.create(
-        #                 node=left_knee,
-        #                 joints=[
-        #                     BallJoint(
-        #                         parent_offset=(0, -0.3, 0),
-        #                         child_offset=(0, 0.5, 0),
-        #                         spring_constant = 1e4,
-        #                         child_bone=self.skeleton_handler.create(
-        #                             node=left_foot
-        #                         )
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #         BallJoint(
-        #             parent_offset=(0.6, 0.1, 0),
-        #             child_offset=(0, 0.3, 0),
-        #             spring_constant=1e4,
-        #             child_bone=self.skeleton_handler.create(
-        #                 node=right_knee,
-        #                 joints=[
-        #                     BallJoint(
-        #                         parent_offset=(0, -0.3, 0),
-        #                         child_offset=(0, 0.5, 0),
-        #                         spring_constant = 1e4,
-        #                         child_bone=self.skeleton_handler.create(
-        #                             node=right_foot
-        #                         )
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #     ]
-        # )
+        john_bottom=self.skeleton_handler.add(
+            node=bottom,
+            joints=[
+                BallJoint(
+                    parent_offset=(0, 1, 0),
+                    child_offset=(0, -0.5, 0),
+                    child_bone=self.skeleton_handler.create(
+                        node=middle,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, 0.5, 0),
+                                child_offset=(0, -0.5, 0),
+                                child_bone=self.skeleton_handler.create(
+                                    node=top,
+                                    joints=[
+                                        RotatorJoint(
+                                            parent_offset=(0, 0.5, 0),
+                                            child_offset=(0, -0.7, 0),
+                                            child_bone=self.skeleton_handler.create(
+                                                node=head
+                                            )
+                                        ),
+                                        BallJoint(
+                                            parent_offset=(-1, 0, 0),
+                                            child_offset=(0, 1, 0),
+                                            child_bone=self.skeleton_handler.create(
+                                                node=right_arm
+                                            )
+                                        ),
+                                        BallJoint(
+                                            parent_offset=(1, 0, 0),
+                                            child_offset=(0, 1, 0),
+                                            child_bone=self.skeleton_handler.create(
+                                                node=left_arm
+                                            )
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    )
+                ),
+                BallJoint(
+                    parent_offset=(-0.6, 0.1, 0),
+                    child_offset=(0, 0.3, 0),
+                    spring_constant=1e4,
+                    child_bone=self.skeleton_handler.create(
+                        node=left_knee,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, -0.3, 0),
+                                child_offset=(0, 0.5, 0),
+                                spring_constant = 1e4,
+                                child_bone=self.skeleton_handler.create(
+                                    node=left_foot
+                                )
+                            )
+                        ]
+                    )
+                ),
+                BallJoint(
+                    parent_offset=(0.6, 0.1, 0),
+                    child_offset=(0, 0.3, 0),
+                    spring_constant=1e4,
+                    child_bone=self.skeleton_handler.create(
+                        node=right_knee,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, -0.3, 0),
+                                child_offset=(0, 0.5, 0),
+                                spring_constant = 1e4,
+                                child_bone=self.skeleton_handler.create(
+                                    node=right_foot
+                                )
+                            )
+                        ]
+                    )
+                ),
+            ]
+        )
         
         # john_bottom.on_frame = walking_animation
         
@@ -636,6 +688,7 @@ class Scene:
         self.model_handler.update()
         self.vao_handler.shader_handler.update_uniforms()
         if camera: self.camera.update()
+        if self.on_frame: exec(self.on_frame)
 
     def render(self, display=True):
         """
@@ -660,3 +713,73 @@ class Scene:
         """
 
         self.vao_handler.release()
+        
+    def get_model_node_at(self, x:int, y:int, distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None):
+        """
+        Gets the closest node at the pixel position
+        """
+        best_model = None
+        best_node  = None
+        pixel_position = glm.vec2(x, y)
+        
+        for root in self.node_handler.nodes:
+            nodes = root.get_nodes(True, has_collider, has_physics_body, material)
+            for node in nodes: 
+                temp_model = best_model
+                best_model = self.is_best_model(best_model, pixel_position, node.model, distance)
+                if best_model != temp_model:
+                    best_node = node
+                
+        return best_node
+        
+    def get_model_at(self, x:int, y:int, distance:float=1e5):
+        """
+        Gets the closest model at pixel position
+        """
+        # gets the clicked model
+        best_model = None
+        pixel_position = glm.vec2(x, y)
+        
+        for model in self.model_handler.models:
+            best_model = self.is_best_model(best_model, pixel_position, model, distance)
+
+        return best_model
+    
+    def is_best_model(self, best_model, pixel_position, model, distance):
+        if glm.dot(model.position - self.camera.position, self.camera.forward) < 0: return best_model # continue if model center behind camera TODO may not be the best
+
+        # get model matrix 
+        matrix = get_model_matrix(model.position, model.scale, model.rotation)
+        model_vertices = self.model_handler.vbos[model.vbo].unique_points
+        
+        for triangle in self.model_handler.vbos[model.vbo].indicies:
+            points = []
+            for point in [model_vertices[t] for t in triangle]:
+                
+                # remove points behind the clip plane
+                vertex = glm.vec4(*point, 1.0)
+                clip_space = self.camera.m_proj * self.camera.m_view * matrix * vertex
+                if clip_space.z <= -clip_space.w or clip_space.w == 0: break
+                
+                # add point in 2d space
+                ndc = clip_space / clip_space.w
+                points.append(glm.vec2(
+                    int((ndc.x + 1) * 0.5 * self.engine.win_size[0]),
+                    int((1 - ndc.y) * 0.5 * self.engine.win_size[1])    
+                ))
+            else: 
+                # determine if pixel point is inside triangle
+                v = [p - points[2] for p in [points[0], points[1], pixel_position]]
+                dot00, dot01, dot02, dot11, dot12 = glm.dot(v[0], v[0]), glm.dot(v[0], v[1]), glm.dot(v[0], v[2]), glm.dot(v[1], v[1]), glm.dot(v[1], v[2])
+                determinant = (dot00 * dot11 - dot01 * dot01)
+                if abs(determinant) < 1e-8: continue
+                u = (dot11 * dot02 - dot01 * dot12) / determinant
+                v = (dot00 * dot12 - dot01 * dot02) / determinant
+
+                # check if point is in the triangle
+                test_distance = glm.length(model.position - self.camera.position)
+                if u >= 0 and v >= 0 and u + v <= 1 and test_distance < distance: 
+                    best_model = model
+                    distance = test_distance
+                    
+        return best_model

@@ -26,6 +26,8 @@ class ColliderHandler():
         """
         Resolves all collisions between colliders
         """
+        for collider in self.colliders: collider.has_collided = False
+        
         # get broad collisions
         collider_vertices, needs_narrow = self.resolve_broad_collisions()
         
@@ -52,6 +54,9 @@ class ColliderHandler():
                 # immediately resolve penetration
                 node1 = collider1.node # TODO add support for colliders without nodes
                 node2 = collider2.node
+                
+                collider1.has_collided = True
+                collider2.has_collided = True
                 
                 if collider1.static: 
                     node2.position += normal * distance

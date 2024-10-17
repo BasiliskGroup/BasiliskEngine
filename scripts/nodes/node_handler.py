@@ -17,9 +17,6 @@ class NodeHandler():
         """
         Updates all top level nodes.
         """
-        # update nodes
-        
-            
         for node in self.nodes: node.update(delta_time)
         
     def tick(self, delta_time:float):
@@ -46,3 +43,17 @@ class NodeHandler():
         Only creates a collectino and returns it, does not add to top level array. 
         """
         return Node(self, position, scale, rotation, nodes, model, material, collider, physics_body, name, camera)
+    
+    def remove(self, node):
+        """
+        Safely removes node from top level
+        """
+        if not node in self.nodes: return
+        
+        if node.collider: self.scene.collider_handler.colliders.remove(node.collider)
+        if node.physics_body: self.scene.physics_body_handler.physics_bodies.remove(node.physics_body)
+        if node.model: self.scene.model_handler.remove(node.model)
+        self.nodes.remove(node)
+        
+        # TODO add removing child nodes
+        

@@ -24,7 +24,7 @@ class SkeletonHandler():
             self.tick_time = 0
             for bone in self.skeletons: bone.tick()
         
-    def add(self, node, joints=None):
+    def add(self, node:Node, joints=None):
         """
         Creates a skeleton and adds it to the top level list. 
         """
@@ -32,11 +32,17 @@ class SkeletonHandler():
         self.skeletons.append(bone)
         return bone
         
-    def create(self, node, joints=None):
+    def create(self, node:Node, joints=None):
         """
         Creates the skeleton and returns it but does not add it to the top level list. 
         """
         return Bone(self, node, joints)
+    
+    def get_node_skeleton(self, node:Node):
+        
+        for skeleton in self.skeletons:
+            sk = skeleton.has_node(node)
+            if sk: return sk
 
 class Bone():
     def __init__(self, skeleton_handler, node, joints=None) -> None:
@@ -77,3 +83,12 @@ class Bone():
         
     def tick(self):
         if self.on_tick: exec(self.on_tick)
+        
+    def has_node(self, node:Node):
+        """
+        Determines which skeleton contains a node
+        """
+        if node in self.node.get_nodes(): return self
+        for joint in self.joints: 
+            if joint.child_bone.has_node(node): return joint.child_bone
+        

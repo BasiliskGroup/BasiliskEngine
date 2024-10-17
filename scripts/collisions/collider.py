@@ -31,6 +31,8 @@ class Collider():
         self.static_friction  = kinetic_friction
         self.kinetic_friction = static_friction
         
+        self.has_collided = False
+        
     def update_dimensions(self):
         model_matrix    = glm.mat4x4([[abs(item) for item in row] for row in get_model_matrix(glm.vec3(0, 0, 0), self.scale, self.rotation)])
         self.dimensions = glm.vec3((new := glm.mul(model_matrix, (*[float(f) for f in self.base_half_dimensions], 1)))[0], new[1], new[2]) * 2

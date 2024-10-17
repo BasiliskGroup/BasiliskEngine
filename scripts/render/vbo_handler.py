@@ -3,6 +3,7 @@ import numpy as np
 from pyobjloader import load_model
 #from scripts.model import load_model
 from numba import njit
+from uuid import uuid4
 
 
 class VBOHandler:
@@ -30,7 +31,14 @@ class VBOHandler:
         """
 
         [vbo.vbo.release() for vbo in self.vbos.values()]
-
+        
+    def create_vbo(self, vertices, indices) -> str:
+        """
+        Creates a RuntimeVBO using the given data. 
+        """
+        uuid = str(uuid4())
+        self.vbos[uuid] = RuntimeVBO(self.ctx, vertices, indices)
+        return uuid
 
 class BaseVBO:
     """
@@ -76,7 +84,6 @@ class BaseVBO:
         self.unique_points = np.array(self.unique_points, dtype='f4')
 
         return vbo
-
     
 class CubeVBO(BaseVBO):
     def __init__(self, ctx):
@@ -88,14 +95,14 @@ class CubeVBO(BaseVBO):
         verticies = [(-1, -1, 1), ( 1, -1,  1), (1,  1,  1), (-1, 1,  1),
                      (-1,  1,-1), (-1, -1, -1), (1, -1, -1), ( 1, 1, -1)]
         
-        indicies = [(0, 2, 3), (0, 1, 2),
+        self.indicies = [(0, 2, 3), (0, 1, 2),
                     (1, 7, 2), (1, 6, 7),
                     (6, 5, 4), (4, 7, 6),
                     (3, 4, 5), (3, 5, 0),
                     (3, 7, 4), (3, 2, 7),
                     (0, 6, 1), (0, 5, 6)]
 
-        vertex_data = self.get_data(verticies, indicies)
+        vertex_data = self.get_data(verticies, self.indicies)
 
         tex_coord_verticies = [(0, 0), (1, 0), (1, 1), (0, 1)]
         tex_coord_indicies = [(0, 2, 3), (0, 1, 2),
@@ -191,6 +198,7 @@ class ModelVBO(BaseVBO):
         self.attribs = self.model.attribs
         self.triangles = None
         self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
+        self.indicies = []
 
     def get_vbo(self):
         """
@@ -213,5 +221,42 @@ class ModelVBO(BaseVBO):
             vertex_data = np.zeros(shape=(len(self.model.vertex_data), 8))
             vertex_data[:,:3] = self.model.vertex_data[:,:3]
             vertex_data[:,5:] = self.model.vertex_data[:,3:]
+        
+        return vertex_data
+    
+class RuntimeVBO(BaseVBO):
+    def __init__(self, ctx, unique_points, indicies):
+        self.unique_points = unique_points
+        self.indicies = indicies
+        super().__init__(ctx)
+        self.format = '3f 2f 3f'
+        self.attribs = ['in_position', 'in_uv', 'in_normal']
+        
+    def get_vertex_data(self):
+        
+        unique_points = [*self.unique_points, *self.unique_points]
+        start = len(self.unique_points)
+        indicies = self.indicies[:]
+        for index in self.indicies: indicies.append([i + start for i in index])
+
+        vertex_data = self.get_data(unique_points, indicies)
+
+        tex_coord_verticies = [(0, 0), (1, 0), (1, 1), (0, 1)]
+        tex_coord_indicies = [(0, 1, 2) for _ in range(len(indicies))]
+        tex_coord_data = self.get_data(tex_coord_verticies, tex_coord_indicies)
+
+        normals = []
+        for i, triangle in enumerate(indicies):
+            points  = [np.array(unique_points[triangle[i]]) for i in range(3)]
+            normal  = np.cross(points[1] - points[0], points[2] - points[0]) if i < len(self.indicies) else np.cross(points[1] - points[2], points[0] - points[2])
+            normal /= np.linalg.norm(normal)
+            normal  = normal.tolist()
+            
+            normals.extend([normal for _ in range(3)])
+            
+        normals = np.array(normals, dtype='f4').reshape(len(indicies) * 3, 3)
+
+        vertex_data = np.hstack([vertex_data, tex_coord_data])
+        vertex_data = np.hstack([vertex_data, normals])
         
         return vertex_data
