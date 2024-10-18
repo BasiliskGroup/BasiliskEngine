@@ -70,10 +70,12 @@ class BaseVBO:
         self.vertex_data = self.get_vertex_data()
         vbo = self.ctx.buffer(self.vertex_data)
 
-        verticies = self.vertex_data[:,:3]
-
+        unique_points_set = set()
         self.unique_points = []
-        [self.unique_points.append(x) for x in verticies.tolist() if x not in self.unique_points]
+        for x in self.vertex_data[:,:3].tolist():
+            if tuple(x) not in unique_points_set:
+                self.unique_points.append(x)
+                unique_points_set.add(tuple(x))
 
         # Save the mash vertex indicies for softbody reconstruction
         self.mesh_indicies = np.zeros(shape=(len(self.vertex_data)))
@@ -208,7 +210,16 @@ class ModelVBO(BaseVBO):
         self.vertex_data = self.get_vertex_data()
         vbo = self.ctx.buffer(self.vertex_data)
 
-        self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
+        unique_points_set = set()
+        self.unique_points = []
+        for x in self.vertex_data[:,:3].tolist():
+            if tuple(x) not in unique_points_set:
+                self.unique_points.append(x)
+                unique_points_set.add(tuple(x))
+        self.unique_points = np.array(self.unique_points, dtype='f4')
+        
+        #[self.unique_points.append(x) for x in self.vertex_data[:,:3].tolist() if x not in self.unique_points]
+        #self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
 
         return vbo
 
