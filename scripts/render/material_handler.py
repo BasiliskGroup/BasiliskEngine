@@ -8,6 +8,17 @@ class MaterialHandler:
         self.programs       = scene.vao_handler.shader_handler.programs
         self.materials      = {}
         self.material_ids   = {}
+        
+        self.add(name="base", color=(.8, .8, .8))
+        self.add(name="brick", texture="brick", normal_map="brick_normal")
+        self.add(name="norm", color=(.8, .8, .8))
+        self.add(name="baby_blue", color=(.69, .97, 1))
+        self.add(name="black", color=(0, 0, 0))
+        self.add(name="dark_grey", color=(.29, .29, .29))
+        self.add(name="grey", color=(.72, .72, .72))
+        self.add(name="red_pink", color=(.99, .01, .38))
+        self.add(name="yellow", color=(1, .96, .22))
+        self.add(name="white", color=(1, 1, 1))
 
         #self.add('cow', texture="cow")
         #self.add('brick', texture='brick', normal_map='brick_normal')
