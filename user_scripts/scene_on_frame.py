@@ -61,7 +61,8 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
         # get the real location of points
         model_matrix = get_model_matrix(model.position, model.scale, model.rotation)
         world_points = []
-        for unique_point in [(-1, -1, 1), ( 1, -1,  1), (1,  1,  1), (-1, 1,  1), (-1,  1,-1), (-1, -1, -1), (1, -1, -1), ( 1, 1, -1)]:
+        ary = [(-1, -1, 1), ( 1, -1,  1), (1,  1,  1), (-1, 1,  1), (-1,  1,-1), (-1, -1, -1), (1, -1, -1), ( 1, 1, -1)] if model.vbo in ['cube'] else vbo.unique_points
+        for unique_point in ary:
             world_point = model_matrix * glm.vec4(*unique_point, 1)
             world_points.append(glm.vec3(world_point))
         
@@ -135,7 +136,7 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
         for key in ['above', 'below']: 
             
             # add interior triangles
-            sorted_triangles[key].extend(triangles)
+            sorted_triangles[key].extend(triangles) # TODO may cause memory erros
             
             # add trapezoid triangles
             for trapezoid in trapezoids[key]: 

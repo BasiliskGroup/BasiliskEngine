@@ -172,7 +172,7 @@ class ModelHandler:
 
         chunk = model.chunk
         self.models.remove(model)
-        self.chunks[chunk].remove(model)
+        if model in self.chunks[chunk]: self.chunks[chunk].remove(model)
 
         self.updated_chunks.add(chunk)
 
