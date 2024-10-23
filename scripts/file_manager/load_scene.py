@@ -4,7 +4,7 @@ from scripts.render.vbo_handler import ModelVBO
 
 def load_scene(scene, local_file_name=None, abs_file_path=None):
     if local_file_name:
-        with open(f'saves\{local_file_name}.gltf') as file:
+        with open(f'saves/{local_file_name}.gltf') as file:
             scene_data = json.load(file)
     else:
         with open(abs_file_path) as file:
@@ -12,7 +12,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
     
     vbos = scene.vao_handler.vbo_handler.vbos
     for buffer in scene_data["buffers"]:
-        obj_file = f"models\{buffer['uri']}"
+        obj_file = f"models/{buffer['uri']}"
         try:
             vbos[buffer["uri"][:-4]] = ModelVBO(scene.ctx, obj_file)
         except FileNotFoundError:

@@ -34,7 +34,7 @@ class PointPhysicsBody():
         return delta_position
 
 class PhysicsBody(PointPhysicsBody):
-    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float=1, velocity:glm.vec3=None, rotational_velocity:int=0, axis_of_rotation:glm.vec3=None, decay:float=0.1):
+    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float=1, velocity:glm.vec3=None, rotational_velocity:int=0, axis_of_rotation:glm.vec3=None, decay:float=0):
         super().__init__(physics_body_handler, mass, velocity, decay)
         self.rotational_velocity = rotational_velocity
         self.axis_of_rotation    = glm.vec3(axis_of_rotation) if axis_of_rotation else glm.vec3(1, 0, 0)

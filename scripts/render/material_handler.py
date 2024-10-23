@@ -18,7 +18,7 @@ class MaterialHandler:
         self.add(name="grey", color=(.72, .72, .72))
         self.add(name="red_pink", color=(.99, .01, .38))
         self.add(name="yellow", color=(1, .96, .22))
-        self.add(name="white", color=(1, 1, 1))
+        self.add(name="white", color=(.99, .99, .99))
 
         #self.add('cow', texture="cow")
         #self.add('brick', texture='brick', normal_map='brick_normal')

@@ -244,30 +244,30 @@ class RuntimeVBO(BaseVBO):
         self.attribs = ['in_position', 'in_uv', 'in_normal']
         
     def get_vertex_data(self):
-        
-        unique_points = [*self.unique_points, *self.unique_points]
-        start = len(self.unique_points)
-        indicies = self.indicies[:]
-        for index in self.indicies: indicies.append([i + start for i in index])
 
-        vertex_data = self.get_data(unique_points, indicies)
+        vertex_data = self.get_data(self.unique_points, self.indicies)
 
         tex_coord_verticies = [(0, 0), (1, 0), (1, 1), (0, 1)]
-        tex_coord_indicies = [(0, 1, 2) for _ in range(len(indicies))]
+        tex_coord_indicies = [(0, 1, 2) for _ in range(len(self.indicies))]
         tex_coord_data = self.get_data(tex_coord_verticies, tex_coord_indicies)
 
         normals = []
-        for i, triangle in enumerate(indicies):
-            points  = [np.array(unique_points[triangle[i]]) for i in range(3)]
-            normal  = np.cross(points[1] - points[0], points[2] - points[0]) if i < len(self.indicies) else np.cross(points[1] - points[2], points[0] - points[2])
+        for i, triangle in enumerate(self.indicies):
+            points  = [np.array(self.unique_points[triangle[i]]) for i in range(3)]
+            normal  = np.cross(points[1] - points[0], points[2] - points[0])
             normal /= np.linalg.norm(normal)
             normal  = normal.tolist()
             
             normals.extend([normal for _ in range(3)])
             
-        normals = np.array(normals, dtype='f4').reshape(len(indicies) * 3, 3)
+        normals = np.array(normals, dtype='f4').reshape(len(self.indicies) * 3, 3)
 
         vertex_data = np.hstack([vertex_data, tex_coord_data])
         vertex_data = np.hstack([vertex_data, normals])
+        
+        # vertex_data = np.vstack([vertex_data, vertex_data], dtype='f4')
+        # mid = len(vertex_data) // 2
+        # vertex_data[:mid,0] = vertex_data[:mid,2]
+        # vertex_data[:mid:,2] = vertex_data[mid:,0]
         
         return vertex_data

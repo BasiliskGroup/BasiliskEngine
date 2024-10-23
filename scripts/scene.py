@@ -15,6 +15,7 @@ from scripts.skeletons.animation import *
 from scripts.skeletons.joints import *
 from random import randint, uniform
 from scripts.generic.math_functions import get_model_matrix
+import moderngl as mgl
 
 class Scene:
     def __init__(self, engine, project) -> None:
@@ -54,587 +55,689 @@ class Scene:
         self.on_frame = scene_on_frame
         load_scene(self, "base_save")
         
-        # #save_scene(self, "test_save")
+        #save_scene(self, "test_save")
         
-        # for _ in range(0):
-        #     self.node_handler.add(
-        #         position=(randint(-20, 20), 10, randint(-20, 20)),
-        #         scale=(uniform(1, 10), uniform(1, 10), uniform(1, 10)),
-        #         rotation=(0, 0, 0),
-        #         nodes=[],
-        #         model='cube',
-        #         material='yellow',
-        #         collider=self.collider_handler.add(vbo='cube', static=False),
-        #         physics_body=self.physics_body_handler.add(mass=20),
-        #         name='box'
-        #     )
+        for _ in range(0):
+            self.node_handler.add(
+                position=(randint(-20, 20), 10, randint(-20, 20)),
+                scale=(uniform(1, 10), uniform(1, 10), uniform(1, 10)),
+                rotation=(0, 0, 0),
+                nodes=[],
+                model='cube',
+                material='yellow',
+                collider=self.collider_handler.add(vbo='cube', static=False),
+                physics_body=self.physics_body_handler.add(mass=20),
+                name='box'
+            )
             
-        # # level 1 #################################################################################################
+        # level 1 #################################################################################################
+        
+        self.node_handler.add(
+            position=(0, -4, 40),
+            scale=(40, 1, 80),
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='floor'
+        )
+        
+        self.node_handler.add(
+            position=(21, 2, 80),
+            scale=(1, 4, 8),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='clamp'
+        )
+        
+        self.node_handler.add(
+            position=(30, 2, 89),
+            scale=(10, 4, 1),
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='clamp'
+        )
+        
+        self.node_handler.add(
+            position=(20, 2, 71),
+            scale=(2, 4, 1),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='clamp'
+        )
+        
+        self.node_handler.add(
+            position=(-21, 2, 80),
+            scale=(1, 4, 8),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='clamp'
+        )
+        
+        self.node_handler.add(
+            position=(-30, 2, 89),
+            scale=(10, 4, 1),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='clamp'
+        )
+        
+        self.node_handler.add(
+            position=(-20, 2, 71),
+            scale=(2, 4, 1),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='clamp'
+        )
         
         # self.node_handler.add(
-        #     position=(0, -4, 0),
-        #     scale=(40, 1, 40),
-        #     rotation=(0, 0, 0),
-        #     nodes=[],
-        #     model='cube', 
-        #     material='brick',
-        #     collider=self.collider_handler.add(vbo='cube', static=True),
-        #     physics_body=None,
-        #     name='floor'
-        # )
-        
-        # self.node_handler.add(
-        #     position=(0, 7, -35),
-        #     scale=(40, 10, 5),
-        #     rotation=(0, 0, 0),
-        #     nodes=[],
-        #     model='cube', 
-        #     material='brick',
-        #     collider=self.collider_handler.add(vbo='cube', static=True),
-        #     physics_body=None,
-        #     name='platform'
-        # )
-        
-        # self.node_handler.add(
-        #     position=(0, 7, 0),
-        #     scale=(10, 10, 10),
+        #     position=(0, 2, 80),
+        #     scale=(20, 4, 6),
         #     model='cube',
         #     material='yellow',
         #     collider=self.collider_handler.add(vbo='cube', static=False),
-        #     physics_body=self.physics_body_handler.add(mass=100),
+        #     physics_body=self.physics_body_handler.add(mass=1000),
         #     name='box'
         # )
         
-        # # level 2 ##################################################################################################
+        # level 2 #################################################################################################
         
-        # self.node_handler.add(
-        #     position=(0, 16, -80),
-        #     scale=(40, 1, 40),
-        #     rotation=(0, 0, 0),
-        #     nodes=[],
-        #     model='cube', 
-        #     material='brick',
-        #     collider=self.collider_handler.add(vbo='cube', static=True),
-        #     physics_body=None,
-        #     name='floor'
-        # )
+        self.node_handler.add(
+            position=(0, 7, -35),
+            scale=(40, 10, 5),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='platform'
+        )
         
-        # # john bitcock #############################################################################################
+        self.node_handler.add(
+            position=(0, 7, 0),
+            scale=(10, 10, 10),
+            model='cube',
+            material='yellow',
+            collider=self.collider_handler.add(vbo='cube', static=False),
+            physics_body=self.physics_body_handler.add(mass=100),
+            name='box'
+        )
         
-        # cock_pos = glm.vec3(0, -2, 0)
+        # level 3 ################################################################################################## (0, +20, -80)
         
-        # left_foot=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(0.5, 0.25, 0),
-        #     scale=(0.3, 0.25, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube', 
-        #     material='white',
-        #     physics_body=self.physics_body_handler.add(mass=10),
-        #     name='left foot',
+        self.node_handler.add(
+            position=(0, 16, -80),
+            scale=(40, 1, 40),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='floor'
+        )
+        
+        self.node_handler.add(
+            position=(0, 27, -115),
+            scale=(40, 10, 5),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='platform'
+        )
+        
+        self.node_handler.add(
+            position=(0, 27, -80),
+            scale=(10, 10, 10),
+            model='cube',
+            material='yellow',
+            collider=self.collider_handler.add(vbo='cube', static=False),
+            physics_body=self.physics_body_handler.add(mass=100),
+            name='box'
+        )
+        
+        # john bitcock #############################################################################################
+        
+        cock_pos = glm.vec3(0, -2, 110)
+        
+        left_foot=self.node_handler.add(
+            position=cock_pos + glm.vec3(0.5, 0.25, 0),
+            scale=(0.3, 0.25, 0.3),
+            rotation=(0, 0, 0),
+            model='cube', 
+            material='white',
+            physics_body=self.physics_body_handler.add(mass=10),
+            name='left foot',
             
-        #     nodes=[
-        #         # leg puff
-        #         self.node_handler.create(
-        #             position=(0, -0.6, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='leg puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.5, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube', 
-        #             material='yellow',
-        #             name='leg puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.4, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='leg puff'
-        #         )
-        #     ]
-        # )
+            nodes=[
+                # leg puff
+                self.node_handler.create(
+                    position=(0, -0.6, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='leg puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.5, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube', 
+                    material='yellow',
+                    name='leg puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.4, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='leg puff'
+                )
+            ]
+        )
         
-        # left_foot.on_frame=face_camera
+        left_foot.on_frame=face_camera
         
-        # left_knee=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(0.5, 0.75, 0),
-        #     scale=(0.3, 0.7, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube', 
-        #     material='white',
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='left foot',
-        # )
+        left_knee=self.node_handler.add(
+            position=cock_pos + glm.vec3(0.5, 0.75, 0),
+            scale=(0.3, 0.7, 0.3),
+            rotation=(0, 0, 0),
+            model='cube', 
+            material='white',
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='left foot',
+        )
         
-        # right_foot=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(-0.5, 0.25, 0),
-        #     scale=(0.3, 0.25, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube',
-        #     material='white',
-        #     physics_body=self.physics_body_handler.add(mass=10),
-        #     name='right foot',
+        right_foot=self.node_handler.add(
+            position=cock_pos + glm.vec3(-0.5, 0.25, 0),
+            scale=(0.3, 0.25, 0.3),
+            rotation=(0, 0, 0),
+            model='cube',
+            material='white',
+            physics_body=self.physics_body_handler.add(mass=10),
+            name='right foot',
             
-        #     nodes=[
-        #         # leg puff
-        #         self.node_handler.create(
-        #             position=(0, -0.6, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='leg puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.5, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube', 
-        #             material='yellow',
-        #             name='leg puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.4, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube',
-        #             material='baby_blue',
-        #             name='leg puff'
-        #         )
-        #     ]
-        # )
+            nodes=[
+                # leg puff
+                self.node_handler.create(
+                    position=(0, -0.6, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='leg puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.5, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube', 
+                    material='yellow',
+                    name='leg puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.4, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube',
+                    material='baby_blue',
+                    name='leg puff'
+                )
+            ]
+        )
         
-        # right_foot.on_tick=face_camera
+        right_foot.on_frame=face_camera
         
-        # right_knee=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(-0.5, 0.75, 0),
-        #     scale=(0.3, 0.7, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube', 
-        #     material='white',
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='left foot',
-        # )
+        right_knee=self.node_handler.add(
+            position=cock_pos + glm.vec3(-0.5, 0.75, 0),
+            scale=(0.3, 0.7, 0.3),
+            rotation=(0, 0, 0),
+            model='cube', 
+            material='white',
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='left foot',
+        )
 
-        # bottom=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(0, 0.5, 0),
-        #     scale=(1, 1.5, 1),
-        #     rotation=(0, 0, 0),
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=2000),
-        #     nodes=[
-        #         self.node_handler.create(
-        #             position=(-2, 6, -2),
-        #             camera=self.camera
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0, 0.5, 0),
-        #             scale=(1, 0.25, 1),
-        #             rotation=(0, 0, 0),
-        #             model='cube', 
-        #             material='white',
-        #         )
-        #     ],
-        #     name='bottom'
-        # )
+        bottom=self.node_handler.add(
+            position=cock_pos + glm.vec3(0, 0.5, 0),
+            scale=(1, 1.5, 1),
+            rotation=(0, 0, 0),
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            physics_body=self.physics_body_handler.add(mass=2000),
+            nodes=[
+                self.node_handler.create(
+                    position=(-2, 6, -2),
+                    camera=self.camera
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0, 0.5, 0),
+                    scale=(1, 0.25, 1),
+                    rotation=(0, 0, 0),
+                    model='cube', 
+                    material='white',
+                )
+            ],
+            name='bottom'
+        )
         
-        # bottom.on_frame = bottom_on_frame
+        bottom.on_frame = bottom_on_frame
         
-        # middle=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(0, 2.5, 0),
-        #     scale=(1, 0.5, 1),
-        #     rotation=(0, 0, 0),
-        #     model='cube', 
-        #     material='white',
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='middle',
+        middle=self.node_handler.add(
+            position=cock_pos + glm.vec3(0, 2.5, 0),
+            scale=(1, 0.5, 1),
+            rotation=(0, 0, 0),
+            model='cube', 
+            material='white',
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='middle',
             
-        #     nodes=[
-        #         self.node_handler.create(
-        #             position=glm.vec3(0, 0, 1),
-        #             scale=(0.8, 0.8, 0.01),
-        #             rotation=(0, 0, 0),
-        #             model='cube', 
-        #             material='grey',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0, 0.1, 1),
-        #             scale=(0.6, 0.6, 0.015),
-        #             rotation=(0, 0, 0),
-        #             model='cube', 
-        #             material='white',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0, 0.1, 1),
-        #             scale=(0.6, 0.3, 0.02),
-        #             rotation=(0, 0, 0),
-        #             model='cube', 
-        #             material='baby_blue',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0, 0.1, 1),
-        #             scale=(0.35, 0.15, 0.025),
-        #             rotation=(0, 0, 0),
-        #             model='cube', 
-        #             material='black',
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0.2, 0.1, 1.02),
-        #             scale=(0.08, 0.03, 0.08),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='white',
-        #         ),
-        #         self.node_handler.create(
-        #             position=(-0.2, 0.1, 1.02),
-        #             scale=(0.08, 0.03, 0.08),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='white',
-        #         ),
-        #     ]
-        # )
+            nodes=[
+                self.node_handler.create(
+                    position=glm.vec3(0, 0, 1),
+                    scale=(0.8, 0.8, 0.01),
+                    rotation=(0, 0, 0),
+                    model='cube', 
+                    material='grey',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0, 0.1, 1),
+                    scale=(0.6, 0.6, 0.015),
+                    rotation=(0, 0, 0),
+                    model='cube', 
+                    material='white',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0, 0.1, 1),
+                    scale=(0.6, 0.3, 0.02),
+                    rotation=(0, 0, 0),
+                    model='cube', 
+                    material='baby_blue',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0, 0.1, 1),
+                    scale=(0.35, 0.15, 0.025),
+                    rotation=(0, 0, 0),
+                    model='cube', 
+                    material='black',
+                ),
+                self.node_handler.create(
+                    position=(0.2, 0.1, 1.02),
+                    scale=(0.08, 0.03, 0.08),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='white',
+                ),
+                self.node_handler.create(
+                    position=(-0.2, 0.1, 1.02),
+                    scale=(0.08, 0.03, 0.08),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='white',
+                ),
+            ]
+        )
         
-        # middle.on_frame = face_camera
+        middle.on_frame = face_camera
         
-        # top=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(0, 3.5, 0),
-        #     scale=(1, 0.5, 1),
-        #     rotation=(0, 0, 0),
-        #     model='cube', 
-        #     material='baby_blue',
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='top',
+        top=self.node_handler.add(
+            position=cock_pos + glm.vec3(0, 3.5, 0),
+            scale=(1, 0.5, 1),
+            rotation=(0, 0, 0),
+            model='cube', 
+            material='baby_blue',
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='top',
             
-        #     nodes=[
-        #         # id
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, 0.2, 1),
-        #             scale=(0.3, 0.1, 0.05),
-        #             rotation=(0, 0, -0.1),
-        #             model='cube', 
-        #             material='red_pink',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.51, 0, 1),
-        #             scale=(0.3, 0.1, 0.05),
-        #             rotation=(0, 0, -0.1),
-        #             model='cube', 
-        #             material='white',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.52, -0.2, 1),
-        #             scale=(0.3, 0.1, 0.05),
-        #             rotation=(0, 0, -0.1),
-        #             model='cube', 
-        #             material='red_pink',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, 0.15, 1),
-        #             scale=(0.1, 0.03, 0.055),
-        #             rotation=(0, 0, 0.1),
-        #             model='cube', 
-        #             material='black',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, -0.05, 1),
-        #             scale=(0.03, 0.2, 0.055),
-        #             rotation=(0, 0, 0.1),
-        #             model='cube', 
-        #             material='black',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.425, -0.15, 1),
-        #             scale=(0.05, 0.03, 0.055),
-        #             rotation=(0, 0, 0.6),
-        #             model='cube', 
-        #             material='black',
-        #         ),
-        #         self.node_handler.create(
-        #             position=glm.vec3(0.5, 0.25, 1.05),
-        #             scale=(0.05, 0.1, 0.05),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='grey',
-        #         ),
-        #         # buttons
+            nodes=[
+                # id
+                self.node_handler.create(
+                    position=glm.vec3(0.5, 0.2, 1),
+                    scale=(0.3, 0.1, 0.05),
+                    rotation=(0, 0, -0.1),
+                    model='cube', 
+                    material='red_pink',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.51, 0, 1),
+                    scale=(0.3, 0.1, 0.05),
+                    rotation=(0, 0, -0.1),
+                    model='cube', 
+                    material='white',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.52, -0.2, 1),
+                    scale=(0.3, 0.1, 0.05),
+                    rotation=(0, 0, -0.1),
+                    model='cube', 
+                    material='red_pink',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.5, 0.15, 1),
+                    scale=(0.1, 0.03, 0.055),
+                    rotation=(0, 0, 0.1),
+                    model='cube', 
+                    material='black',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.5, -0.05, 1),
+                    scale=(0.03, 0.2, 0.055),
+                    rotation=(0, 0, 0.1),
+                    model='cube', 
+                    material='black',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.425, -0.15, 1),
+                    scale=(0.05, 0.03, 0.055),
+                    rotation=(0, 0, 0.6),
+                    model='cube', 
+                    material='black',
+                ),
+                self.node_handler.create(
+                    position=glm.vec3(0.5, 0.25, 1.05),
+                    scale=(0.05, 0.1, 0.05),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='grey',
+                ),
+                # buttons
                 
-        #     ]
-        # )
+            ]
+        )
         
-        # # top.on_frame = face_camera
+        top.on_frame = face_camera
         
-        # left_arm=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(1.3, 2.5, 0),
-        #     scale=(0.3, 1.25, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube',
-        #     material='white',
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='left arm',
+        left_arm=self.node_handler.add(
+            position=cock_pos + glm.vec3(1.3, 2.5, 0),
+            scale=(0.3, 1.25, 0.3),
+            rotation=(0, 0, 0),
+            model='cube',
+            material='white',
+            collider=self.collider_handler.add(vbo='cube', static=False),
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='left arm',
             
-        #     nodes=[
-        #         # arm puff
-        #         self.node_handler.create(
-        #             position=(0, -0.64, 0),
-        #             scale=(1.1, 0.03, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='arm puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.7, 0),
-        #             scale=(1.1, 0.03, 1.1),
-        #             model='cube', 
-        #             material='yellow',
-        #             name='arm puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.76, 0),
-        #             scale=(1.1, 0.03, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='arm puff'
-        #         ),
-        #     ]
-        # )
+            nodes=[
+                # arm puff
+                self.node_handler.create(
+                    position=(0, -0.64, 0),
+                    scale=(1.1, 0.03, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='arm puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.7, 0),
+                    scale=(1.1, 0.03, 1.1),
+                    model='cube', 
+                    material='yellow',
+                    name='arm puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.76, 0),
+                    scale=(1.1, 0.03, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='arm puff'
+                ),
+            ]
+        )
         
-        # right_arm=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(-1.3, 2.5, 0),
-        #     scale=(0.3, 1.25, 0.3),
-        #     rotation=(0, 0, 0),
-        #     model='cube',
-        #     material='white',
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='right arm',
+        right_arm=self.node_handler.add(
+            position=cock_pos + glm.vec3(-1.3, 2.5, 0),
+            scale=(0.3, 1.25, 0.3),
+            rotation=(0, 0, 0),
+            model='cube',
+            material='white',
+            collider=self.collider_handler.add(vbo='cube', static=False),
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='right arm',
             
-        #     nodes=[
-        #         # arm puff
-        #         self.node_handler.create(
-        #             position=(0, -0.64, 0),
-        #             scale=(1.1, 0.03, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='arm puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.7, 0),
-        #             scale=(1.1, 0.03, 1.1),
-        #             model='cube', 
-        #             material='yellow',
-        #             name='arm puff'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, -0.76, 0),
-        #             scale=(1.1, 0.03, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='arm puff'
-        #         ),
-        #     ]
-        # )
+            nodes=[
+                # arm puff
+                self.node_handler.create(
+                    position=(0, -0.64, 0),
+                    scale=(1.1, 0.03, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='arm puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.7, 0),
+                    scale=(1.1, 0.03, 1.1),
+                    model='cube', 
+                    material='yellow',
+                    name='arm puff'
+                ),
+                self.node_handler.create(
+                    position=(0, -0.76, 0),
+                    scale=(1.1, 0.03, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='arm puff'
+                ),
+            ]
+        )
         
-        # head=self.node_handler.add(
-        #     position=cock_pos + glm.vec3(0, 4.7, 0),
-        #     scale=(0.7, 0.7, 0.7),
-        #     rotation=(0, 0, 0),
-        #     model='cube', 
-        #     material='white',
-        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=20),
-        #     name='head',
+        head=self.node_handler.add(
+            position=cock_pos + glm.vec3(0, 4.7, 0),
+            scale=(0.7, 0.7, 0.7),
+            rotation=(0, 0, 0),
+            model='cube', 
+            material='white',
+            collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+            physics_body=self.physics_body_handler.add(mass=20),
+            name='head',
             
-        #     nodes=[
-        #         # cutter
-        #         self.node_handler.create(
-        #             position=(1, 0, 0),
-        #             scale=(0.2, 0.5, 0.5),
-        #             model='cube', 
-        #             material='grey',
-        #             name='cutter base'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(1.1, 1, 0),
-        #             scale=(0.05, 0.5, 0.05),
-        #             model='cube', 
-        #             material='dark_grey',
-        #             name='cutter antenna'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(1.1, 1.5, 0),
-        #             scale=(0.1, 0.1, 0.1),
-        #             model='cube', 
-        #             material='red_pink',
-        #             name='cutter bulb'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(1.35, 0.2, 0),
-        #             scale=(0.15, 0.15, 0.7),
-        #             model='cube', 
-        #             material='grey',
-        #             name='cutter barrel'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(1.35, 0.2, 0.66),
-        #             scale=(0.1, 0.1, 0.1),
-        #             model='cube', 
-        #             material='red_pink',
-        #             name='cutter emitter'
-        #         ),
+            nodes=[
+                # cutter
+                self.node_handler.create(
+                    position=(1, 0, 0),
+                    scale=(0.2, 0.5, 0.5),
+                    model='cube', 
+                    material='grey',
+                    name='cutter base'
+                ),
+                self.node_handler.create(
+                    position=(1.1, 1, 0),
+                    scale=(0.05, 0.5, 0.05),
+                    model='cube', 
+                    material='dark_grey',
+                    name='cutter antenna'
+                ),
+                self.node_handler.create(
+                    position=(1.1, 1.5, 0),
+                    scale=(0.1, 0.1, 0.1),
+                    model='cube', 
+                    material='red_pink',
+                    name='cutter bulb'
+                ),
+                self.node_handler.create(
+                    position=(1.35, 0.2, 0),
+                    scale=(0.15, 0.15, 0.7),
+                    model='cube', 
+                    material='grey',
+                    name='cutter barrel'
+                ),
+                self.node_handler.create(
+                    position=(1.35, 0.2, 0.66),
+                    scale=(0.1, 0.1, 0.1),
+                    model='cube', 
+                    material='red_pink',
+                    name='cutter emitter'
+                ),
                 
-        #         # face
-        #         self.node_handler.create(
-        #             position=(0, -0.3, 1.02),
-        #             scale=(0.4, 0.1, 0.1),
-        #             model='cube', 
-        #             material='black',
-        #             name='mouth'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0.6, 0, 1.02),
-        #             scale=(0.2, 0.1, 0.2),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='black',
-        #             name='left eye'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0.63, 0.03, 1.03),
-        #             scale=(0.1, 0.1, 0.1),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='white',
-        #             name='left pupil'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(-0.6, 0, 1.02),
-        #             scale=(0.2, 0.1, 0.2),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='black',
-        #             name='right eye'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(-0.57, 0.03, 1.03),
-        #             scale=(0.1, 0.1, 0.1),
-        #             rotation=(glm.pi()/2, 0, 0),
-        #             model='cylinder', 
-        #             material='white',
-        #             name='right pupil'
-        #         ),
+                # face
+                self.node_handler.create(
+                    position=(0, -0.3, 1.02),
+                    scale=(0.4, 0.1, 0.1),
+                    model='cube', 
+                    material='black',
+                    name='mouth'
+                ),
+                self.node_handler.create(
+                    position=(0.6, 0, 1.02),
+                    scale=(0.2, 0.1, 0.2),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='black',
+                    name='left eye'
+                ),
+                self.node_handler.create(
+                    position=(0.63, 0.03, 1.03),
+                    scale=(0.1, 0.1, 0.1),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='white',
+                    name='left pupil'
+                ),
+                self.node_handler.create(
+                    position=(-0.6, 0, 1.02),
+                    scale=(0.2, 0.1, 0.2),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='black',
+                    name='right eye'
+                ),
+                self.node_handler.create(
+                    position=(-0.57, 0.03, 1.03),
+                    scale=(0.1, 0.1, 0.1),
+                    rotation=(glm.pi()/2, 0, 0),
+                    model='cylinder', 
+                    material='white',
+                    name='right pupil'
+                ),
                 
-        #         # headwear
-        #         self.node_handler.create(
-        #             position=(0, 0.5, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='lower band'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, 0.6, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube',
-        #             material='yellow',
-        #             name='middle band'
-        #         ),
-        #         self.node_handler.create(
-        #             position=(0, 0.7, 0),
-        #             scale=(1.1, 0.05, 1.1),
-        #             model='cube', 
-        #             material='baby_blue',
-        #             name='upper band'
-        #         ),
-        #     ]
-        # )
+                # headwear
+                self.node_handler.create(
+                    position=(0, 0.5, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='lower band'
+                ),
+                self.node_handler.create(
+                    position=(0, 0.6, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube',
+                    material='yellow',
+                    name='middle band'
+                ),
+                self.node_handler.create(
+                    position=(0, 0.7, 0),
+                    scale=(1.1, 0.05, 1.1),
+                    model='cube', 
+                    material='baby_blue',
+                    name='upper band'
+                ),
+            ]
+        )
         
-        # john_bottom=self.skeleton_handler.add(
-        #     node=bottom,
-        #     joints=[
-        #         BallJoint(
-        #             parent_offset=(0, 1, 0),
-        #             child_offset=(0, -0.5, 0),
-        #             child_bone=self.skeleton_handler.create(
-        #                 node=middle,
-        #                 joints=[
-        #                     BallJoint(
-        #                         parent_offset=(0, 0.5, 0),
-        #                         child_offset=(0, -0.5, 0),
-        #                         child_bone=self.skeleton_handler.create(
-        #                             node=top,
-        #                             joints=[
-        #                                 RotatorJoint(
-        #                                     parent_offset=(0, 0.5, 0),
-        #                                     child_offset=(0, -0.7, 0),
-        #                                     child_bone=self.skeleton_handler.create(
-        #                                         node=head
-        #                                     )
-        #                                 ),
-        #                                 BallJoint(
-        #                                     parent_offset=(-1, 0, 0),
-        #                                     child_offset=(0, 1, 0),
-        #                                     child_bone=self.skeleton_handler.create(
-        #                                         node=right_arm
-        #                                     )
-        #                                 ),
-        #                                 BallJoint(
-        #                                     parent_offset=(1, 0, 0),
-        #                                     child_offset=(0, 1, 0),
-        #                                     child_bone=self.skeleton_handler.create(
-        #                                         node=left_arm
-        #                                     )
-        #                                 )
-        #                             ]
-        #                         )
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #         BallJoint(
-        #             parent_offset=(-0.6, 0.1, 0),
-        #             child_offset=(0, 0.3, 0),
-        #             spring_constant=1e4,
-        #             child_bone=self.skeleton_handler.create(
-        #                 node=left_knee,
-        #                 joints=[
-        #                     BallJoint(
-        #                         parent_offset=(0, -0.3, 0),
-        #                         child_offset=(0, 0.5, 0),
-        #                         spring_constant = 1e4,
-        #                         child_bone=self.skeleton_handler.create(
-        #                             node=left_foot
-        #                         )
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #         BallJoint(
-        #             parent_offset=(0.6, 0.1, 0),
-        #             child_offset=(0, 0.3, 0),
-        #             spring_constant=1e4,
-        #             child_bone=self.skeleton_handler.create(
-        #                 node=right_knee,
-        #                 joints=[
-        #                     BallJoint(
-        #                         parent_offset=(0, -0.3, 0),
-        #                         child_offset=(0, 0.5, 0),
-        #                         spring_constant = 1e4,
-        #                         child_bone=self.skeleton_handler.create(
-        #                             node=right_foot
-        #                         )
-        #                     )
-        #                 ]
-        #             )
-        #         ),
-        #     ]
-        # )
+        john_bottom=self.skeleton_handler.add(
+            node=bottom,
+            joints=[
+                BallJoint(
+                    parent_offset=(0, 1, 0),
+                    child_offset=(0, -0.5, 0),
+                    child_bone=self.skeleton_handler.create(
+                        node=middle,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, 0.5, 0),
+                                child_offset=(0, -0.5, 0),
+                                child_bone=self.skeleton_handler.create(
+                                    node=top,
+                                    joints=[
+                                        RotatorJoint(
+                                            parent_offset=(0, 0.5, 0),
+                                            child_offset=(0, -0.7, 0),
+                                            child_bone=self.skeleton_handler.create(
+                                                node=head
+                                            )
+                                        ),
+                                        BallJoint(
+                                            parent_offset=(-1.4, 0, 0),
+                                            child_offset=(0, 1, 0),
+                                            child_bone=self.skeleton_handler.create(
+                                                node=right_arm
+                                            )
+                                        ),
+                                        BallJoint(
+                                            parent_offset=(1.4, 0, 0),
+                                            child_offset=(0, 1, 0),
+                                            child_bone=self.skeleton_handler.create(
+                                                node=left_arm
+                                            )
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    )
+                ),
+                BallJoint(
+                    parent_offset=(-0.6, 0.1, 0),
+                    child_offset=(0, 0.3, 0),
+                    spring_constant=1e4,
+                    child_bone=self.skeleton_handler.create(
+                        node=left_knee,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, -0.3, 0),
+                                child_offset=(0, 0.5, 0),
+                                spring_constant = 1e4,
+                                child_bone=self.skeleton_handler.create(
+                                    node=left_foot
+                                )
+                            )
+                        ]
+                    )
+                ),
+                BallJoint(
+                    parent_offset=(0.6, 0.1, 0),
+                    child_offset=(0, 0.3, 0),
+                    spring_constant=1e4,
+                    child_bone=self.skeleton_handler.create(
+                        node=right_knee,
+                        joints=[
+                            BallJoint(
+                                parent_offset=(0, -0.3, 0),
+                                child_offset=(0, 0.5, 0),
+                                spring_constant = 1e4,
+                                child_bone=self.skeleton_handler.create(
+                                    node=right_foot
+                                )
+                            )
+                        ]
+                    )
+                ),
+            ]
+        )
         
-        # john_bottom.on_frame = walking_animation
+        john_bottom.on_frame = walking_animation
         
         self.collider_handler.construct_bvh()
                 
@@ -685,6 +788,7 @@ class Scene:
         self.vao_handler.framebuffer.clear(color=(0.08, 0.16, 0.18, 1.0))
         self.vao_handler.framebuffer.use()
         self.sky.render()
+        self.ctx.disable(flags=mgl.CULL_FACE)
         self.model_handler.render()
 
         if not display: return
@@ -738,6 +842,8 @@ class Scene:
         # get model matrix 
         matrix = get_model_matrix(model.position, model.scale, model.rotation)
         model_vertices = self.model_handler.vbos[model.vbo].unique_points
+        
+        print('model vertices', model_vertices)
         
         for triangle in self.model_handler.vbos[model.vbo].indicies:
             points = []
