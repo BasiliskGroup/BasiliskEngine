@@ -20,6 +20,7 @@ class Editor:
         self.load_vao()
 
         # UI rendering/input data
+        self.window_scale = 1
         self.viewport_dim = ViewportDimensions(.05, .2, .2, .2)  # Locations of the editor windows
 
         # Handlers

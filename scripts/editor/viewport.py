@@ -22,5 +22,6 @@ class Viewport:
 
     def set_surf(self) -> None:
         """Sets the viewport surface for drawing onto."""
-        self.dim = self.viewport_dim.get_viewport_pixels(self.engine.win_size)
+        win_size = self.engine.win_size[0] * self.editor.window_scale, self.engine.win_size[1] * self.editor.window_scale
+        self.dim = self.viewport_dim.get_viewport_pixels(win_size)
         self.surf = pg.Surface(self.dim).convert_alpha()

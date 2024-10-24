@@ -19,9 +19,9 @@ class Inspector:
         self.selected_node = None
 
         # Display attributes
-        self.item_height = 30
-        self.padding = 3
-        self.indent_pixels = 10
+        self.item_height = int(30 * self.editor.window_scale)
+        self.padding = int(3 * self.editor.window_scale)
+        self.indent_pixels = int(10 * self.editor.window_scale)
 
         self.set_surf()  # Set the surface for drawing
 
@@ -200,5 +200,6 @@ class Inspector:
 
     def set_surf(self) -> None:
         """Sets the viewport surface for drawing onto."""
-        self.dim = self.viewport_dim.get_inspector_pixels(self.engine.win_size)
+        win_size = self.engine.win_size[0] * self.editor.window_scale, self.engine.win_size[1] * self.editor.window_scale
+        self.dim = self.viewport_dim.get_inspector_pixels(win_size)
         self.surf = pg.Surface(self.dim).convert_alpha()

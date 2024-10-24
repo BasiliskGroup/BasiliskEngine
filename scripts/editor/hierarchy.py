@@ -13,12 +13,12 @@ class Hierarchy:
         self.selected_node_index = 0
 
         # Display attributes
-        self.top_buffer = 50
-        self.indent_pixels = 10
-        self.list_item_height = 30
-        self.scroll_bar_width = 15
-        self.scroll_bar_height = 20
-        self.slider_height = 10
+        self.top_buffer = int(50 * self.editor.window_scale)
+        self.indent_pixels = int(10 * self.editor.window_scale)
+        self.list_item_height = int(30 * self.editor.window_scale)
+        self.scroll_bar_width = int(15 * self.editor.window_scale)
+        self.scroll_bar_height = int(20 * self.editor.window_scale)
+        self.slider_height = int(10 * self.editor.window_scale)
 
         self.set_surf()  # Set the surface for drawing
 
@@ -67,5 +67,6 @@ class Hierarchy:
 
     def set_surf(self) -> None:
         """Sets the viewport surface for drawing onto."""
-        self.dim = self.viewport_dim.get_hierarchy_pixels(self.engine.win_size)
+        win_size = self.engine.win_size[0] * self.editor.window_scale, self.engine.win_size[1] * self.editor.window_scale
+        self.dim = self.viewport_dim.get_hierarchy_pixels(win_size)
         self.surf = pg.Surface(self.dim).convert_alpha()

@@ -34,8 +34,8 @@ class EditorUI:
         # Load assets
         self.logo_source = pg.image.load('scripts/editor/editor_assets/BailiskLogoWhite.png').convert_alpha()
         self.logo = pg.transform.scale(self.logo_source, 
-                                       (self.editor.viewport_dim.top * self.editor.engine.win_size[1] * .8, 
-                                        self.editor.viewport_dim.top * self.editor.engine.win_size[1] * .8))
+                                       (self.editor.viewport_dim.top * self.editor.engine.win_size[1] * self.window_scale * .8, 
+                                        self.editor.viewport_dim.top * self.editor.engine.win_size[1] * self.window_scale * .8))
 
         # Viewports/Windows
         self.viewport           = Viewport(editor)
@@ -60,7 +60,7 @@ class EditorUI:
             self.render_viewports()
 
             # Gets enviornment variables
-            win_size = self.editor.engine.win_size
+            win_size = self.editor.engine.win_size[0] * self.window_scale, self.editor.engine.win_size[1] * self.window_scale
             dim = self.editor.viewport_dim
 
             # Blits all viewport windows to the UI surf
@@ -112,12 +112,14 @@ class EditorUI:
         Makes a moderngl texture from the UI surface. Binds it and the scene framebuffer
         """
         
-        self.surf = pg.Surface(self.editor.engine.win_size).convert_alpha()
+        self.window_scale = self.editor.window_scale
+        win_size = self.editor.engine.win_size[0] * self.window_scale, self.editor.engine.win_size[1] * self.window_scale
+        self.surf = pg.Surface(win_size).convert_alpha()
 
         if self.texture: self.texture.release()
 
         self.texture = self.ctx.texture(self.surf.get_size(), 4)
-        self.texture.filter = (mgl.NEAREST, mgl.NEAREST)
+        self.texture.filter = (mgl.LINEAR, mgl.LINEAR)
         self.texture.swizzel = 'RGBA'
 
         self.program['screenTexture'] = 0
@@ -140,4 +142,5 @@ class EditorUI:
         self.set_surface_texture()
 
         # Update assets
-        self.logo = pg.transform.scale(self.logo_source, (self.editor.viewport_dim.top * self.editor.engine.win_size[1] * .8, self.editor.viewport_dim.top * self.editor.engine.win_size[1] * .8))
+        win_size = self.editor.engine.win_size[0] * self.window_scale, self.editor.engine.win_size[1] * self.window_scale
+        self.logo = pg.transform.scale(self.logo_source, (self.editor.viewport_dim.top * win_size[1] * .8, self.editor.viewport_dim.top * win_size[1] * .8))

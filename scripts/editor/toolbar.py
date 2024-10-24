@@ -9,8 +9,8 @@ class Toolbar:
         self.viewport_dim = editor.viewport_dim
 
         # Display Settings
-        self.padding = 3
-        self.button_size = 80
+        self.padding = (3 * self.editor.window_scale)
+        self.button_size = (80 * self.editor.window_scale)
 
         self.set_surf()  # Set the surface for drawing
 
@@ -34,5 +34,6 @@ class Toolbar:
 
     def set_surf(self) -> None:
         """Sets the viewport surface for drawing onto."""
-        self.dim = self.viewport_dim.get_toolbar_pixels(self.engine.win_size)
+        win_size = self.engine.win_size[0] * self.editor.window_scale, self.engine.win_size[1] * self.editor.window_scale
+        self.dim = self.viewport_dim.get_toolbar_pixels(win_size)
         self.surf = pg.Surface(self.dim).convert_alpha()

@@ -1,16 +1,16 @@
-import pygame
+import pygame as pg
 
 class FontRenderer():
     def __init__(self):
         self.fonts = {}
         self.load_font("Roboto", "scripts/editor/editor_assets/RobotoMono-Regular.ttf")
 
-    def load_font(self, name, path):
+    def load_font(self, name, path, scale=2):
         self.fonts[name] = []
-        self.fonts[name].append(pygame.font.Font(path, 12))
-        self.fonts[name].append(pygame.font.Font(path, 22))
-        self.fonts[name].append(pygame.font.Font(path, 44))
-        self.fonts[name].append(pygame.font.Font(path, 10))
+        self.fonts[name].append(pg.font.Font(path, int(12 * scale)))
+        self.fonts[name].append(pg.font.Font(path, int(22 * scale)))
+        self.fonts[name].append(pg.font.Font(path, int(44 * scale)))
+        self.fonts[name].append(pg.font.Font(path, int(10 * scale)))
     
     def render_text(self, win, pos, text, font="Roboto", size=1, color=(255, 255, 255), bold=False, underline=False, italic=False, center_width=False):
         '''
@@ -42,8 +42,11 @@ class FontRenderer():
         self.fonts[font][size].set_italic(italic)
 
         text_img = self.fonts[font][size].render(text, True, color)
+        
+        scale = 1 * .5
+        text_img = pg.transform.scale(text_img, (text_img.get_width() * scale, text_img.get_height() * scale))
 
         if center_width:
-            win.blit(text_img, (pos[0] - text_img.get_width() / 2, pos[1] - self.fonts[font][size].get_height() / 2))
+            win.blit(text_img, (pos[0] - text_img.get_width() / 2, pos[1] - self.fonts[font][size].get_height() * scale / 2))
         else:
-            win.blit(text_img, (pos[0], pos[1] - self.fonts[font][size].get_height() // 2))
+            win.blit(text_img, (pos[0], pos[1] - self.fonts[font][size].get_height() * scale // 2))

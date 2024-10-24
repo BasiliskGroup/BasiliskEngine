@@ -15,10 +15,10 @@ class ProjectFilesView:
         self.mtl_handler = self.engine.project.current_scene.material_handler
 
         # Display attributes
-        self.padding = 3
-        self.grid_x, self.grid_y = 8, 3
-        self.list_item_height = 30
-        self.image_size = 100
+        self.padding = int(3 * self.editor.window_scale)
+        self.grid_x, self.grid_y = int(8 * self.editor.window_scale), int(3 * self.editor.window_scale)
+        self.list_item_height = int(30 * self.editor.window_scale)
+        self.image_size = int(100 * self.editor.window_scale)
         self.menu = "Models"
 
 
@@ -26,7 +26,7 @@ class ProjectFilesView:
         """Clears the viewport and renders all elements"""
         self.surf.fill(self.editor.ui.primary)
 
-        pg.draw.rect(self.surf, self.editor.ui.secondary, (0, 0, self.editor.viewport_dim.left * self.engine.win_size[0], self.dim[1]))
+        pg.draw.rect(self.surf, self.editor.ui.secondary, (0, 0, self.editor.viewport_dim.left * self.engine.win_size[0] * self.editor.window_scale, self.dim[1]))
 
         self.get_node()
 
@@ -49,7 +49,7 @@ class ProjectFilesView:
         pg.draw.rect(self.surf, self.editor.ui.outline, (0, 0, self.dim[0], self.dim[1]), 1)
 
     def render_image_grid(self, images):
-        left = self.editor.viewport_dim.left * self.engine.win_size[0]
+        left = self.editor.viewport_dim.left * self.engine.win_size[0] * self.editor.window_scale
         width, height = self.image_size, self.image_size
         self.grid_y = self.dim[1] // height
         self.grid_x = (self.dim[0] - left) // width
@@ -76,8 +76,8 @@ class ProjectFilesView:
     def get_input(self) -> None:
         if self.engine.prev_mouse_buttons[0] and not self.engine.mouse_buttons[0]:
             # Get the mouse position in the window
-            mouse_x, mouse_y = self.engine.mouse_position[0], self.engine.mouse_position[1] - (1 - self.editor.viewport_dim.bottom) * self.engine.win_size[1]
-            left = self.editor.viewport_dim.left * self.engine.win_size[0]
+            mouse_x, mouse_y = self.engine.mouse_position[0], self.engine.mouse_position[1] - (1 - self.editor.viewport_dim.bottom) * self.engine.win_size[1] * self.editor.window_scale
+            left = self.editor.viewport_dim.left * self.engine.win_size[0] * self.editor.window_scale
 
             # In the menu side bar, selects what this window will show
             if mouse_x < left:
@@ -89,7 +89,7 @@ class ProjectFilesView:
 
             # In the list section, get the selected list item
             else:
-                left = self.editor.viewport_dim.left * self.engine.win_size[0]
+                left = self.editor.viewport_dim.left * self.engine.win_size[0] * self.editor.window_scale
                 x, y = (mouse_x - left) // self.image_size, mouse_y // self.image_size
 
                 index = int(x + y * self.grid_x)
@@ -158,5 +158,6 @@ class ProjectFilesView:
 
     def set_surf(self) -> None:
         """Sets the viewport surface for drawing onto."""
-        self.dim = self.viewport_dim.get_project_files_pixels(self.engine.win_size)
+        win_size = self.engine.win_size[0] * self.editor.window_scale, self.engine.win_size[1] * self.editor.window_scale
+        self.dim = self.viewport_dim.get_project_files_pixels(win_size)
         self.surf = pg.Surface(self.dim).convert_alpha()
