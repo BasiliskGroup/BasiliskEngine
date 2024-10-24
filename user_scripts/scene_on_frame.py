@@ -135,10 +135,11 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
             # add trapezoid triangles
             for trapezoid in trapezoids[key]: 
                 ba = world_points[trapezoid[1]] - world_points[trapezoid[0]]
-                ca = world_points[trapezoid[2]] - world_points[trapezoid[0]]
-                da = world_points[trapezoid[3]] - world_points[trapezoid[0]]
+                # ca = world_points[trapezoid[2]] - world_points[trapezoid[0]]
+                # da = world_points[trapezoid[3]] - world_points[trapezoid[0]]
+                dc = world_points[trapezoid[3]] - world_points[trapezoid[2]]
                 
-                if glm.length(glm.cross(ba, ca)) / (glm.length(ca) + glm.length(ba)) > glm.length(glm.cross(ba, da)) / (glm.length(da) + glm.length(ba)):
+                if glm.dot(ba, dc) > 0:
                     sorted_triangles[key].append([trapezoid[0], trapezoid[1], trapezoid[2]])
                     sorted_triangles[key].append([trapezoid[3], trapezoid[1], trapezoid[2]])
                 else:

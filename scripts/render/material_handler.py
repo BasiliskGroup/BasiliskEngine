@@ -11,7 +11,6 @@ class MaterialHandler:
         
         self.add(name="base", color=(.8, .8, .8))
         self.add(name="brick", color=(1, 249/255, 234/255), normal_map="brick_normal")
-        
         self.add(name="baby_blue", color=(.69, .97, 1))
         self.add(name="black", color=(0, 0, 0))
         self.add(name="dark_grey", color=(.29, .29, .29))

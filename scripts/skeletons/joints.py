@@ -85,7 +85,7 @@ class BallJoint():
             dampen = -c * relative_velocity * direction
             
             # applies the spring force
-            force_total = (force_spring + dampen) #* (0.5 if child.physics_body and parent.physics_body else 1)
+            force_total = (force_spring + dampen)
             
             if child.physics_body: child.apply_offset_force(force_total, self.child_offset, delta_time)
             if parent.physics_body: parent.apply_offset_force(-force_total, self.parent_offset, delta_time)

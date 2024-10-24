@@ -57,25 +57,12 @@ class Scene:
         load_scene(self, "base_save")
         
         #save_scene(self, "test_save")
-        
-        for _ in range(0):
-            self.node_handler.add(
-                position=(randint(-20, 20), 10, randint(-20, 20)),
-                scale=(uniform(1, 10), uniform(1, 10), uniform(1, 10)),
-                rotation=(0, 0, 0),
-                nodes=[],
-                model='cube',
-                material='yellow',
-                collider=self.collider_handler.add(vbo='cube', static=False),
-                physics_body=self.physics_body_handler.add(mass=20),
-                name='box'
-            )
             
         # level 1 #################################################################################################
         
         self.node_handler.add(
-            position=(0, -4, 40),
-            scale=(40, 1, 80),
+            position=(-30, -4, 40),
+            scale=(10, 1, 80),
             model='cube', 
             material='brick',
             collider=self.collider_handler.add(vbo='cube', static=True),
@@ -84,8 +71,28 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(17, 2, 80),
-            scale=(1, 4, 8),
+            position=(30, -4, 40),
+            scale=(10, 1, 80),
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='floor'
+        )
+        
+        self.node_handler.add(
+            position=(0, -4, 40),
+            scale=(20, 1, 80),
+            model='cube', 
+            material='red_pink',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='floor'
+        )
+        
+        self.node_handler.add(
+            position=(9, 10, 80),
+            scale=(1, 15, 4),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
@@ -96,18 +103,30 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(30, 2, 89),
-            scale=(10, 4, 1),
+            position=(25, 12.1, 85),
+            scale=(15, 15, 1),
             model='cube', 
             material='brick',
             collider=self.collider_handler.add(vbo='cube', static=True),
             physics_body=None,
-            name='clamp'
+            name='clamp front'
         )
         
         self.node_handler.add(
-            position=(14, 2, 71),
-            scale=(3, 4, 1),
+            position=(8, 10, 73),
+            scale=(3, 15, 3),
+            rotation=(0, 0, 0),
+            nodes=[],
+            model='cube', 
+            material='brick',
+            collider=self.collider_handler.add(vbo='cube', static=True),
+            physics_body=None,
+            name='clamp back'
+        )
+        
+        self.node_handler.add(
+            position=(-9, 10, 80),
+            scale=(1, 15, 4),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
@@ -118,49 +137,37 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(-17, 2, 80),
-            scale=(1, 4, 8),
+            position=(-25, 12.1, 85),
+            scale=(15, 15, 1),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
             material='brick',
             collider=self.collider_handler.add(vbo='cube', static=True),
             physics_body=None,
-            name='clamp'
+            name='clamp front'
         )
         
         self.node_handler.add(
-            position=(-30, 2, 89),
-            scale=(10, 4, 1),
+            position=(-8, 10, 73),
+            scale=(3, 15, 3),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
             material='brick',
             collider=self.collider_handler.add(vbo='cube', static=True),
             physics_body=None,
-            name='clamp'
-        )
-        
-        self.node_handler.add(
-            position=(-14, 2, 71),
-            scale=(3, 4, 1),
-            rotation=(0, 0, 0),
-            nodes=[],
-            model='cube', 
-            material='brick',
-            collider=self.collider_handler.add(vbo='cube', static=True),
-            physics_body=None,
-            name='clamp'
+            name='clamp back'
         )
         
         self.node_handler.add(
             position=(0, 2, 80),
-            scale=(15, 4, 6),
+            scale=(8, 10, 3),
             model='cube',
             material='yellow',
             collider=self.collider_handler.add(vbo='cube', static=False),
             physics_body=self.physics_body_handler.add(mass=1000),
-            name='box'
+            name='door'
         )
         
         # level 2 #################################################################################################
