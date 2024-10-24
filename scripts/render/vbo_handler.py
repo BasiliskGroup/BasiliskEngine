@@ -238,10 +238,11 @@ class ModelVBO(BaseVBO):
 class RuntimeVBO(BaseVBO):
     def __init__(self, ctx, unique_points, indicies):
         self.unique_points = unique_points
-        self.indicies = indicies
+        self.indicies = [tuple(i) for i in indicies]
         super().__init__(ctx)
         self.format = '3f 2f 3f'
         self.attribs = ['in_position', 'in_uv', 'in_normal']
+        self.unique_points = unique_points
         
     def get_vertex_data(self):
 
@@ -264,10 +265,5 @@ class RuntimeVBO(BaseVBO):
 
         vertex_data = np.hstack([vertex_data, tex_coord_data])
         vertex_data = np.hstack([vertex_data, normals])
-        
-        # vertex_data = np.vstack([vertex_data, vertex_data], dtype='f4')
-        # mid = len(vertex_data) // 2
-        # vertex_data[:mid,0] = vertex_data[:mid,2]
-        # vertex_data[:mid:,2] = vertex_data[mid:,0]
         
         return vertex_data

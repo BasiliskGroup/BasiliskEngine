@@ -50,6 +50,7 @@ class Scene:
         with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
         with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
         with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
+        with open(f'user_scripts/head_on_frame.py')     as file: head_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
         
         self.on_tick = None # TODO add functionality
         self.on_frame = scene_on_frame
@@ -83,7 +84,7 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(21, 2, 80),
+            position=(17, 2, 80),
             scale=(1, 4, 8),
             rotation=(0, 0, 0),
             nodes=[],
@@ -105,8 +106,8 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(20, 2, 71),
-            scale=(2, 4, 1),
+            position=(14, 2, 71),
+            scale=(3, 4, 1),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
@@ -117,7 +118,7 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(-21, 2, 80),
+            position=(-17, 2, 80),
             scale=(1, 4, 8),
             rotation=(0, 0, 0),
             nodes=[],
@@ -141,8 +142,8 @@ class Scene:
         )
         
         self.node_handler.add(
-            position=(-20, 2, 71),
-            scale=(2, 4, 1),
+            position=(-14, 2, 71),
+            scale=(3, 4, 1),
             rotation=(0, 0, 0),
             nodes=[],
             model='cube', 
@@ -152,15 +153,15 @@ class Scene:
             name='clamp'
         )
         
-        # self.node_handler.add(
-        #     position=(0, 2, 80),
-        #     scale=(20, 4, 6),
-        #     model='cube',
-        #     material='yellow',
-        #     collider=self.collider_handler.add(vbo='cube', static=False),
-        #     physics_body=self.physics_body_handler.add(mass=1000),
-        #     name='box'
-        # )
+        self.node_handler.add(
+            position=(0, 2, 80),
+            scale=(15, 4, 6),
+            model='cube',
+            material='yellow',
+            collider=self.collider_handler.add(vbo='cube', static=False),
+            physics_body=self.physics_body_handler.add(mass=1000),
+            name='box'
+        )
         
         # level 2 #################################################################################################
         
@@ -656,6 +657,8 @@ class Scene:
             ]
         )
         
+        head.on_frame = head_on_frame
+        
         john_bottom=self.skeleton_handler.add(
             node=bottom,
             joints=[
@@ -671,7 +674,7 @@ class Scene:
                                 child_bone=self.skeleton_handler.create(
                                     node=top,
                                     joints=[
-                                        RotatorJoint(
+                                        BallJoint(
                                             parent_offset=(0, 0.5, 0),
                                             child_offset=(0, -0.7, 0),
                                             child_bone=self.skeleton_handler.create(
@@ -843,10 +846,11 @@ class Scene:
         matrix = get_model_matrix(model.position, model.scale, model.rotation)
         model_vertices = self.model_handler.vbos[model.vbo].unique_points
         
-        print('model vertices', model_vertices)
+        # print('model vertices', model_vertices)
         
         for triangle in self.model_handler.vbos[model.vbo].indicies:
             points = []
+            # print(triangle, len(self.model_handler.vbos[model.vbo].unique_points))
             for point in [model_vertices[t] for t in triangle]:
                 
                 # remove points behind the clip plane
