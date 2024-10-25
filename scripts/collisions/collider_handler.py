@@ -47,6 +47,8 @@ class ColliderHandler():
         for collider1, possible_colliders in needs_narrow.items():
             for collider2 in possible_colliders:
                 
+                if collider1.static and collider2.static: continue
+                
                 # check if already collided
                 normal, distance, contact_points = get_narrow_collision(collider_vertices[collider1], collider_vertices[collider2], collider1.position, collider2.position)
                 if distance == 0: continue # continue if no collision

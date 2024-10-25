@@ -139,12 +139,12 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                 # da = world_points[trapezoid[3]] - world_points[trapezoid[0]]
                 dc = world_points[trapezoid[3]] - world_points[trapezoid[2]]
                 
-                if glm.dot(ba, dc) > 0:
+                if glm.dot(ba, dc) < 0:
                     sorted_triangles[key].append([trapezoid[0], trapezoid[1], trapezoid[2]])
-                    sorted_triangles[key].append([trapezoid[3], trapezoid[1], trapezoid[2]])
+                    sorted_triangles[key].append([trapezoid[0], trapezoid[3], trapezoid[2]])
                 else:
                     sorted_triangles[key].append([trapezoid[0], trapezoid[1], trapezoid[2]])
-                    sorted_triangles[key].append([trapezoid[3], trapezoid[0], trapezoid[2]])
+                    sorted_triangles[key].append([trapezoid[3], trapezoid[1], trapezoid[2]])
         
         # deep copy above and below triangle lists
         for key in ['above', 'below']:
@@ -193,6 +193,7 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
             for i, triangle in enumerate(sorted_triangles[key]):
                 ab, ac = unique_points[key][triangle[1]] - unique_points[key][triangle[0]], unique_points[key][triangle[2]] - unique_points[key][triangle[0]]
                 if glm.dot(glm.cross(ab, ac), unique_points[key][triangle[0]]) < 0: 
+                #if random.randint(0, 1) == 1:
                     sorted_triangles[key][i] = [triangle[2], triangle[1], triangle[0]]
             
             # generate node
