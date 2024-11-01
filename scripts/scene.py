@@ -160,15 +160,15 @@ class Scene:
             name='clamp back'
         )
         
-        self.node_handler.add(
-            position=(0, 2, 80),
-            scale=(8, 10, 3),
-            model='cube',
-            material='yellow',
-            collider=self.collider_handler.add(vbo='cube', static=False),
-            physics_body=self.physics_body_handler.add(mass=1000),
-            name='door'
-        )
+        # self.node_handler.add(
+        #     position=(0, 2, 80),
+        #     scale=(8, 10, 3),
+        #     model='cube',
+        #     material='yellow',
+        #     collider=self.collider_handler.add(vbo='cube', static=False),
+        #     physics_body=self.physics_body_handler.add(mass=1000),
+        #     name='door'
+        # )
         
         # level 2 #################################################################################################
         
