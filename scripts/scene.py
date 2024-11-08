@@ -775,14 +775,15 @@ class Scene:
             if platform.system() == "Darwin": 
                 file = input("Enter file path: ")
                 if not file.endswith('.gltf'): file += ".gltf"
-                else: file = save_file_selector()
+            else: file = save_file_selector()
             if file: save_scene(self, abs_file_path=file)
 
         if self.engine.keys[pg.K_LCTRL] and self.engine.keys[pg.K_l]:
+            print(platform.system())
             if platform.system() == "Darwin": 
                 file = input("Enter file path: ")
                 if not file.endswith('.gltf'): file += ".gltf"
-                else: file = load_file_selector()
+            else: file = load_file_selector()
             if file:
                 load_scene(self, abs_file_path=file)
                 self.vao_handler.shader_handler.write_all_uniforms()

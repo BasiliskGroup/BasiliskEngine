@@ -113,3 +113,11 @@ def save_nodes(scene, scene_data, mtl_indices, buffer_indices):
         
         if node.model.material !=  None:
             scene_data["nodes"][-1]["material"] = mtl_indices[mtl_names[node.model.material]]
+
+        if node.physics_body:
+            scene_data["nodes"][-1]["physics_body"] = {}
+            scene_data["nodes"][-1]["physics_body"]["mass"] = node.physics_body.mass
+
+        if node.collider:
+            scene_data["nodes"][-1]["collider"] = {}
+            scene_data["nodes"][-1]["collider"]["static"] = node.collider.static

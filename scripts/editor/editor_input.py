@@ -53,6 +53,11 @@ class InputHandler:
         elif mouse_x > (1 - self.dim.right ) * win_size[0]: self.mouse_viewport_key = 'inspector'
         else:                                               self.mouse_viewport_key = 'viewport'
 
+        if self.mouse_viewport_key == 'viewport' and prev_mouse_buttons[0] and not mouse_buttons[0]:
+            node = self.editor.engine.project.current_scene.get_model_node_at(mouse_x - self.dim.left * win_size[0], mouse_y - self.dim.top * win_size[1])
+            if node: print(node.name)
+            else: print("No node selected")
+
         # Loop through all input events
         for event in self.editor.engine.events:
             if event.type == pg.MOUSEWHEEL:
