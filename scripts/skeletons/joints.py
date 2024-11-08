@@ -4,7 +4,7 @@ from scripts.skeletons.animation import Animation
 
 # child free to move within radius, child must point at offset
 class BallJoint(): 
-    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, fixed=False): # parent and child not saved for splitting
+    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e4, fixed=False): # parent and child not saved for splitting
         # child bone
         self.child_bone = child_bone
         
@@ -69,28 +69,41 @@ class BallJoint():
         
         direction = glm.normalize(displacement)
         
-        # if the node has a physics body do this TODO fix rk4 for springs
-        if child.physics_body:
-               
-            # calculate spring force
-            force_spring = -self.spring_constant * displacement
+        def spring_force(cpos:glm.vec3, cvel:glm.vec3, ppos:glm.vec3, pvel:glm.vec3):
             
-            # get relative velocity along the spring direction
-            relative_velocity = child.physics_body.velocity - (parent.physics_body.velocity if parent.physics_body else glm.vec3(0.0))
+            displacement = cpos + self.child_offset - ppos - self.parent_offset
+            
+            mass = child.physics_body.mass # * parent.physics_body.mass / (child.physics_body.mass + parent.physics_body.mass) if parent.physics_body else child.physics_body.mass
+            
+            # dampening force
+            relative_velocity = cvel - pvel
             relative_velocity = glm.dot(direction, relative_velocity)
+            c = 2 * glm.sqrt(self.spring_constant * mass)
             
-            # get the dampening force of the spring
-            mu     = (child.physics_body.mass * parent.physics_body.mass / (child.physics_body.mass + parent.physics_body.mass)) if parent.physics_body else child.physics_body.mass
-            c      = 2 * glm.sqrt(self.spring_constant * mu)
-            dampen = -c * relative_velocity * direction
+            return (-c * cvel - self.spring_constant * displacement) / mass
+        
+        # if the node has a physics body do this
+        if child.physics_body:
             
-            # applies the spring force
-            force_total = (force_spring + dampen) #* (0.5 if child.physics_body and parent.physics_body else 1)
+            cpos, cvel, ppos, pvel = child.position, child.physics_body.velocity, parent.position, parent.physics_body.velocity if parent.physics_body else glm.vec3(0.0)
             
-            if child.physics_body: child.apply_offset_force(force_total, self.child_offset, delta_time)
-            if parent.physics_body: parent.apply_offset_force(-force_total, self.parent_offset, delta_time)
+            k1_pos = cvel
+            k1_vel = spring_force(cpos, cvel, ppos, pvel)
+            k2_pos = cvel + 0.5 * delta_time * k1_vel
+            k2_vel = spring_force(cpos + 0.5 * delta_time * k1_pos, cvel + 0.5 * delta_time * k1_vel, ppos, pvel)
+            k3_pos = cvel + 0.5 * delta_time * k2_vel
+            k3_vel = spring_force(cpos + 0.5 * delta_time * k2_pos, cvel + 0.5 * delta_time * k2_vel, ppos, pvel)
+            k4_pos = cvel + 0.5 * delta_time * k3_vel
+            k4_vel = spring_force(cpos + 0.5 * delta_time * k3_pos, cvel + 0.5 * delta_time * k3_vel, ppos, pvel)
+            
+            deno = 6#12 if parent.physics_body and not self.fixed else 6
+            child.position += delta_time * (k1_pos + 2 * k2_pos + 2 * k3_pos + k4_pos) / deno
+            child.physics_body.velocity += delta_time * (k1_vel + 2 * k2_vel + 2 * k3_vel + k4_vel) / deno
+            # if parent.physics_body and not self.fixed:
+            #     parent.position -= delta_time * (k1_pos + 2 * k2_pos + 2 * k3_pos + k4_pos) / deno
+            #     parent.physics_body.velocity -= delta_time * (k1_vel + 2 * k2_vel + 2 * k3_vel + k4_vel) / deno
                 
-            return force_total
+            return glm.vec3(0.0) # TODO get spring force
             
         # snap to position if it does not
         else: 
@@ -117,7 +130,7 @@ class RotatorJoint(BallJoint):
     def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, fixed=False):
         super().__init__(child_bone, parent_offset, child_offset, spring_constant, fixed)
         
-    def restrict(self, parent, child, delta_time:float): 
+    def restrict(self, parent, child, delta_time:float): # TODO watch, mat casuse gimble lock
         """
         Restrict face axis to parent offset then ball joint restrict
         """
@@ -130,8 +143,6 @@ class RotatorJoint(BallJoint):
         
         if glm.length(axis) < 1e-6: return
         theta = glm.acos(glm.clamp(glm.dot(normal_child, normal_parent), -1, 1))
-        
-        # if abs(glm.dot(normal_child, normal_parent)) > 1: print(glm.dot(normal_child, normal_parent)) # TODO temp line
         
         # compute effective torque
         torque  = self.spring_constant * theta * axis

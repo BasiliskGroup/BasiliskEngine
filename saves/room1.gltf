@@ -1,0 +1,982 @@
+{
+    "asset": {
+        "version": "2.0"
+    },
+    "scene": 0,
+    "buffers": [
+        {
+            "uri": "cow.obj"
+        },
+        {
+            "uri": "lucy.obj"
+        },
+        {
+            "uri": "bunny.obj"
+        },
+        {
+            "uri": "sphere.obj"
+        },
+        {
+            "uri": "donut.obj"
+        },
+        {
+            "uri": "american_flag.obj"
+        },
+        {
+            "uri": "monkey.obj"
+        },
+        {
+            "uri": "cylinder.obj"
+        },
+        {
+            "uri": "wall_lantern.obj"
+        }
+    ],
+    "meshes": [],
+    "images": [
+        {
+            "uri": "normal_map.png"
+        },
+        {
+            "uri": "container.png"
+        },
+        {
+            "uri": "metal.png"
+        },
+        {
+            "uri": "cow.png"
+        },
+        {
+            "uri": "lantern.png"
+        },
+        {
+            "uri": "normal_map2.png"
+        },
+        {
+            "uri": "america.jpg"
+        },
+        {
+            "uri": "brick_normal.png"
+        },
+        {
+            "uri": "sample-image.png"
+        },
+        {
+            "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "box.png"
+        },
+        {
+            "uri": "brick.png"
+        }
+    ],
+    "textures": [
+        {
+            "sampler": 0
+        },
+        {
+            "sampler": 1
+        },
+        {
+            "sampler": 2
+        },
+        {
+            "sampler": 3
+        },
+        {
+            "sampler": 4
+        },
+        {
+            "sampler": 5
+        },
+        {
+            "sampler": 6
+        },
+        {
+            "sampler": 7
+        },
+        {
+            "sampler": 8
+        },
+        {
+            "sampler": 9
+        },
+        {
+            "sampler": 10
+        },
+        {
+            "sampler": 11
+        }
+    ],
+    "materials": [
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.8,
+                    0.8,
+                    0.8,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64
+            }
+        },
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64.0
+            }
+        },
+        {
+            "name": "Material_2",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    0.20000000298023224,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_3",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_4",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.8500000238418579,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_5",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_6",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_7",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.3799999952316284,
+                    0.20000000298023224,
+                    0.10000000149011612,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_8",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 6,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_9",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 4,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 9,
+                "texCoord": 1,
+                "scale": 1
+            }
+        }
+    ],
+    "nodes": [
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                -2.0,
+                -20.0
+            ],
+            "scale": [
+                40.0,
+                1.0,
+                40.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                6.0,
+                -50.0
+            ],
+            "scale": [
+                40.0,
+                7.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                22.0,
+                21.0
+            ],
+            "scale": [
+                40.0,
+                25.0,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                41.0,
+                22.0,
+                -20.0
+            ],
+            "scale": [
+                1.0,
+                25.0,
+                42.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                40.0,
+                22.0,
+                -40.0
+            ],
+            "scale": [
+                2.0,
+                25.0,
+                2.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 3
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                -40.0,
+                22.0,
+                -40.0
+            ],
+            "scale": [
+                2.0,
+                25.0,
+                2.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 3
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                -40.0,
+                22.0,
+                0.0
+            ],
+            "scale": [
+                2.0,
+                25.0,
+                2.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 3
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                40.0,
+                22.0,
+                0.0
+            ],
+            "scale": [
+                2.0,
+                25.0,
+                2.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                22.0,
+                -61.0
+            ],
+            "scale": [
+                40.0,
+                25.0,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                40.0,
+                15.0,
+                -20.0
+            ],
+            "scale": [
+                0.05000000074505806,
+                12.0,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 4
+        },
+        {
+            "name": "cube",
+            "translation": [
+                40.0,
+                3.0,
+                -20.0
+            ],
+            "scale": [
+                0.25,
+                0.25,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                40.0,
+                15.0,
+                -20.0
+            ],
+            "scale": [
+                0.25,
+                12.0,
+                0.25
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                40.0,
+                15.0,
+                -20.0
+            ],
+            "scale": [
+                0.25,
+                0.25,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                0.0,
+                -2.0,
+                -10.0
+            ],
+            "scale": [
+                20.0,
+                1.0099999904632568,
+                20.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 3
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                0.0,
+                -2.0,
+                -10.0
+            ],
+            "scale": [
+                19.0,
+                1.0199999809265137,
+                19.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 6
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                0.0,
+                -2.0,
+                -10.0
+            ],
+            "scale": [
+                16.0,
+                1.0299999713897705,
+                16.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 3
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                0.0,
+                -2.0,
+                -10.0
+            ],
+            "scale": [
+                15.0,
+                1.0399999618530273,
+                15.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 5
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                3.4000000953674316,
+                20.0,
+                -59.70000076293945
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.30000001192092896,
+                0.10000000149011612
+            ],
+            "rotation": [
+                1.590000033378601,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                6.0,
+                20.0
+            ],
+            "scale": [
+                4.0,
+                7.0,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                1.75,
+                3.0,
+                20.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -1.75,
+                3.0,
+                20.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                1.75,
+                9.5,
+                20.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -1.75,
+                9.5,
+                20.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cylinder",
+            "translation": [
+                -3.4000000953674316,
+                6.300000190734863,
+                19.700000762939453
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.30000001192092896,
+                0.10000000149011612
+            ],
+            "rotation": [
+                1.5800000429153442,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 7
+        },
+        {
+            "name": "sphere",
+            "translation": [
+                -3.4000000953674316,
+                6.300000190734863,
+                19.5
+            ],
+            "scale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 3,
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                20.0,
+                -60.0
+            ],
+            "scale": [
+                4.0,
+                7.0,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                1.75,
+                23.5,
+                -60.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -1.75,
+                23.5,
+                -60.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                1.75,
+                17.0,
+                -60.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -1.75,
+                17.0,
+                -60.0
+            ],
+            "scale": [
+                1.5,
+                3.0,
+                0.30000001192092896
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "sphere",
+            "translation": [
+                3.4000000953674316,
+                20.0,
+                -59.5
+            ],
+            "scale": [
+                0.30000001192092896,
+                0.30000001192092896,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 3,
+            "material": 7
+        },
+        {
+            "name": "american_flag",
+            "translation": [
+                36.0,
+                9.199999809265137,
+                17.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 8
+        },
+        {
+            "name": "wall_lantern",
+            "translation": [
+                15.0,
+                10.0,
+                18.5
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                3.140000104904175,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 9
+        },
+        {
+            "name": "wall_lantern",
+            "translation": [
+                -15.0,
+                10.0,
+                18.5
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                3.140000104904175,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 9
+        },
+        {
+            "name": "american_flag",
+            "translation": [
+                -36.0,
+                9.199999809265137,
+                17.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                0.0,
+                3.140000104904175,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 8
+        }
+    ],
+    "scenes": [
+        {}
+    ]
+}

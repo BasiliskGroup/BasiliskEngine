@@ -1,6 +1,8 @@
 import glm
 import pygame as pg
 
+from scripts.generic.math_functions import get_model_matrix
+
 # Camera view constants
 FOV = 50  # Degrees
 NEAR = 0.1
@@ -100,6 +102,21 @@ class Camera:
     
     def get_params(self) -> tuple:
         return self.engine, self.position, self.yaw, self.pitch
+    
+    # def get_model_node_at(self, forward:glm.vec3=None, max_distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None):
+    #     if not forward: forward = self.forward
+        
+    #     # return best_node
+    #     nodes = []
+    #     for root in self.scene.node_handler.nodes: nodes.extend(root.get_nodes(True, has_collider, has_physics_body, material))
+    #     best_distance = max_distance
+    #     for node in nodes:
+    #         if glm.dot(forward, node.position - self.position) < 0 and node.scale.x * node.scale.y * node.scale.z < (node.position - self.position) ** 2: continue
+            
+    #         # get model matrix & convert points
+    #         model = node.model
+    #         model_matrix = get_model_matrix(model.position, model.scale, model.rotation)
+    #         world_vertices = [model_matrix * glm.vec4(*vert, 1) for vert in self.model_handler.vbos[model.vbo].unique_points]
     
 # camera that will be attached to node
 class FollowCamera(Camera):

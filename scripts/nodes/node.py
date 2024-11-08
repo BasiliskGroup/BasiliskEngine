@@ -224,9 +224,11 @@ class Node():
         if density == 0: density = self.physics_body.mass / self.get_volume() if self.physics_body else 1
         mass = self.physics_body.mass if self.physics_body else 1
         
-        x = 1 * self.scale.x
-        y = 1 * self.scale.y
-        z = 1 * self.scale.z
+        maximums = glm.max([glm.vec3(point) for point in self.collider.unique_points]) if self.collider else glm.vec3(1, 1, 1)
+        
+        x = maximums.x * self.scale.x
+        y = maximums.y * self.scale.y
+        z = maximums.z * self.scale.z
         
         return glm.inverse(mass / 12 * glm.mat3x3([y**2 + z ** 2, 0, 0], [0, x**2 + z**2, 0], [0, 0, x**2 + y**2]))
             
