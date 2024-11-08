@@ -10,7 +10,7 @@ class Engine:
     """
     Instance of python engine. Stores the window, context, and projects
     """
-    def __init__(self, win_size:str=(800, 800)) -> None:
+    def __init__(self, win_size:str=(1600, 800)) -> None:
         """
         Initialize the Pygame window and GL context
         """
@@ -45,7 +45,7 @@ class Engine:
         """
 
         # Update time
-        self.dt = self.clock.tick() / 1000
+        self.dt = self.clock.tick(60) / 1000
         self.time += self.dt
         pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
         # Pygame events
