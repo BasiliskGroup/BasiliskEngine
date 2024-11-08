@@ -29,6 +29,9 @@
             "uri": "cylinder.obj"
         },
         {
+            "uri": "10090_white_house_v1_L1.obj"
+        },
+        {
             "uri": "wall_lantern.obj"
         }
     ],
@@ -38,19 +41,34 @@
             "uri": "normal_map.png"
         },
         {
+            "uri": "hungarian_flooring_normal.png"
+        },
+        {
             "uri": "container.png"
         },
         {
             "uri": "metal.png"
         },
         {
+            "uri": "floral_wallpaper.png"
+        },
+        {
             "uri": "cow.png"
+        },
+        {
+            "uri": "floral_wallpaper_normal.png"
         },
         {
             "uri": "lantern.png"
         },
         {
             "uri": "normal_map2.png"
+        },
+        {
+            "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "hungarian_flooring.png"
         },
         {
             "uri": "america.jpg"
@@ -107,6 +125,21 @@
         },
         {
             "sampler": 11
+        },
+        {
+            "sampler": 12
+        },
+        {
+            "sampler": 13
+        },
+        {
+            "sampler": 14
+        },
+        {
+            "sampler": 15
+        },
+        {
+            "sampler": 16
         }
     ],
     "materials": [
@@ -133,7 +166,11 @@
                     1.0
                 ],
                 "metallicFactor": 0.5,
-                "roughnessFactor": 64.0
+                "roughnessFactor": 64.0,
+                "baseColorTexture": {
+                    "index": 10,
+                    "texCoord": 1
+                }
             }
         },
         {
@@ -159,7 +196,16 @@
                     1.0
                 ],
                 "metallicFactor": 1.0,
-                "roughnessFactor": 32.0
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 4,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 6,
+                "texCoord": 1,
+                "scale": 1
             }
         },
         {
@@ -199,6 +245,11 @@
                 ],
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0
+            },
+            "normalTexture": {
+                "index": 4,
+                "texCoord": 1,
+                "scale": 1
             }
         },
         {
@@ -226,7 +277,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 6,
+                    "index": 11,
                     "texCoord": 1
                 }
             }
@@ -243,12 +294,34 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 4,
+                    "index": 7,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 9,
+                "index": 14,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_10",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 10,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 1,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -293,7 +366,7 @@
                 0.0
             ],
             "mesh": "cube",
-            "material": 2
+            "material": 10
         },
         {
             "name": "cube",
@@ -313,7 +386,7 @@
                 0.0
             ],
             "mesh": "cube",
-            "material": 2
+            "material": 10
         },
         {
             "name": "cube",
@@ -932,7 +1005,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 9,
             "material": 9
         },
         {
@@ -952,7 +1025,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 9,
             "material": 9
         },
         {
