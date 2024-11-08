@@ -65,10 +65,12 @@ class Editor:
                     vbos = self.engine.project.current_scene.vao_handler.vbo_handler.vbos
                     vbos[name[:-4]] = ModelVBO(self.engine.ctx, "models/" + name)
                     self.ui.model_images.append(self.ui.image_gen.generate_file(name))
+                    self.ui.refresh()
                 elif file_path.endswith(".png") or file_path.endswith(".jpg"):
                     self.engine.project.texture_handler.load_texture(name[:-4], '/' + name)
                     self.engine.project.texture_handler.generate_texture_arrays()
                     self.engine.project.texture_handler.write_textures("batch")
+                    self.ui.refresh()
 
 
     def load_vao(self):
