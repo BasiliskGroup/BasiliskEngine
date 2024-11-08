@@ -53,11 +53,6 @@ class InputHandler:
         elif mouse_x > (1 - self.dim.right ) * win_size[0]: self.mouse_viewport_key = 'inspector'
         else:                                               self.mouse_viewport_key = 'viewport'
 
-        if self.mouse_viewport_key == 'viewport' and prev_mouse_buttons[0] and not mouse_buttons[0]:
-            node = self.editor.engine.project.current_scene.get_model_node_at(mouse_x - self.dim.left * win_size[0], mouse_y - self.dim.top * win_size[1])
-            if node: print(node.name)
-            else: print("No node selected")
-
         # Loop through all input events
         for event in self.editor.engine.events:
             if event.type == pg.MOUSEWHEEL:
@@ -89,6 +84,28 @@ class InputHandler:
             self.dragging = ''
             self.input_string = ''
             self.selected_text_attrib = None
+
+            if self.mouse_viewport_key == 'viewport':
+                x = (mouse_x / win_size[0] - self.dim.left) / (1 - self.dim.left - self.dim.right)  * win_size[0]
+                y = (mouse_y / win_size[1] - self.dim.top ) / (1 - self.dim.top  - self.dim.bottom) * win_size[1]
+                node = self.editor.engine.project.current_scene.get_model_node_at(x, y)
+                if node: 
+                    nodes = self.editor.engine.project.current_scene.node_handler.nodes
+                    index = nodes.index(node)
+                    self.editor.ui.hierarchy.selected_node_index = index
+                    self.editor.ui.refresh()
+                else:
+                    self.editor.ui.hierarchy.selected_node_index = -1
+                    self.editor.ui.refresh()
+
+        # Delete button
+        if prev_keys[pg.K_DELETE] and not keys[pg.K_DELETE]:
+            node_handler = self.editor.engine.project.current_scene.node_handler
+            if self.editor.ui.hierarchy.selected_node_index < 0: return
+            node = node_handler.nodes[self.editor.ui.hierarchy.selected_node_index]
+            if not node: return
+            node_handler.remove(node)
+            self.editor.ui.refresh()
 
         match self.dragging:
             case 'bottom':
