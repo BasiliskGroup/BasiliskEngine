@@ -160,7 +160,7 @@
             "name": "base",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    1.0,
+                    0.0,
                     1.0,
                     1.0,
                     1.0
@@ -1047,6 +1047,106 @@
             ],
             "mesh": 5,
             "material": 8
+        },
+        {
+            "name": "american_flag",
+            "translation": [
+                37.0,
+                23.25,
+                -58.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 8
+        },
+        {
+            "name": "american_flag",
+            "translation": [
+                -37.0,
+                23.25,
+                -58.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 8
+        },
+        {
+            "name": "10090_white_house_v1_L1",
+            "translation": [
+                0.0,
+                0.0,
+                30.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 2
+        },
+        {
+            "name": "wall_lantern",
+            "translation": [
+                -15.0,
+                25.0,
+                -58.5
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 9,
+            "material": 9
+        },
+        {
+            "name": "wall_lantern",
+            "translation": [
+                15.0,
+                25.0,
+                -58.5
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 9,
+            "material": 9
         }
     ],
     "scenes": [

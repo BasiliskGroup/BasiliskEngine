@@ -29,9 +29,6 @@ class Scene:
         self.project = project
         self.ctx = self.engine.ctx
 
-        # Makes a free cam
-        self.camera = FollowCamera(self.engine, radius = 40)
-
         # Gets handlers from parent project
         self.vao_handler = self.project.vao_handler
         # model handler
@@ -43,6 +40,9 @@ class Scene:
         self.node_handler = NodeHandler(self)
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
+        
+        # Makes a free cam
+        self.camera = FollowCamera(self.engine, radius = 40, scene=self)
                 
         with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
         exec(scene_on_init)
@@ -830,6 +830,14 @@ class Scene:
         best_node  = None
         pixel_position = glm.vec2(x, y)
         
+        # inv_proj, inv_view = glm.inverse(self.camera.m_proj), glm.inverse(self.camera.m_view)
+        # ndc   = glm.vec4(2 * pixel_position[0] / self.project.engine.win_size[0] - 1, 1 - 2 * pixel_position[1] / self.project.engine.win_size[1], 1, 1)
+        # point = inv_proj * ndc
+        # point /= point.w
+        # forward = glm.vec3(inv_view * glm.vec4(point.x, point.y, point.z, 0))
+        
+        # self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material)
+        
         for root in self.node_handler.nodes:
             nodes = root.get_nodes(True, has_collider, has_physics_body, material)
             for node in nodes: 
@@ -859,11 +867,8 @@ class Scene:
         matrix = get_model_matrix(model.position, model.scale, model.rotation)
         model_vertices = self.model_handler.vbos[model.vbo].unique_points
         
-        # print('model vertices', model_vertices)
-        
         for triangle in self.model_handler.vbos[model.vbo].indicies:
             points = []
-            # print(triangle, len(self.model_handler.vbos[model.vbo].unique_points))
             for point in [model_vertices[t] for t in triangle]:
                 
                 # remove points behind the clip plane
@@ -891,5 +896,5 @@ class Scene:
                 if u >= 0 and v >= 0 and u + v <= 1 and test_distance < distance: 
                     best_model = model
                     distance = test_distance
-                    
+                       
         return best_model
