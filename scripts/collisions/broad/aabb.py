@@ -1,5 +1,5 @@
 import glm
-from scripts.generic.math_functions import get_aabb_collision
+from scripts.generic.math_functions import get_aabb_collision, get_aabb_line_collision
 
 class AABB():
     def __init__(self, a, b, parent):
@@ -44,7 +44,6 @@ class AABB():
         """
         return self.get_test_surface(test_volume) - self.surface_area
 
-
     def find_sibling(self, collider, c_best, inherited):
         """
         Gets the best sibling for the given collider.
@@ -74,10 +73,16 @@ class AABB():
         """
         Returns every possible collider that may have collided with the given collider. 
         """
-        # check for overlap with self
+        # check for overlap with self, if a success was detected, run aabb on children
         if not get_aabb_collision(self.top_right, self.bottom_left, collider.top_right, collider.bottom_left): return []
-        # if a success was detected, run aabb on children
         return self.a.get_collided(collider) + self.b.get_collided(collider)
+    
+    def get_line_collided(self, point:glm.vec3, vec:glm.vec3) -> list:
+        """
+        Returns every possible collider that may have collided with the given line. 
+        """
+        if not get_aabb_line_collision(self.top_right, self.bottom_left, point, vec): return []
+        return self.a.get_line_collided(point, vec) + self.b.get_line_collided(point, vec)
             
     @property
     def a(self): return self._a

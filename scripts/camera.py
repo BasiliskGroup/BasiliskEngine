@@ -1,7 +1,7 @@
 import glm
 import pygame as pg
 
-from scripts.generic.math_functions import get_model_matrix
+from scripts.generic.math_functions import get_model_matrix, moller_trumbore
 
 # Camera view constants
 FOV = 50  # Degrees
@@ -16,9 +16,10 @@ class Camera:
     """
     Camera object to get view and projection matricies. Movement built in
     """
-    def __init__(self, engine, position=(0, 0, 20), yaw=-90, pitch=0) -> None:
+    def __init__(self, engine, scene, position=(0, 0, 20), yaw=-90, pitch=0) -> None:
         # Stores the engine to acces viewport and inputs
         self.engine = engine
+        self.scene  = scene
         # The initial aspect ratio of the screen
         self.aspect_ratio = self.engine.win_size[0] / self.engine.win_size[1]
         # Position
@@ -103,33 +104,55 @@ class Camera:
     def get_params(self) -> tuple:
         return self.engine, self.position, self.yaw, self.pitch
     
-    # def get_model_node_at(self, forward:glm.vec3=None, max_distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None):
-    #     if not forward: forward = self.forward
+    def get_model_node_at(self, position:glm.vec3=None, forward:glm.vec3=None, max_distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None) -> tuple:
+        if not forward:  forward  = self.forward
+        if not position: position = self.position
+        forward = glm.normalize(forward)
         
-    #     # return best_node
-    #     nodes = []
-    #     for root in self.scene.node_handler.nodes: nodes.extend(root.get_nodes(True, has_collider, has_physics_body, material))
-    #     best_distance = max_distance
-    #     for node in nodes:
-    #         if glm.dot(forward, node.position - self.position) < 0 and node.scale.x * node.scale.y * node.scale.z < (node.position - self.position) ** 2: continue
+        # return best_node
+        nodes = []
+        for root in self.scene.node_handler.nodes: nodes.extend(root.get_nodes(True, has_collider, has_physics_body, material))
+        best_distance, best_point, best_node = max_distance, None, None
+        
+        for node in nodes:
+            # if glm.dot(forward, node.position - self.position) < 0 and node.scale.x * node.scale.y * node.scale.z < glm.length(node.position - self.position) ** 2: continue
             
-    #         # get model matrix & convert points
-    #         model = node.model
-    #         model_matrix = get_model_matrix(model.position, model.scale, model.rotation)
-    #         world_vertices = [model_matrix * glm.vec4(*vert, 1) for vert in self.model_handler.vbos[model.vbo].unique_points]
+            # get model matrix & convert points
+            model          = node.model
+            model_matrix   = get_model_matrix(model.position, model.scale, model.rotation)
+            # print(self.scene.model_handler.vbos[model.vbo].unique_points)
+            world_vertices = [glm.vec3(model_matrix * glm.vec4(*vert, 1)) for vert in self.scene.model_handler.vbos[model.vbo].unique_points]
+            
+            # get nearest point
+            for triangle in self.scene.model_handler.vbos[model.vbo].indicies:
+                intersection = moller_trumbore(position, forward, [world_vertices[t] for t in triangle])
+                if not intersection: continue
+                # else: print(intersection)
+                distance = glm.length(intersection - position)
+                if distance < best_distance:
+                    best_distance = distance
+                    best_point    = intersection
+                    best_node     = node
+                    
+        return best_node, best_point
     
 # camera that will be attached to node
 class FollowCamera(Camera):
-    def __init__(self, engine, radius, yaw=-90, pitch=0):
+    def __init__(self, engine, radius, scene, yaw=-90, pitch=0):
         self.anchor = glm.vec3(0, 0, 0)
         self.radius = radius
-        super().__init__(engine, (0, 0, 0), yaw, pitch)
+        self.scene = scene
+        super().__init__(engine, scene, (0, 0, 0), yaw, pitch)
         
     def move(self):
         pass # does nothing since movement is locked to parent
     
     def get_view_matrix(self) -> glm.mat4x4:
-        self.position = self.anchor - self.forward * self.radius
+        distance = self.radius
+        node, point = self.get_model_node_at(position=self.position, forward=self.forward, has_collider=True, max_distance=self.radius * 10) # self.position - self.anchor
+        print(node, point)
+        # if point: distance = glm.length(self.anchor - point)
+        self.position = self.anchor - self.forward * distance
         return glm.lookAt(self.position, self.anchor, self.up)
     
 class StaticCamera(Camera):

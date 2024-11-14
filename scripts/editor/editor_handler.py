@@ -33,7 +33,7 @@ class Editor:
         self.viewport_dim.callback = self.viewport_resize
         
         # Create a camera for the editor viewport and override the scene camera
-        self.camera = Camera(self.engine, (0, 0, 0))
+        self.camera = Camera(self.engine, engine.project.current_scene, (0, 0, 0))
         self.engine.project.current_scene.camera = self.camera
 
         # Will update the scene with the editors attributes

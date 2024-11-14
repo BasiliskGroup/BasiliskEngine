@@ -1,4 +1,5 @@
 from scripts.collisions.broad.aabb import AABB
+import glm
 
 class BoundingVolumeHeirarchy():
     def __init__(self, collider_handler):
@@ -60,9 +61,12 @@ class BoundingVolumeHeirarchy():
         Gets the possible narrow collisions from the root aabb
         """
         return self.root.get_collided(collider)
+    
+    def get_line_collided(self, point:glm.vec3, vec:glm.vec3):
+        return self.root.get_line_collided(point, glm.normalize(vec))
         
     # TODO witawy aw dis
-    def remove_collider(self, collider):
+    def remove_collider(self, collider) -> list:
         ...
         
     def rotate(self, aabb):

@@ -1,5 +1,5 @@
 import glm
-from scripts.generic.math_functions import get_aabb_collision
+from scripts.generic.math_functions import get_aabb_collision, get_aabb_line_collision
 from scripts.generic.math_functions import get_model_matrix
 
 class Collider():
@@ -58,8 +58,12 @@ class Collider():
         # compute lowest cost
         return self.get_test_surface(collider) + inherited, self
     
-    def get_collided(self, collider):
+    def get_collided(self, collider) -> list:
         if self.node is not collider.node and get_aabb_collision(self.top_right, self.bottom_left, collider.top_right, collider.bottom_left): return [self] # do not need to check is self since they will have the same node
+        return []
+    
+    def get_line_collided(self, point:glm.vec3, vec:glm.vec3) -> list:
+        if get_aabb_line_collision(self.top_right, self.bottom_left, point, vec): return [self]
         return []
     
     def get_test_surface(self, test_volume) -> float:

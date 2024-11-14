@@ -8,6 +8,9 @@
             "uri": "toy_001.obj"
         },
         {
+            "uri": "toy_001.obj"
+        },
+        {
             "uri": "cow.obj"
         },
         {
@@ -15,6 +18,12 @@
         },
         {
             "uri": "bunny.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "curtain.obj"
         },
         {
             "uri": "kitchen_sink_001.obj"
@@ -57,6 +66,9 @@
         },
         {
             "uri": "container.png"
+        },
+        {
+            "uri": "colors.png"
         },
         {
             "uri": "colors.png"
@@ -158,6 +170,9 @@
         },
         {
             "sampler": 17
+        },
+        {
+            "sampler": 17
         }
     ],
     "materials": [
@@ -179,6 +194,7 @@
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     0.0,
+                    0.0,
                     1.0,
                     1.0,
                     1.0
@@ -186,6 +202,7 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
+                    "index": 11,
                     "index": 11,
                     "texCoord": 1
                 }
@@ -217,10 +234,12 @@
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
                     "index": 5,
+                    "index": 5,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
+                "index": 7,
                 "index": 7,
                 "texCoord": 1,
                 "scale": 1
@@ -231,6 +250,7 @@
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     0.8500000238418579,
+                    0.949999988079071,
                     0.949999988079071,
                     1.0,
                     1.0
@@ -266,6 +286,7 @@
             },
             "normalTexture": {
                 "index": 5,
+                "index": 5,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -277,9 +298,17 @@
                     0.5799999833106995,
                     0.4000000059604645,
                     0.30000001192092896,
+                    0.5799999833106995,
+                    0.4000000059604645,
+                    0.30000001192092896,
                     1.0
                 ],
                 "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 16,
+                    "texCoord": 1
+                }
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
                     "index": 16,
@@ -300,6 +329,7 @@
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
                     "index": 12,
+                    "index": 12,
                     "texCoord": 1
                 }
             }
@@ -317,10 +347,12 @@
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
                     "index": 8,
+                    "index": 8,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
+                "index": 15,
                 "index": 15,
                 "texCoord": 1,
                 "scale": 1
@@ -338,6 +370,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
+                    "index": 11,
                     "index": 11,
                     "texCoord": 1
                 }
@@ -468,6 +501,7 @@
                 0.0
             ],
             "mesh": 10,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -488,6 +522,7 @@
                 0.0
             ],
             "mesh": 10,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -508,6 +543,7 @@
                 0.0
             ],
             "mesh": 10,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -527,6 +563,7 @@
                 0.0,
                 0.0
             ],
+            "mesh": 10,
             "mesh": 10,
             "material": 3
         },
@@ -648,6 +685,7 @@
                 0.0
             ],
             "mesh": 10,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -667,6 +705,7 @@
                 0.0,
                 0.0
             ],
+            "mesh": 10,
             "mesh": 10,
             "material": 6
         },
@@ -688,6 +727,7 @@
                 0.0
             ],
             "mesh": 10,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -708,6 +748,7 @@
                 0.0
             ],
             "mesh": 10,
+            "mesh": 10,
             "material": 5
         },
         {
@@ -727,6 +768,7 @@
                 0.0,
                 0.0
             ],
+            "mesh": 10,
             "mesh": 10,
             "material": 7
         },
@@ -848,6 +890,7 @@
                 0.0
             ],
             "mesh": 10,
+            "mesh": 10,
             "material": 7
         },
         {
@@ -867,6 +910,7 @@
                 0.0,
                 0.0
             ],
+            "mesh": 6,
             "mesh": 6,
             "material": 7
         },
@@ -988,6 +1032,7 @@
                 0.0
             ],
             "mesh": 6,
+            "mesh": 6,
             "material": 7
         },
         {
@@ -1007,6 +1052,7 @@
                 1.590000033378601,
                 0.0
             ],
+            "mesh": 8,
             "mesh": 8,
             "material": 8
         },
@@ -1028,6 +1074,7 @@
                 0.0
             ],
             "mesh": 12,
+            "mesh": 12,
             "material": 9
         },
         {
@@ -1048,6 +1095,7 @@
                 0.0
             ],
             "mesh": 12,
+            "mesh": 12,
             "material": 9
         },
         {
@@ -1067,6 +1115,7 @@
                 3.140000104904175,
                 0.0
             ],
+            "mesh": 8,
             "mesh": 8,
             "material": 8
         },

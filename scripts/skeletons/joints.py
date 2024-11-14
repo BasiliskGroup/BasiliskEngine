@@ -4,7 +4,7 @@ from scripts.skeletons.animation import Animation
 
 # child free to move within radius, child must point at offset
 class BallJoint(): 
-    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e4, fixed=False): # parent and child not saved for splitting
+    def __init__(self, child_bone, parent_offset:glm.vec3, child_offset:glm.vec3, spring_constant:float=1e5, fixed=False): # parent and child not saved for splitting
         # child bone
         self.child_bone = child_bone
         

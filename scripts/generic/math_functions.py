@@ -50,3 +50,42 @@ def get_rotation_matrix(rotation) -> glm.mat3x3:
 # collision formulas  
 def get_aabb_collision(top_right1, bottom_left1, top_right2, bottom_left2, epsilon:float=1) -> bool:
     return all(bottom_left1[i] <= top_right2[i] + epsilon and epsilon + top_right1[i] >= bottom_left2[i] for i in range(3))
+
+def get_aabb_line_collision(top_right:glm.vec3, bottom_left:glm.vec3, point:glm.vec3, vec:glm.vec3) -> bool:
+    tmin, tmax = -1e10, 1e10
+    for i in range(3):
+        if vec[i] != 0:
+            tlow   = (bottom_left[i] - point[i]) / vec[i]
+            thigh  = (top_right[i]   - point[i]) / vec[i]
+            tentry = min(tlow, thigh)
+            texit  = max(tlow, thigh)
+            tmin   = max(tmin, tentry)
+            tmax   = min(tmax, texit)
+        elif point[i] < bottom_left[i] or point[i] > top_right: return False
+    return tmin <= tmax and tmax >= 0 and tmin <= 1
+        
+def moller_trumbore(point:glm.vec3, vec:glm.vec3, triangle:list[glm.vec3], epsilon:float=1e-7) -> glm.vec3:
+    """
+    Determines where a line intersects with a triangle and where that intersection occurred
+    """
+    edge1, edge2 = triangle[1] - triangle[0], triangle[2] - triangle[0]
+    ray_cross = glm.cross(vec, edge2)
+    det = glm.dot(edge1, ray_cross)
+    
+    # if the ray is parallel to the triangle
+    if abs(det) < epsilon: return None
+    
+    inv_det = 1 / det
+    s = point - triangle[0]
+    u = glm.dot(s, ray_cross) * inv_det
+    
+    if (u < 0 and abs(u) > epsilon) or (u > 1 and abs(u - 1) > epsilon): return None
+    
+    s_cross = glm.cross(s, edge1)
+    v = glm.dot(vec, s_cross) * inv_det
+    
+    if (v < 0 and abs(v) > epsilon) or (u + v > 1 and abs(u + v - 1) > epsilon): return None
+    
+    t = glm.dot(edge2, s_cross) * inv_det
+    if t > epsilon: return point + vec * t
+    return None
