@@ -72,6 +72,9 @@
         },
         {
             "uri": "dish_001.obj"
+        },
+        {
+            "uri": "cube.obj"
         }
     ],
     "meshes": [],
@@ -311,7 +314,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 2
         },
         {
@@ -331,7 +334,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 2
         },
         {
@@ -351,7 +354,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 3
         },
         {
@@ -371,7 +374,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 3
         },
         {
@@ -391,7 +394,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 3
         },
         {
@@ -411,7 +414,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 4
         },
         {
@@ -431,7 +434,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 3
         },
         {
@@ -451,7 +454,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": "cube",
+            "mesh": 23,
             "material": 2
         },
         {

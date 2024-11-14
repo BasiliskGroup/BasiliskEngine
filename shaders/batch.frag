@@ -60,11 +60,11 @@ struct Material {
 };
 
 uniform DirLight dirLight;
-#define maxLights 100
+#define maxLights 80
 uniform int numPointLights;
 uniform PointLight pointLights[maxLights];
 
-#define maxMaterials 10
+#define maxMaterials 20
 uniform Material materials[maxMaterials];
 uniform sampler2D materialsTexture;
 

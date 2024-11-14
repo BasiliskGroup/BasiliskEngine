@@ -13,7 +13,7 @@ class LightHandler:
         self.dir_light = DirectionalLight(ambient=.25, diffuse=0.75, specular=0.5)
         # Create random point lights
         place_range = 30
-        self.point_lights = [PointLight(pos=(random.randrange(-place_range, place_range), random.randrange(-place_range, place_range), random.randrange(-place_range, place_range)), color=(random.uniform(0.0, 1.0), random.uniform(0.0, 1.0), random.uniform(0.0, 1.0))) for i in range(10)]
+        self.point_lights = [PointLight(pos=(random.randrange(-place_range, place_range), random.randrange(-place_range, place_range), random.randrange(-place_range, place_range)), color=(random.uniform(0.0, 1.0), random.uniform(0.0, 1.0), random.uniform(0.0, 1.0))) for i in range(0)]
 
     def write(self, program, dir=True, point=True):
         # Get the program
