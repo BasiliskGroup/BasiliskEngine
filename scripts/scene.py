@@ -60,7 +60,7 @@ class Scene:
         
         #save_scene(self, "test_save")
             
-        # # level 1 #################################################################################################
+        # level 1 #################################################################################################
         
         # self.node_handler.add(
         #     position=(-30, -4, 40),
@@ -189,9 +189,9 @@ class Scene:
         # self.node_handler.add(
         #     position=(0, 7, 0),
         #     scale=(10, 10, 10),
-        #     model='cube',
-        #     material='yellow',
-        #     collider=self.collider_handler.add(vbo='cube', static=False),
+        #     model='sphere',
+        #     material='brick',
+        #     collider=self.collider_handler.add(vbo='sphere', static=False),
         #     physics_body=self.physics_body_handler.add(mass=100),
         #     name='box'
         # )
@@ -869,7 +869,7 @@ class Scene:
         matrix = get_model_matrix(model.position, model.scale, model.rotation)
         vbo = self.model_handler.vbos[model.vbo]
         model_vertices = vbo.unique_points if isinstance(vbo, (CubeVBO, RuntimeVBO)) else vbo.model.vertex_points
-        print(model_vertices)
+        # print(model_vertices)
         
         for triangle in self.model_handler.vbos[model.vbo].indicies:
             points = []

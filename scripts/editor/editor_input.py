@@ -99,7 +99,7 @@ class InputHandler:
                     self.editor.ui.refresh()
 
         # Delete button
-        if prev_keys[pg.K_DELETE] and not keys[pg.K_DELETE]:
+        if prev_keys[pg.K_DELETE] and not keys[pg.K_DELETE] or prev_keys[pg.K_BACKSPACE] and not keys[pg.K_BACKSPACE]:
             node_handler = self.editor.engine.project.current_scene.node_handler
             if self.editor.ui.hierarchy.selected_node_index < 0: return
             node = node_handler.nodes[self.editor.ui.hierarchy.selected_node_index]

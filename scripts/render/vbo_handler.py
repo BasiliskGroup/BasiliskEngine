@@ -192,7 +192,7 @@ class ModelVBO(BaseVBO):
         self.format = self.model.format
         self.attribs = self.model.attribs
         self.triangles = None
-        self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
+        # self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
         self.indicies = []
 
     def get_vbo(self):
@@ -203,13 +203,15 @@ class ModelVBO(BaseVBO):
         self.vertex_data = self.get_vertex_data()
         vbo = self.ctx.buffer(self.vertex_data)
 
-        unique_points_set = set()
-        self.unique_points = []
-        for x in self.vertex_data[:,:3].tolist():
-            if tuple(x) not in unique_points_set:
-                self.unique_points.append(x)
-                unique_points_set.add(tuple(x))
-        self.unique_points = np.array(self.unique_points, dtype='f4')
+        # unique_points_set = set()
+        # self.unique_points = []
+        # for x in self.vertex_data[:,:3].tolist():
+        #     if tuple(x) not in unique_points_set:
+        #         self.unique_points.append(x)
+        #         unique_points_set.add(tuple(x))
+        # self.unique_points = np.array(self.unique_points, dtype='f4')
+        
+        self.unique_points = self.model.vertex_points
         
         #[self.unique_points.append(x) for x in self.vertex_data[:,:3].tolist() if x not in self.unique_points]
         #self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
