@@ -192,8 +192,6 @@ class ModelVBO(BaseVBO):
         self.format = self.model.format
         self.attribs = self.model.attribs
         self.triangles = None
-        # self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
-        self.indicies = []
 
     def get_vbo(self):
         """
@@ -202,19 +200,9 @@ class ModelVBO(BaseVBO):
         
         self.vertex_data = self.get_vertex_data()
         vbo = self.ctx.buffer(self.vertex_data)
-
-        # unique_points_set = set()
-        # self.unique_points = []
-        # for x in self.vertex_data[:,:3].tolist():
-        #     if tuple(x) not in unique_points_set:
-        #         self.unique_points.append(x)
-        #         unique_points_set.add(tuple(x))
-        # self.unique_points = np.array(self.unique_points, dtype='f4')
         
         self.unique_points = self.model.vertex_points
-        
-        #[self.unique_points.append(x) for x in self.vertex_data[:,:3].tolist() if x not in self.unique_points]
-        #self.unique_points = np.array(list(set(map(tuple, self.vertex_data))), dtype='f4')
+        self.indicies = self.model.point_indices
 
         return vbo
 
@@ -242,18 +230,21 @@ class RuntimeVBO(BaseVBO):
         self.unique_points = unique_points
         self.indicies = [tuple(i) for i in indicies]
         super().__init__(ctx)
-        self.format = '3f 2f 3f'
-        self.attribs = ['in_position', 'in_uv', 'in_normal']
+        self.format = '3f 2f 3f 3f 3f'
+        self.attribs = ['in_position', 'in_uv', 'in_normal', 'in_tangent', 'in_bitangent']
         self.unique_points = unique_points
         
     def get_vertex_data(self):
 
         vertex_data = self.get_data(self.unique_points, self.indicies)
 
+        # faked data - we cannot use textures or normals
         tex_coord_verticies = [(0, 0), (1, 0), (1, 1), (0, 1)]
         tex_coord_indicies = [(0, 1, 2) for _ in range(len(self.indicies))]
         tex_coord_data = self.get_data(tex_coord_verticies, tex_coord_indicies)
+        
 
+        # calculate normal
         normals = []
         for i, triangle in enumerate(self.indicies):
             points  = [np.array(self.unique_points[triangle[i]]) for i in range(3)]
@@ -264,8 +255,13 @@ class RuntimeVBO(BaseVBO):
             normals.extend([normal for _ in range(3)])
             
         normals = np.array(normals, dtype='f4').reshape(len(self.indicies) * 3, 3)
+        
+        tangents = [(1, 0, 0) for _ in range(len(normals))]
+        bitangents = [(0, 1, 0) for _ in range(len(normals))]
 
         vertex_data = np.hstack([vertex_data, tex_coord_data])
         vertex_data = np.hstack([vertex_data, normals])
+        vertex_data = np.hstack([vertex_data, tangents])
+        vertex_data = np.hstack([vertex_data, bitangents])
         
         return vertex_data

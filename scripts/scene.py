@@ -188,10 +188,10 @@ class Scene:
         
         # self.node_handler.add(
         #     position=(0, 7, 0),
-        #     scale=(10, 10, 10),
-        #     model='sphere',
-        #     material='brick',
-        #     collider=self.collider_handler.add(vbo='sphere', static=False),
+        #     scale=(100, 100, 100),
+        #     model='bunny',
+        #     material='yellow',
+        #     collider=self.collider_handler.add(vbo='bunny', static=False),
         #     physics_body=self.physics_body_handler.add(mass=100),
         #     name='box'
         # )
@@ -222,15 +222,15 @@ class Scene:
         #     name='platform'
         # )
         
-        # self.node_handler.add(
-        #     position=(0, 27, -80),
-        #     scale=(10, 10, 10),
-        #     model='cube',
-        #     material='yellow',
-        #     collider=self.collider_handler.add(vbo='cube', static=False),
-        #     physics_body=self.physics_body_handler.add(mass=100),
-        #     name='box'
-        # )
+        # # self.node_handler.add(
+        # #     position=(0, 27, -80),
+        # #     scale=(10, 10, 10),
+        # #     model='cube',
+        # #     material='yellow',
+        # #     collider=self.collider_handler.add(vbo='cube', static=False),
+        # #     physics_body=self.physics_body_handler.add(mass=100),
+        # #     name='box'
+        # # )
         
         # # john bitcock #############################################################################################
         
@@ -335,7 +335,7 @@ class Scene:
         #     scale=(1, 1.5, 1),
         #     rotation=(0, 0, 0),
         #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-        #     physics_body=self.physics_body_handler.add(mass=2000),
+        #     physics_body=self.physics_body_handler.add(mass=10000),
         #     nodes=[
         #         self.node_handler.create(
         #             position=(-2, 6, -2),
@@ -780,7 +780,6 @@ class Scene:
             if file: save_scene(self, abs_file_path=file)
 
         if self.engine.keys[pg.K_LCTRL] and self.engine.keys[pg.K_l]:
-            print(platform.system())
             if platform.system() == "Darwin": 
                 file = input("Enter file path: ")
                 if not file.endswith('.gltf'): file += ".gltf"
@@ -826,26 +825,17 @@ class Scene:
         """
         Gets the closest node at the pixel position
         """
-        best_model = None
         best_node  = None
         pixel_position = glm.vec2(x, y)
         
-        # inv_proj, inv_view = glm.inverse(self.camera.m_proj), glm.inverse(self.camera.m_view)
-        # ndc   = glm.vec4(2 * pixel_position[0] / self.project.engine.win_size[0] - 1, 1 - 2 * pixel_position[1] / self.project.engine.win_size[1], 1, 1)
-        # point = inv_proj * ndc
-        # point /= point.w
-        # forward = glm.vec3(inv_view * glm.vec4(point.x, point.y, point.z, 0))
+        # determine forward vector from screen click
+        inv_proj, inv_view = glm.inverse(self.camera.m_proj), glm.inverse(self.camera.m_view)
+        ndc   = glm.vec4(2 * pixel_position[0] / self.project.engine.win_size[0] - 1, 1 - 2 * pixel_position[1] / self.project.engine.win_size[1], 1, 1)
+        point = inv_proj * ndc
+        point /= point.w
+        forward = glm.normalize(glm.vec3(inv_view * glm.vec4(point.x, point.y, point.z, 0)))
         
-        # node, point = self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material)
-        
-        # print(node)
-        
-        for root in self.node_handler.nodes:
-            nodes = root.get_nodes(True, has_collider, has_physics_body, material)
-            for node in nodes: 
-                temp_model = best_model
-                best_model = self.is_best_model(best_model, pixel_position, node.model, distance)
-                if best_model != temp_model: best_node = node
+        best_node, point = self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material)
                 
         return best_node
         
@@ -869,7 +859,6 @@ class Scene:
         matrix = get_model_matrix(model.position, model.scale, model.rotation)
         vbo = self.model_handler.vbos[model.vbo]
         model_vertices = vbo.unique_points if isinstance(vbo, (CubeVBO, RuntimeVBO)) else vbo.model.vertex_points
-        # print(model_vertices)
         
         for triangle in self.model_handler.vbos[model.vbo].indicies:
             points = []

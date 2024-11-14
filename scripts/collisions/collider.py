@@ -39,7 +39,6 @@ class Collider():
         
     def update_vertices(self):
         model_matrix  = get_model_matrix(self.position, self.scale, self.rotation)
-        print(self.unique_points)
         self.vertices = [glm.vec3((new := glm.mul(model_matrix, (*[float(f) for f in vertex], 1)))[0], new[1], new[2]) for vertex in self.unique_points]
         
     def update_geometric_center(self):

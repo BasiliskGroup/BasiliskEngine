@@ -57,7 +57,7 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
             # get the real location of points
             model_matrix = get_model_matrix(model.position, model.scale, model.rotation)
             world_points = []
-            ary = [(-1, -1, 1), ( 1, -1,  1), (1,  1,  1), (-1, 1,  1), (-1,  1,-1), (-1, -1, -1), (1, -1, -1), ( 1, 1, -1)] if model.vbo in ['cube'] else vbo.unique_points
+            ary = vbo.unique_points
             for unique_point in ary:
                 world_point = model_matrix * glm.vec4(*unique_point, 1)
                 world_points.append(glm.vec3(world_point))
