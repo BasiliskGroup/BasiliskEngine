@@ -120,14 +120,12 @@ class Camera:
             # get model matrix & convert points
             model          = node.model
             model_matrix   = get_model_matrix(model.position, model.scale, model.rotation)
-            # print(self.scene.model_handler.vbos[model.vbo].unique_points)
             world_vertices = [glm.vec3(model_matrix * glm.vec4(*vert, 1)) for vert in self.scene.model_handler.vbos[model.vbo].unique_points]
             
             # get nearest point
             for triangle in self.scene.model_handler.vbos[model.vbo].indicies:
                 intersection = moller_trumbore(position, forward, [world_vertices[t] for t in triangle])
                 if not intersection: continue
-                # else: print(intersection)
                 distance = glm.length(intersection - position)
                 if distance < best_distance:
                     best_distance = distance
@@ -149,8 +147,8 @@ class FollowCamera(Camera):
     
     def get_view_matrix(self) -> glm.mat4x4:
         distance = self.radius
-        node, point = self.get_model_node_at(position=self.position, forward=self.forward, has_collider=True, max_distance=self.radius * 10) # self.position - self.anchor
-        print(node, point)
+        #node, point = self.get_model_node_at(position=self.position, forward=self.forward, has_collider=True, max_distance=self.radius * 10) # self.position - self.anchor
+        # print(node, point)
         # if point: distance = glm.length(self.anchor - point)
         self.position = self.anchor - self.forward * distance
         return glm.lookAt(self.position, self.anchor, self.up)
