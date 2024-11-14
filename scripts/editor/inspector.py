@@ -38,13 +38,18 @@ class Inspector:
         self.component_height = 0
         # Reset the current attribute boxes (like buttons)
         self.attribute_boxes = []
+        self.toggles = []
 
-        if self.selected_node: self.render_title()
-        if self.selected_node: self.render_transform_component()
-        if self.selected_node: self.render_mtl_component()
+        if self.selected_node: 
+            self.render_title()
+            self.render_transform_component()
+            self.render_mtl_component()
+            self.render_physics_component()
 
         for box in self.attribute_boxes:
             self.render_attribute_box(*box)
+        for toggle in self.toggles:
+            self.render_toggle(*toggle)
 
         pg.draw.rect(self.surf, self.editor.ui.outline, (0, 0, self.dim[0], self.dim[1]), 1)
 
@@ -62,7 +67,7 @@ class Inspector:
         self.component_height += self.item_height * 2
 
     def render_transform_component(self):
-        start_x, start_y = 45, self.component_height
+        start_x, start_y = 65, self.component_height
         w, h = (self.dim[0] - start_x - 15) // 3, self.item_height
         padding = self.padding
         node = self.selected_node
@@ -86,7 +91,7 @@ class Inspector:
         self.component_height += h * 4
 
     def render_mtl_component(self):
-        start_x, start_y = 45, self.component_height
+        start_x, start_y = 65, self.component_height
         w, h = (self.dim[0] - start_x - 15) // 3, self.item_height
         padding = self.padding
         node = self.selected_node
@@ -137,7 +142,38 @@ class Inspector:
         else:
             pg.draw.rect(self.surf, (0, 0, 0), (self.dim[0]/2 + (self.dim[0]/2 - img_size) / 2, start_y + h * 4, img_size, img_size), 2)
 
-        self.component_height += h * 4 + img_size
+        self.component_height += h * 4 + img_size + padding
+
+    def render_physics_component(self):
+        start_x, start_y = 65, self.component_height
+        w, h = (self.dim[0] - start_x - 15) // 3, self.item_height
+        padding = self.padding
+        node = self.selected_node
+        size = w - padding * 2, h - padding * 2
+
+        y_level = start_y
+
+        # Has Collider body
+        self.editor.font.render_text(self.surf, (padding, y_level + h/2), 'Collider', size=0)
+        self.toggles.append((node, (start_x + w * 0 + padding, y_level + padding, h - padding * 2, h - padding * 2), 'collider'))
+        y_level += h
+
+        # Is static
+        if node.collider:
+            self.editor.font.render_text(self.surf, (padding, y_level + h/2), 'Static', size=0)
+            self.toggles.append((node.collider, (start_x + w * 0 + padding, y_level + padding, h - padding * 2, h - padding * 2), 'static'))
+            y_level += h
+
+        # Has Physics body
+        self.editor.font.render_text(self.surf, (padding, y_level + h/2), 'Physics', size=0)
+        self.toggles.append((node, (start_x + w * 0 + padding, y_level + padding, h - padding * 2, h - padding * 2), 'physics_body'))
+        y_level += h
+
+        # Mass
+        if node.physics_body:
+            self.editor.font.render_text(self.surf, (padding, y_level + h/2), 'Mass', size=0)
+            self.attribute_boxes.append((node.physics_body, (start_x + w * 0 + padding, y_level + padding, size[0] * 3 + padding * 4, size[1]), 'mass'))
+            y_level += h
 
     def render_attribute_box(self, node, rect, attrib_name):
         """
@@ -154,6 +190,17 @@ class Inspector:
             text = f'{value:.2f}'
         pg.draw.rect(self.surf, color, rect)
         self.editor.font.render_text(self.surf, (rect[0] + rect[2] / 2, rect[1] + rect[3] / 2), text, size=3, center_width=True)
+
+    def render_toggle(self, node, rect, attrib_name):
+        """
+        Renders a toggle button for a boolean value
+        """
+        
+        width = 3
+        pg.draw.rect(self.surf, (159, 150, 150) if getattr(node, attrib_name) else self.ui.accent, rect, width)
+        pg.draw.rect(self.surf, (0, 0, 0), rect, 1)
+        if getattr(node, attrib_name): 
+            pg.draw.rect(self.surf, (159, 150, 150), (rect[0] + width + 2, rect[1] + width + 2, rect[2] - width * 2 - 4, rect[3] - width * 2 - 4))
 
     def get_node(self):
         """
@@ -172,10 +219,17 @@ class Inspector:
         mouse_x, mouse_y = self.engine.mouse_position[0] - (1 - self.editor.viewport_dim.right) * self.engine.win_size[0], self.engine.mouse_position[1] - self.editor.viewport_dim.top * self.engine.win_size[1]
         
         if self.engine.prev_mouse_buttons[0] and not self.engine.mouse_buttons[0]:
+            # Check for input into an attribute box
             for box in self.attribute_boxes:
                 box_pos = box[1]
                 if box_pos[0] < mouse_x <= box_pos[0] + box_pos[2] and box_pos[1] < mouse_y <= box_pos[1] + box_pos[3]:
                     self.input.selected_attrib = (box[0], box[2])
+                    self.ui.refresh()
+            # Check if a toggle should be switched
+            for toggle in self.toggles:
+                toggle_pos = toggle[1]
+                if toggle_pos[0] < mouse_x <= toggle_pos[0] + toggle_pos[2] and toggle_pos[1] < mouse_y <= toggle_pos[1] + toggle_pos[3]:
+                    self.apply_toggle(toggle[0], toggle[2])
                     self.ui.refresh()
 
     def apply_input_string(self):
@@ -194,6 +248,25 @@ class Inspector:
         self.input.input_string = ''
 
         self.editor.viewport_resize()
+
+    def apply_toggle(self, obj, attrib):
+        scene = self.engine.project.current_scene
+        match attrib:
+            case "physics_body":
+                if obj.physics_body:
+                    obj.physics_body = None
+                else:
+                    physics_body = scene.physics_body_handler.add(mass=1)
+                    obj.physics_body = physics_body
+            case "collider":
+                if obj.collider:
+                    obj.collider = None
+                else:
+                    print(obj.model.vbo)
+                    collider = scene.collider_handler.add(vbo=obj.model.vbo, static=True)
+                    obj.collider = collider
+            case "static":
+                obj.static = not obj.static
 
     def scroll(self, value) -> None:
         ...

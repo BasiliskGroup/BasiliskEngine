@@ -83,7 +83,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
             body = physics_body_handler.add(mass=node["physics_body"]["mass"])
             kwargs["physics_body"] = body
         if "collider" in node:
-            collider = collider_handler.add(vbo=node["physics_body"]["mass"], static=node["physics_body"]["static"])
+            collider = collider_handler.add(vbo=kwargs["model"], static=node["physics_body"]["static"])
             kwargs["collider"] = collider
 
         scene.node_handler.add(**kwargs)

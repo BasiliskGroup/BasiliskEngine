@@ -80,12 +80,8 @@ class InputHandler:
                     self.dragging = 'left'
                 elif (1 - self.dim.right) * win_size[0] - threshold < mouse_x <= (1 - self.dim.right) * win_size[0] + threshold and self.dim.top * win_size[1] < mouse_y <= (1 - self.dim.bottom) * win_size[1]:
                     self.dragging = 'right'
-        elif prev_mouse_buttons[0]:
-            self.dragging = ''
-            self.input_string = ''
-            self.selected_text_attrib = None
-
-            if self.mouse_viewport_key == 'viewport':
+                
+            if not self.dragging and self.mouse_viewport_key == 'viewport':
                 x = (mouse_x / win_size[0] - self.dim.left) / (1 - self.dim.left - self.dim.right)  * win_size[0]
                 y = (mouse_y / win_size[1] - self.dim.top ) / (1 - self.dim.top  - self.dim.bottom) * win_size[1]
                 node = self.editor.engine.project.current_scene.get_model_node_at(x, y)
@@ -97,6 +93,10 @@ class InputHandler:
                 else:
                     self.editor.ui.hierarchy.selected_node_index = -1
                     self.editor.ui.refresh()
+        elif prev_mouse_buttons[0]:
+            self.dragging = ''
+            self.input_string = ''
+            self.selected_text_attrib = None
 
         # Delete button
         if prev_keys[pg.K_DELETE] and not keys[pg.K_DELETE]:

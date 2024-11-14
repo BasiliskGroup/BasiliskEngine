@@ -1,0 +1,309 @@
+{
+    "asset": {
+        "version": "2.0"
+    },
+    "scene": 0,
+    "buffers": [
+        {
+            "uri": "10090_white_house_v1_L1.obj"
+        },
+        {
+            "uri": "american_flag.obj"
+        },
+        {
+            "uri": "bunny.obj"
+        },
+        {
+            "uri": "closet_001.obj"
+        },
+        {
+            "uri": "closet_002.obj"
+        },
+        {
+            "uri": "cow.obj"
+        },
+        {
+            "uri": "cube.obj"
+        },
+        {
+            "uri": "curtain.obj"
+        },
+        {
+            "uri": "cylinder.obj"
+        },
+        {
+            "uri": "dish_001.obj"
+        },
+        {
+            "uri": "dish_002.obj"
+        },
+        {
+            "uri": "donut.obj"
+        },
+        {
+            "uri": "dresser_001.obj"
+        },
+        {
+            "uri": "drink_001.obj"
+        },
+        {
+            "uri": "drink_002.obj"
+        },
+        {
+            "uri": "Fence_Design_3.obj"
+        },
+        {
+            "uri": "fridge_001.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "kitchen_table_001.obj"
+        },
+        {
+            "uri": "lucy.obj"
+        },
+        {
+            "uri": "monkey.obj"
+        },
+        {
+            "uri": "oak_tree.obj"
+        },
+        {
+            "uri": "sphere.obj"
+        },
+        {
+            "uri": "toy_001.obj"
+        },
+        {
+            "uri": "tv_wall_001.obj"
+        },
+        {
+            "uri": "wall_lantern.obj"
+        }
+    ],
+    "meshes": [],
+    "images": [
+        {
+            "uri": "alley_brick.png"
+        },
+        {
+            "uri": "alley_brick_normal.png"
+        },
+        {
+            "uri": "america.jpg"
+        },
+        {
+            "uri": "box.png"
+        },
+        {
+            "uri": "brick.png"
+        },
+        {
+            "uri": "brick_normal.png"
+        },
+        {
+            "uri": "colors.png"
+        },
+        {
+            "uri": "concrete.png"
+        },
+        {
+            "uri": "concrete_normal.png"
+        },
+        {
+            "uri": "container.png"
+        },
+        {
+            "uri": "cow.png"
+        },
+        {
+            "uri": "declaration.png"
+        },
+        {
+            "uri": "floral_wallpaper.png"
+        },
+        {
+            "uri": "floral_wallpaper_normal.png"
+        },
+        {
+            "uri": "hungarian_flooring.png"
+        },
+        {
+            "uri": "hungarian_flooring_normal.png"
+        },
+        {
+            "uri": "lantern.png"
+        },
+        {
+            "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "metal.png"
+        },
+        {
+            "uri": "normal_map.png"
+        },
+        {
+            "uri": "normal_map2.png"
+        },
+        {
+            "uri": "oak_tree.jpg"
+        },
+        {
+            "uri": "sample-image.png"
+        },
+        {
+            "uri": "tutorial.png"
+        },
+        {
+            "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "wispy_grass.png"
+        },
+        {
+            "uri": "wispy_grass_normal.png"
+        }
+    ],
+    "textures": [
+        {
+            "sampler": 0
+        },
+        {
+            "sampler": 1
+        },
+        {
+            "sampler": 2
+        },
+        {
+            "sampler": 3
+        },
+        {
+            "sampler": 4
+        },
+        {
+            "sampler": 5
+        },
+        {
+            "sampler": 6
+        },
+        {
+            "sampler": 7
+        },
+        {
+            "sampler": 8
+        },
+        {
+            "sampler": 9
+        },
+        {
+            "sampler": 10
+        },
+        {
+            "sampler": 11
+        },
+        {
+            "sampler": 12
+        },
+        {
+            "sampler": 13
+        },
+        {
+            "sampler": 14
+        },
+        {
+            "sampler": 15
+        },
+        {
+            "sampler": 16
+        },
+        {
+            "sampler": 17
+        },
+        {
+            "sampler": 18
+        },
+        {
+            "sampler": 19
+        },
+        {
+            "sampler": 20
+        },
+        {
+            "sampler": 21
+        },
+        {
+            "sampler": 22
+        },
+        {
+            "sampler": 23
+        },
+        {
+            "sampler": 24
+        },
+        {
+            "sampler": 25
+        },
+        {
+            "sampler": 26
+        }
+    ],
+    "materials": [
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.8,
+                    0.8,
+                    0.8,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64
+            }
+        },
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64.0
+            }
+        }
+    ],
+    "nodes": [
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                -0.0,
+                0.0
+            ],
+            "mesh": 6,
+            "material": 1,
+            "physics_body": {
+                "mass": 5.5
+            }
+        }
+    ],
+    "scenes": [
+        {}
+    ]
+}

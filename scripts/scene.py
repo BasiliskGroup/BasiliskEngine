@@ -780,7 +780,6 @@ class Scene:
             if file: save_scene(self, abs_file_path=file)
 
         if self.engine.keys[pg.K_LCTRL] and self.engine.keys[pg.K_l]:
-            print(platform.system())
             if platform.system() == "Darwin": 
                 file = input("Enter file path: ")
                 if not file.endswith('.gltf'): file += ".gltf"
@@ -869,7 +868,6 @@ class Scene:
         matrix = get_model_matrix(model.position, model.scale, model.rotation)
         vbo = self.model_handler.vbos[model.vbo]
         model_vertices = vbo.unique_points if isinstance(vbo, (CubeVBO, RuntimeVBO)) else vbo.model.vertex_points
-        print(model_vertices)
         
         for triangle in self.model_handler.vbos[model.vbo].indicies:
             points = []
