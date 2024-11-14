@@ -45,7 +45,7 @@ class EditorUI:
         self.project_files_view = ProjectFilesView(editor)
 
         self.image_gen = ImageGenerator(self.ctx)
-        self.model_images = self.image_gen.generate_vbos(list(self.editor.engine.project.current_scene.vao_handler.vbo_handler.vbos.values()))
+        self.generate_vbo_images()
 
     def render(self):
         """
@@ -128,6 +128,9 @@ class EditorUI:
         self.editor.engine.project.current_scene.vao_handler.frame_texture.use(location=1)
 
         self.refresh()
+
+    def generate_vbo_images(self):
+        self.model_images = self.image_gen.generate_vbos(list(self.editor.engine.project.current_scene.vao_handler.vbo_handler.vbos.values()))
 
     def refresh(self):
         """

@@ -8,16 +8,13 @@ from scripts.render.light_handler import LightHandler
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
 from scripts.skeletons.joints import * 
-from scripts.file_manager.save_scene import save_scene
 from scripts.file_manager.load_scene import load_scene
-from scripts.file_manager.get_file import save_file_selector, load_file_selector
 from scripts.skeletons.animation import *
 from scripts.skeletons.joints import *
 from scripts.render.vbo_handler import CubeVBO, RuntimeVBO
 from random import randint, uniform
 from scripts.generic.math_functions import get_model_matrix
 import moderngl as mgl
-import platform
 
 class Scene:
     def __init__(self, engine, project) -> None:
@@ -771,26 +768,6 @@ class Scene:
         """
         Updates uniforms, and camera
         """
-
-        if self.engine.keys[pg.K_LCTRL] and self.engine.keys[pg.K_s]:
-            if platform.system() == "Darwin": 
-                file = input("Enter file path: ")
-                if not file.endswith('.gltf'): file += ".gltf"
-            else: file = save_file_selector()
-            if file: save_scene(self, abs_file_path=file)
-
-        if self.engine.keys[pg.K_LCTRL] and self.engine.keys[pg.K_l]:
-            if platform.system() == "Darwin": 
-                file = input("Enter file path: ")
-                if not file.endswith('.gltf'): file += ".gltf"
-            else: file = load_file_selector()
-            if file:
-                load_scene(self, abs_file_path=file)
-                self.vao_handler.shader_handler.write_all_uniforms()
-                self.project.texture_handler.write_textures()
-                self.project.texture_handler.write_textures('batch')
-                self.light_handler.write('batch')
-                self.material_handler.write('batch')
 
         self.model_handler.update()
         self.vao_handler.shader_handler.update_uniforms()

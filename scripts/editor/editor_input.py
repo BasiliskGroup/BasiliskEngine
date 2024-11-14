@@ -1,4 +1,8 @@
 import pygame as pg
+from scripts.file_manager.save_scene import save_scene
+from scripts.file_manager.load_scene import load_scene
+from scripts.file_manager.get_file import save_file_selector, load_file_selector
+import platform
 
 
 class InputHandler:
@@ -114,6 +118,37 @@ class InputHandler:
                 self.dim.left   = min(max(mouse_x / win_size[0], 0), .95 - self.dim.right)
             case 'right':
                 self.dim.right  = min(max(1 - mouse_x / win_size[0], 0), .95 - self.dim.left)
+
+        # Save and load scenes
+        if keys[pg.K_LCTRL] and keys[pg.K_s]:
+            if platform.system() == "Darwin": 
+                file = input("Enter file path: ")
+                if not file.endswith('.gltf'): file += ".gltf"
+            else: file = save_file_selector()
+            if file: 
+                # Get the scene
+                scene = self.editor.engine.project.current_scene
+                # Save
+                save_scene(scene, abs_file_path=file)
+
+        if keys[pg.K_LCTRL] and keys[pg.K_l]:
+            if platform.system() == "Darwin": 
+                file = input("Enter file path: ")
+                if not file.endswith('.gltf'): file += ".gltf"
+            else: file = load_file_selector()
+            if file:
+                # Get the scene
+                scene = self.editor.engine.project.current_scene
+                # Load and update scene
+                load_scene(scene, abs_file_path=file)
+                scene.vao_handler.shader_handler.write_all_uniforms()
+                scene.project.texture_handler.write_textures()
+                scene.project.texture_handler.write_textures('batch')
+                scene.light_handler.write('batch')
+                scene.material_handler.write('batch')
+                # Refresh the UI
+                self.editor.ui.generate_vbo_images()
+                self.editor.ui.refresh()
 
         # Right click
         if mouse_buttons[2] and prev_mouse_buttons[2]: 
