@@ -79,12 +79,12 @@ def moller_trumbore(point:glm.vec3, vec:glm.vec3, triangle:list[glm.vec3], epsil
     s = point - triangle[0]
     u = glm.dot(s, ray_cross) * inv_det
     
-    if u < 0 or u > 1: return None
+    if (u < 0 and abs(u) > epsilon) or (u > 1 and abs(u - 1) > epsilon): return None
     
     s_cross = glm.cross(s, edge1)
     v = glm.dot(vec, s_cross) * inv_det
     
-    if v < 0 or u + v > 1: return None
+    if (v < 0 and abs(v) > epsilon) or (u + v > 1 and abs(u + v - 1) > epsilon): return None
     
     t = glm.dot(edge2, s_cross) * inv_det
     if t > epsilon: return point + vec * t

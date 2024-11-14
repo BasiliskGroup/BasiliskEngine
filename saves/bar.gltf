@@ -1,0 +1,701 @@
+{
+    "asset": {
+        "version": "2.0"
+    },
+    "scene": 0,
+    "buffers": [
+        {
+            "uri": "toy_001.obj"
+        },
+        {
+            "uri": "kitchen_table_001.obj"
+        },
+        {
+            "uri": "cow.obj"
+        },
+        {
+            "uri": "dresser_001.obj"
+        },
+        {
+            "uri": "lucy.obj"
+        },
+        {
+            "uri": "bunny.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "curtain.obj"
+        },
+        {
+            "uri": "drink_002.obj"
+        },
+        {
+            "uri": "sphere.obj"
+        },
+        {
+            "uri": "drink_001.obj"
+        },
+        {
+            "uri": "donut.obj"
+        },
+        {
+            "uri": "american_flag.obj"
+        },
+        {
+            "uri": "fridge_001.obj"
+        },
+        {
+            "uri": "monkey.obj"
+        },
+        {
+            "uri": "cylinder.obj"
+        },
+        {
+            "uri": "tv_wall_001.obj"
+        },
+        {
+            "uri": "10090_white_house_v1_L1.obj"
+        },
+        {
+            "uri": "closet_001.obj"
+        },
+        {
+            "uri": "dish_002.obj"
+        },
+        {
+            "uri": "closet_002.obj"
+        },
+        {
+            "uri": "wall_lantern.obj"
+        },
+        {
+            "uri": "dish_001.obj"
+        }
+    ],
+    "meshes": [],
+    "images": [
+        {
+            "uri": "normal_map.png"
+        },
+        {
+            "uri": "hungarian_flooring_normal.png"
+        },
+        {
+            "uri": "container.png"
+        },
+        {
+            "uri": "colors.png"
+        },
+        {
+            "uri": "metal.png"
+        },
+        {
+            "uri": "floral_wallpaper.png"
+        },
+        {
+            "uri": "cow.png"
+        },
+        {
+            "uri": "floral_wallpaper_normal.png"
+        },
+        {
+            "uri": "lantern.png"
+        },
+        {
+            "uri": "normal_map2.png"
+        },
+        {
+            "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "hungarian_flooring.png"
+        },
+        {
+            "uri": "america.jpg"
+        },
+        {
+            "uri": "brick_normal.png"
+        },
+        {
+            "uri": "sample-image.png"
+        },
+        {
+            "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "box.png"
+        },
+        {
+            "uri": "brick.png"
+        }
+    ],
+    "textures": [
+        {
+            "sampler": 0
+        },
+        {
+            "sampler": 1
+        },
+        {
+            "sampler": 2
+        },
+        {
+            "sampler": 3
+        },
+        {
+            "sampler": 4
+        },
+        {
+            "sampler": 5
+        },
+        {
+            "sampler": 6
+        },
+        {
+            "sampler": 7
+        },
+        {
+            "sampler": 8
+        },
+        {
+            "sampler": 9
+        },
+        {
+            "sampler": 10
+        },
+        {
+            "sampler": 11
+        },
+        {
+            "sampler": 12
+        },
+        {
+            "sampler": 13
+        },
+        {
+            "sampler": 14
+        },
+        {
+            "sampler": 15
+        },
+        {
+            "sampler": 16
+        },
+        {
+            "sampler": 17
+        }
+    ],
+    "materials": [
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.8,
+                    0.8,
+                    0.8,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64
+            }
+        },
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64.0
+            }
+        },
+        {
+            "name": "Material_2",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.5699999928474426,
+                    0.4000000059604645,
+                    0.30000001192092896,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 11,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 1,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_3",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 17,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 13,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_4",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 2,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_5",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 3,
+                    "texCoord": 1
+                }
+            }
+        }
+    ],
+    "nodes": [
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                -2.0,
+                0.0
+            ],
+            "scale": [
+                30.0,
+                1.0,
+                30.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                11.0,
+                31.0
+            ],
+            "scale": [
+                30.0,
+                12.0,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                31.0,
+                11.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                12.0,
+                30.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                11.0,
+                -31.0
+            ],
+            "scale": [
+                30.0,
+                12.0,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                24.0,
+                0.0
+            ],
+            "scale": [
+                36.0,
+                1.0,
+                36.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 4
+        },
+        {
+            "name": "cube",
+            "translation": [
+                10.0,
+                1.0,
+                10.0
+            ],
+            "scale": [
+                1.0,
+                2.0,
+                20.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                10.0,
+                3.0,
+                10.0
+            ],
+            "scale": [
+                1.25,
+                0.25,
+                20.25
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "toy_001",
+            "translation": [
+                100.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 0,
+            "material": 2
+        },
+        {
+            "name": "kitchen_sink_001",
+            "translation": [
+                26.0,
+                -1.0,
+                22.0
+            ],
+            "scale": [
+                4.0,
+                4.0,
+                4.0
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 6,
+            "material": 5
+        },
+        {
+            "name": "curtain",
+            "translation": [
+                100.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 7,
+            "material": 2
+        },
+        {
+            "name": "dish_001",
+            "translation": [
+                10.0,
+                3.5,
+                11.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 22,
+            "material": 5
+        },
+        {
+            "name": "dish_002",
+            "translation": [
+                10.0,
+                3.25,
+                0.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 19,
+            "material": 5
+        },
+        {
+            "name": "dresser_001",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 3,
+            "material": 5
+        },
+        {
+            "name": "drink_001",
+            "translation": [
+                10.25,
+                3.25,
+                7.5
+            ],
+            "scale": [
+                3.5,
+                3.5,
+                3.5
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 10,
+            "material": 5
+        },
+        {
+            "name": "fridge_001",
+            "translation": [
+                25.0,
+                0.0,
+                27.0
+            ],
+            "scale": [
+                6.0,
+                6.0,
+                6.0
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 13,
+            "material": 5
+        },
+        {
+            "name": "drink_001",
+            "translation": [
+                10.0,
+                3.25,
+                18.0
+            ],
+            "scale": [
+                3.5,
+                3.5,
+                3.5
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 10,
+            "material": 5
+        },
+        {
+            "name": "drink_001",
+            "translation": [
+                9.0,
+                3.25,
+                3.0
+            ],
+            "scale": [
+                3.5,
+                3.5,
+                3.5
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 10,
+            "material": 5
+        },
+        {
+            "name": "fridge_001",
+            "translation": [
+                25.0,
+                0.0,
+                4.0
+            ],
+            "scale": [
+                6.0,
+                6.0,
+                6.0
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 13,
+            "material": 5
+        },
+        {
+            "name": "kitchen_table_001",
+            "translation": [
+                27.0,
+                -1.0,
+                13.0
+            ],
+            "scale": [
+                5.0,
+                5.0,
+                5.0
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 1,
+            "material": 5
+        }
+    ],
+    "scenes": [
+        {}
+    ]
+}

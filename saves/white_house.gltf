@@ -1,0 +1,1106 @@
+{
+    "asset": {
+        "version": "2.0"
+    },
+    "scene": 0,
+    "buffers": [
+        {
+            "uri": "toy_001.obj"
+        },
+        {
+            "uri": "kitchen_table_001.obj"
+        },
+        {
+            "uri": "cow.obj"
+        },
+        {
+            "uri": "dresser_001.obj"
+        },
+        {
+            "uri": "lucy.obj"
+        },
+        {
+            "uri": "bunny.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "curtain.obj"
+        },
+        {
+            "uri": "oak_tree.obj"
+        },
+        {
+            "uri": "drink_002.obj"
+        },
+        {
+            "uri": "sphere.obj"
+        },
+        {
+            "uri": "drink_001.obj"
+        },
+        {
+            "uri": "donut.obj"
+        },
+        {
+            "uri": "american_flag.obj"
+        },
+        {
+            "uri": "fridge_001.obj"
+        },
+        {
+            "uri": "monkey.obj"
+        },
+        {
+            "uri": "cylinder.obj"
+        },
+        {
+            "uri": "tv_wall_001.obj"
+        },
+        {
+            "uri": "10090_white_house_v1_L1.obj"
+        },
+        {
+            "uri": "closet_001.obj"
+        },
+        {
+            "uri": "dish_002.obj"
+        },
+        {
+            "uri": "closet_002.obj"
+        },
+        {
+            "uri": "wall_lantern.obj"
+        },
+        {
+            "uri": "dish_001.obj"
+        }
+    ],
+    "meshes": [],
+    "images": [
+        {
+            "uri": "normal_map.png"
+        },
+        {
+            "uri": "hungarian_flooring_normal.png"
+        },
+        {
+            "uri": "container.png"
+        },
+        {
+            "uri": "colors.png"
+        },
+        {
+            "uri": "metal.png"
+        },
+        {
+            "uri": "alley_brick.png"
+        },
+        {
+            "uri": "oak_tree.jpg"
+        },
+        {
+            "uri": "floral_wallpaper.png"
+        },
+        {
+            "uri": "wispy_grass.png"
+        },
+        {
+            "uri": "concrete.png"
+        },
+        {
+            "uri": "alley_brick_normal.png"
+        },
+        {
+            "uri": "cow.png"
+        },
+        {
+            "uri": "floral_wallpaper_normal.png"
+        },
+        {
+            "uri": "lantern.png"
+        },
+        {
+            "uri": "wispy_grass_normal.png"
+        },
+        {
+            "uri": "concrete_normal.png"
+        },
+        {
+            "uri": "normal_map2.png"
+        },
+        {
+            "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "hungarian_flooring.png"
+        },
+        {
+            "uri": "america.jpg"
+        },
+        {
+            "uri": "brick_normal.png"
+        },
+        {
+            "uri": "sample-image.png"
+        },
+        {
+            "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "box.png"
+        },
+        {
+            "uri": "brick.png"
+        }
+    ],
+    "textures": [
+        {
+            "sampler": 0
+        },
+        {
+            "sampler": 1
+        },
+        {
+            "sampler": 2
+        },
+        {
+            "sampler": 3
+        },
+        {
+            "sampler": 4
+        },
+        {
+            "sampler": 5
+        },
+        {
+            "sampler": 6
+        },
+        {
+            "sampler": 7
+        },
+        {
+            "sampler": 8
+        },
+        {
+            "sampler": 9
+        },
+        {
+            "sampler": 10
+        },
+        {
+            "sampler": 11
+        },
+        {
+            "sampler": 12
+        },
+        {
+            "sampler": 13
+        },
+        {
+            "sampler": 14
+        },
+        {
+            "sampler": 15
+        },
+        {
+            "sampler": 16
+        },
+        {
+            "sampler": 17
+        },
+        {
+            "sampler": 18
+        },
+        {
+            "sampler": 19
+        },
+        {
+            "sampler": 20
+        },
+        {
+            "sampler": 21
+        },
+        {
+            "sampler": 22
+        },
+        {
+            "sampler": 23
+        },
+        {
+            "sampler": 24
+        }
+    ],
+    "materials": [
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.8,
+                    0.8,
+                    0.8,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64
+            }
+        },
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64.0
+            }
+        },
+        {
+            "name": "Material_2",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 9,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 15,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_3",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 8,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 14,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_4",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 6,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_5",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 5,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 10,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_6",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 17,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_7",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    0.5,
+                    0.5,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            },
+            "normalTexture": {
+                "index": 14,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_8",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.699999988079071,
+                    0.699999988079071,
+                    0.699999988079071,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 8,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 14,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_9",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.800000011920929,
+                    0.8999999761581421,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            },
+            "normalTexture": {
+                "index": 16,
+                "texCoord": 1,
+                "scale": 1
+            }
+        }
+    ],
+    "nodes": [
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                -2.0,
+                0.0
+            ],
+            "scale": [
+                10.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 1
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                -2.0,
+                -20.0
+            ],
+            "scale": [
+                10.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                -2.0,
+                -40.0
+            ],
+            "scale": [
+                10.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                15.0,
+                -2.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                15.0,
+                -2.0,
+                -20.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                15.0,
+                -2.0,
+                -40.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -15.0,
+                -2.0,
+                0.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -15.0,
+                -2.0,
+                -20.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -15.0,
+                -2.0,
+                -40.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                -15.0,
+                -1.0,
+                -40.0
+            ],
+            "scale": [
+                0.029999999329447746,
+                0.029999999329447746,
+                0.029999999329447746
+            ],
+            "rotation": [
+                1.590000033378601,
+                0.0,
+                10.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                15.0,
+                -1.0,
+                -40.0
+            ],
+            "scale": [
+                0.029999999329447746,
+                0.029999999329447746,
+                0.029999999329447746
+            ],
+            "rotation": [
+                1.590000033378601,
+                0.0,
+                15.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "donut",
+            "translation": [
+                -15.0,
+                -1.5,
+                -40.0
+            ],
+            "scale": [
+                4.0,
+                1.0,
+                4.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 12,
+            "material": 5
+        },
+        {
+            "name": "donut",
+            "translation": [
+                15.0,
+                -1.5,
+                -40.0
+            ],
+            "scale": [
+                4.0,
+                1.0,
+                4.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 12,
+            "material": 5
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                -15.0,
+                -1.0,
+                -20.0
+            ],
+            "scale": [
+                0.029999999329447746,
+                0.029999999329447746,
+                0.029999999329447746
+            ],
+            "rotation": [
+                1.590000033378601,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "donut",
+            "translation": [
+                -15.0,
+                -1.5,
+                -20.0
+            ],
+            "scale": [
+                4.0,
+                1.0,
+                4.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 12,
+            "material": 5
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                15.0,
+                -1.0,
+                -20.0
+            ],
+            "scale": [
+                0.029999999329447746,
+                0.029999999329447746,
+                0.029999999329447746
+            ],
+            "rotation": [
+                1.590000033378601,
+                0.0,
+                24.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "donut",
+            "translation": [
+                15.0,
+                -1.5,
+                -20.0
+            ],
+            "scale": [
+                4.0,
+                1.0,
+                4.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 12,
+            "material": 5
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                15.0,
+                -1.0,
+                -7.0
+            ],
+            "scale": [
+                0.029999999329447746,
+                0.029999999329447746,
+                0.029999999329447746
+            ],
+            "rotation": [
+                1.590000033378601,
+                0.0,
+                4.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "donut",
+            "translation": [
+                15.0,
+                -1.5,
+                -7.0
+            ],
+            "scale": [
+                4.0,
+                1.0,
+                4.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 12,
+            "material": 5
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                -15.0,
+                -1.0,
+                -7.0
+            ],
+            "scale": [
+                0.029999999329447746,
+                0.029999999329447746,
+                0.029999999329447746
+            ],
+            "rotation": [
+                1.590000033378601,
+                0.0,
+                2.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "donut",
+            "translation": [
+                -15.0,
+                -1.5,
+                -7.0
+            ],
+            "scale": [
+                4.0,
+                1.0,
+                4.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 12,
+            "material": 5
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                -2.0,
+                -60.0
+            ],
+            "scale": [
+                50.0,
+                1.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                35.0,
+                -2.0,
+                -20.0
+            ],
+            "scale": [
+                15.0,
+                1.0,
+                30.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -35.0,
+                -2.0,
+                -20.0
+            ],
+            "scale": [
+                15.0,
+                1.0,
+                30.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 2
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                -2.0,
+                -120.0
+            ],
+            "scale": [
+                100.0,
+                1.0,
+                50.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "10090_white_house_v1_L1",
+            "translation": [
+                0.0,
+                -1.0,
+                -150.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                1.5700000524520874,
+                0.0,
+                3.141590118408203
+            ],
+            "mesh": 18,
+            "material": 6
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                50.0,
+                -40.0,
+                -150.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                1.5700000524520874,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                -50.0,
+                -40.0,
+                -150.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                1.5700000524520874,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                80.0,
+                -40.0,
+                -120.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                1.5700000524520874,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                -80.0,
+                -40.0,
+                -120.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                1.5700000524520874,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 4
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                2.0,
+                -5.0,
+                -90.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                1.5700000524520874,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 7
+        },
+        {
+            "name": "oak_tree",
+            "translation": [
+                2.0,
+                -9.0,
+                -92.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.009999999776482582,
+                0.019999999552965164
+            ],
+            "rotation": [
+                1.5700000524520874,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 8
+        },
+        {
+            "name": "american_flag",
+            "translation": [
+                0.0,
+                -1.0,
+                -91.0
+            ],
+            "scale": [
+                0.009999999776482582,
+                0.009999999776482582,
+                0.009999999776482582
+            ],
+            "rotation": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "mesh": 13,
+            "material": 9
+        }
+    ],
+    "scenes": [
+        {}
+    ]
+}

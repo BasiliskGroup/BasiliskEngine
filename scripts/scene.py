@@ -13,6 +13,7 @@ from scripts.file_manager.load_scene import load_scene
 from scripts.file_manager.get_file import save_file_selector, load_file_selector
 from scripts.skeletons.animation import *
 from scripts.skeletons.joints import *
+from scripts.render.vbo_handler import CubeVBO, RuntimeVBO
 from random import randint, uniform
 from scripts.generic.math_functions import get_model_matrix
 import moderngl as mgl
@@ -690,14 +691,14 @@ class Scene:
         #                                     )
         #                                 ),
         #                                 BallJoint(
-        #                                     parent_offset=(-1.4, 0, 0),
+        #                                     parent_offset=(-1.5, 0, 0),
         #                                     child_offset=(0, 1, 0),
         #                                     child_bone=self.skeleton_handler.create(
         #                                         node=right_arm
         #                                     )
         #                                 ),
         #                                 BallJoint(
-        #                                     parent_offset=(1.4, 0, 0),
+        #                                     parent_offset=(1.5, 0, 0),
         #                                     child_offset=(0, 1, 0),
         #                                     child_bone=self.skeleton_handler.create(
         #                                         node=left_arm
@@ -836,7 +837,9 @@ class Scene:
         # point /= point.w
         # forward = glm.vec3(inv_view * glm.vec4(point.x, point.y, point.z, 0))
         
-        # self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material)
+        # node, point = self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material)
+        
+        # print(node)
         
         for root in self.node_handler.nodes:
             nodes = root.get_nodes(True, has_collider, has_physics_body, material)
@@ -865,7 +868,9 @@ class Scene:
 
         # get model matrix 
         matrix = get_model_matrix(model.position, model.scale, model.rotation)
-        model_vertices = self.model_handler.vbos[model.vbo].unique_points
+        vbo = self.model_handler.vbos[model.vbo]
+        model_vertices = vbo.unique_points if isinstance(vbo, (CubeVBO, RuntimeVBO)) else vbo.model.vertex_points
+        print(model_vertices)
         
         for triangle in self.model_handler.vbos[model.vbo].indicies:
             points = []

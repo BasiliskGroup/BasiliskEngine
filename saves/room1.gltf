@@ -5,6 +5,9 @@
     "scene": 0,
     "buffers": [
         {
+            "uri": "toy_001.obj"
+        },
+        {
             "uri": "cow.obj"
         },
         {
@@ -12,6 +15,12 @@
         },
         {
             "uri": "bunny.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "curtain.obj"
         },
         {
             "uri": "sphere.obj"
@@ -45,6 +54,9 @@
         },
         {
             "uri": "container.png"
+        },
+        {
+            "uri": "colors.png"
         },
         {
             "uri": "metal.png"
@@ -140,6 +152,9 @@
         },
         {
             "sampler": 16
+        },
+        {
+            "sampler": 17
         }
     ],
     "materials": [
@@ -168,7 +183,7 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 10,
+                    "index": 11,
                     "texCoord": 1
                 }
             }
@@ -198,12 +213,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 4,
+                    "index": 5,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 6,
+                "index": 7,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -213,7 +228,7 @@
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     0.8500000238418579,
-                    1.0,
+                    0.949999988079071,
                     1.0,
                     1.0
                 ],
@@ -247,7 +262,7 @@
                 "roughnessFactor": 32.0
             },
             "normalTexture": {
-                "index": 4,
+                "index": 5,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -256,13 +271,17 @@
             "name": "Material_7",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    0.3799999952316284,
-                    0.20000000298023224,
-                    0.10000000149011612,
+                    0.5799999833106995,
+                    0.4000000059604645,
+                    0.30000001192092896,
                     1.0
                 ],
                 "metallicFactor": 1.0,
-                "roughnessFactor": 32.0
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 16,
+                    "texCoord": 1
+                }
             }
         },
         {
@@ -277,7 +296,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 11,
+                    "index": 12,
                     "texCoord": 1
                 }
             }
@@ -294,12 +313,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 7,
+                    "index": 8,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 14,
+                "index": 15,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -316,7 +335,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 10,
+                    "index": 11,
                     "texCoord": 1
                 }
             },
@@ -445,7 +464,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -465,7 +484,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -485,7 +504,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -505,7 +524,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -566,7 +585,7 @@
                 0.0
             ],
             "mesh": "cube",
-            "material": 3
+            "material": 7
         },
         {
             "name": "cube",
@@ -586,7 +605,7 @@
                 0.0
             ],
             "mesh": "cube",
-            "material": 3
+            "material": 7
         },
         {
             "name": "cube",
@@ -606,7 +625,7 @@
                 0.0
             ],
             "mesh": "cube",
-            "material": 3
+            "material": 7
         },
         {
             "name": "cylinder",
@@ -625,7 +644,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -645,7 +664,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 6
         },
         {
@@ -665,7 +684,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 3
         },
         {
@@ -685,7 +704,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 5
         },
         {
@@ -705,7 +724,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 7
         },
         {
@@ -825,7 +844,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 7
         },
         {
@@ -845,7 +864,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 3,
+            "mesh": 6,
             "material": 7
         },
         {
@@ -965,7 +984,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 3,
+            "mesh": 6,
             "material": 7
         },
         {
@@ -985,7 +1004,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 5,
+            "mesh": 8,
             "material": 8
         },
         {
@@ -1005,7 +1024,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 9,
+            "mesh": 12,
             "material": 9
         },
         {
@@ -1025,7 +1044,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 9,
+            "mesh": 12,
             "material": 9
         },
         {
@@ -1045,7 +1064,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 5,
+            "mesh": 8,
             "material": 8
         },
         {
@@ -1065,7 +1084,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 5,
+            "mesh": 8,
             "material": 8
         },
         {
@@ -1085,28 +1104,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 5,
-            "material": 8
-        },
-        {
-            "name": "10090_white_house_v1_L1",
-            "translation": [
-                0.0,
-                0.0,
-                30.0
-            ],
-            "scale": [
-                0.009999999776482582,
-                0.009999999776482582,
-                0.009999999776482582
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
             "mesh": 8,
-            "material": 2
+            "material": 8
         },
         {
             "name": "wall_lantern",
@@ -1125,7 +1124,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 9,
+            "mesh": 12,
             "material": 9
         },
         {
@@ -1145,8 +1144,248 @@
                 0.0,
                 0.0
             ],
-            "mesh": 9,
+            "mesh": 12,
             "material": 9
+        },
+        {
+            "name": "curtain",
+            "translation": [
+                39.599998474121094,
+                1.0,
+                -11.0
+            ],
+            "scale": [
+                0.20000000298023224,
+                0.25,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                -1.590000033378601,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 5
+        },
+        {
+            "name": "curtain",
+            "translation": [
+                39.599998474121094,
+                1.0,
+                -29.0
+            ],
+            "scale": [
+                0.20000000298023224,
+                0.25,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                -1.590000033378601,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 5
+        },
+        {
+            "name": "curtain",
+            "translation": [
+                -39.599998474121094,
+                1.0,
+                -11.0
+            ],
+            "scale": [
+                0.20000000298023224,
+                0.25,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 5
+        },
+        {
+            "name": "curtain",
+            "translation": [
+                -39.599998474121094,
+                1.0,
+                -29.0
+            ],
+            "scale": [
+                0.20000000298023224,
+                0.25,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 5,
+            "material": 5
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                46.0,
+                -20.0
+            ],
+            "scale": [
+                42.0,
+                1.0,
+                42.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 10
+        },
+        {
+            "name": "cube",
+            "translation": [
+                40.0,
+                28.0,
+                -20.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                14.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -41.0,
+                21.0,
+                -20.0
+            ],
+            "scale": [
+                1.0,
+                24.0,
+                42.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 3
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -40.0,
+                15.0,
+                -20.0
+            ],
+            "scale": [
+                0.05000000074505806,
+                12.0,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 4
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -40.0,
+                15.0,
+                -20.0
+            ],
+            "scale": [
+                0.25,
+                0.25,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -40.0,
+                3.0,
+                -20.0
+            ],
+            "scale": [
+                0.25,
+                0.25,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -40.0,
+                15.0,
+                -20.0
+            ],
+            "scale": [
+                0.25,
+                12.0,
+                0.25
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
+        },
+        {
+            "name": "cube",
+            "translation": [
+                -40.0,
+                28.0,
+                -20.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                14.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": "cube",
+            "material": 7
         }
     ],
     "scenes": [
