@@ -3,16 +3,20 @@
 layout (location = 0) in vec3 in_position;
 layout (location = 1) in vec2 in_uv;
 layout (location = 2) in vec3 in_normal;
+layout (location = 3) in vec3 in_tangent;
+layout (location = 4) in vec3 in_bitangent;
 
-layout (location = 3) in vec3 obj_position;
-layout (location = 4) in vec3 obj_rotation;
-layout (location = 5) in vec3 obj_scale;
-layout (location = 6) in float obj_material;
+layout (location = 5) in vec3 obj_position;
+layout (location = 6) in vec3 obj_rotation;
+layout (location = 7) in vec3 obj_scale;
+layout (location = 8) in float obj_material;
+
 
 out vec2 uv;
 flat out int  materialID;
 out vec3 normal;
 out vec3 position;
+out mat3 TBN;
 
 uniform mat4 m_proj;
 uniform mat4 m_view;
@@ -44,7 +48,13 @@ void main() {
     mat4 m_model = m_trans * m_rot * m_scale;
 
     position = (m_model * vec4(in_position, 1.0)).xyz;
+
     normal = normalize(mat3(transpose(inverse(m_model))) * in_normal);
+    vec3 T = normalize(vec3(m_model * vec4(in_tangent,   0.0)));
+    vec3 B = normalize(vec3(m_model * vec4(in_bitangent, 0.0)));
+    vec3 N = normalize(vec3(m_model * vec4(in_normal,    0.0)));
+    TBN = mat3(T, B, N);
+    
     uv = in_uv;
     materialID = int(obj_material);
 

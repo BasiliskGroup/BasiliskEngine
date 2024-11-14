@@ -106,9 +106,9 @@ def save_nodes(scene, scene_data, mtl_indices, buffer_indices):
         scene_data["nodes"][-1]["scale"]       = node.scale.x, node.scale.y, node.scale.z
         scene_data["nodes"][-1]["rotation"]    = node.rotation.x, node.rotation.y, node.rotation.z
 
-        if node.model.vbo == "cube":
-            scene_data["nodes"][-1]["mesh"] = "cube"
-        elif node.model.vbo:
+        # if node.model.vbo == "cube":
+        #     scene_data["nodes"][-1]["mesh"] = "cube"
+        if node.model.vbo:
             scene_data["nodes"][-1]["mesh"] = buffer_indices[node.model.vbo]
         
         if node.model.material !=  None:

@@ -21,10 +21,10 @@ class LightHandler:
 
         if dir:    # Write the dirctional light
             program['dirLight.direction'].write(self.dir_light.dir)
-            program['dirLight.color'    ].write(self.dir_light.color)
-            program['dirLight.ambient'  ].write(self.dir_light.ambient)
-            program['dirLight.diffuse'  ].write(self.dir_light.diffuse)
-            program['dirLight.specular' ].write(self.dir_light.specular)
+            # program['dirLight.color'    ].write(self.dir_light.color)
+            # program['dirLight.ambient'  ].write(self.dir_light.ambient)
+            # program['dirLight.diffuse'  ].write(self.dir_light.diffuse)
+            # program['dirLight.specular' ].write(self.dir_light.specular)
 
         if point:  # Write all point lights
             program[f'numPointLights'].write(glm.int32(len(self.point_lights)))  # Number of lights that need to be rendered

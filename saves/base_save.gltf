@@ -5,6 +5,9 @@
     "scene": 0,
     "buffers": [
         {
+            "uri": "cube.obj"
+        },
+        {
             "uri": "bunny.obj"
         },
         {

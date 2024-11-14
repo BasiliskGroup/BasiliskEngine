@@ -7,6 +7,7 @@ in vec2 uv;
 flat in int materialID;
 in vec3 normal;
 in vec3 position;
+in mat3 TBN;
 
 uniform vec3 cameraPosition;
 
@@ -69,24 +70,22 @@ uniform sampler2D materialsTexture;
 
 
 vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 albedo) {
-    vec3 lightDir = normalize(-light.direction);
-    // diffuse
-    float diff = max((dot(normal, lightDir) + 1) / 2, 0.0);
-    // specular
-    vec3 reflectDir = reflect(normalize(-light.direction * (int(mtl.hasNormalMap) * 2 - 1)), normal);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), mtl.specularExponent);
-    // result
-    vec3 ambient  = light.ambient  * albedo * light.color * mtl.color;
-    vec3 diffuse  = light.diffuse  * diff * albedo * light.color * mtl.color;
-    vec3 specular = light.specular * spec * albedo * light.color * mtl.specular;
-    return (ambient + diffuse + specular);
+    // Vector between the view and light vectors
+    vec3 halfVector = normalize((viewDir - light.direction) / 2);
+    // Lambertian Diffuse
+    float diff = max(dot(normalize(-light.direction), normal), 0);
+    // Blinn-Phong Specular
+    float specular = max(pow(dot(normal, halfVector), mtl.specularExponent), 0);
+    // Final result
+    vec3 ambient = .1 * albedo;
+    return (albedo + specular * .5) * diff + ambient;
 }
 
 vec3 CalcPointLight(PointLight light, Material mtl, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 albedo)
 {
     vec3 lightDir = normalize(light.position - fragPos);
     // diffuse
-    float diff = max(dot(normal, lightDir), 0.0);
+    float diff = max((dot(normal, lightDir) + 1) / 2, 0.0);
     // specular
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 24);
@@ -126,7 +125,8 @@ void main() {
     if (bool(mtl.hasNormalMap)) {
         textureID = mtl.normalMap;
         vec3 nomral_map_fragment = texture(textureArrays[int(round(textureID.x))].array, vec3(uv, round(textureID.y))).rgb;
-        normalDirection = normalize(normal + nomral_map_fragment * 2.0 - 1.0);
+        normalDirection = nomral_map_fragment * 2.0 - 1.0;
+        normalDirection = normalize(TBN * normalDirection); 
     }
 
     vec3 viewDir = vec3(normalize(cameraPosition - position));
@@ -143,5 +143,5 @@ void main() {
     mtlRed = texture(materialsTexture, vec2(materialID * 12, 1)).r  * 255;
 
     fragColor = vec4(light_result, mtl.alpha);
-    fragColor.rgb += vec3(mtlRed) / 1000;
+    fragColor.rgb += vec3(mtlRed) / 100000;
 }

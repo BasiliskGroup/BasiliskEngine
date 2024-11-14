@@ -805,7 +805,6 @@ class Scene:
         self.vao_handler.framebuffer.clear()
         self.vao_handler.framebuffer.use()
         self.sky.render()
-        self.ctx.disable(flags=mgl.CULL_FACE)
         self.model_handler.render()
 
         if not display: return

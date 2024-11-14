@@ -72,8 +72,9 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
             kwargs["scale"] = node["scale"]
 
         if "mesh" in node:
-            if node["mesh"] == "cube": kwargs["model"] = "cube"
-            else: kwargs["model"] = scene_data["buffers"][node["mesh"]]["uri"][:-4]
+            kwargs["model"] = scene_data["buffers"][node["mesh"]]["uri"][:-4]
+            # if node["mesh"] == "cube": kwargs["model"] = "cube"
+            # else: kwargs["model"] = scene_data["buffers"][node["mesh"]]["uri"][:-4]
 
         if "material" in node:
             kwargs["material"] = scene_data["materials"][node["material"]]["name"]

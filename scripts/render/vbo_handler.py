@@ -14,16 +14,8 @@ class VBOHandler:
         self.ctx = ctx
         self.directory = directory
         self.vbos = {}
-        self.vbos['cube'] = CubeVBO(self.ctx)
+        # self.vbos['cube'] = CubeVBO(self.ctx)
         self.frame_vbo = FrameVBO(self.ctx)
-
-        # for file in os.listdir(self.directory):
-        #     filename = os.fsdecode(file)
-
-        #     if not filename.endswith(".obj"): continue
-
-        #     obj_file = os.path.join(directory, filename)
-        #     self.vbos[file[:-4]] = ModelVBO(self.ctx, obj_file)
 
     def release(self):
         """
@@ -113,6 +105,7 @@ class CubeVBO(BaseVBO):
                               (2, 3, 0), (2, 0, 1),
                               (0, 2, 3), (0, 1, 2),
                               (3, 1, 2), (3, 0, 1)]
+        
         tex_coord_data = self.get_data(tex_coord_verticies, tex_coord_indicies)
 
         normals = [(0, 0,  1) * 6,
@@ -224,7 +217,7 @@ class ModelVBO(BaseVBO):
         return vbo
 
     def get_vertex_data(self):
-        self.model = load_model(self.path)
+        self.model = load_model(self.path, calculate_tangents=True)
 
         if len(self.model.vertex_data[0]) == 8:
             vertex_data = self.model.vertex_data.copy()
@@ -233,6 +226,13 @@ class ModelVBO(BaseVBO):
             vertex_data[:,:3] = self.model.vertex_data[:,:3]
             vertex_data[:,5:] = self.model.vertex_data[:,3:]
         
+        if len(self.model.tangent_data[0]) == 6:
+            vertex_data = np.hstack([vertex_data, self.model.tangent_data])
+        else:
+            tangents = np.zeros(shape=(len(vertex_data), 6))
+            tangents[:,:] += [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+            vertex_data = np.hstack([vertex_data, tangents])
+
         return vertex_data
     
 class RuntimeVBO(BaseVBO):
