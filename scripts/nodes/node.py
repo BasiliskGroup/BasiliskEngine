@@ -53,6 +53,9 @@ class Node():
         self.on_touch     = None
         self.on_collision = None # like touch but will have threashold
         self.on_frame     = None
+        
+        # tags
+        self.tags = 'cuttable'
     
     # initialization
     def init_physics_body(self): 
@@ -71,17 +74,17 @@ class Node():
         self.define_inverse_inertia() # TODO remove line for debugging
         
         # TODO make better property for manual rotation
-        manual_rotated = False
-        for i in range(3):
-            if self.manual_rotation[i] != self.rotation[i]:
-                self.rotation[i] = self.manual_rotation[i]
-                manual_rotated = True
+        # manual_rotated = False
+        # for i in range(3):
+        #     if self.manual_rotation[i] != self.rotation[i]:
+        #         self.rotation[i] = self.manual_rotation[i]
+        #         manual_rotated = True
         
-        if manual_rotated:
-            if self.physics_body: 
-                self.physics_body.set_rotation(glm.quat(self.manual_rotation))
-                self.rotation = self.physics_body.get_new_rotation(0)
-            self.manual_rotation = glm.vec3(self.rotation)
+        # if manual_rotated:
+        #     if self.physics_body: 
+        #         self.physics_body.set_rotation(glm.quat(self.manual_rotation))
+        #         self.rotation = self.physics_body.get_new_rotation(0)
+        #     self.manual_rotation = glm.vec3(self.rotation)
             
         # update physics body
         if self.physics_body:
@@ -202,12 +205,12 @@ class Node():
         for node in self.nodes: models += node.get_models()
         return models
     
-    def get_nodes(self, has_model:bool=False, has_collider:bool=False, has_physics_body:bool=False, material:str=None) -> list:
+    def get_nodes(self, has_model:bool=False, has_collider:bool=False, has_physics_body:bool=False, material:str=None, tags:list[str]='') -> list:
         """
         Gets self and child nodes if they meet the filter
         """
         nodes = []
-        if (not has_model or self.model) and (not has_collider or self.collider) and (not has_physics_body or self.physics_body) and (not material or self.material == material): nodes.append(self)
+        if (not has_model or self.model) and (not has_collider or self.collider) and (not has_physics_body or self.physics_body) and (not material or self.material == material) and (tags == '' or self.tags == tags): nodes.append(self)
         for node in self.nodes: nodes.extend(node.get_nodes(has_model, has_collider, has_physics_body))
         return nodes
     

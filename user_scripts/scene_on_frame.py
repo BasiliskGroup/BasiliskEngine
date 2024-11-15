@@ -21,10 +21,6 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
     pg.mouse.get_rel() # flush the dpos of the mouse from pg
     
     if glm.length(self.click_anchor - self.click_position) > 1e-3:
-    
-        # calculate plane
-        # print()
-        # print('screen position: ', self.click_anchor, self.click_position)
         
         # converts the points on screen to vectors projected from the camera
         inv_proj, inv_view = glm.inverse(self.camera.m_proj), glm.inverse(self.camera.m_view)
@@ -40,7 +36,8 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
         # print('normal:', plane_normal)
             
         # identify what has been clicked
-        node = self.get_model_node_at(*self.click_anchor, has_collider = True, has_physics_body = True, material='yellow')
+        node = self.get_model_node_at(*self.click_anchor, has_collider = True, has_physics_body = True, tags = 'cuttable')
+        print(node)
         skeleton = self.skeleton_handler.get_node_skeleton(node)
         
         # sort triangles

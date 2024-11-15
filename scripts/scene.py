@@ -113,7 +113,7 @@ class Scene:
         self.on_tick = None # TODO add functionality
         self.on_frame = scene_on_frame
 
-    def get_model_node_at(self, x:int, y:int, distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None):
+    def get_model_node_at(self, x:int, y:int, distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None, tags:list[str]=''):
         """
         Gets the closest node at the pixel position
         """
@@ -127,6 +127,6 @@ class Scene:
         point /= point.w
         forward = glm.normalize(glm.vec3(inv_view * glm.vec4(point.x, point.y, point.z, 0)))
         
-        best_node, point = self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material)
+        best_node, point = self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material, tags = tags)
                 
         return best_node
