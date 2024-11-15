@@ -33,11 +33,9 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
             vecs.append(glm.vec3(point))
             
         plane_normal = glm.normalize(glm.cross(vecs[0], vecs[1]))
-        # print('normal:', plane_normal)
             
         # identify what has been clicked
         node = self.get_model_node_at(*self.click_anchor, has_collider = True, has_physics_body = True, tags = 'cuttable')
-        print(node)
         skeleton = self.skeleton_handler.get_node_skeleton(node)
         
         # sort triangles

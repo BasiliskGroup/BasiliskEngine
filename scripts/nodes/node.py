@@ -72,19 +72,6 @@ class Node():
         self.before_update()
         
         self.define_inverse_inertia() # TODO remove line for debugging
-        
-        # TODO make better property for manual rotation
-        # manual_rotated = False
-        # for i in range(3):
-        #     if self.manual_rotation[i] != self.rotation[i]:
-        #         self.rotation[i] = self.manual_rotation[i]
-        #         manual_rotated = True
-        
-        # if manual_rotated:
-        #     if self.physics_body: 
-        #         self.physics_body.set_rotation(glm.quat(self.manual_rotation))
-        #         self.rotation = self.physics_body.get_new_rotation(0)
-        #     self.manual_rotation = glm.vec3(self.rotation)
             
         # update physics body
         if self.physics_body:
@@ -438,6 +425,10 @@ class Node():
         else:
             self.physics_body.rotational_velocity = rotational_velocity
             self.physics_body.axis_of_rotation    = glm.normalize(omega)
+            
+    def set_rotation(self, rotation:glm.vec3):
+        self.rotation = rotation
+        if self.physics_body: self.physics_body.rotation = glm.quat(rotation)
             
     # position
     @property
