@@ -260,6 +260,10 @@ class Inspector:
         obj = self.input.selected_attrib[0]
         attrib = self.input.selected_attrib[1]
         
+        if not obj or not attrib:
+            print(f"obj: {obj} | attrib: {attrib}")
+            return
+
         # Need to do manual override for roation
         if obj == self.selected_node.rotation:
             rotation = obj
@@ -270,7 +274,7 @@ class Inspector:
                 self.input.input_string = ''
                 return
             setattr(rotation, attrib, input_value)
-            
+
             self.selected_node.set_rotation(glm.vec3(rotation))
             self.input.selected_attrib = (None, None)
             self.input.input_string = ''

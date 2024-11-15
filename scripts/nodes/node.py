@@ -428,8 +428,9 @@ class Node():
             
     def set_rotation(self, rotation:glm.vec3):
         self.rotation = rotation
-        if self.physics_body: self.physics_body.rotation = glm.quat(rotation)
-        self.rotation = self.physics_body.get_new_rotation(0)
+        if self.physics_body: 
+            self.physics_body.rotation = glm.quat(rotation)
+            self.rotation = self.physics_body.get_new_rotation(0)
             
     # position
     @property
