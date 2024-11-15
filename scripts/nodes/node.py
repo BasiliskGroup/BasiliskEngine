@@ -55,7 +55,7 @@ class Node():
         self.on_frame     = None
         
         # tags
-        self.tags = 'cuttable'
+        self.tags = ''
     
     # initialization
     def init_physics_body(self): 

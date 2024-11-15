@@ -80,9 +80,9 @@ class Inspector:
         self.attribute_boxes.append((node.position, (start_x + w * 2 + padding, start_y + h * 0 + padding, *size), 'z'))
         # Rotation
         self.editor.font.render_text(self.surf, (padding, start_y + h * 1 + h/2), 'Rot', size=0)
-        self.attribute_boxes.append((node.manual_rotation, (start_x + w * 0 + padding, start_y + h * 1 + padding, *size), 'x'))
-        self.attribute_boxes.append((node.manual_rotation, (start_x + w * 1 + padding, start_y + h * 1 + padding, *size), 'y'))
-        self.attribute_boxes.append((node.manual_rotation, (start_x + w * 2 + padding, start_y + h * 1 + padding, *size), 'z'))
+        self.attribute_boxes.append((node.rotation, (start_x + w * 0 + padding, start_y + h * 1 + padding, *size), 'x'))
+        self.attribute_boxes.append((node.rotation, (start_x + w * 1 + padding, start_y + h * 1 + padding, *size), 'y'))
+        self.attribute_boxes.append((node.rotation, (start_x + w * 2 + padding, start_y + h * 1 + padding, *size), 'z'))
         # Scale
         self.editor.font.render_text(self.surf, (padding, start_y + h * 2 + h/2), 'Scale', size=0)
         self.attribute_boxes.append((node.scale   , (start_x + w * 0 + padding, start_y + h * 2 + padding, *size), 'x'))
@@ -164,13 +164,12 @@ class Inspector:
             self.editor.font.render_text(self.surf, (padding, y_level + h/2), 'Static', size=0)
             self.toggles.append((node.collider, (start_x + w * 0 + padding, y_level + padding, h - padding * 2, h - padding * 2), 'static'))
             y_level += h
+            self.component_height += h
 
         # Has Physics body
         self.editor.font.render_text(self.surf, (padding, y_level + h/2), 'Physics', size=0)
         self.toggles.append((node, (start_x + w * 0 + padding, y_level + padding, h - padding * 2, h - padding * 2), 'physics_body'))
         y_level += h
-
-        self.component_height += h * 3
 
         # Mass
         if node.physics_body:
@@ -258,6 +257,32 @@ class Inspector:
 
     def apply_input_string(self):
 
+        obj = self.input.selected_attrib[0]
+        attrib = self.input.selected_attrib[1]
+        
+        # Need to do manual override for roation
+        if obj == self.selected_node.rotation:
+            rotation = obj
+            try:
+                input_value = float(self.input.input_string)
+            except:
+                self.input.selected_attrib = (None, None)
+                self.input.input_string = ''
+                return
+            setattr(rotation, attrib, input_value)
+            
+            self.selected_node.set_rotation(glm.vec3(rotation))
+            self.input.selected_attrib = (None, None)
+            self.input.input_string = ''
+            return
+
+        # Set string-valued attributes
+        if attrib in set(["tags"]):
+            setattr(obj, attrib, self.input.input_string)
+            self.input.selected_attrib = (None, None)
+            self.input.input_string = ''
+            return
+  
         try:
             input_value = float(self.input.input_string)
         except:
@@ -265,8 +290,6 @@ class Inspector:
             self.input.input_string = ''
             return
 
-        obj = self.input.selected_attrib[0]
-        attrib = self.input.selected_attrib[1]
         setattr(obj, attrib, input_value)
         self.input.selected_attrib = (None, None)
         self.input.input_string = ''
