@@ -20,7 +20,6 @@ class NodeHandler():
         for node in self.nodes: node.update(delta_time)
         
     def tick(self, delta_time:float):
-        
         self.tick_time += delta_time
         if self.tick_time > self.tick_iterval:
             self.tick_time = 0

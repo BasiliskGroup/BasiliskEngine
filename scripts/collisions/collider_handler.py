@@ -1,6 +1,5 @@
 import glm
 import numpy as np
-import ctypes
 from scripts.collisions.collider import Collider
 from scripts.collisions.broad.bounding_volume_heirarchy import BoundingVolumeHeirarchy
 from scripts.collisions.narrow.narrow_collisions import get_narrow_collision
