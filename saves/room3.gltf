@@ -1534,13 +1534,62 @@
         {
             "name": "cube",
             "translation": [
-                0.0,
-                7.0,
-                -23.0
+                -20.0,
+                3.0,
+                -4.0
             ],
             "scale": [
                 7.0,
+                4.0,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                -0.0,
+                0.0
+            ],
+            "mesh": 13,
+            "material": 2,
+            "physics_body": {
+                "mass": 100.0
+            },
+            "collider": {
+                "static": false
+            }
+        },
+        {
+            "name": "cube",
+            "translation": [
+                0.0,
+                2.0,
+                -30.0
+            ],
+            "scale": [
+                40.0,
+                3.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 13,
+            "material": 1,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cube",
+            "translation": [
+                20.0,
+                4.0,
+                -4.0
+            ],
+            "scale": [
                 7.0,
+                5.0,
                 7.0
             ],
             "rotation": [

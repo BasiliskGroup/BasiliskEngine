@@ -29,6 +29,7 @@ class Node():
         self.prev_scale    = glm.vec3(self.scale) # TODO check live scaling for nodes
         self.prev_rotation = glm.vec3(self.rotation)
         
+        self.manual_rotation = glm.vec3(self.rotation)
         self.update_position = True
         self.update_scale    = True
         self.update_rotation = True
@@ -68,6 +69,19 @@ class Node():
         self.before_update()
         
         self.define_inverse_inertia() # TODO remove line for debugging
+        
+        # TODO make better property for manual rotation
+        manual_rotated = False
+        for i in range(3):
+            if self.manual_rotation[i] != self.rotation[i]:
+                self.rotation[i] = self.manual_rotation[i]
+                manual_rotated = True
+        
+        if manual_rotated:
+            if self.physics_body: 
+                self.physics_body.set_rotation(glm.quat(self.manual_rotation))
+                self.rotation = self.physics_body.get_new_rotation(0)
+            self.manual_rotation = glm.vec3(self.rotation)
             
         # update physics body
         if self.physics_body:

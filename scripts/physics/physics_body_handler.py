@@ -6,12 +6,12 @@ class PhysicsBodyHandler():
         self.physics_handler = self.scene.project.physics_handler
         self.physics_bodies  = physics_bodies if physics_bodies else []
         
-    def add(self, mass:float = 1, velocity:glm.vec3 = None, rotational_velocity:int = 0, axis_of_rotation:glm.vec3 = None):
+    def add(self, mass:float = 1, rotation:glm.quat = glm.quat(1, 0, 0, 0), velocity:glm.vec3 = None, rotational_velocity:int = 0, axis_of_rotation:glm.vec3 = None):
         """
         Adds a physics body to the physics handler and returns it. 
         """
         # add physics body and return
-        self.physics_bodies.append(PhysicsBody(self, mass, velocity, rotational_velocity, axis_of_rotation))
+        self.physics_bodies.append(PhysicsBody(self, mass, rotation, velocity, rotational_velocity, axis_of_rotation))
         return self.physics_bodies[-1]
     
 class PointPhysicsBody():
@@ -34,11 +34,11 @@ class PointPhysicsBody():
         return delta_position
 
 class PhysicsBody(PointPhysicsBody):
-    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float=1, velocity:glm.vec3=None, rotational_velocity:int=0, axis_of_rotation:glm.vec3=None, decay:float=0):
+    def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float=1, rotation:glm.quat=glm.quat(1, 0, 0, 0), velocity:glm.vec3=None, rotational_velocity:int=0, axis_of_rotation:glm.vec3=None, decay:float=0):
         super().__init__(physics_body_handler, mass, velocity, decay)
         self.rotational_velocity = rotational_velocity
         self.axis_of_rotation    = glm.vec3(axis_of_rotation) if axis_of_rotation else glm.vec3(1, 0, 0)
-        self.rotation            = glm.quat((0, 0, 0)) # will be reset in collection's after init
+        self.rotation            = rotation # will be reset in node's after init
 
     def get_new_rotation(self, delta_time: float):
         """
@@ -58,3 +58,6 @@ class PhysicsBody(PointPhysicsBody):
         self.rotation = self.rotation * rq
         self.rotational_velocity -= self.decay * delta_time
         return glm.eulerAngles(self.rotation)
+    
+    def set_rotation(self, quat): # TODO replace usage with properties
+        self.rotation = quat

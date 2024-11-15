@@ -79,9 +79,9 @@ class Inspector:
         self.attribute_boxes.append((node.position, (start_x + w * 2 + padding, start_y + h * 0 + padding, *size), 'z'))
         # Rotation
         self.editor.font.render_text(self.surf, (padding, start_y + h * 1 + h/2), 'Rot', size=0)
-        self.attribute_boxes.append((node.rotation, (start_x + w * 0 + padding, start_y + h * 1 + padding, *size), 'x'))
-        self.attribute_boxes.append((node.rotation, (start_x + w * 1 + padding, start_y + h * 1 + padding, *size), 'y'))
-        self.attribute_boxes.append((node.rotation, (start_x + w * 2 + padding, start_y + h * 1 + padding, *size), 'z'))
+        self.attribute_boxes.append((node.manual_rotation, (start_x + w * 0 + padding, start_y + h * 1 + padding, *size), 'x'))
+        self.attribute_boxes.append((node.manual_rotation, (start_x + w * 1 + padding, start_y + h * 1 + padding, *size), 'y'))
+        self.attribute_boxes.append((node.manual_rotation, (start_x + w * 2 + padding, start_y + h * 1 + padding, *size), 'z'))
         # Scale
         self.editor.font.render_text(self.surf, (padding, start_y + h * 2 + h/2), 'Scale', size=0)
         self.attribute_boxes.append((node.scale   , (start_x + w * 0 + padding, start_y + h * 2 + padding, *size), 'x'))
@@ -256,7 +256,7 @@ class Inspector:
                 if obj.physics_body:
                     obj.physics_body = None
                 else:
-                    physics_body = scene.physics_body_handler.add(mass=1)
+                    physics_body = scene.physics_body_handler.add(mass=1, rotation=glm.quat(obj.rotation))
                     obj.physics_body = physics_body
             case "collider":
                 if obj.collider:
