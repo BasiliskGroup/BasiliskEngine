@@ -45,6 +45,7 @@ class Inspector:
             self.render_transform_component()
             self.render_mtl_component()
             self.render_physics_component()
+            self.render_tags_component()
 
         for box in self.attribute_boxes:
             self.render_attribute_box(*box)
@@ -169,11 +170,30 @@ class Inspector:
         self.toggles.append((node, (start_x + w * 0 + padding, y_level + padding, h - padding * 2, h - padding * 2), 'physics_body'))
         y_level += h
 
+        self.component_height += h * 3
+
         # Mass
         if node.physics_body:
+            start_x, start_y = 65, self.component_height
+            w, h = (self.dim[0] - start_x - 15) // 3, self.item_height
+            padding = self.padding
+            node = self.selected_node
+            size = w - padding * 2, h - padding * 2
+
             self.editor.font.render_text(self.surf, (padding, y_level + h/2), 'Mass', size=0)
             self.attribute_boxes.append((node.physics_body, (start_x + w * 0 + padding, y_level + padding, size[0] * 3 + padding * 4, size[1]), 'mass'))
             y_level += h
+            self.component_height += h
+
+    def render_tags_component(self):
+        start_x, start_y = 65, self.component_height
+        w, h = (self.dim[0] - start_x - 15) // 3, self.item_height
+        padding = self.padding
+        node = self.selected_node
+        size = w - padding * 2, h - padding * 2
+
+        self.editor.font.render_text(self.surf, (padding, start_y + h * 2 + h/2), 'Tags', size=0)
+        self.attribute_boxes.append((node.tags, (start_x + w * 0 + padding, start_y + h * 2 + padding, size[0] * 3 + padding * 4, size[1]), 'tags'))
 
     def render_attribute_box(self, node, rect, attrib_name):
         """
