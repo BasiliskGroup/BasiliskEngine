@@ -147,9 +147,8 @@ class FollowCamera(Camera):
     
     def get_view_matrix(self) -> glm.mat4x4:
         distance = self.radius
-        #node, point = self.get_model_node_at(position=self.position, forward=self.forward, has_collider=True, max_distance=self.radius * 10) # self.position - self.anchor
-        # print(node, point)
-        # if point: distance = glm.length(self.anchor - point)
+        node, point = self.get_model_node_at(position=self.anchor, forward=-self.forward, has_collider=True, max_distance=self.radius) # 
+        if point: distance = glm.length(self.anchor - point)
         self.position = self.anchor - self.forward * distance
         return glm.lookAt(self.position, self.anchor, self.up)
     

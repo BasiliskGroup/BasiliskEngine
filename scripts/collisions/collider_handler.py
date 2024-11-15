@@ -26,7 +26,9 @@ class ColliderHandler():
         """
         Resolves all collisions between colliders
         """
-        for collider in self.colliders: collider.has_collided = False
+        for collider in self.colliders: 
+            collider.has_collided      = False
+            collider.collision_normals = []
         
         # get broad collisions
         collider_vertices, needs_narrow = self.resolve_broad_collisions()
@@ -47,27 +49,32 @@ class ColliderHandler():
         for collider1, possible_colliders in needs_narrow.items():
             for collider2 in possible_colliders:
                 
-                if collider1.static and collider2.static: continue
+                node1 = collider1.node # TODO add support for colliders without nodes
+                node2 = collider2.node
+                
+                #if collider1.static and collider2.static: continue
+                if not (node1.physics_body or node2.physics_body): continue
                 
                 # check if already collided
                 normal, distance, contact_points = get_narrow_collision(collider_vertices[collider1], collider_vertices[collider2], collider1.position, collider2.position)
                 if distance == 0: continue # continue if no collision
                 
                 # immediately resolve penetration
-                node1 = collider1.node # TODO add support for colliders without nodes
-                node2 = collider2.node
-                
                 collider1.has_collided = True
                 collider2.has_collided = True
                 
                 if collider1.static: 
                     node2.position += normal * distance
+                    collider2.collision_normals.append(normal)
                 else:
                     if collider2.static: 
                         node1.position += normal * -distance
+                        collider1.collision_normals.append(-normal)
                     else:
                         node1.position += normal * 0.5 * -distance
                         node2.position += normal * 0.5 * distance
+                        collider1.collision_normals.append(-normal)
+                        collider2.collision_normals.append(normal)
                         
                 #for both physics bodies
                 if not (node1.physics_body or node2.physics_body): continue

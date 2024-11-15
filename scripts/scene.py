@@ -46,6 +46,7 @@ class Scene:
         exec(scene_on_init)
         
         with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = compile(file.read(), 'bottom_on_frame', 'exec')
+        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_init    = compile(file.read(), 'bottom_on_init', 'exec')
         with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
         with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
         with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
@@ -185,10 +186,10 @@ class Scene:
         
         # self.node_handler.add(
         #     position=(0, 7, 0),
-        #     scale=(100, 100, 100),
-        #     model='bunny',
+        #     scale=(10, 10, 10),
+        #     model='cube',
         #     material='yellow',
-        #     collider=self.collider_handler.add(vbo='bunny', static=False),
+        #     collider=self.collider_handler.add(vbo='cube', static=False),
         #     physics_body=self.physics_body_handler.add(mass=100),
         #     name='box'
         # )
@@ -350,6 +351,8 @@ class Scene:
         # )
         
         # bottom.on_frame = bottom_on_frame
+        # setattr(bottom, 'jump_time', 0)
+        # setattr(bottom, 'jump_max', 1)
         
         # middle=self.node_handler.add(
         #     position=cock_pos + glm.vec3(0, 2.5, 0),
@@ -484,7 +487,7 @@ class Scene:
         #     model='cube',
         #     material='white',
         #     collider=self.collider_handler.add(vbo='cube', static=False),
-        #     physics_body=self.physics_body_handler.add(mass=20),
+        #     physics_body=self.physics_body_handler.add(mass=4),
         #     name='left arm',
             
         #     nodes=[
@@ -520,7 +523,7 @@ class Scene:
         #     model='cube',
         #     material='white',
         #     collider=self.collider_handler.add(vbo='cube', static=False),
-        #     physics_body=self.physics_body_handler.add(mass=20),
+        #     physics_body=self.physics_body_handler.add(mass=4),
         #     name='right arm',
             
         #     nodes=[
@@ -688,15 +691,15 @@ class Scene:
         #                                     )
         #                                 ),
         #                                 BallJoint(
-        #                                     parent_offset=(-1.5, 0, 0),
-        #                                     child_offset=(0, 1, 0),
+        #                                     parent_offset=(-1.4, 0, 0),
+        #                                     child_offset=(0.1, 1, 0),
         #                                     child_bone=self.skeleton_handler.create(
         #                                         node=right_arm
         #                                     )
         #                                 ),
         #                                 BallJoint(
         #                                     parent_offset=(1.5, 0, 0),
-        #                                     child_offset=(0, 1, 0),
+        #                                     child_offset=(-0.1, 1, 0),
         #                                     child_bone=self.skeleton_handler.create(
         #                                         node=left_arm
         #                                     )

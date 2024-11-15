@@ -52,6 +52,9 @@ def calculate_impluse1(physics_body, inv_mass, omega, radius, inv_inertia, elast
     """
     Calculates the impulse from a collision including friction from the impulse
     """
+    # determine if mass needs to be calculated TODO determine if this is a good check
+    if glm.dot(radius, physics_body.velocity) < 0: return glm.vec3(0, 0, 0)
+    
     # normal impulse
     relative_velocity        = physics_body.velocity + glm.cross(omega, radius)
     relative_normal_velocity = glm.dot(relative_velocity, normal)
@@ -78,6 +81,7 @@ def calculate_impulse2(physics_body1, physics_body2, inv_mass1, inv_mass2, omega
     """
     Calculates the impulse from a collision including friction from the impulse
     """
+    
     # normal impulse
     relative_velocity = physics_body1.velocity + glm.cross(omega1, radius1) - (physics_body2.velocity + glm.cross(omega2, radius2))
     relative_normal_velocity = glm.dot(relative_velocity, normal)
