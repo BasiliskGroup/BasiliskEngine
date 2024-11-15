@@ -26,11 +26,11 @@ class NodeHandler():
             for node in self.nodes: node.tick()
     
     # create and add to top level nodes                    
-    def add(self, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None):
+    def add(self, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None, tags=''):
         """
         Adds a node to the top level array and returns it. 
         """
-        node = Node(self, position, scale, rotation, nodes, model, material, collider, physics_body, name, camera)
+        node = Node(self, position, scale, rotation, nodes, model, material, collider, physics_body, name, camera, tags)
         node.init_physics_body()
         node.update_parents()
         self.nodes.append(node)

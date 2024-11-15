@@ -101,6 +101,7 @@ def save_nodes(scene, scene_data, mtl_indices, buffer_indices):
     for node in scene.node_handler.nodes:
         scene_data["nodes"].append({})
         scene_data["nodes"][-1]["name"] = node.name
+        scene_data["nodes"][-1]["tags"] = node.tags
 
         scene_data["nodes"][-1]["translation"] = node.position.x, node.position.y, node.position.z
         scene_data["nodes"][-1]["scale"]       = node.scale.x, node.scale.y, node.scale.z

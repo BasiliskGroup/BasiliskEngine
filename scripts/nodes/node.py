@@ -6,7 +6,7 @@ from scripts.generic.data_types import vec3
 from scripts.generic.math_functions import get_model_matrix, get_rotation_matrix
     
 class Node():
-    def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None):
+    def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None, tags=''):
         # handler
         self.node_handler = node_handler
         self.collider     = collider
@@ -55,7 +55,7 @@ class Node():
         self.on_frame     = None
         
         # tags
-        self.tags = ''
+        self.tags = tags
     
     # initialization
     def init_physics_body(self): 

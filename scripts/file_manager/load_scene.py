@@ -70,6 +70,9 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
         kwargs = {}
         kwargs["name"] = node["name"]
 
+        if "tags" in node:
+            kwargs["tags"] = node["tags"]
+
         if "translation" in node:
             kwargs["position"] = node["translation"]
         if "rotation" in node:

@@ -42,7 +42,7 @@ class Scene:
         # Makes a free cam
         self.camera = FollowCamera(self.engine, radius = 40, scene=self)
                 
-        load_scene(self, "room1")
+        load_scene(self, "room4")
         if not editor: 
             self.load_user_scripts()
             self.collider_handler.construct_bvh()
@@ -76,6 +76,7 @@ class Scene:
         Redners all instances
         """
 
+        self.ctx.disable(flags=mgl.CULL_FACE)
         self.vao_handler.framebuffer.clear()
         self.vao_handler.framebuffer.use()
         self.sky.render()

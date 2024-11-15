@@ -137,7 +137,7 @@ class InputHandler:
             self.selected_text_attrib = None
 
         # Delete button
-        if prev_keys[pg.K_DELETE] and not keys[pg.K_DELETE] or prev_keys[pg.K_BACKSPACE] and not keys[pg.K_BACKSPACE]:
+        if prev_keys[pg.K_DELETE] and not keys[pg.K_DELETE] or prev_keys[pg.K_BACKSPACE] and not keys[pg.K_BACKSPACE] and not self.selected_attrib:
             node_handler = self.editor.engine.project.current_scene.node_handler
             if self.editor.ui.hierarchy.selected_node_index < 0: return
             node = node_handler.nodes[self.editor.ui.hierarchy.selected_node_index]
