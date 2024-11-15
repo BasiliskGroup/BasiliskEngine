@@ -73,12 +73,18 @@ vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 
     // Vector between the view and light vectors
     vec3 halfVector = normalize((viewDir - light.direction) / 2);
     // Lambertian Diffuse
-    float diff = max(dot(normalize(-light.direction), normal), 0);
+    float diff = max(dot(normalize(-light.direction), normal) / 2 + 0.5, 0.0);
     // Blinn-Phong Specular
-    float specular = max(pow(dot(normal, halfVector), mtl.specularExponent), 0);
+    float specular = pow(max(dot(normal, halfVector), 0.0), mtl.specularExponent);
+
+    // Backlight
+    vec3 backDirection = -light.direction;
+    vec3 halfVectorBack = normalize((viewDir - backDirection) / 2);
+    float diffBack = max(dot(normalize(-backDirection), normal), 0.0);
+    float specularBack = max(pow(dot(normal, halfVectorBack), mtl.specularExponent), 0.0);
+
     // Final result
-    vec3 ambient = .1 * albedo;
-    return (albedo + specular * .5) * diff + ambient;
+    return (albedo + (specular + specularBack / 4) * mtl.specular) * (diff + diffBack / 4) + 0.1 * albedo;
 }
 
 vec3 CalcPointLight(PointLight light, Material mtl, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 albedo)
@@ -107,8 +113,7 @@ uniform textArray textureArrays[5];
 
 
 void main() {
-
-
+    float gamma = 2.2;
     Material mtl = materials[int(materialID)];
 
     vec3 albedo;
@@ -116,6 +121,7 @@ void main() {
     if (bool(mtl.hasAlbedoMap)) {
         textureID = mtl.albedoMap;
         albedo = texture(textureArrays[int(round(textureID.x))].array, vec3(uv, round(textureID.y))).rgb;
+        albedo = pow(albedo, vec3(gamma)) * mtl.color;
     }
     else {
         albedo = mtl.color;
@@ -144,4 +150,6 @@ void main() {
 
     fragColor = vec4(light_result, mtl.alpha);
     fragColor.rgb += vec3(mtlRed) / 100000;
+
+    fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
 }

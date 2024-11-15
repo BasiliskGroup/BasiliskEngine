@@ -5,157 +5,172 @@
     "scene": 0,
     "buffers": [
         {
-            "uri": "toy_001.obj"
-        },
-        {
-            "uri": "kitchen_table_001.obj"
-        },
-        {
-            "uri": "cow.obj"
-        },
-        {
-            "uri": "dresser_001.obj"
-        },
-        {
-            "uri": "lucy.obj"
-        },
-        {
-            "uri": "bunny.obj"
-        },
-        {
-            "uri": "kitchen_sink_001.obj"
-        },
-        {
-            "uri": "curtain.obj"
-        },
-        {
-            "uri": "oak_tree.obj"
-        },
-        {
-            "uri": "drink_002.obj"
-        },
-        {
-            "uri": "sphere.obj"
-        },
-        {
-            "uri": "drink_001.obj"
-        },
-        {
-            "uri": "donut.obj"
+            "uri": "10090_white_house_v1_L1.obj"
         },
         {
             "uri": "american_flag.obj"
         },
         {
-            "uri": "fridge_001.obj"
-        },
-        {
-            "uri": "monkey.obj"
-        },
-        {
-            "uri": "cylinder.obj"
-        },
-        {
-            "uri": "tv_wall_001.obj"
-        },
-        {
-            "uri": "10090_white_house_v1_L1.obj"
+            "uri": "bunny.obj"
         },
         {
             "uri": "closet_001.obj"
         },
         {
-            "uri": "dish_002.obj"
-        },
-        {
             "uri": "closet_002.obj"
         },
         {
-            "uri": "wall_lantern.obj"
+            "uri": "cow.obj"
+        },
+        {
+            "uri": "cube.obj"
+        },
+        {
+            "uri": "curtain.obj"
+        },
+        {
+            "uri": "cylinder.obj"
         },
         {
             "uri": "dish_001.obj"
         },
         {
-            "uri": "cube.obj"
+            "uri": "dish_002.obj"
+        },
+        {
+            "uri": "donut.obj"
+        },
+        {
+            "uri": "dresser_001.obj"
+        },
+        {
+            "uri": "drink_001.obj"
+        },
+        {
+            "uri": "drink_002.obj"
+        },
+        {
+            "uri": "Fence_Design_3.obj"
+        },
+        {
+            "uri": "fridge_001.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "kitchen_table_001.obj"
+        },
+        {
+            "uri": "lucy.obj"
+        },
+        {
+            "uri": "monkey.obj"
+        },
+        {
+            "uri": "oak_tree.obj"
+        },
+        {
+            "uri": "sphere.obj"
+        },
+        {
+            "uri": "toy_001.obj"
+        },
+        {
+            "uri": "tv_wall_001.obj"
+        },
+        {
+            "uri": "wall_lantern.obj"
         }
     ],
     "meshes": [],
     "images": [
         {
-            "uri": "normal_map.png"
-        },
-        {
-            "uri": "hungarian_flooring_normal.png"
-        },
-        {
-            "uri": "container.png"
-        },
-        {
-            "uri": "colors.png"
-        },
-        {
-            "uri": "metal.png"
-        },
-        {
             "uri": "alley_brick.png"
-        },
-        {
-            "uri": "oak_tree.jpg"
-        },
-        {
-            "uri": "floral_wallpaper.png"
-        },
-        {
-            "uri": "wispy_grass.png"
-        },
-        {
-            "uri": "concrete.png"
         },
         {
             "uri": "alley_brick_normal.png"
         },
         {
-            "uri": "cow.png"
-        },
-        {
-            "uri": "floral_wallpaper_normal.png"
-        },
-        {
-            "uri": "lantern.png"
-        },
-        {
-            "uri": "wispy_grass_normal.png"
-        },
-        {
-            "uri": "concrete_normal.png"
-        },
-        {
-            "uri": "normal_map2.png"
-        },
-        {
-            "uri": "whitehouse.jpg"
-        },
-        {
-            "uri": "hungarian_flooring.png"
-        },
-        {
             "uri": "america.jpg"
-        },
-        {
-            "uri": "brick_normal.png"
-        },
-        {
-            "uri": "sample-image.png"
-        },
-        {
-            "uri": "lantern_normal.png"
         },
         {
             "uri": "box.png"
         },
         {
             "uri": "brick.png"
+        },
+        {
+            "uri": "brick_normal.png"
+        },
+        {
+            "uri": "colors.png"
+        },
+        {
+            "uri": "concrete.png"
+        },
+        {
+            "uri": "concrete_normal.png"
+        },
+        {
+            "uri": "container.png"
+        },
+        {
+            "uri": "cow.png"
+        },
+        {
+            "uri": "declaration.png"
+        },
+        {
+            "uri": "floral_wallpaper.png"
+        },
+        {
+            "uri": "floral_wallpaper_normal.png"
+        },
+        {
+            "uri": "hungarian_flooring.png"
+        },
+        {
+            "uri": "hungarian_flooring_normal.png"
+        },
+        {
+            "uri": "lantern.png"
+        },
+        {
+            "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "metal.png"
+        },
+        {
+            "uri": "normal_map.png"
+        },
+        {
+            "uri": "normal_map2.png"
+        },
+        {
+            "uri": "oak_tree.jpg"
+        },
+        {
+            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.jpg"
+        },
+        {
+            "uri": "Poliigon_GrassPatchyGround_4585_Normal.png"
+        },
+        {
+            "uri": "sample-image.png"
+        },
+        {
+            "uri": "tutorial.png"
+        },
+        {
+            "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "wispy_grass.png"
+        },
+        {
+            "uri": "wispy_grass_normal.png"
         }
     ],
     "textures": [
@@ -233,6 +248,18 @@
         },
         {
             "sampler": 24
+        },
+        {
+            "sampler": 25
+        },
+        {
+            "sampler": 26
+        },
+        {
+            "sampler": 27
+        },
+        {
+            "sampler": 28
         }
     ],
     "materials": [
@@ -256,7 +283,7 @@
                     0.800000011920929,
                     0.800000011920929,
                     0.800000011920929,
-                    1.0
+                    0.0
                 ],
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0
@@ -274,12 +301,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 9,
+                    "index": 7,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 15,
+                "index": 8,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -288,20 +315,20 @@
             "name": "Material_3",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    1.0,
-                    1.0,
+                    0.800000011920929,
+                    1.2000000476837158,
                     1.0,
                     1.0
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "metallicFactor": 0.3499999940395355,
+                "roughnessFactor": 128.0,
                 "baseColorTexture": {
-                    "index": 8,
+                    "index": 22,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 14,
+                "index": 23,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -311,14 +338,14 @@
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     1.0,
-                    1.0,
-                    1.0,
+                    1.2000000476837158,
+                    0.8999999761581421,
                     1.0
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "metallicFactor": 0.20000000298023224,
+                "roughnessFactor": 128.0,
                 "baseColorTexture": {
-                    "index": 6,
+                    "index": 21,
                     "texCoord": 1
                 }
             }
@@ -332,15 +359,15 @@
                     1.0,
                     1.0
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "metallicFactor": 0.25,
+                "roughnessFactor": 52.0,
                 "baseColorTexture": {
-                    "index": 5,
+                    "index": 0,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 10,
+                "index": 1,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -355,9 +382,9 @@
                     1.0
                 ],
                 "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "roughnessFactor": 90.0,
                 "baseColorTexture": {
-                    "index": 17,
+                    "index": 26,
                     "texCoord": 1
                 }
             }
@@ -367,15 +394,15 @@
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     1.0,
-                    0.5,
-                    0.5,
+                    0.4000000059604645,
+                    0.6000000238418579,
                     1.0
                 ],
-                "metallicFactor": 1.0,
+                "metallicFactor": 0.0,
                 "roughnessFactor": 32.0
             },
             "normalTexture": {
-                "index": 14,
+                "index": 28,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -385,19 +412,19 @@
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     0.699999988079071,
-                    0.699999988079071,
+                    0.800000011920929,
                     0.699999988079071,
                     1.0
                 ],
-                "metallicFactor": 1.0,
+                "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 8,
+                    "index": 27,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 14,
+                "index": 28,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -406,16 +433,38 @@
             "name": "Material_9",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    0.800000011920929,
-                    0.8999999761581421,
+                    0.4000000059604645,
+                    0.699999988079071,
                     1.0,
-                    1.0
+                    0.699999988079071
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0
+                "metallicFactor": 10.0,
+                "roughnessFactor": 120.0
             },
             "normalTexture": {
-                "index": 16,
+                "index": 20,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_10",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.8999999761581421,
+                    0.949999988079071,
+                    1.2000000476837158,
+                    1.0
+                ],
+                "metallicFactor": 0.30000001192092896,
+                "roughnessFactor": 12.0,
+                "baseColorTexture": {
+                    "index": 7,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 8,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -439,8 +488,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
-            "material": 2
+            "mesh": 6,
+            "material": 10
         },
         {
             "name": "cube",
@@ -459,8 +508,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
-            "material": 1
+            "mesh": 6,
+            "material": 2
         },
         {
             "name": "cube",
@@ -479,8 +528,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
-            "material": 2
+            "mesh": 6,
+            "material": 10
         },
         {
             "name": "cube",
@@ -499,8 +548,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
-            "material": 2
+            "mesh": 6,
+            "material": 10
         },
         {
             "name": "cube",
@@ -519,7 +568,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 6,
             "material": 3
         },
         {
@@ -539,7 +588,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 6,
             "material": 3
         },
         {
@@ -559,7 +608,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 6,
             "material": 3
         },
         {
@@ -579,7 +628,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 6,
             "material": 3
         },
         {
@@ -599,7 +648,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 6,
             "material": 3
         },
         {
@@ -619,7 +668,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 6,
             "material": 3
         },
         {
@@ -639,7 +688,7 @@
                 0.0,
                 10.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -659,7 +708,7 @@
                 0.0,
                 15.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -679,7 +728,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 12,
+            "mesh": 11,
             "material": 5
         },
         {
@@ -699,7 +748,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 12,
+            "mesh": 11,
             "material": 5
         },
         {
@@ -719,7 +768,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -739,7 +788,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 12,
+            "mesh": 11,
             "material": 5
         },
         {
@@ -759,7 +808,7 @@
                 0.0,
                 24.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -779,7 +828,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 12,
+            "mesh": 11,
             "material": 5
         },
         {
@@ -799,7 +848,7 @@
                 0.0,
                 4.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -819,7 +868,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 12,
+            "mesh": 11,
             "material": 5
         },
         {
@@ -839,7 +888,7 @@
                 0.0,
                 2.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -859,7 +908,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 12,
+            "mesh": 11,
             "material": 5
         },
         {
@@ -879,8 +928,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
-            "material": 2
+            "mesh": 6,
+            "material": 10
         },
         {
             "name": "cube",
@@ -899,8 +948,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
-            "material": 2
+            "mesh": 6,
+            "material": 10
         },
         {
             "name": "cube",
@@ -919,8 +968,8 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
-            "material": 2
+            "mesh": 6,
+            "material": 10
         },
         {
             "name": "cube",
@@ -939,7 +988,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 6,
             "material": 3
         },
         {
@@ -959,7 +1008,7 @@
                 0.0,
                 3.141590118408203
             ],
-            "mesh": 18,
+            "mesh": 0,
             "material": 6
         },
         {
@@ -979,7 +1028,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -999,7 +1048,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -1019,7 +1068,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -1039,7 +1088,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 4
         },
         {
@@ -1059,7 +1108,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 7
         },
         {
@@ -1079,7 +1128,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 21,
             "material": 8
         },
         {
@@ -1099,7 +1148,7 @@
                 1.0,
                 0.0
             ],
-            "mesh": 13,
+            "mesh": 1,
             "material": 9
         }
     ],
