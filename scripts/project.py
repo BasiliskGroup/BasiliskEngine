@@ -7,7 +7,7 @@ class Project:
     """
     Stores, loads, and saves scene data
     """
-    def __init__(self, engine) -> None:
+    def __init__(self, engine, editor=False) -> None:
         # Stores the engine
         self.engine = engine
         self.ctx = engine.ctx
@@ -18,7 +18,7 @@ class Project:
         # Creates a texture handler
         self.texture_handler = TextureHandler(self.engine, self.vao_handler)
         # Creates scenes
-        self.scenes = {0 : Scene(self.engine, self)}
+        self.scenes = {0 : Scene(self.engine, self, editor=editor)}
         self.current_scene = self.scenes[0]
         self.physics_handler.scene = self.current_scene
         # Use scene

@@ -17,7 +17,7 @@ from scripts.generic.math_functions import get_model_matrix
 import moderngl as mgl
 
 class Scene:
-    def __init__(self, engine, project) -> None:
+    def __init__(self, engine, project, editor=False) -> None:
         """
         Contains all data for scene
         """
@@ -43,8 +43,9 @@ class Scene:
         self.camera = FollowCamera(self.engine, radius = 40, scene=self)
                 
         load_scene(self, "room1")
-        self.load_user_scripts()
-        self.collider_handler.construct_bvh()
+        if not editor: 
+            self.load_user_scripts()
+            self.collider_handler.construct_bvh()
                 
     def use(self, camera=True):
         """
@@ -68,7 +69,7 @@ class Scene:
         self.model_handler.update()
         self.vao_handler.shader_handler.update_uniforms()
         if camera: self.camera.update()
-        if self.on_frame and camera: exec(self.on_frame)
+        if camera and self.on_frame: exec(self.on_frame)
 
     def render(self, display=True):
         """

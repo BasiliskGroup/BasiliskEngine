@@ -35,7 +35,7 @@ class Engine:
         self.dt = 0
         self.runtime_multiplier = 0
         # Project handler
-        self.project = Project(self)
+        self.project = Project(self, editor=True)
         # Editor
         self.editor = Editor(self)
 
