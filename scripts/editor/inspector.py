@@ -193,7 +193,7 @@ class Inspector:
         size = w - padding * 2, h - padding * 2
 
         self.editor.font.render_text(self.surf, (padding, start_y + h * 2 + h/2), 'Tags', size=0)
-        self.attribute_boxes.append((node.tags, (start_x + w * 0 + padding, start_y + h * 2 + padding, size[0] * 3 + padding * 4, size[1]), 'tags'))
+        self.attribute_boxes.append((node, (start_x + w * 0 + padding, start_y + h * 2 + padding, size[0] * 3 + padding * 4, size[1]), 'tags'))
 
     def render_attribute_box(self, node, rect, attrib_name):
         """
@@ -207,7 +207,11 @@ class Inspector:
         else: 
             color = self.ui.secondary
             value = getattr(node, attrib_name)
-            text = f'{value:.2f}'
+            try:
+                float(value)
+                text = f'{value:.2f}'
+            except ValueError:
+                text = value
         pg.draw.rect(self.surf, color, rect)
         self.editor.font.render_text(self.surf, (rect[0] + rect[2] / 2, rect[1] + rect[3] / 2), text, size=3, center_width=True)
 
