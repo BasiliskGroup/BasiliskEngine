@@ -2,19 +2,7 @@
 
 layout (location = 0) out vec4 fragColor;
 
-
-in vec2 uv;
-flat in int materialID;
-in vec3 normal;
-in vec3 position;
-in mat3 TBN;
-
-uniform vec3 cameraPosition;
-
-
-float mtlRed;
-
-
+// Structs needed for the shader
 struct textArray {
     sampler2DArray array;
 };
@@ -59,14 +47,27 @@ struct Material {
     vec2 normalMap;
 };
 
+
+in vec2 uv;
+in vec3 normal;
+in vec3 position;
+in mat3 TBN;
+// Material attributes
+flat in vec3 mtlColor;
+flat in vec2 albedoMap;
+flat in vec2 normalMap;
+flat in float mtlSpecular;
+flat in float mtlSpecularExponent;
+flat in float mtlAlpha;
+flat in int hasAlbedoMap;
+flat in int hasNormalMap;
+
+// Uniforms
+uniform vec3 cameraPosition;
+#define maxLights 100
 uniform DirLight dirLight;
-#define maxLights 80
 uniform int numPointLights;
 uniform PointLight pointLights[maxLights];
-
-#define maxMaterials 20
-uniform Material materials[maxMaterials];
-uniform sampler2D materialsTexture;
 
 
 vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 albedo) {
@@ -114,23 +115,16 @@ uniform textArray textureArrays[5];
 
 void main() {
     float gamma = 2.2;
-    Material mtl = materials[int(materialID)];
+    Material mtl = Material(mtlColor, mtlSpecular, mtlSpecularExponent, mtlAlpha, hasAlbedoMap, hasNormalMap, albedoMap, normalMap);
 
-    vec3 albedo;
-    vec2 textureID;
+    vec3 albedo = mtl.color;
     if (bool(mtl.hasAlbedoMap)) {
-        textureID = mtl.albedoMap;
-        albedo = texture(textureArrays[int(round(textureID.x))].array, vec3(uv, round(textureID.y))).rgb;
-        albedo = pow(albedo, vec3(gamma)) * mtl.color;
-    }
-    else {
-        albedo = mtl.color;
+        albedo = pow(texture(textureArrays[int(round(mtl.albedoMap.x))].array, vec3(uv, round(mtl.albedoMap.y))).rgb, vec3(gamma)) * mtl.color;
     }
 
     vec3 normalDirection = normal;
     if (bool(mtl.hasNormalMap)) {
-        textureID = mtl.normalMap;
-        vec3 nomral_map_fragment = texture(textureArrays[int(round(textureID.x))].array, vec3(uv, round(textureID.y))).rgb;
+        vec3 nomral_map_fragment = texture(textureArrays[int(round(mtl.normalMap.x))].array, vec3(uv, round(mtl.normalMap.y))).rgb;
         normalDirection = nomral_map_fragment * 2.0 - 1.0;
         normalDirection = normalize(TBN * normalDirection); 
     }
@@ -140,16 +134,12 @@ void main() {
     vec3 light_result = CalcDirLight(dirLight, mtl, normalDirection, viewDir, albedo);
     for(int i = 0; i < numPointLights; i++){
         float distance = length(pointLights[i].position - position);
-        light_result += CalcPointLight(pointLights[i], mtl, normalDirection, position, viewDir, albedo);
-        //if (distance < pointLights[i].radius){
-        //    light_result += CalcPointLight(pointLights[i], mtl, normalDirection, position, viewDir, albedo);
-        //}
+        if (distance < pointLights[i].radius * 2){
+            light_result += CalcPointLight(pointLights[i], mtl, normalDirection, position, viewDir, albedo);
+        }
     }
 
-    mtlRed = texture(materialsTexture, vec2(materialID * 12, 1)).r  * 255;
-
     fragColor = vec4(light_result, mtl.alpha);
-    fragColor.rgb += vec3(mtlRed) / 100000;
-
+    // Gamma correction
     fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
 }

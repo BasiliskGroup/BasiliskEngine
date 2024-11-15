@@ -11,15 +11,23 @@ layout (location = 6) in vec3 obj_rotation;
 layout (location = 7) in vec3 obj_scale;
 layout (location = 8) in float obj_material;
 
-
 out vec2 uv;
-flat out int  materialID;
 out vec3 normal;
 out vec3 position;
 out mat3 TBN;
 
+flat out vec3 mtlColor;
+flat out vec2 albedoMap;
+flat out vec2 normalMap;
+flat out float mtlSpecular;
+flat out float mtlSpecularExponent;
+flat out float mtlAlpha;
+flat out int hasAlbedoMap;
+flat out int hasNormalMap;
+
 uniform mat4 m_proj;
 uniform mat4 m_view;
+uniform sampler2D materialsTexture;
 
 void main() {
     vec3 rot = obj_rotation;
@@ -56,7 +64,19 @@ void main() {
     TBN = mat3(T, B, N);
     
     uv = in_uv;
-    materialID = int(obj_material);
+    int materialID = int(obj_material);
+
+    // Get the material attributes from material texture
+    mtlColor  = vec3(texelFetch(materialsTexture, ivec2(0, 0  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * 12), 0).r);
+    albedoMap = vec2(texelFetch(materialsTexture, ivec2(0, 7  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 8  + materialID * 12), 0).r);
+    normalMap = vec2(texelFetch(materialsTexture, ivec2(0, 10 + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 11 + materialID * 12), 0).r);
+    
+    mtlSpecular         = texelFetch(materialsTexture, ivec2(0, 3  + materialID * 12), 0).r;
+    mtlSpecularExponent = texelFetch(materialsTexture, ivec2(0, 4  + materialID * 12), 0).r;
+    mtlAlpha            = texelFetch(materialsTexture, ivec2(0, 5  + materialID * 12), 0).r;
+    
+    hasAlbedoMap = int(texelFetch(materialsTexture, ivec2(0, 6  + materialID * 12), 0).r);
+    hasNormalMap = int(texelFetch(materialsTexture, ivec2(0, 9  + materialID * 12), 0).r);
 
     gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
 }

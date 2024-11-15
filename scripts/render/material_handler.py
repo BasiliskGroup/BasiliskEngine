@@ -1,5 +1,6 @@
 import glm
 import numpy as np
+import moderngl as mgl
 
 class MaterialHandler:
     def __init__(self, scene) -> None:
@@ -8,45 +9,41 @@ class MaterialHandler:
         self.programs       = scene.vao_handler.shader_handler.programs
         self.materials      = {}
         self.material_ids   = {}
-        
-        # self.add(name="base", color=(.8, .8, .8))
-        # self.add(name="brick", color=(1, 249/255, 234/255), normal_map="brick_normal")
-        # self.add(name="baby_blue", color=(.69, .97, 1))
-        # self.add(name="black", color=(0, 0, 0))
-        # self.add(name="dark_grey", color=(.29, .29, .29))
-        # self.add(name="grey", color=(.72, .72, .72))
-        # self.add(name="red_pink", color=(.99, .01, .38))
-        # self.add(name="yellow", color=(1, .96, .22))
-        # self.add(name="white", color=(1, 1, 1))
-        # self.add(name="norm", color=(.8, .8, .8))
-
-        #self.add('cow', texture="cow")
-        #self.add('brick', texture='brick', normal_map='brick_normal')
 
     def add(self, name="base", color: tuple=(1, 1, 1), specular: float=1, specular_exponent: float=32, alpha: float=1, texture=None, normal_map=None):
+        """
+        Adds a new material to the material list
+        """
+        
         mtl = Material(self, color, specular, specular_exponent, alpha, texture, normal_map)
         self.material_ids[name] = len(self.materials)
         self.materials[name] = mtl
 
     def get(self, value):
+        """
+        Get a material.
+            value: int | Returns the material at index value
+        """
+        
         if type(value) == int:
             return self.materials[list(self.material_ids.keys())[value]]
 
-    def write(self, program):
-        program = self.programs[program]
-        self.make_texture(program)
-        for mtl_name in list(self.materials.keys()):
-            mtl = self.materials[mtl_name]
-            mtl.write(program, self.texture_ids, self.material_ids[mtl_name])
-
-    def make_texture(self, program):
+    def write(self, program: str="batch"):
+        """
+        Creates a material texture and writes to the given shader program key
+        """
+        
+        # Check if there are any materials to write
         if not len(self.materials): return
 
-        # (3i, 1i, 1i, 1i, 3i, 3i)
-        texture_data = np.zeros(shape=(len(self.materials), 12), dtype="f")
+        # Get the specified shader program
+        program = self.programs[program]
 
+        # Initalize the material data as a 2D array of zeros
+        texture_data = np.zeros(shape=(len(self.materials), 12), dtype="f4")
         texture_ids = self.scene.project.texture_handler.texture_ids
 
+        # Add each material and its attributes to the material array
         for i, mtl in enumerate(list(self.materials.values())):
             texture_data[i][:3]  = mtl.color.x, mtl.color.y, mtl.color.z
             texture_data[i][3]   = mtl.specular.value
@@ -57,10 +54,9 @@ class MaterialHandler:
             texture_data[i][9]   = mtl.has_normal_map.value
             texture_data[i][10:] = texture_ids[mtl.normal_map] if mtl.normal_map else [0, 0]
 
+        # Convert all material data to a texture and write to shader
         texture_buffer = self.scene.ctx.buffer(texture_data)
-
-        self.mtl_texture = self.scene.ctx.texture((texture_buffer.size, 1), components=1, data=texture_buffer.read())
-
+        self.mtl_texture = self.scene.ctx.texture((1, int(texture_buffer.size/4)), components=1, dtype='f4', data=texture_buffer.read())
         program[f'materialsTexture'] = 9
         self.mtl_texture.use(location=9)
 
@@ -87,18 +83,6 @@ class Material:
         else:
             self.has_normal_map  = True
             self.normal_map: str = normal_map
-
-    def write(self, program, texture_ids, i=0):
-        program[f'materials[{i}].color'           ].write(self.color)
-        program[f'materials[{i}].specular'        ].write(self.specular)
-        program[f'materials[{i}].specularExponent'].write(self.specular_exponent)
-        program[f'materials[{i}].alpha'           ].write(self.alpha)
-
-        program[f'materials[{i}].hasAlbedoMap'  ].write(self.has_texture)
-        program[f'materials[{i}].hasNormalMap'  ].write(self.has_normal_map)
-
-        if self.has_texture  : program[f'materials[{i}].albedoMap'  ].write(glm.vec2(texture_ids[self.texture]))
-        if self.has_normal_map  : program[f'materials[{i}].normalMap'  ].write(glm.vec2(texture_ids[self.normal_map]))
 
     @property
     def color(self): return self._color
