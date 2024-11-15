@@ -57,14 +57,14 @@ def save_materials(scene, scene_data, texture_indices):
     mtl_indices = {}
 
     # Add the base mtl
-    scene_data["materials"].append({})
-    scene_data["materials"][-1]["name"] = "base"
-    scene_data["materials"][-1]["pbrMetallicRoughness"] = {
-        "baseColorFactor": [0.8, 0.8, 0.8, 1.0],
-        "metallicFactor" : .5,
-        "roughnessFactor" : 64
-    }
-    mtl_indices['base'] = 0
+    # scene_data["materials"].append({})
+    # scene_data["materials"][-1]["name"] = "base"
+    # scene_data["materials"][-1]["pbrMetallicRoughness"] = {
+    #     "baseColorFactor": [0.8, 0.8, 0.8, 1.0],
+    #     "metallicFactor" : .5,
+    #     "roughnessFactor" : 64
+    # }
+    # mtl_indices['base'] = 0
 
     materials = scene.material_handler.materials
     for i, mtl_key in enumerate(materials):
@@ -91,7 +91,7 @@ def save_materials(scene, scene_data, texture_indices):
                 "scale" : 1
             }
 
-        mtl_indices[mtl_key] = i + 1
+        mtl_indices[mtl_key] = i
     
     return mtl_indices
 
@@ -106,8 +106,6 @@ def save_nodes(scene, scene_data, mtl_indices, buffer_indices):
         scene_data["nodes"][-1]["scale"]       = node.scale.x, node.scale.y, node.scale.z
         scene_data["nodes"][-1]["rotation"]    = node.rotation.x, node.rotation.y, node.rotation.z
 
-        # if node.model.vbo == "cube":
-        #     scene_data["nodes"][-1]["mesh"] = "cube"
         if node.model.vbo:
             scene_data["nodes"][-1]["mesh"] = buffer_indices[node.model.vbo]
         

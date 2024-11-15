@@ -66,6 +66,10 @@ class Engine:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_p:
                     self.runtime_multiplier = int(not self.runtime_multiplier)
+                    if self.runtime_multiplier:
+                        self.editor.input.save_scene("saves/runtime/playback.gltf")
+                    else:
+                        self.editor.input.load_scene("saves/runtime/playback.gltf")
 
         # Update Project
         self.project.update(self.dt * self.runtime_multiplier, camera=False)

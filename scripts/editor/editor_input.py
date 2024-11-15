@@ -37,6 +37,40 @@ class InputHandler:
             'viewport' : self.editor.ui.viewport
         }
 
+    def save_scene(self, file: str=None):
+        # Get the file if not provided
+        if not file:
+            if platform.system() == "Darwin": 
+                file = input("Enter file path: ")
+                if not file.endswith('.gltf'): file += ".gltf"
+            else: file = save_file_selector()
+        if file: 
+            # Get the scene
+            scene = self.editor.engine.project.current_scene
+            # Save
+            save_scene(scene, abs_file_path=file)
+
+    def load_scene(self, file: str=None):
+        # Get the file if not provided
+        if not file:
+            if platform.system() == "Darwin":
+                file = input("Enter file path: ")
+                if not file.endswith('.gltf'): file += ".gltf"
+            else: file = load_file_selector()
+        if file:
+            # Get the scene
+            scene = self.editor.engine.project.current_scene
+            # Load and update scene
+            load_scene(scene, abs_file_path=file)
+            scene.vao_handler.shader_handler.write_all_uniforms()
+            scene.project.texture_handler.write_textures()
+            scene.project.texture_handler.write_textures('batch')
+            scene.light_handler.write('batch')
+            scene.material_handler.write('batch')
+            # Refresh the UI
+            self.editor.ui.generate_vbo_images()
+            self.editor.ui.refresh()
+
     def update(self):
         """
         
@@ -120,35 +154,8 @@ class InputHandler:
                 self.dim.right  = min(max(1 - mouse_x / win_size[0], 0), .95 - self.dim.left)
 
         # Save and load scenes
-        if keys[pg.K_LCTRL] and keys[pg.K_s]:
-            if platform.system() == "Darwin": 
-                file = input("Enter file path: ")
-                if not file.endswith('.gltf'): file += ".gltf"
-            else: file = save_file_selector()
-            if file: 
-                # Get the scene
-                scene = self.editor.engine.project.current_scene
-                # Save
-                save_scene(scene, abs_file_path=file)
-
-        if keys[pg.K_LCTRL] and keys[pg.K_l]:
-            if platform.system() == "Darwin": 
-                file = input("Enter file path: ")
-                if not file.endswith('.gltf'): file += ".gltf"
-            else: file = load_file_selector()
-            if file:
-                # Get the scene
-                scene = self.editor.engine.project.current_scene
-                # Load and update scene
-                load_scene(scene, abs_file_path=file)
-                scene.vao_handler.shader_handler.write_all_uniforms()
-                scene.project.texture_handler.write_textures()
-                scene.project.texture_handler.write_textures('batch')
-                scene.light_handler.write('batch')
-                scene.material_handler.write('batch')
-                # Refresh the UI
-                self.editor.ui.generate_vbo_images()
-                self.editor.ui.refresh()
+        if keys[pg.K_LCTRL] and keys[pg.K_s]: self.save_scene()
+        if keys[pg.K_LCTRL] and keys[pg.K_l]: self.load_scene()
 
         # Right click
         if mouse_buttons[2] and prev_mouse_buttons[2]: 

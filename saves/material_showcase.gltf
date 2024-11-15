@@ -267,17 +267,21 @@
             "name": "base",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    0.8,
-                    0.8,
-                    0.8,
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929,
                     1.0
                 ],
                 "metallicFactor": 0.5,
-                "roughnessFactor": 64
+                "roughnessFactor": 64.0,
+                "baseColorTexture": {
+                    "index": 2,
+                    "texCoord": 1
+                }
             }
         },
         {
-            "name": "base",
+            "name": "Material_1",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     1.0,
@@ -468,7 +472,7 @@
                 0.0
             ],
             "mesh": 6,
-            "material": 6
+            "material": 0
         }
     ],
     "scenes": [

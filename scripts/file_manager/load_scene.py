@@ -12,6 +12,8 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
     
     vbos = scene.vao_handler.vbo_handler.vbos
     for buffer in scene_data["buffers"]:
+        if buffer['uri'] in vbos: continue
+        
         obj_file = f"models/{buffer['uri']}"
         try:
             vbos[buffer["uri"][:-4]] = ModelVBO(scene.ctx, obj_file)
@@ -25,6 +27,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
             print(f"Attempted to load {image['uri']} for the scene, but it was not in the textures folder")
 
     scene.material_handler.materials.clear()
+    scene.material_handler.material_ids.clear()
     for mtl in scene_data["materials"]:
         kwargs = {}
         kwargs["name"] = mtl["name"]
@@ -60,6 +63,9 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
     collider_handler = scene.collider_handler
     physics_body_handler = scene.physics_body_handler
 
+    collider_handler.colliders.clear()
+    physics_body_handler.physics_bodies.clear()
+
     for node in scene_data["nodes"]:
         kwargs = {}
         kwargs["name"] = node["name"]
@@ -73,8 +79,6 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
 
         if "mesh" in node:
             kwargs["model"] = scene_data["buffers"][node["mesh"]]["uri"][:-4]
-            # if node["mesh"] == "cube": kwargs["model"] = "cube"
-            # else: kwargs["model"] = scene_data["buffers"][node["mesh"]]["uri"][:-4]
 
         if "material" in node:
             kwargs["material"] = scene_data["materials"][node["material"]]["name"]
@@ -83,7 +87,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
             body = physics_body_handler.add(mass=node["physics_body"]["mass"])
             kwargs["physics_body"] = body
         if "collider" in node:
-            collider = collider_handler.add(vbo=kwargs["model"], static=node["physics_body"]["static"])
+            collider = collider_handler.add(vbo=kwargs["model"], static=node["collider"]["static"])
             kwargs["collider"] = collider
 
         scene.node_handler.add(**kwargs)

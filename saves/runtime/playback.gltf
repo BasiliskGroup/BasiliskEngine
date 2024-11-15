@@ -152,6 +152,12 @@
             "uri": "oak_tree.jpg"
         },
         {
+            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.jpg"
+        },
+        {
+            "uri": "Poliigon_GrassPatchyGround_4585_Normal.png"
+        },
+        {
             "uri": "sample-image.png"
         },
         {
@@ -248,24 +254,17 @@
         },
         {
             "sampler": 26
+        },
+        {
+            "sampler": 27
+        },
+        {
+            "sampler": 28
         }
     ],
     "materials": [
         {
             "name": "base",
-            "pbrMetallicRoughness": {
-                "baseColorFactor": [
-                    0.8,
-                    0.8,
-                    0.8,
-                    1.0
-                ],
-                "metallicFactor": 0.5,
-                "roughnessFactor": 64
-            }
-        },
-        {
-            "name": "Material_1",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     0.800000011920929,
@@ -283,32 +282,12 @@
             "name": "cube",
             "translation": [
                 0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 6,
-            "material": 1
-        },
-        {
-            "name": "bunny",
-            "translation": [
-                5.0,
-                5.0,
+                -5.0,
                 0.0
             ],
             "scale": [
                 10.0,
-                10.0,
+                1.0,
                 10.0
             ],
             "rotation": [
@@ -316,13 +295,16 @@
                 0.0,
                 0.0
             ],
-            "mesh": 2,
-            "material": 1
+            "mesh": 6,
+            "material": 0,
+            "collider": {
+                "static": true
+            }
         },
         {
-            "name": "cow",
+            "name": "cube",
             "translation": [
-                5.0,
+                0.0,
                 0.0,
                 0.0
             ],
@@ -336,10 +318,13 @@
                 -0.0,
                 0.0
             ],
-            "mesh": 5,
-            "material": 1,
+            "mesh": 6,
+            "material": 0,
             "physics_body": {
-                "mass": 3.0
+                "mass": 20.0
+            },
+            "collider": {
+                "static": false
             }
         }
     ],
