@@ -104,14 +104,14 @@ class Camera:
     def get_params(self) -> tuple:
         return self.engine, self.position, self.yaw, self.pitch
     
-    def get_model_node_at(self, position:glm.vec3=None, forward:glm.vec3=None, max_distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None) -> tuple:
+    def get_model_node_at(self, position:glm.vec3=None, forward:glm.vec3=None, max_distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None, tags:list[str]='') -> tuple:
         if not forward:  forward  = self.forward
         if not position: position = self.position
         forward = glm.normalize(forward)
         
         # return best_node
         nodes = []
-        for root in self.scene.node_handler.nodes: nodes.extend(root.get_nodes(True, has_collider, has_physics_body, material))
+        for root in self.scene.node_handler.nodes: nodes.extend(root.get_nodes(True, has_collider, has_physics_body, material, tags))
         best_distance, best_point, best_node = max_distance, None, None
         
         for node in nodes:
