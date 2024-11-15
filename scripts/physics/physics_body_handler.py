@@ -59,6 +59,5 @@ class PhysicsBody(PointPhysicsBody):
         self.rotational_velocity -= self.decay * delta_time
         return glm.eulerAngles(self.rotation)
     
-    def set_rotation(self, quat):
+    def set_rotation(self, quat): # TODO replace usage with properties
         self.rotation = quat
-        print('setting:', quat, self.rotation)
