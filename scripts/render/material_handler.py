@@ -9,6 +9,7 @@ class MaterialHandler:
         self.programs       = scene.vao_handler.shader_handler.programs
         self.materials      = {}
         self.material_ids   = {}
+        self.mtl_texture = None
 
     def add(self, name="base", color: tuple=(1, 1, 1), specular: float=1, specular_exponent: float=32, alpha: float=1, texture=None, normal_map=None):
         """
@@ -56,7 +57,9 @@ class MaterialHandler:
 
         # Convert all material data to a texture and write to shader
         texture_buffer = self.scene.ctx.buffer(texture_data)
+        if self.mtl_texture: self.mtl_texture.release()
         self.mtl_texture = self.scene.ctx.texture((1, int(texture_buffer.size/4)), components=1, dtype='f4', data=texture_buffer.read())
+        texture_buffer.release()
         program[f'materialsTexture'] = 9
         self.mtl_texture.use(location=9)
 

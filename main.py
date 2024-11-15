@@ -9,7 +9,7 @@ class Engine:
     """
     Instance of python engine. Stores the window, context, and projects
     """
-    def __init__(self, win_size:str=(800, 800)) -> None:
+    def __init__(self, win_size:str=(1600, 800)) -> None:
         """
         Initialize the Pygame window and GL context
         """

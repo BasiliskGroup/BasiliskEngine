@@ -41,6 +41,7 @@ class Scene:
         
         # Makes a free cam
         self.camera = FollowCamera(self.engine, radius = 40, scene=self)
+        self.camera = Camera(self.engine, self, position=(0, 5, 30))
                 
         with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
         exec(scene_on_init)
@@ -54,8 +55,7 @@ class Scene:
         
         self.on_tick = None # TODO add functionality
         self.on_frame = scene_on_frame
-        load_scene(self, "base_save")
-        
+        load_scene(self, "physics_sample")
         #save_scene(self, "test_save")
             
         # level 1 #################################################################################################
