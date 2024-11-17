@@ -206,6 +206,7 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                     physics_body=self.physics_body_handler.add(mass=node.physics_body.mass / 2), # TODO get split mass (estimate)
                     model=uuid, 
                 )
+                self.node_handler.nodes[-1].tags = 'cuttable'
                 
             # TODO split skeleton
             

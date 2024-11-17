@@ -40,9 +40,9 @@ class Scene:
         self.light_handler = LightHandler(self)
         
         # Makes a free cam
-        self.camera = FollowCamera(self.engine, radius = 40, scene=self)
+        self.camera = FollowCamera(self.engine, radius = 20, scene=self)
                 
-        load_scene(self, "room4")
+        load_scene(self, "room1")
         if not editor: 
             self.load_user_scripts()
             self.collider_handler.construct_bvh()
@@ -102,7 +102,6 @@ class Scene:
         with open(f'user_scripts/add_john.py')      as file: add_john          = compile(file.read(), 'add_john', 'exec')
         # Load runtime scripts
         with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = compile(file.read(), 'bottom_on_frame', 'exec')
-        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_init    = compile(file.read(), 'bottom_on_init', 'exec')
         with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
         with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
         with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')

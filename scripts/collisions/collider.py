@@ -28,7 +28,7 @@ class Collider():
         self.base_volume      = 8
         self.static           = static
         self.elasticity       = elasticity
-        self.static_friction  = kinetic_friction
+        self.static_friction  = 0.99 if self.static else 0.2
         self.kinetic_friction = static_friction
         
         self.has_collided = False

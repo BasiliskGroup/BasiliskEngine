@@ -5,6 +5,9 @@
     "scene": 0,
     "buffers": [
         {
+            "uri": "Fence_Design_3.obj"
+        },
+        {
             "uri": "toy_001.obj"
         },
         {
@@ -26,7 +29,19 @@
             "uri": "kitchen_sink_001.obj"
         },
         {
+            "uri": "Stool_Livingroom_IKEA_INGOLF.obj"
+        },
+        {
             "uri": "curtain.obj"
+        },
+        {
+            "uri": "oak_tree.obj"
+        },
+        {
+            "uri": "Old_TV_.obj"
+        },
+        {
+            "uri": "Old Tv Set nr1.obj"
         },
         {
             "uri": "drink_002.obj"
@@ -36,6 +51,9 @@
         },
         {
             "uri": "drink_001.obj"
+        },
+        {
+            "uri": "cube.obj"
         },
         {
             "uri": "donut.obj"
@@ -72,9 +90,6 @@
         },
         {
             "uri": "dish_001.obj"
-        },
-        {
-            "uri": "cube.obj"
         }
     ],
     "meshes": [],
@@ -86,6 +101,12 @@
             "uri": "hungarian_flooring_normal.png"
         },
         {
+            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.jpg"
+        },
+        {
+            "uri": "dancing_tv.png"
+        },
+        {
             "uri": "container.png"
         },
         {
@@ -95,7 +116,22 @@
             "uri": "metal.png"
         },
         {
+            "uri": "alley_brick.png"
+        },
+        {
+            "uri": "oak_tree.jpg"
+        },
+        {
             "uri": "floral_wallpaper.png"
+        },
+        {
+            "uri": "wispy_grass.png"
+        },
+        {
+            "uri": "concrete.png"
+        },
+        {
+            "uri": "alley_brick_normal.png"
         },
         {
             "uri": "cow.png"
@@ -107,10 +143,25 @@
             "uri": "lantern.png"
         },
         {
+            "uri": "tutorial.png"
+        },
+        {
+            "uri": "wispy_grass_normal.png"
+        },
+        {
+            "uri": "concrete_normal.png"
+        },
+        {
             "uri": "normal_map2.png"
         },
         {
+            "uri": "dancing_poster.png"
+        },
+        {
             "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "declaration.png"
         },
         {
             "uri": "hungarian_flooring.png"
@@ -122,7 +173,13 @@
             "uri": "brick_normal.png"
         },
         {
+            "uri": "Poliigon_GrassPatchyGround_4585_Normal.png"
+        },
+        {
             "uri": "sample-image.png"
+        },
+        {
+            "uri": "casing.jpg"
         },
         {
             "uri": "lantern_normal.png"
@@ -188,6 +245,48 @@
         },
         {
             "sampler": 17
+        },
+        {
+            "sampler": 18
+        },
+        {
+            "sampler": 19
+        },
+        {
+            "sampler": 20
+        },
+        {
+            "sampler": 21
+        },
+        {
+            "sampler": 22
+        },
+        {
+            "sampler": 23
+        },
+        {
+            "sampler": 24
+        },
+        {
+            "sampler": 25
+        },
+        {
+            "sampler": 26
+        },
+        {
+            "sampler": 27
+        },
+        {
+            "sampler": 28
+        },
+        {
+            "sampler": 29
+        },
+        {
+            "sampler": 30
+        },
+        {
+            "sampler": 31
         }
     ],
     "materials": [
@@ -195,13 +294,17 @@
             "name": "base",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    0.8,
-                    0.8,
-                    0.8,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ],
                 "metallicFactor": 0.5,
-                "roughnessFactor": 64
+                "roughnessFactor": 64.0,
+                "baseColorTexture": {
+                    "index": 28,
+                    "texCoord": 1
+                }
             }
         },
         {
@@ -213,8 +316,12 @@
                     1.0,
                     1.0
                 ],
-                "metallicFactor": 0.5,
-                "roughnessFactor": 64.0
+                "metallicFactor": 0.0,
+                "roughnessFactor": 64.0,
+                "baseColorTexture": {
+                    "index": 3,
+                    "texCoord": 1
+                }
             }
         },
         {
@@ -229,7 +336,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 11,
+                    "index": 23,
                     "texCoord": 1
                 }
             },
@@ -248,15 +355,15 @@
                     0.800000011920929,
                     1.0
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "metallicFactor": 2.0,
+                "roughnessFactor": 128.0,
                 "baseColorTexture": {
-                    "index": 17,
+                    "index": 31,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 13,
+                "index": 25,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -273,7 +380,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 2,
+                    "index": 4,
                     "texCoord": 1
                 }
             }
@@ -290,7 +397,58 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 3,
+                    "index": 5,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_7",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 20,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_8",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 15,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_9",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    0.3499999940395355,
+                    0.25,
+                    0.15000000596046448,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 23,
                     "texCoord": 1
                 }
             }
@@ -299,26 +457,7 @@
     "nodes": [
         {
             "name": "cube",
-            "translation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                0.10000000149011612,
-                0.10000000149011612,
-                0.10000000149011612
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 23,
-            "material": 2
-        },
-        {
-            "name": "cube",
+            "tags": "",
             "translation": [
                 0.0,
                 -2.0,
@@ -334,11 +473,15 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
-            "material": 2
+            "mesh": 16,
+            "material": 2,
+            "collider": {
+                "static": true
+            }
         },
         {
             "name": "cube",
+            "tags": "",
             "translation": [
                 0.0,
                 11.0,
@@ -354,11 +497,15 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
-            "material": 3
+            "mesh": 16,
+            "material": 3,
+            "collider": {
+                "static": true
+            }
         },
         {
             "name": "cube",
+            "tags": "",
             "translation": [
                 31.0,
                 11.0,
@@ -374,11 +521,15 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
-            "material": 3
+            "mesh": 16,
+            "material": 3,
+            "collider": {
+                "static": true
+            }
         },
         {
             "name": "cube",
+            "tags": "",
             "translation": [
                 0.0,
                 11.0,
@@ -394,11 +545,15 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
-            "material": 3
+            "mesh": 16,
+            "material": 3,
+            "collider": {
+                "static": true
+            }
         },
         {
             "name": "cube",
+            "tags": "",
             "translation": [
                 0.0,
                 24.0,
@@ -414,11 +569,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
+            "mesh": 16,
             "material": 4
         },
         {
             "name": "cube",
+            "tags": "",
             "translation": [
                 10.0,
                 1.0,
@@ -434,11 +590,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
+            "mesh": 16,
             "material": 3
         },
         {
             "name": "cube",
+            "tags": "",
             "translation": [
                 10.0,
                 3.0,
@@ -454,11 +611,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
+            "mesh": 16,
             "material": 2
         },
         {
             "name": "toy_001",
+            "tags": "",
             "translation": [
                 100.0,
                 0.0,
@@ -474,11 +632,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 0,
+            "mesh": 1,
             "material": 2
         },
         {
             "name": "kitchen_sink_001",
+            "tags": "",
             "translation": [
                 26.0,
                 -1.0,
@@ -494,11 +653,12 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 7,
             "material": 5
         },
         {
             "name": "curtain",
+            "tags": "",
             "translation": [
                 100.0,
                 0.0,
@@ -514,14 +674,15 @@
                 0.0,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 9,
             "material": 2
         },
         {
             "name": "dish_001",
+            "tags": "",
             "translation": [
                 10.0,
-                3.5,
+                3.200000047683716,
                 11.0
             ],
             "scale": [
@@ -534,11 +695,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 28,
             "material": 5
         },
         {
             "name": "dish_002",
+            "tags": "",
             "translation": [
                 10.0,
                 3.25,
@@ -554,31 +716,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 19,
-            "material": 5
-        },
-        {
-            "name": "dresser_001",
-            "translation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 3,
+            "mesh": 25,
             "material": 5
         },
         {
             "name": "drink_001",
+            "tags": "",
             "translation": [
                 10.25,
                 3.25,
@@ -594,11 +737,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 10,
+            "mesh": 15,
             "material": 5
         },
         {
             "name": "fridge_001",
+            "tags": "",
             "translation": [
                 25.0,
                 0.0,
@@ -614,11 +758,12 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 13,
+            "mesh": 19,
             "material": 5
         },
         {
             "name": "drink_001",
+            "tags": "",
             "translation": [
                 10.0,
                 3.25,
@@ -634,11 +779,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 10,
+            "mesh": 15,
             "material": 5
         },
         {
             "name": "drink_001",
+            "tags": "",
             "translation": [
                 9.0,
                 3.25,
@@ -654,11 +800,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 10,
+            "mesh": 15,
             "material": 5
         },
         {
             "name": "fridge_001",
+            "tags": "",
             "translation": [
                 25.0,
                 0.0,
@@ -674,11 +821,12 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 13,
+            "mesh": 19,
             "material": 5
         },
         {
             "name": "kitchen_table_001",
+            "tags": "",
             "translation": [
                 27.0,
                 -1.0,
@@ -694,8 +842,281 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 1,
+            "mesh": 2,
             "material": 5
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                10.0,
+                10.0,
+                30.0
+            ],
+            "scale": [
+                2.0,
+                0.10000000149011612,
+                3.0
+            ],
+            "rotation": [
+                1.5700000524520874,
+                -0.0,
+                0.0
+            ],
+            "mesh": 16,
+            "material": 6
+        },
+        {
+            "name": "Old Tv Set nr1",
+            "tags": "",
+            "translation": [
+                28.0,
+                13.0,
+                16.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                2.0
+            ],
+            "rotation": [
+                0.0,
+                1.5700000524520874,
+                0.0
+            ],
+            "mesh": 12,
+            "material": 0
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                27.5,
+                12.800000190734863,
+                16.100000381469727
+            ],
+            "scale": [
+                0.09000000357627869,
+                4.900000095367432,
+                3.0
+            ],
+            "rotation": [
+                -1.5700000524520874,
+                0.0,
+                0.0
+            ],
+            "mesh": 16,
+            "material": 1
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                28.0,
+                9.0,
+                16.0
+            ],
+            "scale": [
+                1.0,
+                0.30000001192092896,
+                5.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 16,
+            "material": 4
+        },
+        {
+            "name": "closet_001",
+            "tags": "",
+            "translation": [
+                26.0,
+                -1.0,
+                -20.0
+            ],
+            "scale": [
+                6.0,
+                6.0,
+                6.0
+            ],
+            "rotation": [
+                0.0,
+                1.5700000524520874,
+                0.0
+            ],
+            "mesh": 24,
+            "material": 5
+        },
+        {
+            "name": "closet_002",
+            "tags": "",
+            "translation": [
+                28.0,
+                -1.0,
+                -14.0
+            ],
+            "scale": [
+                8.0,
+                8.0,
+                8.0
+            ],
+            "rotation": [
+                0.0,
+                1.5700000524520874,
+                0.0
+            ],
+            "mesh": 26,
+            "material": 5
+        },
+        {
+            "name": "wall_lantern",
+            "tags": "",
+            "translation": [
+                28.5,
+                10.0,
+                -5.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                1.590000033378601,
+                0.0
+            ],
+            "mesh": 27,
+            "material": 7
+        },
+        {
+            "name": "wall_lantern",
+            "tags": "",
+            "translation": [
+                15.0,
+                10.0,
+                -28.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 27,
+            "material": 7
+        },
+        {
+            "name": "Stool_Livingroom_IKEA_INGOLF",
+            "tags": "",
+            "translation": [
+                5.0,
+                -1.0,
+                -3.0
+            ],
+            "scale": [
+                0.004999999888241291,
+                0.007000000216066837,
+                0.00800000037997961
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 8
+        },
+        {
+            "name": "Stool_Livingroom_IKEA_INGOLF",
+            "tags": "",
+            "translation": [
+                5.0,
+                -1.0,
+                23.0
+            ],
+            "scale": [
+                0.004999999888241291,
+                0.007000000216066837,
+                0.00800000037997961
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 8
+        },
+        {
+            "name": "Stool_Livingroom_IKEA_INGOLF",
+            "tags": "",
+            "translation": [
+                5.0,
+                -1.0,
+                16.0
+            ],
+            "scale": [
+                0.004999999888241291,
+                0.007000000216066837,
+                0.00800000037997961
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 8,
+            "material": 8
+        },
+        {
+            "name": "wall_lantern",
+            "tags": "",
+            "translation": [
+                17.0,
+                10.0,
+                28.5
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                3.140000104904175,
+                0.0
+            ],
+            "mesh": 27,
+            "material": 7
+        },
+        {
+            "name": "wall_lantern",
+            "tags": "",
+            "translation": [
+                -4.0,
+                10.0,
+                28.5
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                3.140000104904175,
+                0.0
+            ],
+            "mesh": 27,
+            "material": 7
         }
     ],
     "scenes": [

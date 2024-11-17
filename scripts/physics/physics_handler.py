@@ -14,9 +14,7 @@ class PhysicsHandler:
         # accelerate all physics bodies by external accelerations
         self.scene.node_handler.update(delta_time)       # movement and syncronization
         self.scene.skeleton_handler.update(delta_time)   # skeleton restrictions
-        
         self.scene.collider_handler.resolve_collisions() # collisions
-        
         self.scene.node_handler.tick(delta_time)
         self.scene.skeleton_handler.tick(delta_time)
         

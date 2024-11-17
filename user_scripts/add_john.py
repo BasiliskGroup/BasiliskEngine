@@ -10,7 +10,7 @@ if "white" not in self.material_handler.materials:
 if "grey" not in self.material_handler.materials: 
     self.material_handler.add("grey", color=(.72, .72, .72), specular=.5, specular_exponent=64)
 if "red_pink" not in self.material_handler.materials: 
-    self.material_handler.add("red_pink", color=(.99, .01, .38), specular=.5, specular_exponent=64)
+    self.material_handler.add("red_pink", color=(.99, .01, .15), specular=.5, specular_exponent=64)
 if "black" not in self.material_handler.materials: 
     self.material_handler.add("black", color=(0.0, 0.0, 0.0), specular=.5, specular_exponent=64)
 if "dark_grey" not in self.material_handler.materials: 
@@ -26,7 +26,7 @@ left_foot=self.node_handler.add(
     rotation=(0, 0, 0),
     model='cube', 
     material='white',
-    physics_body=self.physics_body_handler.add(mass=10),
+    physics_body=self.physics_body_handler.add(mass=1),
     name='left foot',
     
     nodes=[
@@ -63,7 +63,7 @@ left_knee=self.node_handler.add(
     rotation=(0, 0, 0),
     model='cube', 
     material='white',
-    physics_body=self.physics_body_handler.add(mass=20),
+    physics_body=self.physics_body_handler.add(mass=2),
     name='left foot',
 )
 
@@ -73,7 +73,7 @@ right_foot=self.node_handler.add(
     rotation=(0, 0, 0),
     model='cube',
     material='white',
-    physics_body=self.physics_body_handler.add(mass=10),
+    physics_body=self.physics_body_handler.add(mass=1),
     name='right foot',
     
     nodes=[
@@ -110,7 +110,7 @@ right_knee=self.node_handler.add(
     rotation=(0, 0, 0),
     model='cube', 
     material='white',
-    physics_body=self.physics_body_handler.add(mass=20),
+    physics_body=self.physics_body_handler.add(mass=2),
     name='left foot',
 )
 
@@ -119,7 +119,7 @@ bottom=self.node_handler.add(
     scale=(1, 1.5, 1),
     rotation=(0, 0, 0),
     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-    physics_body=self.physics_body_handler.add(mass=10000),
+    physics_body=self.physics_body_handler.add(mass=100),
     nodes=[
         self.node_handler.create(
             position=(-2, 6, -2),
@@ -147,7 +147,7 @@ middle=self.node_handler.add(
     model='cube', 
     material='white',
     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-    physics_body=self.physics_body_handler.add(mass=20),
+    physics_body=self.physics_body_handler.add(mass=2),
     name='middle',
     
     nodes=[
@@ -205,7 +205,7 @@ top=self.node_handler.add(
     model='cube', 
     material='baby_blue',
     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-    physics_body=self.physics_body_handler.add(mass=20),
+    physics_body=self.physics_body_handler.add(mass=2),
     name='top',
     
     nodes=[
@@ -345,7 +345,7 @@ head=self.node_handler.add(
     model='cube', 
     material='white',
     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
-    physics_body=self.physics_body_handler.add(mass=20),
+    physics_body=self.physics_body_handler.add(mass=2),
     name='head',
     
     nodes=[
@@ -448,7 +448,7 @@ head=self.node_handler.add(
             model='cube', 
             material='baby_blue',
             name='upper band'
-        ),
+        )
     ]
 )
 
@@ -536,3 +536,10 @@ john_bottom=self.skeleton_handler.add(
 )
 
 john_bottom.on_frame = walking_animation
+
+setattr(left_foot, 'saved_rotation', glm.quat())
+setattr(right_foot, 'saved_rotation', glm.quat())
+setattr(bottom, 'saved_rotation', glm.quat())
+setattr(middle, 'saved_rotation', glm.quat())
+setattr(top, 'saved_rotation', glm.quat())
+setattr(head, 'saved_rotation', glm.quat())
