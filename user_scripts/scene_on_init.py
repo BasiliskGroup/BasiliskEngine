@@ -10,3 +10,6 @@ self.real_rotate = self.camera.rotate
 self.clicked_model    = None
 self.clicked_node     = None
 self.clicked_skeleton = None
+
+# Rendering scripts
+self.overlay = Overlay(self)

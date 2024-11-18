@@ -1,0 +1,1 @@
+if self.clicked: self.overlay.render(self.click_anchor)
