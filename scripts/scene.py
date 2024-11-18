@@ -101,8 +101,9 @@ class Scene:
     
     def load_user_scripts(self):
         # Load scene scripts
-        with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
-        with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
+        with open(f'user_scripts/scene_on_init.py')   as file: scene_on_init   = compile(file.read(), 'scene_on_init', 'exec')
+        with open(f'user_scripts/scene_on_frame.py')  as file: scene_on_frame  = compile(file.read(), 'scene_on_frame', 'exec')
+        with open(f'user_scripts/scene_on_render.py') as file: scene_on_render = compile(file.read(), 'scene_on_render', 'exec')
         
         # Exec on init scripts
         exec(scene_on_init)
