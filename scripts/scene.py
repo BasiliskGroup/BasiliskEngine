@@ -100,21 +100,12 @@ class Scene:
         self.vao_handler.release()
     
     def load_user_scripts(self):
-        # Load init scripts
+        # Load scene scripts
         with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
-        with open(f'user_scripts/add_john.py')      as file: add_john      = compile(file.read(), 'add_john', 'exec')
-        # Load runtime scripts
-        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = compile(file.read(), 'bottom_on_frame', 'exec')
-        with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
-        with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
         with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
-        with open(f'user_scripts/head_on_frame.py')     as file: head_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
-        # Load rendering scripts
-        with open(f'user_scripts/scene_on_render.py')   as file: scene_on_render   = compile(file.read(), 'scene_on_render', 'exec')
-        with open(f'user_scripts/overlay.py')           as file: overlay           = compile(file.read(), 'overlay', 'exec')
+        
         # Exec on init scripts
         exec(scene_on_init)
-        exec(add_john)
         
         self.on_tick   = None # TODO add functionality
         self.on_frame  = scene_on_frame

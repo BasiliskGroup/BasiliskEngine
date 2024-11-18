@@ -12,6 +12,7 @@ class Collider():
         self.scale    = glm.vec3(scale)    if scale    else glm.vec3(1, 1, 1)
         self.rotation = glm.vec3(rotation) if rotation else glm.vec3(0, 0, 0)
         # geometry
+        self.vbo = vbo
         self.unique_points = self.collider_handler.vbos[vbo].unique_points
         self.update_vertices() # vertices must be created before everything else
         self.base_dimensions = glm.vec3(2, 2, 2)
@@ -32,7 +33,7 @@ class Collider():
         self.kinetic_friction = static_friction
         
         self.has_collided = False
-        self.collision_normals = []
+        self.collision_normals = {}
         
     def update_dimensions(self):
         model_matrix    = glm.mat4x4([[abs(item) for item in row] for row in get_model_matrix(glm.vec3(0, 0, 0), self.scale, self.rotation)])

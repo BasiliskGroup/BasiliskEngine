@@ -27,7 +27,7 @@ class ColliderHandler():
         """
         for collider in self.colliders: 
             collider.has_collided      = False
-            collider.collision_normals = []
+            collider.collision_normals = {}
         
         # get broad collisions
         collider_vertices, needs_narrow = self.resolve_broad_collisions()
@@ -64,16 +64,16 @@ class ColliderHandler():
                 
                 if collider1.static: 
                     node2.position += normal * distance
-                    collider2.collision_normals.append(normal)
+                    collider2.collision_normals[node1] = normal # TODO may need to switch node with collider
                 else:
                     if collider2.static: 
                         node1.position += normal * -distance
-                        collider1.collision_normals.append(-normal)
+                        collider1.collision_normals[node2] = -normal
                     else:
                         node1.position += normal * 0.5 * -distance
                         node2.position += normal * 0.5 * distance
-                        collider1.collision_normals.append(-normal)
-                        collider2.collision_normals.append(normal)
+                        collider1.collision_normals[node2] = -normal
+                        collider2.collision_normals[node1] = normal
                         
                 #for both physics bodies
                 if not (node1.physics_body or node2.physics_body): continue
