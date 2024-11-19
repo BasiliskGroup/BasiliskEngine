@@ -1670,7 +1670,7 @@
         },
         {
             "name": "cube",
-            "tags": "",
+            "tags": "cuttable",
             "translation": [
                 0.0,
                 73.0,
@@ -1689,7 +1689,7 @@
             "mesh": 17,
             "material": 2,
             "physics_body": {
-                "mass": 300.0
+                "mass": 3000.0
             },
             "collider": {
                 "static": false

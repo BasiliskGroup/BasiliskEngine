@@ -14,10 +14,8 @@ class LightHandler:
         # Create random point lights
         place_range = 30
         self.point_lights = [
-            PointLight(pos=(28, 10, -5), color=(1, 0.7, 0.3), diffuse=5),
-            PointLight(pos=(15, 10, -28), color=(1, 0.7, 0.3), diffuse=5),
-            PointLight(pos=(-4, 10, 28.5), color=(1, 0.7, 0.3), diffuse=5),
-            PointLight(pos=(17, 10, 28.5), color=(1, 0.7, 0.3), diffuse=5)
+            PointLight(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
+            PointLight(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
         ]
         # [PointLight(pos=(random.randrange(-place_range, place_range), random.randrange(-place_range, place_range), random.randrange(-place_range, place_range)), color=(random.uniform(0.0, 1.0), random.uniform(0.0, 1.0), random.uniform(0.0, 1.0))) for i in range(0)]
 

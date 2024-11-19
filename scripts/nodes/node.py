@@ -3,7 +3,7 @@ import pygame as pg # imported for scripting
 from scripts.camera import *
 from scripts.collisions.collider import Collider
 from scripts.generic.data_types import vec3
-from scripts.generic.math_functions import get_model_matrix, get_rotation_matrix
+from scripts.generic.math_functions import get_model_matrix, get_rotation_matrix, compute_inertia_moment, compute_inertia_product
     
 class Node():
     def __init__(self, node_handler, position:glm.vec3|list=None, scale:glm.vec3|list=None, rotation:glm.vec3|list=None, nodes:list=None, model:str=None, material:str="base", collider=None, physics_body=None, name:str='node', camera=None, tags=''):
@@ -17,6 +17,7 @@ class Node():
         # other
         self.name = name
         self.camera = camera
+        self.tags = tags
         
         # transforms
         self.position     = glm.vec3(position) if position else glm.vec3(0.0)
@@ -53,9 +54,6 @@ class Node():
         self.on_touch     = None
         self.on_collision = None # like touch but will have threashold
         self.on_frame     = None
-        
-        # tags
-        self.tags = tags
     
     # initialization
     def init_physics_body(self): 
@@ -224,8 +222,6 @@ class Node():
         """
         Defines the inertia tensor for the node if the node has a collider
         """
-        # determine the density of the node
-        if density == 0: density = self.physics_body.mass / self.get_volume() if self.physics_body else 1
         mass = self.physics_body.mass if self.physics_body else 1
         
         if not (self.collider and self.physics_body): 
@@ -238,27 +234,26 @@ class Node():
             return glm.inverse(mass / 12 * glm.mat3x3([y**2 + z ** 2, 0, 0], [0, x**2 + z**2, 0], [0, 0, x**2 + y**2]))
 
         vbo = self.node_handler.scene.vao_handler.vbo_handler.vbos[self.collider.vbo]
-        model_matrix = get_model_matrix(glm.vec3(0), self.collider.scale, glm.vec3(0))
+        model_matrix = get_model_matrix(glm.vec3(0, 0, 0), glm.vec3(1, 1, 1), glm.vec3(0, 0, 0))
         world_points = [glm.vec3(model_matrix * glm.vec4(*vert, 1)) for vert in vbo.unique_points]
         
-        def compute_inertia_moment(t:list[glm.vec3], i:int) -> float:
-            return t[0][i] ** 2 + t[1][i] * t[2][i] + \
-                   t[1][i] ** 2 + t[0][i] * t[2][i] + \
-                   t[2][i] ** 2 + t[0][i] * t[1][i]
-                   
-        def compute_inertia_product(t:list[glm.vec3], i:int, j:int) -> float:
-            return 2 * t[0][i] * t[0][j] + t[1][i] * t[2][j] + t[2][i] * t[1][j] + \
-                   2 * t[1][i] * t[1][j] + t[0][i] * t[2][j] + t[2][i] * t[0][j] + \
-                   2 * t[2][i] * t[2][j] + t[0][i] * t[1][j] + t[1][i] * t[0][j]
-        
         ia = ib = ic = iap = ibp = icp = 0
+        tet_mass = 0
+        center = glm.vec3(0, 0, 0)
+        
+        volume = 0
+        for triangle in vbo.indicies:
+            points = [world_points[t] for t in triangle]
+            det_j = glm.dot(points[0], glm.cross(points[1], points[2]))
+            volume += det_j / 6
+        
+        density = self.physics_body.mass / volume
+        mass = 0
         
         for triangle in vbo.indicies:
             points = [world_points[t] for t in triangle]
             det_j = glm.dot(points[0], glm.cross(points[1], points[2]))
             vol = det_j / 6
-            tet_mass = density * vol
-            center = (points[0] + points[1] + points[2]) / 4
             
             ia += det_j * (compute_inertia_moment(points, 1) + compute_inertia_moment(points, 2))
             ib += det_j * (compute_inertia_moment(points, 0) + compute_inertia_moment(points, 2))
@@ -267,18 +262,26 @@ class Node():
             ibp += det_j * compute_inertia_product(points, 0, 1)
             icp += det_j * compute_inertia_product(points, 0, 2)
             
-        ia *= density / 60
-        ib *= density / 60
-        ic *= density / 60
-        iap *= density / 120
-        ibp *= density / 120
-        icp *= density / 120
+            tet_mass = density * vol 
+            mass += tet_mass
+            center += tet_mass * (points[0] + points[1] + points[2]) / 4
+        
+        center /= mass
+        ia = ia * density / 60 - mass * (center[1] ** 2 + center[2] ** 2)
+        ib = ib * density / 60 - mass * (center[0] ** 2 + center[2] ** 2)
+        ic = ic * density / 60 - mass * (center[0] ** 2 + center[1] ** 2)
+        iap = iap * density / 120 - mass * center[1] * center[2]
+        ibp = ibp * density / 120 - mass * center[0] * center[1]
+        icp = icp * density / 120 - mass * center[0] * center[2]
         
         inertia_tensor = glm.mat3x3(
             ia, -ibp, -icp,
             -ibp, ib, -iap,
             -icp, -iap, ic
         )
+        # if self.tags == 'cuttable':
+        #     print(inertia_tensor)
+            # print(f'{self.name}:\nin\t{self.collider.geometric_center}\ncalc\t{center}')
             
         return glm.inverse(inertia_tensor)
     

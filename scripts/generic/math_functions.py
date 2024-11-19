@@ -95,3 +95,13 @@ def moller_trumbore(point:glm.vec3, vec:glm.vec3, triangle:list[glm.vec3], epsil
     t = glm.dot(edge2, s_cross) * inv_det
     if t > epsilon: return point + vec * t
     return None
+
+def compute_inertia_moment(t:list[glm.vec3], i:int) -> float:
+    return t[0][i] ** 2 + t[1][i] * t[2][i] + \
+           t[1][i] ** 2 + t[0][i] * t[2][i] + \
+           t[2][i] ** 2 + t[0][i] * t[1][i]
+            
+def compute_inertia_product(t:list[glm.vec3], i:int, j:int) -> float:
+    return 2 * t[0][i] * t[0][j] + t[1][i] * t[2][j] + t[2][i] * t[1][j] + \
+           2 * t[1][i] * t[1][j] + t[0][i] * t[2][j] + t[2][i] * t[0][j] + \
+           2 * t[2][i] * t[2][j] + t[0][i] * t[1][j] + t[1][i] * t[0][j]

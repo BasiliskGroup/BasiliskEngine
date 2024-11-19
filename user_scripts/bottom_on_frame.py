@@ -34,3 +34,6 @@ for node, collider in self.collider.collision_normals.items():
     load_scene(self.node_handler.scene, f'room{self.node_handler.scene.level}')
     self.node_handler.scene.add_john()
     
+if keys[pg.K_r]: 
+    load_scene(self.node_handler.scene, f'room{self.node_handler.scene.level}')
+    self.node_handler.scene.add_john()

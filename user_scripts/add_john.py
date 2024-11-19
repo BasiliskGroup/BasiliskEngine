@@ -5,12 +5,12 @@ from scripts.skeletons.joints import *
 # Add all the materials needed for john
 if "baby_blue" not in self.material_handler.materials: self.material_handler.add("baby_blue", color=(.69, .97, 1), specular=.5, specular_exponent=64)
 if "white" not in self.material_handler.materials:     self.material_handler.add("white", color=(1.0, 1.0, 1.0), specular=.5, specular_exponent=64)
-if "grey" not in self.material_handler.materials:   self.material_handler.add("grey", color=(.72, .72, .72), specular=.5, specular_exponent=64)
-if "red_pink" not in self.material_handler.materials: self.material_handler.add("red_pink", color=(.99, .01, .15), specular=.5, specular_exponent=64)
-if "black" not in self.material_handler.materials: self.material_handler.add("black", color=(0.0, 0.0, 0.0), specular=.5, specular_exponent=64)
+if "grey" not in self.material_handler.materials:      self.material_handler.add("grey", color=(.72, .72, .72), specular=.5, specular_exponent=64)
+if "red_pink" not in self.material_handler.materials:  self.material_handler.add("red_pink", color=(.99, .01, .15), specular=.5, specular_exponent=64)
+if "black" not in self.material_handler.materials:     self.material_handler.add("black", color=(0.0, 0.0, 0.0), specular=.5, specular_exponent=64)
 if "dark_grey" not in self.material_handler.materials: self.material_handler.add("dark_grey", color=(.29, .29, .29), specular=.5, specular_exponent=64)
-if "yellow" not in self.material_handler.materials: self.material_handler.add("yellow", color=(1, .96, .22), specular=.5, specular_exponent=64)
-
+if "yellow" not in self.material_handler.materials:    self.material_handler.add("yellow", color=(1, .96, .22), specular=.5, specular_exponent=64)
+if "dummy" not in self.material_handler.materials:     self.material_handler.add("dummy", color=(1, .96, .22), specular=.5, specular_exponent=64)
 
 cock_pos = glm.vec3(0, -2, 0)
 left_foot=self.node_handler.add(

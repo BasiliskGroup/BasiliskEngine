@@ -15,7 +15,9 @@ class Collider():
         self.vbo = vbo
         self.unique_points = self.collider_handler.vbos[vbo].unique_points
         self.update_vertices() # vertices must be created before everything else
-        self.base_dimensions = glm.vec3(2, 2, 2)
+        model_matrix = get_model_matrix(self.position, self.scale, self.rotation)
+        world_points = [glm.vec3(model_matrix * glm.vec4(*vert, 1)) for vert in self.unique_points]
+        self.base_dimensions = glm.max(world_points) - glm.min(world_points)
         self.base_half_dimensions = self.base_dimensions / 2
         self.update_dimensions()
         self.base_geometric_center = glm.vec3(0, 0, 0)

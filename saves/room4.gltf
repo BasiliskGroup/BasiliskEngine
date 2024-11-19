@@ -1641,7 +1641,7 @@
             "mesh": 17,
             "material": 2,
             "physics_body": {
-                "mass": 100.0
+                "mass": 2000.0
             },
             "collider": {
                 "static": false
@@ -1692,7 +1692,7 @@
             "mesh": 17,
             "material": 2,
             "physics_body": {
-                "mass": 100.0
+                "mass": 1000.0
             },
             "collider": {
                 "static": false
