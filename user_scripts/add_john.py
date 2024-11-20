@@ -115,7 +115,7 @@ bottom=self.node_handler.add(
     physics_body=self.physics_body_handler.add(mass=100),
     nodes=[
         self.node_handler.create(
-            position=(-2, 6, -2),
+            position=(0, 6, 0),
             camera=self.camera
         ),
         self.node_handler.create(
