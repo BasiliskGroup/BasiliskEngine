@@ -13,7 +13,11 @@ class LightHandler:
         self.dir_light = DirectionalLight(ambient=.25, diffuse=0.75, specular=0.5)
         # Create random point lights
         place_range = 30
-        self.point_lights = [PointLight(pos=(random.randrange(-place_range, place_range), random.randrange(-place_range, place_range), random.randrange(-place_range, place_range)), color=(random.uniform(0.0, 1.0), random.uniform(0.0, 1.0), random.uniform(0.0, 1.0))) for i in range(0)]
+        self.point_lights = [
+            PointLight(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
+            PointLight(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
+        ]
+        # [PointLight(pos=(random.randrange(-place_range, place_range), random.randrange(-place_range, place_range), random.randrange(-place_range, place_range)), color=(random.uniform(0.0, 1.0), random.uniform(0.0, 1.0), random.uniform(0.0, 1.0))) for i in range(0)]
 
     def write(self, program, dir=True, point=True):
         # Get the program
@@ -39,7 +43,6 @@ class LightHandler:
                 program[f'pointLights[{i}].specular' ].write(light.specular)
                 program[f'pointLights[{i}].radius'   ].write(light.radius)
 
-
 class Light:
     def __init__(self, ambient=0.2, diffuse=0.5, specular=1.0, color=(1.0, 1.0, 1.0)):
         """
@@ -55,7 +58,7 @@ class Light:
 class DirectionalLight(Light):
     def __init__(self, direction=(1.5, -2.0, 1.0), ambient=0.4, diffuse=0.6, specular=1.0, color=(1.0, 1.0, 1.0)):
         """
-        Light that points in a single direction at all loctions in the scene (Like sun).
+        Light that points in a single direction at all loctions in the scene (Like sun). 
         Will cast shadows (Not yet implamented). 
         Should only have one directional light per scene. 
         Args:

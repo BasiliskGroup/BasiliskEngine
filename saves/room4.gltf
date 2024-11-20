@@ -5,154 +5,178 @@
     "scene": 0,
     "buffers": [
         {
-            "uri": "10090_white_house_v1_L1.obj"
-        },
-        {
-            "uri": "american_flag.obj"
-        },
-        {
-            "uri": "bunny.obj"
-        },
-        {
-            "uri": "closet_001.obj"
-        },
-        {
-            "uri": "closet_002.obj"
-        },
-        {
-            "uri": "cow.obj"
-        },
-        {
-            "uri": "cube.obj"
-        },
-        {
-            "uri": "curtain.obj"
-        },
-        {
-            "uri": "cylinder.obj"
-        },
-        {
-            "uri": "dish_001.obj"
-        },
-        {
-            "uri": "dish_002.obj"
-        },
-        {
-            "uri": "donut.obj"
-        },
-        {
-            "uri": "dresser_001.obj"
-        },
-        {
-            "uri": "drink_001.obj"
-        },
-        {
-            "uri": "drink_002.obj"
-        },
-        {
             "uri": "Fence_Design_3.obj"
-        },
-        {
-            "uri": "fridge_001.obj"
-        },
-        {
-            "uri": "kitchen_sink_001.obj"
-        },
-        {
-            "uri": "kitchen_table_001.obj"
-        },
-        {
-            "uri": "lucy.obj"
-        },
-        {
-            "uri": "monkey.obj"
-        },
-        {
-            "uri": "oak_tree.obj"
-        },
-        {
-            "uri": "sphere.obj"
         },
         {
             "uri": "toy_001.obj"
         },
         {
+            "uri": "kitchen_table_001.obj"
+        },
+        {
+            "uri": "cow.obj"
+        },
+        {
+            "uri": "dresser_001.obj"
+        },
+        {
+            "uri": "lucy.obj"
+        },
+        {
+            "uri": "bunny.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "Stool_Livingroom_IKEA_INGOLF.obj"
+        },
+        {
+            "uri": "10447_Pine_Tree_v1_L3b.obj"
+        },
+        {
+            "uri": "curtain.obj"
+        },
+        {
+            "uri": "oak_tree.obj"
+        },
+        {
+            "uri": "Old_TV_.obj"
+        },
+        {
+            "uri": "Old Tv Set nr1.obj"
+        },
+        {
+            "uri": "drink_002.obj"
+        },
+        {
+            "uri": "sphere.obj"
+        },
+        {
+            "uri": "drink_001.obj"
+        },
+        {
+            "uri": "cube.obj"
+        },
+        {
+            "uri": "donut.obj"
+        },
+        {
+            "uri": "american_flag.obj"
+        },
+        {
+            "uri": "fridge_001.obj"
+        },
+        {
+            "uri": "monkey.obj"
+        },
+        {
+            "uri": "cylinder.obj"
+        },
+        {
             "uri": "tv_wall_001.obj"
         },
         {
+            "uri": "10090_white_house_v1_L1.obj"
+        },
+        {
+            "uri": "closet_001.obj"
+        },
+        {
+            "uri": "dish_002.obj"
+        },
+        {
+            "uri": "closet_002.obj"
+        },
+        {
             "uri": "wall_lantern.obj"
+        },
+        {
+            "uri": "dish_001.obj"
         }
     ],
     "meshes": [],
     "images": [
         {
-            "uri": "alley_brick.png"
-        },
-        {
-            "uri": "alley_brick_normal.png"
-        },
-        {
-            "uri": "america.jpg"
-        },
-        {
-            "uri": "box.png"
-        },
-        {
-            "uri": "brick.png"
-        },
-        {
-            "uri": "brick_normal.png"
-        },
-        {
-            "uri": "colors.png"
-        },
-        {
-            "uri": "concrete.png"
-        },
-        {
-            "uri": "concrete_normal.png"
-        },
-        {
-            "uri": "container.png"
-        },
-        {
-            "uri": "cow.png"
-        },
-        {
-            "uri": "declaration.png"
-        },
-        {
-            "uri": "floral_wallpaper.png"
-        },
-        {
-            "uri": "floral_wallpaper_normal.png"
-        },
-        {
-            "uri": "hungarian_flooring.png"
+            "uri": "normal_map.png"
         },
         {
             "uri": "hungarian_flooring_normal.png"
         },
         {
-            "uri": "lantern.png"
+            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.jpg"
         },
         {
-            "uri": "lantern_normal.png"
+            "uri": "dancing_tv.png"
+        },
+        {
+            "uri": "container.png"
+        },
+        {
+            "uri": "colors.png"
+        },
+        {
+            "uri": "pine_tree.jpg"
         },
         {
             "uri": "metal.png"
         },
         {
-            "uri": "normal_map.png"
-        },
-        {
-            "uri": "normal_map2.png"
+            "uri": "alley_brick.png"
         },
         {
             "uri": "oak_tree.jpg"
         },
         {
-            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.jpg"
+            "uri": "floral_wallpaper.png"
+        },
+        {
+            "uri": "wispy_grass.png"
+        },
+        {
+            "uri": "concrete.png"
+        },
+        {
+            "uri": "alley_brick_normal.png"
+        },
+        {
+            "uri": "cow.png"
+        },
+        {
+            "uri": "floral_wallpaper_normal.png"
+        },
+        {
+            "uri": "lantern.png"
+        },
+        {
+            "uri": "tutorial.png"
+        },
+        {
+            "uri": "wispy_grass_normal.png"
+        },
+        {
+            "uri": "concrete_normal.png"
+        },
+        {
+            "uri": "normal_map2.png"
+        },
+        {
+            "uri": "dancing_poster.png"
+        },
+        {
+            "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "declaration.png"
+        },
+        {
+            "uri": "hungarian_flooring.png"
+        },
+        {
+            "uri": "america.jpg"
+        },
+        {
+            "uri": "brick_normal.png"
         },
         {
             "uri": "Poliigon_GrassPatchyGround_4585_Normal.png"
@@ -161,16 +185,16 @@
             "uri": "sample-image.png"
         },
         {
-            "uri": "tutorial.png"
+            "uri": "casing.jpg"
         },
         {
-            "uri": "whitehouse.jpg"
+            "uri": "lantern_normal.png"
         },
         {
-            "uri": "wispy_grass.png"
+            "uri": "box.png"
         },
         {
-            "uri": "wispy_grass_normal.png"
+            "uri": "brick.png"
         }
     ],
     "textures": [
@@ -260,6 +284,18 @@
         },
         {
             "sampler": 28
+        },
+        {
+            "sampler": 29
+        },
+        {
+            "sampler": 30
+        },
+        {
+            "sampler": 31
+        },
+        {
+            "sampler": 32
         }
     ],
     "materials": [
@@ -288,12 +324,12 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 14,
+                    "index": 24,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 15,
+                "index": 1,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -323,12 +359,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 12,
+                    "index": 10,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 13,
+                "index": 15,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -372,7 +408,7 @@
                 "roughnessFactor": 32.0
             },
             "normalTexture": {
-                "index": 12,
+                "index": 10,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -389,7 +425,7 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 3,
+                    "index": 31,
                     "texCoord": 1
                 }
             }
@@ -406,7 +442,7 @@
                 "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 16.0,
                 "baseColorTexture": {
-                    "index": 2,
+                    "index": 25,
                     "texCoord": 1
                 }
             }
@@ -428,7 +464,7 @@
                 }
             },
             "normalTexture": {
-                "index": 17,
+                "index": 30,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -453,7 +489,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 1,
             "collider": {
                 "static": true
@@ -477,7 +513,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 1,
             "collider": {
                 "static": true
@@ -501,7 +537,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 3,
             "collider": {
                 "static": true
@@ -525,7 +561,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 3,
             "collider": {
                 "static": true
@@ -549,7 +585,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 3,
             "collider": {
                 "static": true
@@ -573,7 +609,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 3,
             "collider": {
                 "static": true
@@ -597,7 +633,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 3,
             "collider": {
                 "static": true
@@ -621,7 +657,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 3,
             "collider": {
                 "static": true
@@ -645,7 +681,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 3,
             "collider": {
                 "static": true
@@ -669,7 +705,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 4
         },
         {
@@ -690,7 +726,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -711,7 +747,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -732,7 +768,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -753,7 +789,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 3
         },
         {
@@ -774,7 +810,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 6
         },
         {
@@ -795,7 +831,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 3
         },
         {
@@ -816,7 +852,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 5
         },
         {
@@ -837,7 +873,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 7
         },
         {
@@ -858,7 +894,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -879,7 +915,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -900,7 +936,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -921,7 +957,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -942,7 +978,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -963,7 +999,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 22,
             "material": 7
         },
         {
@@ -984,7 +1020,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 15,
             "material": 7
         },
         {
@@ -1005,7 +1041,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1026,7 +1062,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1047,7 +1083,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1068,7 +1104,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1089,7 +1125,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1110,7 +1146,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 15,
             "material": 7
         },
         {
@@ -1131,7 +1167,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 1,
+            "mesh": 19,
             "material": 8
         },
         {
@@ -1152,7 +1188,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 25,
+            "mesh": 28,
             "material": 9
         },
         {
@@ -1173,7 +1209,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 25,
+            "mesh": 28,
             "material": 9
         },
         {
@@ -1194,7 +1230,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 1,
+            "mesh": 19,
             "material": 8
         },
         {
@@ -1215,7 +1251,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 1,
+            "mesh": 19,
             "material": 8
         },
         {
@@ -1236,7 +1272,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 1,
+            "mesh": 19,
             "material": 8
         },
         {
@@ -1257,7 +1293,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 25,
+            "mesh": 28,
             "material": 9
         },
         {
@@ -1278,7 +1314,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 25,
+            "mesh": 28,
             "material": 9
         },
         {
@@ -1299,7 +1335,7 @@
                 -1.590000033378601,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 5
         },
         {
@@ -1320,7 +1356,7 @@
                 -1.590000033378601,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 5
         },
         {
@@ -1341,7 +1377,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 5
         },
         {
@@ -1362,7 +1398,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 7,
+            "mesh": 10,
             "material": 5
         },
         {
@@ -1383,7 +1419,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 1,
             "collider": {
                 "static": true
@@ -1407,7 +1443,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1428,7 +1464,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 3,
             "collider": {
                 "static": true
@@ -1452,7 +1488,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 4
         },
         {
@@ -1473,7 +1509,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1494,7 +1530,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1515,7 +1551,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
@@ -1536,12 +1572,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 7
         },
         {
             "name": "cube",
-            "tags": "",
+            "tags": "exit",
             "translation": [
                 0.0,
                 26.0,
@@ -1557,7 +1593,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 0,
             "collider": {
                 "static": true
@@ -1581,7 +1617,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 8
         },
         {
@@ -1602,10 +1638,10 @@
                 -0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 2,
             "physics_body": {
-                "mass": 100.0
+                "mass": 2000.0
             },
             "collider": {
                 "static": false
@@ -1629,7 +1665,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 1,
             "collider": {
                 "static": true
@@ -1653,10 +1689,10 @@
                 -0.0,
                 0.0
             ],
-            "mesh": 6,
+            "mesh": 17,
             "material": 2,
             "physics_body": {
-                "mass": 100.0
+                "mass": 1000.0
             },
             "collider": {
                 "static": false

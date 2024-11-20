@@ -5,6 +5,7 @@ from scripts.nodes.node_handler import NodeHandler
 from scripts.physics.physics_body_handler import PhysicsBodyHandler
 from scripts.render.material_handler import MaterialHandler
 from scripts.render.light_handler import LightHandler
+from user_scripts.overlay import Overlay
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
 from scripts.skeletons.joints import * 
@@ -38,11 +39,12 @@ class Scene:
         self.node_handler = NodeHandler(self)
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
-        
+
         # Makes a free cam
-        self.camera = FollowCamera(self.engine, radius = 40, scene=self)
-                
+        self.camera = FollowCamera(self.engine, radius = 20, scene=self)
+
         load_scene(self, "room1")
+        self.on_render = None
         if not editor: 
             self.load_user_scripts()
             self.collider_handler.construct_bvh()
@@ -81,6 +83,7 @@ class Scene:
         self.vao_handler.framebuffer.use()
         self.sky.render()
         self.model_handler.render()
+        if self.on_render: exec(self.on_render)
 
         if not display: return
 
@@ -97,22 +100,17 @@ class Scene:
         self.vao_handler.release()
     
     def load_user_scripts(self):
-        # Load init scripts
-        with open(f'user_scripts/scene_on_init.py') as file: scene_on_init = compile(file.read(), 'scene_on_init', 'exec')
-        with open(f'user_scripts/add_john.py')      as file: add_john          = compile(file.read(), 'add_john', 'exec')
-        # Load runtime scripts
-        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_frame   = compile(file.read(), 'bottom_on_frame', 'exec')
-        with open(f'user_scripts/bottom_on_frame.py')   as file: bottom_on_init    = compile(file.read(), 'bottom_on_init', 'exec')
-        with open(f'user_scripts/face_camera.py')       as file: face_camera       = compile(file.read(), 'face_camera', 'exec')
-        with open(f'user_scripts/walking_animation.py') as file: walking_animation = compile(file.read(), 'walking_animation', 'exec')
-        with open(f'user_scripts/scene_on_frame.py')    as file: scene_on_frame    = compile(file.read(), 'scene_on_frame', 'exec')
-        with open(f'user_scripts/head_on_frame.py')     as file: head_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
+        # Load scene scripts
+        with open(f'user_scripts/scene_on_init.py')   as file: scene_on_init   = compile(file.read(), 'scene_on_init', 'exec')
+        with open(f'user_scripts/scene_on_frame.py')  as file: scene_on_frame  = compile(file.read(), 'scene_on_frame', 'exec')
+        with open(f'user_scripts/scene_on_render.py') as file: scene_on_render = compile(file.read(), 'scene_on_render', 'exec')
+        
         # Exec on init scripts
         exec(scene_on_init)
-        exec(add_john)
         
-        self.on_tick = None # TODO add functionality
-        self.on_frame = scene_on_frame
+        self.on_tick   = None # TODO add functionality
+        self.on_frame  = scene_on_frame
+        self.on_render = scene_on_render
 
     def get_model_node_at(self, x:int, y:int, distance:float=1e5, has_collider:bool=False, has_physics_body:bool=False, material:str=None, tags:list[str]=''):
         """

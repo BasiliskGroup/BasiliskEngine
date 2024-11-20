@@ -1,10 +1,11 @@
 from user_scripts.delaunay import delunay_triangulation, Point
 import random
 
-mouse_position = glm.vec2([int(self.project.engine.mouse_position[i]) for i in range(2)])
-
 if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
-    self.click_anchor = mouse_position
+    window = self.project.engine.win_size
+    self.click_anchor = (window[0] / 2, window[1] / 2)
+    pg.mouse.set_pos(self.click_anchor)
+    pg.mouse.get_rel()
     self.clicked = True
     
     # prevent the camera from rotating until the mouse has been released
@@ -12,7 +13,9 @@ if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
     self.camera.rotate = rotate
 
 elif self.clicked and not self.project.engine.mouse_buttons[0]:
+    
     # get the dpos of the mouse 
+    mouse_position = glm.vec2([int(self.project.engine.mouse_position[i]) for i in range(2)])
     self.click_position = mouse_position
     self.clicked = False
     
@@ -131,17 +134,18 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                 
                 # add trapezoid triangles
                 for trapezoid in trapezoids[key]: 
-                    ba = world_points[trapezoid[1]] - world_points[trapezoid[0]]
-                    # ca = world_points[trapezoid[2]] - world_points[trapezoid[0]]
-                    # da = world_points[trapezoid[3]] - world_points[trapezoid[0]]
-                    dc = world_points[trapezoid[3]] - world_points[trapezoid[2]]
+                    t = [world_points[i] for i in trapezoid]
                     
-                    if glm.dot(ba, dc) < 0:
+                    center = (t[0] + t[1] + t[2] + t[3]) / 4
+                    c1 = glm.cross(t[2] - center, t[3] - center)
+                    c2 = glm.cross(t[0] - center, t[1] - center)
+                    
+                    if glm.dot(c1, c2) > 0:
                         sorted_triangles[key].append([trapezoid[0], trapezoid[1], trapezoid[2]])
                         sorted_triangles[key].append([trapezoid[0], trapezoid[3], trapezoid[2]])
                     else:
                         sorted_triangles[key].append([trapezoid[0], trapezoid[1], trapezoid[2]])
-                        sorted_triangles[key].append([trapezoid[3], trapezoid[1], trapezoid[2]])
+                        sorted_triangles[key].append([trapezoid[1], trapezoid[2], trapezoid[3]])
             
             # deep copy above and below triangle lists
             for key in ['above', 'below']:
@@ -186,11 +190,13 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                 # convert to vbo space
                 for i, point in enumerate(unique_points[key]): unique_points[key][i] = glm.vec3(inv_model_matrix * glm.vec4(*point, 1)) - vbo_center
                 
+                world_center = glm.vec3(0, 0, 0)
+                for point in unique_points[key]: world_center += point
+                world_center /= len(unique_points[key])
+                
                 # orient sides
                 for i, triangle in enumerate(sorted_triangles[key]):
-                    ab, ac = unique_points[key][triangle[1]] - unique_points[key][triangle[0]], unique_points[key][triangle[2]] - unique_points[key][triangle[0]]
-                    if glm.dot(glm.cross(ab, ac), unique_points[key][triangle[0]]) < 0: 
-                    #if random.randint(0, 1) == 1:
+                    if glm.dot(glm.cross(unique_points[key][triangle[1]] - world_center, unique_points[key][triangle[2]] - world_center), unique_points[key][triangle[0]] - world_center) < 0: 
                         sorted_triangles[key][i] = [triangle[2], triangle[1], triangle[0]]
                 
                 # generate node
@@ -203,15 +209,12 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                     rotation=node.rotation,
                     material=node.material,
                     collider=self.collider_handler.add(vbo=uuid, static=False),
-                    physics_body=self.physics_body_handler.add(mass=node.physics_body.mass / 2), # TODO get split mass (estimate)
+                    physics_body=self.physics_body_handler.add(mass=node.physics_body.mass), # TODO get split mass (estimate)
                     model=uuid, 
                 )
+                self.node_handler.nodes[-1].tags = 'cuttable'
                 
             # TODO split skeleton
             
             # remove split node
             self.node_handler.remove(node)
-        
-            # print('model:', node.model)
-            # print('node', node)
-            # print('skeleton:', skeleton)

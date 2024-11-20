@@ -1,5 +1,6 @@
 import glm
 from math import sin, cos
+from scripts.generic.data_types import vec3 as customVec3
 
 # getting support points
 def get_support_point(points1:list, points2:list, direction_vector:glm.vec3) -> glm.vec3:
@@ -30,17 +31,18 @@ def is_ccw_turn(a:glm.vec2, b:glm.vec2, c:glm.vec2) -> bool:
 # matrix math
 def get_model_matrix(position, scale, rotation) -> glm.mat4x4:
     """gets projection matrix from object data"""
+    # Input validation
+    if isinstance(position, customVec3): position = glm.vec3(position.x, position.y, position.z)
+    if isinstance(scale, customVec3):    scale    = glm.vec3(scale.x, scale.y, scale.z)
+    if isinstance(rotation, customVec3): rotation = glm.vec3(rotation.x, rotation.y, rotation.z)
     # create blank matrix
     model_matrix = glm.mat4x4()
     # translate, rotate, and scale
-    try:
-        model_matrix = glm.translate(model_matrix, position) # translation
-        model_matrix = glm.rotate(model_matrix, rotation.x, glm.vec3(-1, 0, 0)) # x rotation
-        model_matrix = glm.rotate(model_matrix, rotation.y, glm.vec3(0, -1, 0)) # y rotation
-        model_matrix = glm.rotate(model_matrix, rotation.z, glm.vec3(0, 0, -1)) # z rotation
-        model_matrix = glm.scale(model_matrix, scale) # scale
-    except TypeError:
-        raise RuntimeError(f"Invalid glm arguments in camera | m_matrix {type(model_matrix)}: {model_matrix} | position {type(position)}: {position}")
+    model_matrix = glm.translate(model_matrix, position) # translation
+    model_matrix = glm.rotate(model_matrix, rotation.x, glm.vec3(-1, 0, 0)) # x rotation
+    model_matrix = glm.rotate(model_matrix, rotation.y, glm.vec3(0, -1, 0)) # y rotation
+    model_matrix = glm.rotate(model_matrix, rotation.z, glm.vec3(0, 0, -1)) # z rotation
+    model_matrix = glm.scale(model_matrix, scale) # scale
     
     return model_matrix
 
@@ -93,3 +95,13 @@ def moller_trumbore(point:glm.vec3, vec:glm.vec3, triangle:list[glm.vec3], epsil
     t = glm.dot(edge2, s_cross) * inv_det
     if t > epsilon: return point + vec * t
     return None
+
+def compute_inertia_moment(t:list[glm.vec3], i:int) -> float:
+    return t[0][i] ** 2 + t[1][i] * t[2][i] + \
+           t[1][i] ** 2 + t[0][i] * t[2][i] + \
+           t[2][i] ** 2 + t[0][i] * t[1][i]
+            
+def compute_inertia_product(t:list[glm.vec3], i:int, j:int) -> float:
+    return 2 * t[0][i] * t[0][j] + t[1][i] * t[2][j] + t[2][i] * t[1][j] + \
+           2 * t[1][i] * t[1][j] + t[0][i] * t[2][j] + t[2][i] * t[0][j] + \
+           2 * t[2][i] * t[2][j] + t[0][i] * t[1][j] + t[1][i] * t[0][j]
