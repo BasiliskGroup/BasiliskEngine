@@ -42,7 +42,7 @@ class Scene:
         # Makes a free cam
         self.camera = FollowCamera(self.engine, radius = 40, scene=self)
                 
-        load_scene(self, "room4")
+        load_scene(self, "room1")
         if not editor: 
             self.load_user_scripts()
             self.collider_handler.construct_bvh()
