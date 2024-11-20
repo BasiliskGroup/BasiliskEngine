@@ -70,6 +70,9 @@ class Engine:
                 pg.event.set_grab(True)
                 pg.mouse.set_visible(False)
 
+        self.prev_keys = self.keys
+        self.prev_mouse_buttons = self.mouse_buttons
+
         # Update Project
         self.project.update(self.dt)
 

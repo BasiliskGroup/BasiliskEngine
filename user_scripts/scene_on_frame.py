@@ -4,6 +4,7 @@ import random
 if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
     window = self.project.engine.win_size
     self.click_anchor = (window[0] / 2, window[1] / 2)
+    self.project.engine.mouse_position = self.click_anchor
     pg.mouse.set_pos(self.click_anchor)
     pg.mouse.get_rel()
     self.clicked = True
