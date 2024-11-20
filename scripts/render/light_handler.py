@@ -16,6 +16,10 @@ class LightHandler:
         self.point_lights = [
             PointLight(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
             PointLight(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
+            PointLight(pos=(-15, 10, -58.5), color=(1, 0.7, 0.3), diffuse=5),
+            PointLight(pos=(15, 10, -58.5), color=(1, 0.7, 0.3), diffuse=5),
+            PointLight(pos=(-40, 15, -20), color=(0.525, 0.831, 1), diffuse=5),
+            PointLight(pos=(40, 15, -20), color=(0.525, 0.831, 1), diffuse=5),
         ]
         # [PointLight(pos=(random.randrange(-place_range, place_range), random.randrange(-place_range, place_range), random.randrange(-place_range, place_range)), color=(random.uniform(0.0, 1.0), random.uniform(0.0, 1.0), random.uniform(0.0, 1.0))) for i in range(0)]
 
