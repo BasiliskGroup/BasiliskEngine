@@ -17,6 +17,7 @@ from random import randint, uniform
 from scripts.generic.math_functions import get_model_matrix
 import moderngl as mgl
 
+
 class Scene:
     def __init__(self, engine, project, editor=False) -> None:
         """

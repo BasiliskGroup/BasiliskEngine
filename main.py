@@ -42,7 +42,7 @@ class Engine:
         Updates pygame events and checks for window events
         """
         # Update time
-        self.dt = self.clock.tick(60) / 1000
+        self.dt = self.clock.tick() / 1000
         self.time += self.dt
         pg.display.set_caption(f"FPS: {round(self.clock.get_fps())} | Models: {len(self.project.current_scene.model_handler.models)}")
         # Pygame events

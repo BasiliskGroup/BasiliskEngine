@@ -3,6 +3,7 @@ from scripts.render.vao_handler import VAOHandler
 from scripts.render.texture_handler import TextureHandler
 from scripts.physics.physics_handler import PhysicsHandler
 
+
 class Project:
     """
     Stores, loads, and saves scene data
@@ -28,6 +29,7 @@ class Project:
         """
         Updates the current scene        
         """
+        
         if delta_time: self.physics_handler.update(delta_time)
         self.current_scene.update(camera)
 
