@@ -97,7 +97,7 @@ class Node():
         Synchronizes the position, scale, and rotation of all child nodes. Data may be inherited by a parent. 
         """
         if self.position.y < self.node_handler.death_plane: 
-            self.position = glm.vec3(5, 5, 5)
+            self.position = glm.vec3(0, 5, 0)
             if self.physics_body: 
                 self.physics_body.velocity = glm.vec3(0, 0, 0)
                 self.physics_body.rotational_velocity = 0

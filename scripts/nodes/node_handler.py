@@ -49,10 +49,14 @@ class NodeHandler():
         """
         if not node in self.nodes: return
         
-        if node.collider: self.scene.collider_handler.colliders.remove(node.collider)
-        if node.physics_body: self.scene.physics_body_handler.physics_bodies.remove(node.physics_body)
+        if node.collider: self.scene.collider_handler.colliders.remove(node.collider) # bad
+        if node.physics_body: self.scene.physics_body_handler.physics_bodies.remove(node.physics_body) # bad
         if node.model: self.scene.model_handler.remove(node.model)
         self.nodes.remove(node)
+        
+        for child in node.nodes: self.remove(child)
+        
+        del node
         
         # TODO add removing child nodes
         
