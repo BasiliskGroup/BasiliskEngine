@@ -27,6 +27,7 @@ class ColliderHandler():
         """
         for collider in self.colliders: 
             collider.has_collided      = False
+            collider.has_hard_collided = False
             collider.collision_normals = {}
         
         # get broad collisions
@@ -62,22 +63,24 @@ class ColliderHandler():
                 collider1.has_collided = True
                 collider2.has_collided = True
                 
+                rel_vel = (node1.physics_body.velocity if node1.physics_body else glm.vec3(0)) - (node2.physics_body.velocity if node2.physics_body else glm.vec3(0))
+                n_rel_vel = glm.dot(rel_vel, normal)
+                if abs(n_rel_vel) > 3: 
+                    collider1.has_hard_collided = True
+                    collider2.has_hard_collided = True
+                
                 if collider1.static: 
                     node2.position += normal * distance
-                    collider2.collision_normals[node1] = normal # TODO may need to switch node with collider
-                    node2.sync_data() # TODO temp line, wont work recursively
+                    collider2.collision_normals[node1] = normal * rel_vel # TODO may need to switch node with collider
                 else:
                     if collider2.static: 
                         node1.position += normal * -distance
-                        collider1.collision_normals[node2] = -normal
-                        node1.sync_data() # TODO temp line, wont work recursively
+                        collider1.collision_normals[node2] = -normal * rel_vel
                     else:
                         node1.position += normal * 0.5 * -distance
                         node2.position += normal * 0.5 * distance
-                        collider1.collision_normals[node2] = -normal
-                        collider2.collision_normals[node1] = normal
-                        node1.sync_data() # TODO temp line, wont work recursively
-                        node2.sync_data() # TODO temp line, wont work recursively
+                        collider1.collision_normals[node2] = -normal * rel_vel
+                        collider2.collision_normals[node1] = normal * rel_vel
                         
                 #for both physics bodies
                 if not (node1.physics_body or node2.physics_body): continue

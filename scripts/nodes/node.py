@@ -86,6 +86,7 @@ class Node():
         self.after_update()
 
         if self.on_frame: exec(self.on_frame)
+        if self.collider and self.on_collision and self.collider.has_hard_collided: exec(self.on_collision)
         
     def tick(self):
         
