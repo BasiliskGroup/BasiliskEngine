@@ -14,6 +14,10 @@ class PhysicsBodyHandler():
         self.physics_bodies.append(PhysicsBody(self, mass, rotation, velocity, rotational_velocity, axis_of_rotation))
         return self.physics_bodies[-1]
     
+    def remove(self, physics_body):
+        if physics_body in self.physics_bodies: self.physics_bodies.remove(physics_body)
+        del physics_body
+    
 class PointPhysicsBody():
     def __init__(self, physics_body_handler:PhysicsBodyHandler, mass:float = 1, velocity:glm.vec3 = None, decay:float=0.1) -> None:
         self.mass     = mass

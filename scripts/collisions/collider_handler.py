@@ -153,3 +153,7 @@ class ColliderHandler():
         
         self.to_update = set([])
         return collider_data
+    
+    def remove(self, collider:Collider):
+        if collider in self.colliders: self.colliders.remove(collider)
+        del collider
