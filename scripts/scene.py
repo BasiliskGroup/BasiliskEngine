@@ -10,6 +10,7 @@ from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
 from scripts.skeletons.joints import * 
 from scripts.file_manager.load_scene import load_scene
+from scripts.file_manager.preload import preload
 from scripts.skeletons.animation import *
 from scripts.skeletons.joints import *
 from scripts.render.vbo_handler import CubeVBO, RuntimeVBO
@@ -40,6 +41,8 @@ class Scene:
         self.node_handler = NodeHandler(self)
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
+
+        preload(self, "models", "textures")
 
         # Makes a free cam
         self.camera = FollowCamera(self.engine, radius = 20, scene=self)

@@ -1,6 +1,6 @@
 import json
 from scripts.render.vbo_handler import ModelVBO
-
+import time
 
 def load_scene(scene, local_file_name=None, abs_file_path=None):
     if local_file_name:
@@ -12,7 +12,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
     
     vbos = scene.vao_handler.vbo_handler.vbos
     for buffer in scene_data["buffers"]:
-        if buffer['uri'] in vbos: continue
+        if buffer["uri"][:-4] in vbos: continue
         
         obj_file = f"models/{buffer['uri']}"
         try:
@@ -21,6 +21,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
             print(f"Attempted to load {obj_file} for the scene, but it was not in the models folder")
 
     for image in scene_data["images"]:
+        if image['uri'][:-4] in scene.project.texture_handler.textures: continue
         try:
             scene.project.texture_handler.load_texture(image['uri'][:-4], '/' + image['uri'])
         except FileNotFoundError:
