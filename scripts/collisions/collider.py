@@ -35,6 +35,7 @@ class Collider():
         self.kinetic_friction = static_friction
         
         self.has_collided = False
+        self.has_hard_collided = False
         self.collision_normals = {}
         
     def update_dimensions(self):

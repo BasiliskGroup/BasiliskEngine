@@ -108,7 +108,7 @@ def apply_impulse(radius, impulse_signed, inv_inertia, inv_mass, physics_body) -
     physics_body.velocity += impulse_signed * inv_mass
     # update rotational velcoity
     delta_omega = inv_inertia * glm.cross(radius, impulse_signed)
-    angular_velocity_vector = physics_body.axis_of_rotation * physics_body.rotational_velocity + delta_omega
+    angular_velocity_vector = physics_body.rotational_velocity * physics_body.axis_of_rotation + delta_omega
     if glm.length(angular_velocity_vector) < 1e-6: # checking if there is no rotation
         physics_body.rotational_velocity = 0
         physics_body.axis_of_rotation = glm.vec3(0, 1, 0)

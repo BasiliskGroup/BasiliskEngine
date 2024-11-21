@@ -1,0 +1,743 @@
+{
+    "asset": {
+        "version": "2.0"
+    },
+    "scene": 0,
+    "buffers": [
+        {
+            "uri": "Whisk.obj"
+        },
+        {
+            "uri": "Fence_Design_3.obj"
+        },
+        {
+            "uri": "FryingPan.obj"
+        },
+        {
+            "uri": "toy_001.obj"
+        },
+        {
+            "uri": "kitchen_table_001.obj"
+        },
+        {
+            "uri": "cow.obj"
+        },
+        {
+            "uri": "dresser_001.obj"
+        },
+        {
+            "uri": "lucy.obj"
+        },
+        {
+            "uri": "Spatula.obj"
+        },
+        {
+            "uri": "Tongs.obj"
+        },
+        {
+            "uri": "bunny.obj"
+        },
+        {
+            "uri": "kitchen_sink_001.obj"
+        },
+        {
+            "uri": "Stool_Livingroom_IKEA_INGOLF.obj"
+        },
+        {
+            "uri": "10447_Pine_Tree_v1_L3b.obj"
+        },
+        {
+            "uri": "curtain.obj"
+        },
+        {
+            "uri": "oak_tree.obj"
+        },
+        {
+            "uri": "Old_TV_.obj"
+        },
+        {
+            "uri": "Old Tv Set nr1.obj"
+        },
+        {
+            "uri": "drink_002.obj"
+        },
+        {
+            "uri": "sphere.obj"
+        },
+        {
+            "uri": "drink_001.obj"
+        },
+        {
+            "uri": "cube.obj"
+        },
+        {
+            "uri": "donut.obj"
+        },
+        {
+            "uri": "american_flag.obj"
+        },
+        {
+            "uri": "fridge_001.obj"
+        },
+        {
+            "uri": "knife.obj"
+        },
+        {
+            "uri": "monkey.obj"
+        },
+        {
+            "uri": "cylinder.obj"
+        },
+        {
+            "uri": "tv_wall_001.obj"
+        },
+        {
+            "uri": "10090_white_house_v1_L1.obj"
+        },
+        {
+            "uri": "closet_001.obj"
+        },
+        {
+            "uri": "dish_002.obj"
+        },
+        {
+            "uri": "closet_002.obj"
+        },
+        {
+            "uri": "wall_lantern.obj"
+        },
+        {
+            "uri": "dish_001.obj"
+        }
+    ],
+    "meshes": [],
+    "images": [
+        {
+            "uri": "normal_map.png"
+        },
+        {
+            "uri": "paintedbrick1_albedo.png"
+        },
+        {
+            "uri": "soft-blanket_normal-ogl.png"
+        },
+        {
+            "uri": "hungarian_flooring_normal.png"
+        },
+        {
+            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.jpg"
+        },
+        {
+            "uri": "dancing_tv.png"
+        },
+        {
+            "uri": "container.png"
+        },
+        {
+            "uri": "woodframe1-normal2.png"
+        },
+        {
+            "uri": "colors.png"
+        },
+        {
+            "uri": "pine_tree.jpg"
+        },
+        {
+            "uri": "dark-wood-stain_normal-ogl.png"
+        },
+        {
+            "uri": "metal.png"
+        },
+        {
+            "uri": "stringy_marble_albedo.png"
+        },
+        {
+            "uri": "alley_brick.png"
+        },
+        {
+            "uri": "oak_tree.jpg"
+        },
+        {
+            "uri": "trump_mugshot.png"
+        },
+        {
+            "uri": "agedplanks1-normal4-ogl.png"
+        },
+        {
+            "uri": "woodframe1b-albedo.png"
+        },
+        {
+            "uri": "antique_veneer1_albedo.png"
+        },
+        {
+            "uri": "floral_wallpaper.png"
+        },
+        {
+            "uri": "luxury-vinyl-plank_light_albedo.png"
+        },
+        {
+            "uri": "wispy_grass.png"
+        },
+        {
+            "uri": "concrete.png"
+        },
+        {
+            "uri": "luxury-vinyl-plank_light_normal-ogl.png"
+        },
+        {
+            "uri": "alley_brick_normal.png"
+        },
+        {
+            "uri": "cow.png"
+        },
+        {
+            "uri": "floral_wallpaper_normal.png"
+        },
+        {
+            "uri": "declaration_rewritten.png"
+        },
+        {
+            "uri": "paintedbrick1_Normal-ogl.png"
+        },
+        {
+            "uri": "chipping-painted-wall_normal-ogl.png"
+        },
+        {
+            "uri": "black-tile1_albedo.png"
+        },
+        {
+            "uri": "kim_cute.png"
+        },
+        {
+            "uri": "lantern.png"
+        },
+        {
+            "uri": "chipping-painted-wall_albedo.png"
+        },
+        {
+            "uri": "tutorial.png"
+        },
+        {
+            "uri": "wispy_grass_normal.png"
+        },
+        {
+            "uri": "denim1_albedo.png"
+        },
+        {
+            "uri": "concrete_normal.png"
+        },
+        {
+            "uri": "bernie.png"
+        },
+        {
+            "uri": "denim1_normal-ogl.png"
+        },
+        {
+            "uri": "normal_map2.png"
+        },
+        {
+            "uri": "briefing_room.png"
+        },
+        {
+            "uri": "dancing_poster.png"
+        },
+        {
+            "uri": "whitehouse.jpg"
+        },
+        {
+            "uri": "declaration.png"
+        },
+        {
+            "uri": "hungarian_flooring.png"
+        },
+        {
+            "uri": "harris_drink.png"
+        },
+        {
+            "uri": "antique_veneer1_Normal-ogl.png"
+        },
+        {
+            "uri": "biden_falling.png"
+        },
+        {
+            "uri": "america.jpg"
+        },
+        {
+            "uri": "oak-wood-bare_albedo.png"
+        },
+        {
+            "uri": "agedplanks1-albedo.png"
+        },
+        {
+            "uri": "black-tile1_normal-ogl.png"
+        },
+        {
+            "uri": "your_ad.jpeg"
+        },
+        {
+            "uri": "brick_normal.png"
+        },
+        {
+            "uri": "dark-wood-stain_albedo.png"
+        },
+        {
+            "uri": "oak-wood-bare_normal-ogl.png"
+        },
+        {
+            "uri": "Poliigon_GrassPatchyGround_4585_Normal.png"
+        },
+        {
+            "uri": "sample-image.png"
+        },
+        {
+            "uri": "casing.jpg"
+        },
+        {
+            "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "box.png"
+        },
+        {
+            "uri": "stringy_marble_Normal-ogl.png"
+        },
+        {
+            "uri": "soft-blanket_albedo.png"
+        },
+        {
+            "uri": "jow_and_obama.png"
+        },
+        {
+            "uri": "brick.png"
+        }
+    ],
+    "textures": [
+        {
+            "sampler": 0
+        },
+        {
+            "sampler": 1
+        },
+        {
+            "sampler": 2
+        },
+        {
+            "sampler": 3
+        },
+        {
+            "sampler": 4
+        },
+        {
+            "sampler": 5
+        },
+        {
+            "sampler": 6
+        },
+        {
+            "sampler": 7
+        },
+        {
+            "sampler": 8
+        },
+        {
+            "sampler": 9
+        },
+        {
+            "sampler": 10
+        },
+        {
+            "sampler": 11
+        },
+        {
+            "sampler": 12
+        },
+        {
+            "sampler": 13
+        },
+        {
+            "sampler": 14
+        },
+        {
+            "sampler": 15
+        },
+        {
+            "sampler": 16
+        },
+        {
+            "sampler": 17
+        },
+        {
+            "sampler": 18
+        },
+        {
+            "sampler": 19
+        },
+        {
+            "sampler": 20
+        },
+        {
+            "sampler": 21
+        },
+        {
+            "sampler": 22
+        },
+        {
+            "sampler": 23
+        },
+        {
+            "sampler": 24
+        },
+        {
+            "sampler": 25
+        },
+        {
+            "sampler": 26
+        },
+        {
+            "sampler": 27
+        },
+        {
+            "sampler": 28
+        },
+        {
+            "sampler": 29
+        },
+        {
+            "sampler": 30
+        },
+        {
+            "sampler": 31
+        },
+        {
+            "sampler": 32
+        },
+        {
+            "sampler": 33
+        },
+        {
+            "sampler": 34
+        },
+        {
+            "sampler": 35
+        },
+        {
+            "sampler": 36
+        },
+        {
+            "sampler": 37
+        },
+        {
+            "sampler": 38
+        },
+        {
+            "sampler": 39
+        },
+        {
+            "sampler": 40
+        },
+        {
+            "sampler": 41
+        },
+        {
+            "sampler": 42
+        },
+        {
+            "sampler": 43
+        },
+        {
+            "sampler": 44
+        },
+        {
+            "sampler": 45
+        },
+        {
+            "sampler": 46
+        },
+        {
+            "sampler": 47
+        },
+        {
+            "sampler": 48
+        },
+        {
+            "sampler": 49
+        },
+        {
+            "sampler": 50
+        },
+        {
+            "sampler": 51
+        },
+        {
+            "sampler": 52
+        },
+        {
+            "sampler": 53
+        },
+        {
+            "sampler": 54
+        },
+        {
+            "sampler": 55
+        },
+        {
+            "sampler": 56
+        },
+        {
+            "sampler": 57
+        },
+        {
+            "sampler": 58
+        },
+        {
+            "sampler": 59
+        },
+        {
+            "sampler": 60
+        },
+        {
+            "sampler": 61
+        },
+        {
+            "sampler": 62
+        },
+        {
+            "sampler": 63
+        },
+        {
+            "sampler": 64
+        },
+        {
+            "sampler": 65
+        }
+    ],
+    "materials": [
+        {
+            "name": "base",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64.0
+            }
+        },
+        {
+            "name": "Material_2",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 22,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_3",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 45,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 3,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_4",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    0.10000000149011612,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_5",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        }
+    ],
+    "nodes": [
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                0.10000000149011612,
+                0.10000000149011612,
+                0.10000000149011612
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 21,
+            "material": 0
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                0.0,
+                -2.0,
+                -2.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                5.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 21,
+            "material": 1,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                0.0,
+                22.0,
+                -50.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                50.0
+            ],
+            "rotation": [
+                -0.5,
+                0.0,
+                0.0
+            ],
+            "mesh": 21,
+            "material": 1,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                0.0,
+                75.5999984741211,
+                -195.0
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                5.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 21,
+            "material": 2,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                0.0,
+                69.80000305175781,
+                -137.5
+            ],
+            "scale": [
+                5.0,
+                1.0,
+                50.0
+            ],
+            "rotation": [
+                -0.5,
+                0.0,
+                0.0
+            ],
+            "mesh": 21,
+            "material": 1,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "sphere",
+            "tags": "cuttable",
+            "translation": [
+                0.0,
+                110.0,
+                -170.0
+            ],
+            "scale": [
+                7.0,
+                7.0,
+                7.0
+            ],
+            "rotation": [
+                -3.141592502593994,
+                -0.04425712674856186,
+                2.7875959873199463
+            ],
+            "mesh": 19,
+            "material": 3,
+            "physics_body": {
+                "mass": 100.0
+            },
+            "collider": {
+                "static": false
+            }
+        }
+    ],
+    "scenes": [
+        {}
+    ]
+}

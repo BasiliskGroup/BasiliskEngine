@@ -47,7 +47,7 @@ class Scene:
         # Makes a free cam
         self.camera = FollowCamera(self.engine, radius = 20, scene=self)
 
-        load_scene(self, "room4")
+        load_scene(self, "room5")
         self.on_render = None
         if not editor: 
             self.load_user_scripts()

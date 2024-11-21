@@ -13,7 +13,7 @@ self.position += dpos * velocity
 if keys[pg.K_SPACE] and self.jump_time > self.jump_max and abs(self.physics_body.velocity[1] < 1):
     can_jump = False
     for normal in self.collider.collision_normals.values():
-        if glm.dot(normal, (0, 1, 0)) > 0.6:
+        if glm.dot(glm.normalize(normal), (0, 1, 0)) > 0.6:
             can_jump = True
             break
     if can_jump: 
