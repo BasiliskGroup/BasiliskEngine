@@ -146,6 +146,9 @@
             "uri": "floral_wallpaper_normal.png"
         },
         {
+            "uri": "declaration_rewritten.png"
+        },
+        {
             "uri": "lantern.png"
         },
         {
@@ -296,6 +299,9 @@
         },
         {
             "sampler": 32
+        },
+        {
+            "sampler": 33
         }
     ],
     "materials": [
@@ -303,9 +309,9 @@
             "name": "base",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    0.800000011920929,
-                    0.800000011920929,
-                    0.800000011920929,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ],
                 "metallicFactor": 0.5,
@@ -324,9 +330,14 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 17,
+                    "index": 25,
                     "texCoord": 1
                 }
+            },
+            "normalTexture": {
+                "index": 1,
+                "texCoord": 1,
+                "scale": 1
             }
         },
         {
@@ -346,9 +357,9 @@
             "name": "Material_3",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    1.0,
-                    1.0,
-                    1.0,
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929,
                     1.0
                 ],
                 "metallicFactor": 1.0,
@@ -381,13 +392,13 @@
             "name": "Material_5",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    1.0,
-                    0.20000000298023224,
-                    0.20000000298023224,
+                    0.8999999761581421,
+                    0.10000000149011612,
+                    0.10000000149011612,
                     1.0
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0
+                "metallicFactor": 0.20000000298023224,
+                "roughnessFactor": 16.0
             }
         },
         {
@@ -396,7 +407,7 @@
                 "baseColorFactor": [
                     0.20000000298023224,
                     0.20000000298023224,
-                    1.0,
+                    0.699999988079071,
                     1.0
                 ],
                 "metallicFactor": 1.0,
@@ -417,10 +428,10 @@
                     0.30000001192092896,
                     1.0
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "metallicFactor": 0.5,
+                "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 31,
+                    "index": 32,
                     "texCoord": 1
                 }
             }
@@ -434,10 +445,10 @@
                     1.0,
                     1.0
                 ],
-                "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "metallicFactor": 0.30000001192092896,
+                "roughnessFactor": 16.0,
                 "baseColorTexture": {
-                    "index": 25,
+                    "index": 26,
                     "texCoord": 1
                 }
             }
@@ -452,20 +463,20 @@
                     1.0
                 ],
                 "metallicFactor": 1.0,
-                "roughnessFactor": 32.0,
+                "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 16,
+                    "index": 17,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 30,
+                "index": 31,
                 "texCoord": 1,
                 "scale": 1
             }
         },
         {
-            "name": "Material_10",
+            "name": "Material_11",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
                     1.0,
@@ -476,14 +487,9 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 24,
+                    "index": 7,
                     "texCoord": 1
                 }
-            },
-            "normalTexture": {
-                "index": 1,
-                "texCoord": 1,
-                "scale": 1
             }
         }
     ],
@@ -507,7 +513,7 @@
                 0.0
             ],
             "mesh": 17,
-            "material": 10,
+            "material": 1,
             "collider": {
                 "static": true
             }
@@ -516,9 +522,9 @@
             "name": "cube",
             "tags": "",
             "translation": [
-                100.0,
+                0.0,
                 6.0,
-                -50.0
+                -70.0
             ],
             "scale": [
                 40.0,
@@ -531,7 +537,10 @@
                 0.0
             ],
             "mesh": 17,
-            "material": 10
+            "material": 1,
+            "collider": {
+                "static": true
+            }
         },
         {
             "name": "cube",
@@ -563,12 +572,12 @@
             "translation": [
                 41.0,
                 22.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 1.0,
                 25.0,
-                42.0
+                52.0
             ],
             "rotation": [
                 0.0,
@@ -587,7 +596,7 @@
             "translation": [
                 40.0,
                 22.0,
-                -40.0
+                -60.0
             ],
             "scale": [
                 2.0,
@@ -611,7 +620,7 @@
             "translation": [
                 -40.0,
                 22.0,
-                -40.0
+                -60.0
             ],
             "scale": [
                 2.0,
@@ -683,7 +692,7 @@
             "translation": [
                 0.0,
                 22.0,
-                -61.0
+                -81.0
             ],
             "scale": [
                 40.0,
@@ -707,7 +716,7 @@
             "translation": [
                 40.0,
                 15.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.05000000074505806,
@@ -728,7 +737,7 @@
             "translation": [
                 40.0,
                 3.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.25,
@@ -749,7 +758,7 @@
             "translation": [
                 40.0,
                 15.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.25,
@@ -770,7 +779,7 @@
             "translation": [
                 40.0,
                 15.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.25,
@@ -874,8 +883,8 @@
             "tags": "",
             "translation": [
                 3.4000000953674316,
-                6.300000190734863,
-                -59.70000076293945
+                20.0,
+                -79.9000015258789
             ],
             "scale": [
                 0.10000000149011612,
@@ -1042,8 +1051,8 @@
             "tags": "",
             "translation": [
                 0.0,
-                6.0,
-                -60.0
+                20.0,
+                -80.0
             ],
             "scale": [
                 4.0,
@@ -1063,8 +1072,8 @@
             "tags": "",
             "translation": [
                 1.75,
-                9.5,
-                -60.0
+                23.5,
+                -80.0
             ],
             "scale": [
                 1.5,
@@ -1084,8 +1093,8 @@
             "tags": "",
             "translation": [
                 -1.75,
-                9.5,
-                -60.0
+                23.5,
+                -80.0
             ],
             "scale": [
                 1.5,
@@ -1105,8 +1114,8 @@
             "tags": "",
             "translation": [
                 1.75,
-                3.0,
-                -60.0
+                17.0,
+                -80.0
             ],
             "scale": [
                 1.5,
@@ -1126,8 +1135,8 @@
             "tags": "",
             "translation": [
                 -1.75,
-                3.0,
-                -60.0
+                17.0,
+                -80.0
             ],
             "scale": [
                 1.5,
@@ -1147,8 +1156,8 @@
             "tags": "",
             "translation": [
                 3.4000000953674316,
-                6.300000190734863,
-                -59.5
+                20.0,
+                -79.5
             ],
             "scale": [
                 0.30000001192092896,
@@ -1252,8 +1261,8 @@
             "tags": "",
             "translation": [
                 37.0,
-                9.199999809265137,
-                -58.0
+                23.25,
+                -78.0
             ],
             "scale": [
                 0.009999999776482582,
@@ -1273,8 +1282,8 @@
             "tags": "",
             "translation": [
                 -37.0,
-                9.199999809265137,
-                -58.0
+                23.25,
+                -78.0
             ],
             "scale": [
                 0.009999999776482582,
@@ -1294,8 +1303,8 @@
             "tags": "",
             "translation": [
                 -15.0,
-                10.0,
-                -58.5
+                25.0,
+                -78.5
             ],
             "scale": [
                 10.0,
@@ -1315,8 +1324,8 @@
             "tags": "",
             "translation": [
                 15.0,
-                10.0,
-                -58.5
+                25.0,
+                -78.5
             ],
             "scale": [
                 10.0,
@@ -1337,7 +1346,7 @@
             "translation": [
                 39.599998474121094,
                 1.0,
-                -11.0
+                -21.0
             ],
             "scale": [
                 0.20000000298023224,
@@ -1358,7 +1367,7 @@
             "translation": [
                 39.599998474121094,
                 1.0,
-                -29.0
+                -39.0
             ],
             "scale": [
                 0.20000000298023224,
@@ -1379,7 +1388,7 @@
             "translation": [
                 -39.599998474121094,
                 1.0,
-                -11.0
+                -21.0
             ],
             "scale": [
                 0.20000000298023224,
@@ -1400,7 +1409,7 @@
             "translation": [
                 -39.599998474121094,
                 1.0,
-                -29.0
+                -39.0
             ],
             "scale": [
                 0.20000000298023224,
@@ -1421,12 +1430,12 @@
             "translation": [
                 0.0,
                 46.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 42.0,
                 1.0,
-                42.0
+                52.0
             ],
             "rotation": [
                 0.0,
@@ -1434,10 +1443,7 @@
                 0.0
             ],
             "mesh": 17,
-            "material": 10,
-            "collider": {
-                "static": true
-            }
+            "material": 1
         },
         {
             "name": "cube",
@@ -1445,7 +1451,7 @@
             "translation": [
                 40.0,
                 28.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 1.0,
@@ -1466,12 +1472,12 @@
             "translation": [
                 -41.0,
                 21.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 1.0,
                 24.0,
-                42.0
+                52.0
             ],
             "rotation": [
                 0.0,
@@ -1490,7 +1496,7 @@
             "translation": [
                 -40.0,
                 15.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.05000000074505806,
@@ -1511,7 +1517,7 @@
             "translation": [
                 -40.0,
                 15.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.25,
@@ -1532,7 +1538,7 @@
             "translation": [
                 -40.0,
                 3.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.25,
@@ -1553,7 +1559,7 @@
             "translation": [
                 -40.0,
                 15.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 0.25,
@@ -1574,7 +1580,7 @@
             "translation": [
                 -40.0,
                 28.0,
-                -20.0
+                -30.0
             ],
             "scale": [
                 1.0,
@@ -1591,16 +1597,133 @@
         },
         {
             "name": "cube",
-            "tags": "cuttable",
+            "tags": "",
             "translation": [
                 0.0,
-                4.0,
-                -25.0
+                13.0,
+                -78.0
             ],
             "scale": [
-                15.699999809265137,
-                5.0,
+                4.0,
+                0.009999999776482582,
+                2.5
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 17,
+            "material": 0,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                0.0,
+                13.0,
+                -78.0
+            ],
+            "scale": [
+                3.5,
+                0.019999999552965164,
                 2.0
+            ],
+            "rotation": [
+                0.0,
+                3.140000104904175,
+                0.0
+            ],
+            "mesh": 17,
+            "material": 8
+        },
+        {
+            "name": "cube",
+            "tags": "",
+            "translation": [
+                -25.0,
+                -1.7000000476837158,
+                -0.699999988079071
+            ],
+            "scale": [
+                2.0,
+                15.0,
+                7.0
+            ],
+            "rotation": [
+                0.8999999761581421,
+                0.0,
+                0.0
+            ],
+            "mesh": 17,
+            "material": 7,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cylinder",
+            "tags": "",
+            "translation": [
+                -25.0,
+                6.0,
+                -15.0
+            ],
+            "scale": [
+                7.0,
+                7.0,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 22,
+            "material": 7,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cylinder",
+            "tags": "",
+            "translation": [
+                25.0,
+                6.0,
+                -40.0
+            ],
+            "scale": [
+                7.0,
+                7.0,
+                7.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 22,
+            "material": 7,
+            "collider": {
+                "static": true
+            }
+        },
+        {
+            "name": "cube",
+            "tags": "cuttable",
+            "translation": [
+                24.0,
+                6.0,
+                0.0
+            ],
+            "scale": [
+                7.0,
+                7.0,
+                14.0
             ],
             "rotation": [
                 0.0,
@@ -1620,118 +1743,22 @@
             "name": "cube",
             "tags": "",
             "translation": [
-                0.0,
-                5.0,
-                -19.5
+                -10.0,
+                15.0,
+                -58.0
             ],
             "scale": [
-                3.0,
-                6.0,
-                3.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 17,
-            "material": 7,
-            "collider": {
-                "static": true
-            }
-        },
-        {
-            "name": "cube",
-            "tags": "",
-            "translation": [
                 30.0,
-                5.0,
-                -25.0
-            ],
-            "scale": [
-                10.0,
-                6.0,
-                7.0
+                4.0,
+                1.0
             ],
             "rotation": [
-                0.0,
+                -0.8999999761581421,
                 0.0,
                 0.0
             ],
             "mesh": 17,
-            "material": 7,
-            "collider": {
-                "static": true
-            }
-        },
-        {
-            "name": "cube",
-            "tags": "",
-            "translation": [
-                18.0,
-                5.0,
-                -25.0
-            ],
-            "scale": [
-                2.0,
-                6.0,
-                3.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 17,
-            "material": 7,
-            "collider": {
-                "static": true
-            }
-        },
-        {
-            "name": "cube",
-            "tags": "",
-            "translation": [
-                -30.0,
-                5.0,
-                -25.0
-            ],
-            "scale": [
-                10.0,
-                6.0,
-                7.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 17,
-            "material": 7,
-            "collider": {
-                "static": true
-            }
-        },
-        {
-            "name": "cube",
-            "tags": "",
-            "translation": [
-                -18.0,
-                5.0,
-                -25.0
-            ],
-            "scale": [
-                2.0,
-                6.0,
-                3.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 17,
-            "material": 7,
+            "material": 1,
             "collider": {
                 "static": true
             }
@@ -1741,111 +1768,21 @@
             "tags": "",
             "translation": [
                 0.0,
-                5.0,
-                -30.5
+                11.0,
+                -32.0
             ],
             "scale": [
-                3.0,
-                6.0,
-                3.0
+                1.0,
+                12.0,
+                30.0
             ],
             "rotation": [
                 0.0,
-                0.0,
+                -0.4000000059604645,
                 0.0
-            ],
-            "mesh": 17,
-            "material": 7,
-            "collider": {
-                "static": true
-            }
-        },
-        {
-            "name": "cube",
-            "tags": "",
-            "translation": [
-                0.0,
-                30.0,
-                -60.0
-            ],
-            "scale": [
-                9.0,
-                19.0,
-                0.30000001192092896
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                1.5700000524520874
             ],
             "mesh": 17,
             "material": 1
-        },
-        {
-            "name": "cube",
-            "tags": "",
-            "translation": [
-                0.0,
-                30.0,
-                -60.0
-            ],
-            "scale": [
-                20.0,
-                10.0,
-                0.20000000298023224
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 17,
-            "material": 7
-        },
-        {
-            "name": "cube",
-            "tags": "exit",
-            "translation": [
-                0.0,
-                -1.0,
-                -57.25
-            ],
-            "scale": [
-                4.0,
-                0.009999999776482582,
-                2.75
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "mesh": 17,
-            "material": 0,
-            "collider": {
-                "static": true
-            }
-        },
-        {
-            "name": "cube",
-            "tags": "",
-            "translation": [
-                0.0,
-                -1.0,
-                -57.5
-            ],
-            "scale": [
-                3.5,
-                0.019999999552965164,
-                2.5
-            ],
-            "rotation": [
-                0.0,
-                3.140000104904175,
-                0.0
-            ],
-            "mesh": 17,
-            "material": 8
         }
     ],
     "scenes": [

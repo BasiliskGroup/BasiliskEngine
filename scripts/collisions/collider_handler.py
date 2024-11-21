@@ -56,7 +56,7 @@ class ColliderHandler():
                 
                 # check if already collided
                 normal, distance, contact_points = get_narrow_collision(collider_vertices[collider1], collider_vertices[collider2], collider1.position, collider2.position)
-                if distance == 0: continue # continue if no collision
+                if abs(distance) < 1e-6: continue # continue if no collision
                 
                 # immediately resolve penetration
                 collider1.has_collided = True
@@ -65,15 +65,19 @@ class ColliderHandler():
                 if collider1.static: 
                     node2.position += normal * distance
                     collider2.collision_normals[node1] = normal # TODO may need to switch node with collider
+                    node2.sync_data() # TODO temp line, wont work recursively
                 else:
                     if collider2.static: 
                         node1.position += normal * -distance
                         collider1.collision_normals[node2] = -normal
+                        node1.sync_data() # TODO temp line, wont work recursively
                     else:
                         node1.position += normal * 0.5 * -distance
                         node2.position += normal * 0.5 * distance
                         collider1.collision_normals[node2] = -normal
                         collider2.collision_normals[node1] = normal
+                        node1.sync_data() # TODO temp line, wont work recursively
+                        node2.sync_data() # TODO temp line, wont work recursively
                         
                 #for both physics bodies
                 if not (node1.physics_body or node2.physics_body): continue
