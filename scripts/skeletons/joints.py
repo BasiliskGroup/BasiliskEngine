@@ -82,8 +82,8 @@ class BallJoint():
             
             return (-c * cvel - self.spring_constant * displacement) / mass
         
-        # if the node has a physics body do this
-        if child.physics_body:
+        # if the node has a physics body do thi
+        if child.physics_body and delta_time < 0.022:
             
             cpos, cvel, ppos, pvel = child.position, child.physics_body.velocity, parent.position, parent.physics_body.velocity if parent.physics_body else glm.vec3(0.0)
             
@@ -107,7 +107,8 @@ class BallJoint():
             
         # snap to position if it does not
         else: 
-            child.position = origin + self.child_offset
+            child.position -= displacement
+            if child.physics_body: child.physics_body.velocity[1] = parent.physics_body.velocity[1] if parent.physics_body else 0
             
             return glm.vec3(0.0)
     

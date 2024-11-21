@@ -118,6 +118,13 @@ bottom=self.node_handler.add(
             position=(0, 6, 0),
             camera=self.camera
         ),
+        # self.node_handler.create(
+        #     position=(0, 1, 0),
+        #     scale=(1.05, 2, 1.05),
+        #     collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
+        #     model='cube', 
+        #     material='white',
+        # ),
         self.node_handler.create(
             position=glm.vec3(0, 0.5, 0),
             scale=(1, 0.25, 1),
@@ -265,7 +272,7 @@ left_arm=self.node_handler.add(
     rotation=(0, 0, 0),
     model='cube',
     material='white',
-    collider=self.collider_handler.add(vbo='cube', static=False),
+    collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
     physics_body=self.physics_body_handler.add(mass=10),
     name='left arm',
     
@@ -301,7 +308,7 @@ right_arm=self.node_handler.add(
     rotation=(0, 0, 0),
     model='cube',
     material='white',
-    collider=self.collider_handler.add(vbo='cube', static=False),
+    collider=self.collider_handler.add(vbo='cube', static=False, group='john'),
     physics_body=self.physics_body_handler.add(mass=10),
     name='right arm',
     

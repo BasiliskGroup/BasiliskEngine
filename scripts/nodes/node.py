@@ -234,7 +234,7 @@ class Node():
             return glm.inverse(mass / 12 * glm.mat3x3([y**2 + z ** 2, 0, 0], [0, x**2 + z**2, 0], [0, 0, x**2 + y**2]))
 
         vbo = self.node_handler.scene.vao_handler.vbo_handler.vbos[self.collider.vbo]
-        model_matrix = get_model_matrix(glm.vec3(0, 0, 0), glm.vec3(1, 1, 1), glm.vec3(0, 0, 0))
+        model_matrix = get_model_matrix(glm.vec3(0, 0, 0), glm.vec3(1 / 2, 1 / 2, 1 / 2), glm.vec3(0, 0, 0))
         world_points = [glm.vec3(model_matrix * glm.vec4(*vert, 1)) for vert in vbo.unique_points]
         
         ia = ib = ic = iap = ibp = icp = 0
