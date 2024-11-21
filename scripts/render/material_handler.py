@@ -29,6 +29,13 @@ class MaterialHandler:
         if type(value) == int:
             return self.materials[list(self.material_ids.keys())[value]]
 
+    def clear(self):
+        if self.mtl_texture:
+            self.mtl_texture.release()
+        self.materials.clear()
+        self.material_ids.clear()
+        
+
     def write(self, program: str="batch"):
         """
         Creates a material texture and writes to the given shader program key

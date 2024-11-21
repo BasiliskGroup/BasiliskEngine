@@ -27,8 +27,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
         except FileNotFoundError:
             print(f"Attempted to load {image['uri']} for the scene, but it was not in the textures folder")
 
-    scene.material_handler.materials.clear()
-    scene.material_handler.material_ids.clear()
+    scene.material_handler.clear()
     for mtl in scene_data["materials"]:
         kwargs = {}
         kwargs["name"] = mtl["name"]
@@ -57,9 +56,7 @@ def load_scene(scene, local_file_name=None, abs_file_path=None):
         scene.material_handler.add(**kwargs)
 
     scene.node_handler.nodes.clear()
-    scene.model_handler.models.clear()
-    scene.model_handler.chunks.clear()
-    scene.model_handler.batches.clear()
+    scene.model_handler.clear()
 
     collider_handler = scene.collider_handler
     physics_body_handler = scene.physics_body_handler

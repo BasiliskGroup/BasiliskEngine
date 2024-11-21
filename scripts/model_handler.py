@@ -165,6 +165,14 @@ class ModelHandler:
 
         return new_model
 
+    def clear(self):
+        for chunk_key in self.batches:
+            self.batches[chunk_key][0].release()
+            self.batches[chunk_key][1].release()
+        self.models.clear()
+        self.chunks.clear()
+        self.batches.clear()
+
     def remove(self, model) -> None:
         """
         Removes an model from the scene
