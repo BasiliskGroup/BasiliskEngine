@@ -101,6 +101,12 @@
             "uri": "normal_map.png"
         },
         {
+            "uri": "paintedbrick1_albedo.png"
+        },
+        {
+            "uri": "soft-blanket_normal-ogl.png"
+        },
+        {
             "uri": "hungarian_flooring_normal.png"
         },
         {
@@ -119,6 +125,9 @@
             "uri": "pine_tree.jpg"
         },
         {
+            "uri": "dark-wood-stain_normal-ogl.png"
+        },
+        {
             "uri": "metal.png"
         },
         {
@@ -126,6 +135,12 @@
         },
         {
             "uri": "oak_tree.jpg"
+        },
+        {
+            "uri": "trump_mugshot.png"
+        },
+        {
+            "uri": "antique_veneer1_albedo.png"
         },
         {
             "uri": "floral_wallpaper.png"
@@ -146,6 +161,18 @@
             "uri": "floral_wallpaper_normal.png"
         },
         {
+            "uri": "declaration_rewritten.png"
+        },
+        {
+            "uri": "paintedbrick1_Normal-ogl.png"
+        },
+        {
+            "uri": "black-tile1_albedo.png"
+        },
+        {
+            "uri": "kim_cute.png"
+        },
+        {
             "uri": "lantern.png"
         },
         {
@@ -155,10 +182,22 @@
             "uri": "wispy_grass_normal.png"
         },
         {
+            "uri": "denim1_albedo.png"
+        },
+        {
             "uri": "concrete_normal.png"
         },
         {
+            "uri": "bernie.png"
+        },
+        {
+            "uri": "denim1_normal-ogl.png"
+        },
+        {
             "uri": "normal_map2.png"
+        },
+        {
+            "uri": "briefing_room.png"
         },
         {
             "uri": "dancing_poster.png"
@@ -173,10 +212,34 @@
             "uri": "hungarian_flooring.png"
         },
         {
+            "uri": "harris_drink.png"
+        },
+        {
+            "uri": "antique_veneer1_Normal-ogl.png"
+        },
+        {
+            "uri": "biden_falling.png"
+        },
+        {
             "uri": "america.jpg"
         },
         {
+            "uri": "oak-wood-bare_albedo.png"
+        },
+        {
+            "uri": "black-tile1_normal-ogl.png"
+        },
+        {
+            "uri": "your_ad.jpeg"
+        },
+        {
             "uri": "brick_normal.png"
+        },
+        {
+            "uri": "dark-wood-stain_albedo.png"
+        },
+        {
+            "uri": "oak-wood-bare_normal-ogl.png"
         },
         {
             "uri": "Poliigon_GrassPatchyGround_4585_Normal.png"
@@ -192,6 +255,12 @@
         },
         {
             "uri": "box.png"
+        },
+        {
+            "uri": "soft-blanket_albedo.png"
+        },
+        {
+            "uri": "jow_and_obama.png"
         },
         {
             "uri": "brick.png"
@@ -296,6 +365,75 @@
         },
         {
             "sampler": 32
+        },
+        {
+            "sampler": 33
+        },
+        {
+            "sampler": 34
+        },
+        {
+            "sampler": 35
+        },
+        {
+            "sampler": 36
+        },
+        {
+            "sampler": 37
+        },
+        {
+            "sampler": 38
+        },
+        {
+            "sampler": 39
+        },
+        {
+            "sampler": 40
+        },
+        {
+            "sampler": 41
+        },
+        {
+            "sampler": 42
+        },
+        {
+            "sampler": 43
+        },
+        {
+            "sampler": 44
+        },
+        {
+            "sampler": 45
+        },
+        {
+            "sampler": 46
+        },
+        {
+            "sampler": 47
+        },
+        {
+            "sampler": 48
+        },
+        {
+            "sampler": 49
+        },
+        {
+            "sampler": 50
+        },
+        {
+            "sampler": 51
+        },
+        {
+            "sampler": 52
+        },
+        {
+            "sampler": 53
+        },
+        {
+            "sampler": 54
+        },
+        {
+            "sampler": 55
         }
     ],
     "materials": [
@@ -324,12 +462,12 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 24,
+                    "index": 37,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 1,
+                "index": 3,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -351,20 +489,20 @@
             "name": "Material_3",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    0.800000011920929,
-                    0.800000011920929,
-                    0.800000011920929,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ],
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 10,
+                    "index": 1,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 15,
+                "index": 47,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -408,7 +546,7 @@
                 "roughnessFactor": 32.0
             },
             "normalTexture": {
-                "index": 10,
+                "index": 15,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -425,9 +563,14 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 31,
+                    "index": 42,
                     "texCoord": 1
                 }
+            },
+            "normalTexture": {
+                "index": 9,
+                "texCoord": 1,
+                "scale": 1
             }
         },
         {
@@ -442,7 +585,7 @@
                 "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 16.0,
                 "baseColorTexture": {
-                    "index": 25,
+                    "index": 41,
                     "texCoord": 1
                 }
             }
@@ -459,14 +602,62 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 16,
+                    "index": 25,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 30,
+                "index": 51,
                 "texCoord": 1,
                 "scale": 1
+            }
+        },
+        {
+            "name": "Material_11",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 23,
+                    "texCoord": 1
+                }
+            },
+            "normalTexture": {
+                "index": 43,
+                "texCoord": 1,
+                "scale": 1
+            }
+        },
+        {
+            "name": "Material_12",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
+            }
+        },
+        {
+            "name": "Material_13",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0
             }
         }
     ],
@@ -490,7 +681,7 @@
                 0.0
             ],
             "mesh": 17,
-            "material": 1,
+            "material": 10,
             "collider": {
                 "static": true
             }
