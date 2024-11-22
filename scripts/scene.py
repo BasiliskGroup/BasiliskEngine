@@ -8,6 +8,7 @@ from scripts.render.light_handler import LightHandler
 from user_scripts.overlay import Overlay
 from scripts.video.cutscene_handler import CutsceneHandler
 from scripts.audio.audio_handler import AudioHandler
+from scripts.particles.particle import ParticleHandler
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
 from scripts.skeletons.joints import * 
@@ -45,11 +46,11 @@ class Scene:
         self.light_handler = LightHandler(self)
         self.cutscene_handler = CutsceneHandler(self)
         self.audio_handler = AudioHandler()
-
         preload(self, "models", "textures")
+        self.camera = FollowCamera(self.engine, radius = 20, scene=self)
+        self.particle_handler = ParticleHandler(self)
 
         # Makes a free cam
-        self.camera = FollowCamera(self.engine, radius = 20, scene=self)
 
         load_scene(self, "tutorial")
         self.on_render = None
@@ -78,6 +79,7 @@ class Scene:
 
         self.model_handler.update()
         self.vao_handler.shader_handler.update_uniforms()
+        self.particle_handler.update(self.engine.dt)
         if camera: self.camera.update()
         if camera and self.on_frame: exec(self.on_frame)
 
@@ -91,6 +93,7 @@ class Scene:
         self.vao_handler.framebuffer.use()
         self.sky.render()
         self.model_handler.render()
+        self.particle_handler.render()
         if self.on_render: exec(self.on_render)
 
         if not display: return

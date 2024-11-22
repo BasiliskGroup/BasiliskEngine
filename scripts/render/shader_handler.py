@@ -17,6 +17,8 @@ class ShaderHandler:
         self.programs['batch'] = self.load_program('batch')
         self.programs['sky'] = self.load_program('sky')
         self.programs['overlay'] = self.load_program('overlay')
+        self.programs['particle'] = self.load_program('particle')
+        self.programs['particle3d'] = self.load_program('particle3d')
 
     def load_program(self, name: str='default') -> mgl.Program:
         """
