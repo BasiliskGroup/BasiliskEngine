@@ -85,7 +85,7 @@ vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 
     float specularBack = max(pow(dot(normal, halfVectorBack), mtl.specularExponent), 0.0);
 
     // Final result
-    return (albedo + (specular + specularBack / 4) * mtl.specular) * (diff + diffBack / 4) + 0.1 * albedo;
+    return light.color * light.diffuse * (albedo + (specular + specularBack / 4) * mtl.specular) * (diff + diffBack / 4) + light.ambient * albedo;
 }
 
 vec3 CalcPointLight(PointLight light, Material mtl, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 albedo)
@@ -134,7 +134,7 @@ void main() {
     vec3 light_result = CalcDirLight(dirLight, mtl, normalDirection, viewDir, albedo);
     for(int i = 0; i < numPointLights; i++){
         float distance = length(pointLights[i].position - position);
-        if (distance < pointLights[i].radius * 2){
+        if (distance < pointLights[i].radius * 10){
             light_result += CalcPointLight(pointLights[i], mtl, normalDirection, position, viewDir, albedo);
         }
     }

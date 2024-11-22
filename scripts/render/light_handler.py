@@ -10,7 +10,7 @@ class LightHandler:
         self.programs = scene.vao_handler.shader_handler.programs
         
         # Create a directional light
-        self.dir_light = DirectionalLight(ambient=.25, diffuse=0.75, specular=0.5)
+        self.dir_light = DirectionalLight(ambient=.05, diffuse=0.5, color=(1.0, 0.5, 0.3))
         # Create random point lights
         place_range = 30
         self.point_lights = [
@@ -29,10 +29,9 @@ class LightHandler:
 
         if dir:    # Write the dirctional light
             program['dirLight.direction'].write(self.dir_light.dir)
-            # program['dirLight.color'    ].write(self.dir_light.color)
-            # program['dirLight.ambient'  ].write(self.dir_light.ambient)
-            # program['dirLight.diffuse'  ].write(self.dir_light.diffuse)
-            # program['dirLight.specular' ].write(self.dir_light.specular)
+            program['dirLight.color'    ].write(self.dir_light.color)
+            program['dirLight.ambient'  ].write(self.dir_light.ambient)
+            program['dirLight.diffuse'  ].write(self.dir_light.diffuse)
 
         if point:  # Write all point lights
             program[f'numPointLights'].write(glm.int32(len(self.point_lights)))  # Number of lights that need to be rendered
