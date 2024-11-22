@@ -31,3 +31,4 @@ self.clicked_skeleton = None
 
 # Rendering scripts
 self.overlay = Overlay(self)
+# self.cutscene_handler.play_cutscene("intro")
