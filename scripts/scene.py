@@ -7,6 +7,7 @@ from scripts.render.material_handler import MaterialHandler
 from scripts.render.light_handler import LightHandler
 from user_scripts.overlay import Overlay
 from scripts.video.cutscene_handler import CutsceneHandler
+from scripts.audio.audio_handler import AudioHandler
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
 from scripts.skeletons.joints import * 
@@ -43,6 +44,7 @@ class Scene:
         self.skeleton_handler = SkeletonHandler(self)
         self.light_handler = LightHandler(self)
         self.cutscene_handler = CutsceneHandler(self)
+        self.audio_handler = AudioHandler()
 
         preload(self, "models", "textures")
 
