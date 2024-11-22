@@ -83,6 +83,9 @@
             "uri": "american_flag.obj"
         },
         {
+            "uri": "Chandiler.obj"
+        },
+        {
             "uri": "fridge_001.obj"
         },
         {
@@ -931,7 +934,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 2,
             "collider": {
                 "static": true
@@ -955,7 +958,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 4
         },
         {
@@ -976,7 +979,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 3
         },
         {
@@ -1234,12 +1237,12 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 1
         },
         {
             "name": "cube",
-            "tags": "",
+            "tags": "lava",
             "translation": [
                 0.0,
                 -20.0,
@@ -1420,7 +1423,7 @@
                 -0.0,
                 1.5700000524520874
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 8,
             "physics_body": {
                 "mass": 100.0
@@ -1447,7 +1450,7 @@
                 -0.0,
                 1.5700000524520874
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 8,
             "physics_body": {
                 "mass": 100.0
@@ -1474,7 +1477,7 @@
                 -0.0,
                 1.5700000524520874
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 8,
             "physics_body": {
                 "mass": 100.0
@@ -1533,7 +1536,7 @@
         },
         {
             "name": "cube",
-            "tags": "",
+            "tags": "lava",
             "translation": [
                 0.0,
                 -20.0,

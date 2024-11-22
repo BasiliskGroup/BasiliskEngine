@@ -83,6 +83,9 @@
             "uri": "american_flag.obj"
         },
         {
+            "uri": "Chandiler.obj"
+        },
+        {
             "uri": "fridge_001.obj"
         },
         {
@@ -965,7 +968,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 3,
             "collider": {
                 "static": true
@@ -989,7 +992,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 3,
             "collider": {
                 "static": true
@@ -1013,7 +1016,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 3,
             "collider": {
                 "static": true
@@ -1037,7 +1040,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 3,
             "collider": {
                 "static": true
@@ -1169,7 +1172,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 7
         },
         {
@@ -1295,7 +1298,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 7
         },
         {
@@ -1484,7 +1487,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1505,7 +1508,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1589,7 +1592,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1610,7 +1613,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1890,7 +1893,7 @@
                 0.0
             ],
             "mesh": 23,
-            "material": 0,
+            "material": 12,
             "collider": {
                 "static": true
             }
@@ -2033,7 +2036,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 3,
             "collider": {
                 "static": true
@@ -2057,7 +2060,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 3,
             "collider": {
                 "static": true
