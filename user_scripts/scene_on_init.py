@@ -34,5 +34,6 @@ self.clicked_skeleton = None
 
 # Rendering scripts
 self.overlay = Overlay(self)
+self.overlay_time = 0
 # self.audio_handler.play_playlist("music")
 # self.cutscene_handler.play_cutscene("intro")

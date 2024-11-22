@@ -10,7 +10,7 @@ class Overlay:
         # Array of vertex data before render
         self.data = []
         # Render objects
-        self.vbo = self.scene.ctx.buffer(reserve=7_000, dynamic=True)
+        self.vbo = self.scene.ctx.buffer(reserve=100_000, dynamic=True)
         program = self.scene.vao_handler.shader_handler.programs["overlay"]
         self.vao = self.scene.ctx.vertex_array(program, [(self.vbo, "2f 3f", *["in_position", "in_color"])], skip_errors=True)
     
@@ -27,7 +27,7 @@ class Overlay:
         self.vbo.clear()
         self.data = []
 
-    def draw_circle(self, x: float, y: float, radius: float, color: tuple=(255, 255, 255)):
+    def draw_circle(self, x: float, y: float, radius: float, color: tuple=(255, 255, 255), win_size: tuple=(1, 1)):
         """
         Draws a rect between centered on x, y with width and height
             Args:
@@ -46,10 +46,12 @@ class Overlay:
         resolution = 25
         delta_theta = (2 * pi) / resolution
 
+        aspect_ratio = (win_size[1] / win_size[0])
+
         for triangle in range(resolution):
-            v2 = (x + radius * cos(theta), y + radius * sin(theta), *color)
+            v2 = (x + radius * cos(theta) * aspect_ratio, y + radius * sin(theta), *color)
             theta += delta_theta
-            v3 = (x + radius * cos(theta), y + radius * sin(theta), *color)
+            v3 = (x + radius * cos(theta) * aspect_ratio, y + radius * sin(theta), *color)
             self.data.extend([v1, v3, v2])
 
     def draw_rect(self, x: float, y: float, width: float, height: float, color: tuple=(255, 255, 255)):

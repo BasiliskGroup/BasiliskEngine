@@ -5,7 +5,7 @@ from scripts.nodes.node_handler import NodeHandler
 from scripts.physics.physics_body_handler import PhysicsBodyHandler
 from scripts.render.material_handler import MaterialHandler
 from scripts.render.light_handler import LightHandler
-from user_scripts.overlay import Overlay
+from scripts.render.overlay import Overlay
 from scripts.video.cutscene_handler import CutsceneHandler
 from scripts.audio.audio_handler import AudioHandler
 from scripts.particles.particle import ParticleHandler
