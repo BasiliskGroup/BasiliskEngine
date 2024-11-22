@@ -71,6 +71,7 @@ class Engine:
                 pg.mouse.set_visible(False)
             if event.type == pg.MOUSEWHEEL:
                 # Scroll the grab radius
+                self.project.current_scene.grab_distance += event.y * 5
                 ... # event.y is the scroll direction
                 
             if event.type == pg.USEREVENT+1: #  Music end

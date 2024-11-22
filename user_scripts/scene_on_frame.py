@@ -1,7 +1,10 @@
 from user_scripts.delaunay import delunay_triangulation, Point
+from math import sqrt
 import random
 
 # print(self.grab_distance)
+
+min_grab_distance = 40
 
 if self.project.engine.mouse_buttons[2] and not self.grabbed: # getting object
     point = glm.vec2(self.project.engine.win_size) / 2
@@ -14,22 +17,27 @@ if self.project.engine.mouse_buttons[2] and not self.grabbed: # getting object
         
         self.grabbed = node
         center_vec = node.position - self.camera.position
-        print(self.camera.position, node.position)
         self.grab_distance = glm.length(center_vec)
 
 elif self.project.engine.mouse_buttons[2]: # moving object
     point = glm.vec2(self.project.engine.win_size) / 2
     node = self.get_model_node_at(*point, has_collider = True, has_physics_body = True, tags = 'cuttable')
-    if node == self.grabbed:
-        target = self.camera.forward * self.grab_distance
-        node.physics_body.velocity += .1 * (target - node.position)
-    else:
-        self.grabbed = None
-        self.grab_distance = 0
 
 else: # releasing object
     self.grabbed = None
     self.grab_distance = 0
+
+if self.grabbed:
+    self.grab_distance = max(self.grab_distance, min_grab_distance)
+    target_position = self.camera.position + glm.normalize(self.camera.forward) * self.grab_distance
+    x = self.grabbed.position - target_position
+    v = self.grabbed.physics_body.velocity
+
+    k = 1.5
+    damping = .25
+    force = -x * k - v * damping
+
+    self.grabbed.physics_body.velocity += force
 
 if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
     window = self.project.engine.win_size

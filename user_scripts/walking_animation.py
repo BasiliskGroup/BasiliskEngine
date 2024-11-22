@@ -30,7 +30,7 @@ for index in range(0, 2):
     
 # break if feet already in animation
 if not animated: # start next animation
-            
+    
     # determine walking direction
     direction = glm.vec3(0.0)
     keys = self.skeleton_handler.scene.engine.keys
@@ -52,7 +52,7 @@ if not animated: # start next animation
     
     index = 1 if glm.length(centers[0] - points[0]) > glm.length(centers[1] - points[1]) else 2
     if glm.length(centers[index - 1] - points[index - 1]) > radius: 
-    
+        
         dest = centers[index - 1]
         dest[1] = self.node.position[1] - 1.2
         
