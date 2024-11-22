@@ -69,6 +69,12 @@ class Engine:
                 # Lock mouse
                 pg.event.set_grab(True)
                 pg.mouse.set_visible(False)
+            if event.type == pg.MOUSEWHEEL:
+                # Scroll the grab radius
+                ... # event.y is the scroll direction
+                
+            if event.type == pg.USEREVENT+1: #  Music end
+                self.project.current_scene.audio_handler.update_playlist()
 
         self.prev_keys = self.keys
         self.prev_mouse_buttons = self.mouse_buttons
