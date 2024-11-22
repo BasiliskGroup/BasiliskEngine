@@ -10,7 +10,7 @@ class LightHandler:
         self.programs = scene.vao_handler.shader_handler.programs
         
         # Create a directional light
-        self.dir_light = DirectionalLight(ambient=.05, diffuse=0.5, color=(1.0, 0.5, 0.3))
+        self.dir_light = DirectionalLight(ambient=.05, diffuse=0.5, color=(1.0, 0.4, 0.2))
         # Create random point lights
         place_range = 30
         self.point_lights = [

@@ -4,7 +4,7 @@ import random
 
 # print(self.grab_distance)
 
-min_grab_distance = 40
+min_grab_distance = 35
 
 if self.project.engine.mouse_buttons[2] and not self.grabbed: # getting object
     point = glm.vec2(self.project.engine.win_size) / 2
