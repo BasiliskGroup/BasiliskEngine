@@ -12,12 +12,15 @@ self.position += dpos * velocity
 # jump mechanic
 if keys[pg.K_SPACE] and self.jump_time > self.jump_max and abs(self.physics_body.velocity[1] < 1):
     can_jump = False
+    found = None
     for normal in self.collider.collision_normals.values():
-        if glm.dot(glm.normalize(normal), (0, 1, 0)) > 0.6:
+        found = normal
+        if glm.dot(glm.normalize(normal), (0, 1, 0)) > 0.1:
             can_jump = True
             break
     if can_jump: 
-        self.physics_body.velocity[1] = 10
+        self.position += glm.normalize(found) * 0.25
+        self.physics_body.velocity[1] = 16
         self.jump_time = 0
 
 if keys[pg.K_w] or keys[pg.K_s] or keys[pg.K_a] or keys[pg.K_d] or keys[pg.K_SPACE]:

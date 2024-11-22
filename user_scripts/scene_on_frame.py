@@ -1,6 +1,36 @@
 from user_scripts.delaunay import delunay_triangulation, Point
 import random
 
+# print(self.grab_distance)
+
+if self.project.engine.mouse_buttons[2] and not self.grabbed: # getting object
+    point = glm.vec2(self.project.engine.win_size) / 2
+    node = self.get_model_node_at(*point, has_collider = True, has_physics_body = True, tags = 'cuttable')
+    if node:
+        inv_proj, inv_view = glm.inverse(self.camera.m_proj), glm.inverse(self.camera.m_view)
+        ndc   = glm.vec4(2 * point[0] / self.project.engine.win_size[0] - 1, 1 - 2 * point[1] / self.project.engine.win_size[1], 1, 1)
+        point = inv_proj * ndc
+        point /= point.w
+        
+        self.grabbed = node
+        center_vec = node.position - self.camera.position
+        print(self.camera.position, node.position)
+        self.grab_distance = glm.length(center_vec)
+
+elif self.project.engine.mouse_buttons[2]: # moving object
+    point = glm.vec2(self.project.engine.win_size) / 2
+    node = self.get_model_node_at(*point, has_collider = True, has_physics_body = True, tags = 'cuttable')
+    if node == self.grabbed:
+        target = self.camera.forward * self.grab_distance
+        node.physics_body.velocity += .1 * (target - node.position)
+    else:
+        self.grabbed = None
+        self.grab_distance = 0
+
+else: # releasing object
+    self.grabbed = None
+    self.grab_distance = 0
+
 if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
     window = self.project.engine.win_size
     self.click_anchor = (window[0] / 2, window[1] / 2)
@@ -28,22 +58,27 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
         
         # converts the points on screen to vectors projected from the camera
         inv_proj, inv_view = glm.inverse(self.camera.m_proj), glm.inverse(self.camera.m_view)
+        diff = (glm.vec2(self.click_position) - glm.vec2(self.click_anchor)) / 25
+        points = [self.click_anchor + diff * i for i in range(26)]
         vecs = []
-        for point in [self.click_anchor, self.click_position]:
+        for point in points:
             ndc   = glm.vec4(2 * point[0] / self.project.engine.win_size[0] - 1, 1 - 2 * point[1] / self.project.engine.win_size[1], 1, 1)
             point = inv_proj * ndc
             point /= point.w
             point = inv_view * glm.vec4(point.x, point.y, point.z, 0)
             vecs.append(glm.vec3(point))
             
-        plane_normal = glm.normalize(glm.cross(vecs[0], vecs[1]))
+        plane_normal = glm.normalize(glm.cross(vecs[0], vecs[25]))
             
         # identify what has been clicked
-        node = self.get_model_node_at(*self.click_anchor, has_collider = True, has_physics_body = True, tags = 'cuttable')
-        skeleton = self.skeleton_handler.get_node_skeleton(node)
+        nodes = set()
+        for point in points:
+            node = self.get_model_node_at(*point, has_collider = True, has_physics_body = True, tags = 'cuttable')
+            skeleton = self.skeleton_handler.get_node_skeleton(node)
+            if node: nodes.add(node)
         
         # sort triangles
-        if node is not None:
+        for node in nodes:
             
             # easy access variables
             vbo   = self.vao_handler.vbo_handler.vbos[node.model.vbo]
