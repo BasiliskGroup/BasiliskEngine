@@ -13,7 +13,7 @@ class ModelHandler:
         self.program =     scene.vao_handler.shader_handler.programs['batch']
         self.texture_ids = scene.project.texture_handler.texture_ids
 
-        self.view_distance = 4  # In chunks
+        self.view_distance = 5  # In chunks
 
         self.models = []  # List containig all models
         self.chunks  = {}  # Contain lists with models positioned in a bounding box in space (Spatial partitioning)

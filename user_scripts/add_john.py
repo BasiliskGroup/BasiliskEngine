@@ -138,7 +138,7 @@ bottom=self.node_handler.add(
 
 bottom.on_frame = self.bottom_on_frame
 setattr(bottom, 'jump_time', 0)
-setattr(bottom, 'jump_max', 1)
+setattr(bottom, 'jump_max', 0.5)
 
 middle=self.node_handler.add(
     position=cock_pos + glm.vec3(0, 2.5, 0),
@@ -264,7 +264,7 @@ top=self.node_handler.add(
     ]
 )
 
-top.on_frame = self.face_camera
+top.on_frame = self.head_on_frame
 
 left_arm=self.node_handler.add(
     position=cock_pos + glm.vec3(1.3, 2.5, 0),

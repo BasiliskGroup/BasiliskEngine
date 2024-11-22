@@ -2,7 +2,7 @@ import glm
 
 class PhysicsHandler:
     """controls the movement of physics bodies"""
-    def __init__(self, scene = None, accelerations:list = [glm.vec3(0, -16, 0)]) -> None:
+    def __init__(self, scene = None, accelerations:list = [glm.vec3(0, -32, 0)]) -> None:
         """stores scene and accelerations list in project"""
         self.scene = scene
         self.accelerations = accelerations # constant accelerations in the scene
