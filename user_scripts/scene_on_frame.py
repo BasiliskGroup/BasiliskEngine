@@ -2,8 +2,23 @@ from user_scripts.delaunay import delunay_triangulation, Point
 from math import sqrt
 import random
 
-# print(self.grab_distance)
+# level 5
+if self.level == 5:
+    for node in self.node_handler.nodes:
+        if not (node.tags == 'cuttable' and node.collider.vbo == 'cylinder'): continue
+        if abs(node.position[0]) < 3:
+            target = glm.vec3(node.position)
+            target[0] = 0
+            x = node.position - target
+            v = node.physics_body.velocity
 
+            k = 1.5
+            damping = .25
+            force = -x * k - v * damping
+
+            node.physics_body.velocity[0] += force[0]
+
+# grabbing
 min_grab_distance = 35
 
 if self.project.engine.mouse_buttons[2] and not self.grabbed: # getting object
@@ -39,6 +54,7 @@ if self.grabbed:
 
     self.grabbed.physics_body.velocity += force
 
+# cutting
 if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
     window = self.project.engine.win_size
     self.click_anchor = (window[0] / 2, window[1] / 2)
@@ -81,9 +97,9 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
         # identify what has been clicked
         nodes = set()
         for point in points:
-            node = self.get_model_node_at(*point, has_collider = True, has_physics_body = True, tags = 'cuttable')
+            node = self.get_model_node_at(*point, has_collider = True)
             skeleton = self.skeleton_handler.get_node_skeleton(node)
-            if node: nodes.add(node)
+            if node and node.tags == 'cuttable': nodes.add(node)
         
         # sort triangles
         for node in nodes:

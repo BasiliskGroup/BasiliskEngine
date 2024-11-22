@@ -14,6 +14,9 @@
             "uri": "FryingPan.obj"
         },
         {
+            "uri": "ico.obj"
+        },
+        {
             "uri": "toy_001.obj"
         },
         {
@@ -38,6 +41,9 @@
             "uri": "bunny.obj"
         },
         {
+            "uri": "low-poly-sphere.obj"
+        },
+        {
             "uri": "kitchen_sink_001.obj"
         },
         {
@@ -60,9 +66,6 @@
         },
         {
             "uri": "drink_002.obj"
-        },
-        {
-            "uri": "Spoon.obj"
         },
         {
             "uri": "sphere.obj"
@@ -137,6 +140,12 @@
             "uri": "container.png"
         },
         {
+            "uri": "elijah.png"
+        },
+        {
+            "uri": "woodframe1-normal2.png"
+        },
+        {
             "uri": "colors.png"
         },
         {
@@ -152,13 +161,34 @@
             "uri": "stringy_marble_albedo.png"
         },
         {
+            "uri": "gavin_podium.png"
+        },
+        {
             "uri": "alley_brick.png"
+        },
+        {
+            "uri": "andrew.png"
         },
         {
             "uri": "oak_tree.jpg"
         },
         {
+            "uri": "brack.png"
+        },
+        {
             "uri": "trump_mugshot.png"
+        },
+        {
+            "uri": "gavin_troll.png"
+        },
+        {
+            "uri": "agedplanks1-normal4-ogl.png"
+        },
+        {
+            "uri": "woodframe1b-albedo.png"
+        },
+        {
+            "uri": "firewall.JPG"
         },
         {
             "uri": "antique_veneer1_albedo.png"
@@ -188,10 +218,16 @@
             "uri": "floral_wallpaper_normal.png"
         },
         {
+            "uri": "jackson.png"
+        },
+        {
             "uri": "declaration_rewritten.png"
         },
         {
             "uri": "paintedbrick1_Normal-ogl.png"
+        },
+        {
+            "uri": "chipping-painted-wall_normal-ogl.png"
         },
         {
             "uri": "black-tile1_albedo.png"
@@ -201,6 +237,9 @@
         },
         {
             "uri": "lantern.png"
+        },
+        {
+            "uri": "chipping-painted-wall_albedo.png"
         },
         {
             "uri": "tutorial.png"
@@ -254,6 +293,9 @@
             "uri": "oak-wood-bare_albedo.png"
         },
         {
+            "uri": "agedplanks1-albedo.png"
+        },
+        {
             "uri": "black-tile1_normal-ogl.png"
         },
         {
@@ -278,7 +320,16 @@
             "uri": "casing.jpg"
         },
         {
+            "uri": "asher.png"
+        },
+        {
+            "uri": "ethan_podium.png"
+        },
+        {
             "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "gavin_creep.png"
         },
         {
             "uri": "box.png"
@@ -288,6 +339,9 @@
         },
         {
             "uri": "soft-blanket_albedo.png"
+        },
+        {
+            "uri": "ethan_washington.png"
         },
         {
             "uri": "jow_and_obama.png"
@@ -476,6 +530,57 @@
         },
         {
             "sampler": 59
+        },
+        {
+            "sampler": 60
+        },
+        {
+            "sampler": 61
+        },
+        {
+            "sampler": 62
+        },
+        {
+            "sampler": 63
+        },
+        {
+            "sampler": 64
+        },
+        {
+            "sampler": 65
+        },
+        {
+            "sampler": 66
+        },
+        {
+            "sampler": 67
+        },
+        {
+            "sampler": 68
+        },
+        {
+            "sampler": 69
+        },
+        {
+            "sampler": 70
+        },
+        {
+            "sampler": 71
+        },
+        {
+            "sampler": 72
+        },
+        {
+            "sampler": 73
+        },
+        {
+            "sampler": 74
+        },
+        {
+            "sampler": 75
+        },
+        {
+            "sampler": 76
         }
     ],
     "materials": [
@@ -491,7 +596,7 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 47,
+                    "index": 14,
                     "texCoord": 1
                 }
             }
@@ -508,12 +613,12 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 31,
+                    "index": 43,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 34,
+                "index": 46,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -543,12 +648,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 16,
+                    "index": 25,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 23,
+                "index": 32,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -592,7 +697,7 @@
                 "roughnessFactor": 32.0
             },
             "normalTexture": {
-                "index": 16,
+                "index": 25,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -609,12 +714,12 @@
                 "metallicFactor": 2.0,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 45,
+                    "index": 57,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 50,
+                "index": 63,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -631,7 +736,7 @@
                 "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 16.0,
                 "baseColorTexture": {
-                    "index": 44,
+                    "index": 56,
                     "texCoord": 1
                 }
             }
@@ -648,12 +753,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 28,
+                    "index": 39,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 54,
+                "index": 69,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -670,7 +775,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 16,
+                    "index": 25,
                     "texCoord": 1
                 }
             },
@@ -692,7 +797,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 36,
+                    "index": 48,
                     "texCoord": 1
                 }
             }
@@ -722,7 +827,24 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 41,
+                    "index": 53,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_15",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 68,
                     "texCoord": 1
                 }
             }
@@ -747,7 +869,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 1,
             "collider": {
                 "static": true
@@ -771,7 +893,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 1,
             "collider": {
                 "static": true
@@ -795,7 +917,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -819,7 +941,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -843,7 +965,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 3,
             "collider": {
                 "static": true
@@ -867,7 +989,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 3,
             "collider": {
                 "static": true
@@ -891,7 +1013,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 3,
             "collider": {
                 "static": true
@@ -915,7 +1037,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 3,
             "collider": {
                 "static": true
@@ -939,7 +1061,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -963,7 +1085,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 4
         },
         {
@@ -984,7 +1106,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1005,7 +1127,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1026,7 +1148,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1047,7 +1169,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 7
         },
         {
@@ -1068,7 +1190,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1089,7 +1211,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1110,7 +1232,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1131,7 +1253,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1152,7 +1274,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1173,7 +1295,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 7
         },
         {
@@ -1194,7 +1316,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 20,
+            "mesh": 21,
             "material": 7
         },
         {
@@ -1215,7 +1337,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1236,7 +1358,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1257,7 +1379,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1278,7 +1400,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1299,7 +1421,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1320,7 +1442,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 20,
+            "mesh": 21,
             "material": 7
         },
         {
@@ -1341,7 +1463,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1362,7 +1484,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 34,
+            "mesh": 35,
             "material": 9
         },
         {
@@ -1383,7 +1505,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 34,
+            "mesh": 35,
             "material": 9
         },
         {
@@ -1404,7 +1526,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1425,7 +1547,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1446,7 +1568,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 24,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1467,7 +1589,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 34,
+            "mesh": 35,
             "material": 9
         },
         {
@@ -1488,7 +1610,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 34,
+            "mesh": 35,
             "material": 9
         },
         {
@@ -1509,7 +1631,7 @@
                 -1.590000033378601,
                 0.0
             ],
-            "mesh": 14,
+            "mesh": 16,
             "material": 5
         },
         {
@@ -1530,7 +1652,7 @@
                 -1.590000033378601,
                 0.0
             ],
-            "mesh": 14,
+            "mesh": 16,
             "material": 5
         },
         {
@@ -1551,7 +1673,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 14,
+            "mesh": 16,
             "material": 5
         },
         {
@@ -1572,7 +1694,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 14,
+            "mesh": 16,
             "material": 5
         },
         {
@@ -1593,7 +1715,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 10,
             "collider": {
                 "static": true
@@ -1617,7 +1739,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1638,7 +1760,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -1662,7 +1784,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 4
         },
         {
@@ -1683,7 +1805,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1704,7 +1826,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1725,7 +1847,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1746,7 +1868,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1767,7 +1889,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 0,
             "collider": {
                 "static": true
@@ -1791,7 +1913,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 8
         },
         {
@@ -1812,7 +1934,7 @@
                 -0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 2,
             "physics_body": {
                 "mass": 1000.0
@@ -1839,7 +1961,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 1,
             "collider": {
                 "static": true
@@ -1863,7 +1985,7 @@
                 -0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 2,
             "physics_body": {
                 "mass": 1000.0
@@ -1890,7 +2012,7 @@
                 0.0,
                 1.5700000524520874
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 11
         },
         {
@@ -1911,7 +2033,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 3,
             "collider": {
                 "static": true
@@ -1935,7 +2057,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 28,
+            "mesh": 29,
             "material": 3,
             "collider": {
                 "static": true
@@ -1959,7 +2081,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 3
         },
         {
@@ -1980,7 +2102,7 @@
                 0.0,
                 1.5700000524520874
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 13
         },
         {
@@ -2001,7 +2123,7 @@
                 0.0,
                 1.5700000524520874
             ],
-            "mesh": 22,
+            "mesh": 23,
             "material": 0
         },
         {
@@ -2022,8 +2144,8 @@
                 0.0,
                 -1.5700000524520874
             ],
-            "mesh": 22,
-            "material": 0
+            "mesh": 23,
+            "material": 14
         }
     ],
     "scenes": [

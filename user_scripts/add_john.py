@@ -543,3 +543,55 @@ setattr(bottom, 'saved_rotation', glm.quat())
 setattr(middle, 'saved_rotation', glm.quat())
 setattr(top, 'saved_rotation', glm.quat())
 setattr(head, 'saved_rotation', glm.quat())
+
+# lights
+# PointLight(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
+# PointLight(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5),
+# PointLight(pos=(-15, 10, -58.5), color=(1, 0.7, 0.3), diffuse=5),
+# PointLight(pos=(15, 10, -58.5), color=(1, 0.7, 0.3), diffuse=5),
+# PointLight(pos=(-40, 15, -20), color=(0.525, 0.831, 1), diffuse=5),
+# PointLight(pos=(40, 15, -20), color=(0.525, 0.831, 1), diffuse=5),
+
+if self.level == 0:
+    
+    self.light_handler.add(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(-15, 10, -58.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 10, -58.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(-40, 15, -20), color=(0.525, 0.831, 1), diffuse=20)
+    self.light_handler.add(pos=(40, 15, -20), color=(0.525, 0.831, 1), diffuse=20)
+    
+elif self.level in [1, 2]:
+    
+    self.light_handler.add(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(-15, 25, -58.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 25, -58.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(-40, 15, -20), color=(0.525, 0.831, 1), diffuse=20)
+    self.light_handler.add(pos=(40, 15, -20), color=(0.525, 0.831, 1), diffuse=20)
+    
+elif self.level == 3:
+    
+    self.light_handler.add(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 38, -78.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(-15, 38, -78.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(38.7, 10, -20), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(-38.7, 10, -20), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(0, 50, -30), color=(1, 0.7, 0.3), diffuse=25)
+    
+elif self.level == 4:
+    
+    self.light_handler.add(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(-15, 25, -58.5), color=(1, 0.7, 0.3), diffuse=5)
+    self.light_handler.add(pos=(15, 25, -58.5), color=(1, 0.7, 0.3), diffuse=5)
+    
+elif self.level == 5:
+    
+    self.light_handler.add(pos=(0, 108, -200.5), color=(0.525, 0.831, 1), diffuse=7)
+    self.light_handler.add(pos=(0, 120, -200.5), color=(0.525, 0.831, 1), diffuse=3)
+    self.light_handler.add(pos=(30, 110, -205.5), color=(0.525, 0.831, 1), diffuse=3)
+    self.light_handler.add(pos=(-30, 110, -205.5), color=(0.525, 0.831, 1), diffuse=3)
+    
+self.light_handler.write('batch')

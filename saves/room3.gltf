@@ -14,6 +14,9 @@
             "uri": "FryingPan.obj"
         },
         {
+            "uri": "ico.obj"
+        },
+        {
             "uri": "toy_001.obj"
         },
         {
@@ -36,6 +39,9 @@
         },
         {
             "uri": "bunny.obj"
+        },
+        {
+            "uri": "low-poly-sphere.obj"
         },
         {
             "uri": "kitchen_sink_001.obj"
@@ -75,6 +81,9 @@
         },
         {
             "uri": "american_flag.obj"
+        },
+        {
+            "uri": "Chandiler.obj"
         },
         {
             "uri": "fridge_001.obj"
@@ -134,6 +143,12 @@
             "uri": "container.png"
         },
         {
+            "uri": "elijah.png"
+        },
+        {
+            "uri": "woodframe1-normal2.png"
+        },
+        {
             "uri": "colors.png"
         },
         {
@@ -149,13 +164,34 @@
             "uri": "stringy_marble_albedo.png"
         },
         {
+            "uri": "gavin_podium.png"
+        },
+        {
             "uri": "alley_brick.png"
+        },
+        {
+            "uri": "andrew.png"
         },
         {
             "uri": "oak_tree.jpg"
         },
         {
+            "uri": "brack.png"
+        },
+        {
             "uri": "trump_mugshot.png"
+        },
+        {
+            "uri": "gavin_troll.png"
+        },
+        {
+            "uri": "agedplanks1-normal4-ogl.png"
+        },
+        {
+            "uri": "woodframe1b-albedo.png"
+        },
+        {
+            "uri": "firewall.JPG"
         },
         {
             "uri": "antique_veneer1_albedo.png"
@@ -185,10 +221,16 @@
             "uri": "floral_wallpaper_normal.png"
         },
         {
+            "uri": "jackson.png"
+        },
+        {
             "uri": "declaration_rewritten.png"
         },
         {
             "uri": "paintedbrick1_Normal-ogl.png"
+        },
+        {
+            "uri": "chipping-painted-wall_normal-ogl.png"
         },
         {
             "uri": "black-tile1_albedo.png"
@@ -198,6 +240,9 @@
         },
         {
             "uri": "lantern.png"
+        },
+        {
+            "uri": "chipping-painted-wall_albedo.png"
         },
         {
             "uri": "tutorial.png"
@@ -251,6 +296,9 @@
             "uri": "oak-wood-bare_albedo.png"
         },
         {
+            "uri": "agedplanks1-albedo.png"
+        },
+        {
             "uri": "black-tile1_normal-ogl.png"
         },
         {
@@ -275,7 +323,16 @@
             "uri": "casing.jpg"
         },
         {
+            "uri": "asher.png"
+        },
+        {
+            "uri": "ethan_podium.png"
+        },
+        {
             "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "gavin_creep.png"
         },
         {
             "uri": "box.png"
@@ -285,6 +342,9 @@
         },
         {
             "uri": "soft-blanket_albedo.png"
+        },
+        {
+            "uri": "ethan_washington.png"
         },
         {
             "uri": "jow_and_obama.png"
@@ -473,6 +533,57 @@
         },
         {
             "sampler": 59
+        },
+        {
+            "sampler": 60
+        },
+        {
+            "sampler": 61
+        },
+        {
+            "sampler": 62
+        },
+        {
+            "sampler": 63
+        },
+        {
+            "sampler": 64
+        },
+        {
+            "sampler": 65
+        },
+        {
+            "sampler": 66
+        },
+        {
+            "sampler": 67
+        },
+        {
+            "sampler": 68
+        },
+        {
+            "sampler": 69
+        },
+        {
+            "sampler": 70
+        },
+        {
+            "sampler": 71
+        },
+        {
+            "sampler": 72
+        },
+        {
+            "sampler": 73
+        },
+        {
+            "sampler": 74
+        },
+        {
+            "sampler": 75
+        },
+        {
+            "sampler": 76
         }
     ],
     "materials": [
@@ -501,12 +612,12 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 26,
+                    "index": 37,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 46,
+                "index": 59,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -537,7 +648,7 @@
                 "roughnessFactor": 32.0
             },
             "normalTexture": {
-                "index": 20,
+                "index": 29,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -581,7 +692,7 @@
                 "roughnessFactor": 32.0
             },
             "normalTexture": {
-                "index": 16,
+                "index": 25,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -598,12 +709,12 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 45,
+                    "index": 57,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 9,
+                "index": 11,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -620,7 +731,7 @@
                 "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 16.0,
                 "baseColorTexture": {
-                    "index": 44,
+                    "index": 56,
                     "texCoord": 1
                 }
             }
@@ -637,12 +748,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 28,
+                    "index": 39,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 54,
+                "index": 69,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -659,12 +770,12 @@
                 "metallicFactor": 5.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 11,
+                    "index": 13,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 56,
+                "index": 72,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -681,7 +792,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 15,
+                    "index": 24,
                     "texCoord": 1
                 }
             }
@@ -698,7 +809,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 14,
+                    "index": 19,
                     "texCoord": 1
                 }
             }
@@ -715,7 +826,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 27,
+                    "index": 38,
                     "texCoord": 1
                 }
             }
@@ -732,7 +843,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 47,
+                    "index": 67,
                     "texCoord": 1
                 }
             }
@@ -749,7 +860,24 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 17,
+                    "index": 26,
+                    "texCoord": 1
+                }
+            }
+        },
+        {
+            "name": "Material_17",
+            "pbrMetallicRoughness": {
+                "baseColorFactor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "metallicFactor": 1.0,
+                "roughnessFactor": 32.0,
+                "baseColorTexture": {
+                    "index": 33,
                     "texCoord": 1
                 }
             }
@@ -774,7 +902,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 1,
             "collider": {
                 "static": true
@@ -798,7 +926,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 1,
             "collider": {
                 "static": true
@@ -822,7 +950,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -846,7 +974,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -870,7 +998,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -894,7 +1022,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 27,
+            "mesh": 30,
             "material": 7
         },
         {
@@ -915,7 +1043,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -936,7 +1064,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -957,7 +1085,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -978,7 +1106,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -999,7 +1127,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1020,7 +1148,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 27,
+            "mesh": 30,
             "material": 7
         },
         {
@@ -1041,7 +1169,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 19,
+            "mesh": 21,
             "material": 7
         },
         {
@@ -1062,7 +1190,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1083,7 +1211,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1104,7 +1232,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1125,7 +1253,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1146,7 +1274,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 7
         },
         {
@@ -1167,7 +1295,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 19,
+            "mesh": 21,
             "material": 7
         },
         {
@@ -1188,7 +1316,7 @@
                 1.590000033378601,
                 0.0
             ],
-            "mesh": 23,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1209,7 +1337,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 33,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1230,7 +1358,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 33,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1251,7 +1379,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 23,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1272,7 +1400,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1293,7 +1421,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 23,
+            "mesh": 25,
             "material": 8
         },
         {
@@ -1314,7 +1442,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 33,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1335,7 +1463,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 33,
+            "mesh": 36,
             "material": 9
         },
         {
@@ -1356,7 +1484,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 11,
             "collider": {
                 "static": true
@@ -1380,7 +1508,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 3,
             "collider": {
                 "static": true
@@ -1404,7 +1532,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 0,
             "collider": {
                 "static": true
@@ -1428,7 +1556,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 8
         },
         {
@@ -1449,7 +1577,7 @@
                 -0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 2,
             "physics_body": {
                 "mass": 2000.0
@@ -1476,7 +1604,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 10,
             "collider": {
                 "static": true
@@ -1500,7 +1628,7 @@
                 -0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 2,
             "physics_body": {
                 "mass": 1000.0
@@ -1527,7 +1655,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 12
         },
         {
@@ -1548,7 +1676,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 13
         },
         {
@@ -1569,8 +1697,8 @@
                 0.0,
                 1.5700000524520874
             ],
-            "mesh": 21,
-            "material": 14
+            "mesh": 23,
+            "material": 16
         },
         {
             "name": "cube",
@@ -1590,7 +1718,7 @@
                 0.0,
                 -1.5700000524520874
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 14
         },
         {
@@ -1695,7 +1823,7 @@
                 0.0,
                 1.5700000524520874
             ],
-            "mesh": 9,
+            "mesh": 10,
             "material": 15
         },
         {
@@ -1737,7 +1865,7 @@
                 1.5700000524520874,
                 0.0
             ],
-            "mesh": 8,
+            "mesh": 9,
             "material": 15
         },
         {
@@ -1758,7 +1886,7 @@
                 1.5700000524520874,
                 -1.5700000524520874
             ],
-            "mesh": 25,
+            "mesh": 28,
             "material": 15
         },
         {
@@ -1779,7 +1907,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 11
         },
         {
@@ -1800,8 +1928,71 @@
                 0.0,
                 0.0
             ],
-            "mesh": 21,
+            "mesh": 23,
             "material": 11
+        },
+        {
+            "name": "wall_lantern",
+            "tags": "",
+            "translation": [
+                -38.70000076293945,
+                10.0,
+                -20.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                -1.5700000524520874,
+                0.0
+            ],
+            "mesh": 36,
+            "material": 9
+        },
+        {
+            "name": "wall_lantern",
+            "tags": "",
+            "translation": [
+                38.70000076293945,
+                10.0,
+                -20.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                1.5700000524520874,
+                0.0
+            ],
+            "mesh": 36,
+            "material": 9
+        },
+        {
+            "name": "Chandiler",
+            "tags": "",
+            "translation": [
+                0.0,
+                80.0,
+                -30.0
+            ],
+            "scale": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "mesh": 26,
+            "material": 15
         }
     ],
     "scenes": [
