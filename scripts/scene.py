@@ -137,6 +137,6 @@ class Scene:
         point /= point.w
         forward = glm.normalize(glm.vec3(inv_view * glm.vec4(point.x, point.y, point.z, 0)))
         
-        best_node, point = self.camera.get_model_node_at(forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material, tags = tags)
+        best_node, point = self.camera.get_model_node_at(position=self.camera.position + self.camera.forward, forward = forward, max_distance = distance, has_collider = has_collider, has_physics_body = has_physics_body, material = material, tags = tags)
                 
         return best_node
