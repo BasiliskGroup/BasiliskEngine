@@ -37,7 +37,7 @@ class ParticleHandler:
     def __init__(self, scene) -> None:
         self.programs = scene.vao_handler.shader_handler.programs
         self.ctx = scene.ctx
-        self.cam = scene.camera
+        self.scene = scene
         self.emitter_handler = ParticleEmitterHandler(self)
 
         self.vbo_2d = ParticleVBO(self.ctx)
@@ -67,13 +67,15 @@ class ParticleHandler:
                                                                      ], 
                                                                      skip_errors=True)
 
+       #  self.emitter_handler.add_emitter('lava', pos=(0, 0, 0))
+
     def render(self):
-        cam_pos = self.cam.position
-        self.programs['particle']['m_view'].write(self.cam.m_view)
-        self.programs['particle']['m_proj'].write(self.cam.m_proj)
+        cam_pos = self.scene.camera.position
+        self.programs['particle']['m_view'].write(self.scene.camera.m_view)
+        self.programs['particle']['m_proj'].write(self.scene.camera.m_proj)
         self.programs['particle']['cam'].write(cam_pos)
-        self.programs['particle3d']['m_view'].write(self.cam.m_view)
-        self.programs['particle3d']['m_proj'].write(self.cam.m_proj)
+        self.programs['particle3d']['m_view'].write(self.scene.camera.m_view)
+        self.programs['particle3d']['m_proj'].write(self.scene.camera.m_proj)
 
         alive_particles = get_alive(self.particle_instances_3d)
         self.instance_buffer_3d.write(np.array(alive_particles[:,:8], order='C'))
@@ -90,7 +92,7 @@ class ParticleHandler:
         elif len(self.particle_instances_3d) < (self.particle_cube_size ** 3): self.particle_instances_3d = np.vstack((np.array([*pos, *clr, scale, life, *vel, *accel]), self.particle_instances_3d), dtype='f4')
 
     def update(self, dt):
-        cam_pos = self.cam.position
+        cam_pos = self.scene.camera.position
         self.emitter_handler.update(dt)
         # Update 2D Particle Matrix & Sort by distance from camera
         self.particle_instances_2d = get_alive(self.particle_instances_2d)
