@@ -71,5 +71,11 @@ class CutsceneHandler:
                     self.win_size = (event.w, event.h)
                     self.scene.engine.win_size = (event.w, event.h)
 
+                if event.type == pg.KEYUP:
+                    if event.key == pg.K_ESCAPE:
+                        # Unlock mouse
+                        pg.event.set_grab(False)
+                        pg.mouse.set_visible(True)
+
             self.dt = self.clock.tick() / 1000
             self.draw()

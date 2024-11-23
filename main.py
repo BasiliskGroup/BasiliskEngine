@@ -17,13 +17,15 @@ class Engine:
         # Pygame initialization
         pg.init()
         # Window size
-        self.win_size = win_size
+        info_object = pg.display.Info()
+        self.win_size = (info_object.current_w, info_object.current_h)
         # GL attributes
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # Pygame display init
-        pg.display.set_mode(self.win_size, vsync=False, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE | pg.FULLSCREEN)
+        pg.display.set_mode(self.win_size, vsync=False, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+        pg.display.set_caption("IndepenDance Day | Basilisk Engine")
         # Lock mouse in place and hide
         pg.event.set_grab(True)
         pg.mouse.set_visible(False)
@@ -38,6 +40,7 @@ class Engine:
         # Project handler
         self.project = Project(self)
 
+
     def update(self) -> None:
         """
         Updates pygame events and checks for window events
@@ -45,7 +48,7 @@ class Engine:
         # Update time
         self.dt = self.clock.tick() / 1000
         self.time += self.dt
-        pg.display.set_caption(f"FPS: {round(self.clock.get_fps())} | Models: {len(self.project.current_scene.model_handler.models)}")
+        # pg.display.set_caption(f"FPS: {round(self.clock.get_fps())} | Models: {len(self.project.current_scene.model_handler.models)}")
         # Pygame events
         self.events = pg.event.get()
         self.keys = pg.key.get_pressed()
