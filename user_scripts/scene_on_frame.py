@@ -167,10 +167,10 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                 cut_index_3d = [world_points[cut_indices[0]], world_points[cut_indices[1]]]
                 particle_dir = (cut_index_3d[1] - cut_index_3d[0]) / 10
                 for w in range(11):
-                    self.particle_handler.add_particles(type=1, life=0.3, pos=cut_index_3d[0] + particle_dir * w, clr=(0.9 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1)), vel=[random.uniform(-1.5, 1.5) for _ in range(3)], accel=(0, 0, 0))
-                    self.particle_handler.add_particles(type=2, life=0.3, pos=cut_index_3d[0] + particle_dir * w, clr=(0.9 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1)), vel=[random.uniform(-1.5, 1.5) for _ in range(3)], accel=(0, 0, 0))
+                    self.particle_handler.add_particles(type=1, life=0.3, pos=cut_index_3d[0] + particle_dir * w, clr=(0.9 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1)), vel=[random.uniform(-1.5, 1.5), random.uniform(-1.5, 1.5), random.uniform(-1.5, 1.5)], accel=(0, 0, 0))
+                    self.particle_handler.add_particles(type=2, life=0.3, pos=cut_index_3d[0] + particle_dir * w, clr=(0.9 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1)), vel=[random.uniform(-1.5, 1.5), random.uniform(-1.5, 1.5), random.uniform(-1.5, 1.5)], accel=(0, 0, 0))
                     grey_off = random.uniform(-0.1, 0.1)
-                    if w % 2: self.particle_handler.add_particles(type=2, life=0.3, pos=cut_index_3d[0] + particle_dir * w, clr=(0.7 + grey_off, 0.7 + grey_off, 0.7 + grey_off), vel=[random.uniform(-2, 2) for _ in range(3)], accel=(0, 0, 0))
+                    if w % 2: self.particle_handler.add_particles(type=2, life=0.3, pos=cut_index_3d[0] + particle_dir * w, clr=(0.7 + grey_off, 0.7 + grey_off, 0.7 + grey_off), vel=[random.uniform(-2, 2), random.uniform(-2, 2), random.uniform(-2, 2)], accel=(0, 0, 0))
                         
                 # determine which point is different
                 for i in range(3):
