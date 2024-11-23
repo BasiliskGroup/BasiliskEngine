@@ -1,4 +1,5 @@
 import pygame as pg
+import random
 
 music = {
     'song' : 'audio/music/song.mp3',
@@ -19,8 +20,10 @@ class AudioHandler:
         
         self.sounds = {sound : pg.mixer.Sound(sounds[sound]) for sound in sounds}
         self.playlists = {}
+        self.sound_groups = {}
 
         self.make_playlist('music', ['song'])
+        self.add_sound_group()
 
         self.current_track = None
         self.current_playlist = None
@@ -31,6 +34,9 @@ class AudioHandler:
 
     def make_playlist(self, name, songs):
         self.playlists[name] = [music[song] for song in songs]
+
+    def add_sound_group(self, name: str, sounds: tuple):
+        self.sound_groups[name] = sounds
 
     def play_playlist(self, playlist):
         self.playlist_index = 0
@@ -59,6 +65,10 @@ class AudioHandler:
         snd = self.sounds[sound]
         snd.set_volume(100/100)
         snd.play()
+
+    def play_sound_group(self, group_name):
+        sound = random.choice(self.sound_groups[group_name])
+        self.play_sound(sound)
 
     def fast_forward(self):
         pg.mixer.music.pause()
