@@ -43,7 +43,7 @@ class StartScreen:
         self.cursor = pg.image.load('textures/cursor.png').convert_alpha()
         self.cursor = pg.transform.scale(self.cursor, (75, 100))
 
-        self.text = pg.image.load('textures\clicktostart.png').convert_alpha()
+        self.text = pg.image.load('textures/clicktostart.png').convert_alpha()
         self.text = pg.transform.scale(self.text, (500, 150))
 
         # Load the texture
