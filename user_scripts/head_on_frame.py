@@ -10,13 +10,13 @@ else:
 
 if self.node_handler.scene.level == 5:
     for node in self.collider.collision_normals.keys():
-        if node.tags != 'cuttable': continue
+        if not (node.tags == 'cuttable' and node.collider.vbo == 'cylinder'): continue
         
         bottom = self.node_handler.scene.skeleton_handler.skeletons[0].node
         force = bottom.position - node.position
         force[1] = 0
         glm.normalize(force)
         
-        bottom.apply_offset_force(force * 100, glm.vec3(0, 0, 0), 1)
+        bottom.physics_body.velocity += force
         
         break

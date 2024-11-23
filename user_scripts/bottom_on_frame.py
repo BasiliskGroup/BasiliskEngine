@@ -39,3 +39,10 @@ for node, collider in self.collider.collision_normals.items():
 if keys[pg.K_r]: 
     load_scene(self.node_handler.scene, f'room{self.node_handler.scene.level}')
     self.node_handler.scene.add_john()
+    
+# level 5
+if self.node_handler.scene.level == 5:
+    for node in self.collider.collision_normals.keys():
+        if node.tags != 'lava': continue
+        load_scene(self.node_handler.scene, f'room{self.node_handler.scene.level}')
+        self.node_handler.scene.add_john()

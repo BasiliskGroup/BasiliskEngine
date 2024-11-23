@@ -8,7 +8,7 @@ with open(f'user_scripts/walking_animation.py') as file: self.walking_animation 
 with open(f'user_scripts/head_on_frame.py')     as file: self.head_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
 
 # levels
-self.level = 2
+self.level = 5
 
 # john
 self.add_john_compile = add_john
