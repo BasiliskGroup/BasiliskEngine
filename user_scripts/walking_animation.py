@@ -1,3 +1,5 @@
+import random
+
 # pull information
 nodes = [self.joints[1].child_bone.joints[0].child_bone.node, self.joints[2].child_bone.joints[0].child_bone.node]
 nodes[0].position[1], nodes[1].position[1] = self.node.position[1] - 1.2, self.node.position[1] - 1.2
@@ -56,6 +58,9 @@ if not animated: # start next animation
         dest = centers[index - 1]
         dest[1] = self.node.position[1] - 1.2
         
+        # if random.randint(0, 2) == 1:
+            # self.skeleton_handler.scene.audio_handler.play_sound_group('step')
+
         self.joints[index].child_bone.joints[0].animations.append(
             Animation(
                 key_frames=[

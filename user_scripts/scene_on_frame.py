@@ -292,8 +292,8 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                     model=uuid, 
                 )
                 self.node_handler.nodes[-1].tags = 'cuttable'
-                
-            # TODO split skeleton
-            
+                            
             # remove split node
             self.node_handler.remove(node)
+            # Play sound
+            self.audio_handler.play_sound_group('slice')

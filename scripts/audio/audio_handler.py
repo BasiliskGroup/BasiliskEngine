@@ -38,10 +38,10 @@ class AudioHandler:
 
         self.make_playlist('music', ['song'])
 
-        self.add_sound_group('door', ('door'))
+        self.add_sound_group('door', ['door'])
         self.add_sound_group('hit', ('hit1', 'hit2', 'hit3', 'hit4', 'hit5'))
         self.add_sound_group('slice', ('slice1', 'slice2', 'slice3'))
-        self.add_sound_group('step', ('step1', 'step2', 'step3', 'step4'))
+        self.add_sound_group('step', ['step1', 'step2', 'step3'])
         self.add_sound_group('john', ('john1', 'john2'))
 
         self.current_track = None
@@ -50,6 +50,9 @@ class AudioHandler:
 
     def update_volume(self):
         pg.mixer.music.set_volume(100/100)
+
+    def set_volume(self, volume):
+        pg.mixer.music.set_volume(volume)
 
     def make_playlist(self, name, songs):
         self.playlists[name] = [music[song] for song in songs]
