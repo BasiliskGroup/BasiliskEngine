@@ -5,7 +5,7 @@ music = {
 }
 
 sounds = {
-
+    
 }
 
 class AudioHandler:

@@ -19,6 +19,9 @@ class LightHandler:
     def add(self, pos=(0.0, 0.0, 0.0), constant=1.0, linear=0.09, quadratic=0.032, ambient=0.0, diffuse=1.5, specular=1.0, color=(1.0, 1.0, 1.0)):
         self.point_lights.append(PointLight(pos, constant, linear, quadratic, ambient, diffuse, specular, color))
 
+    def clear(self):
+        self.point_lights.clear()
+
     def write(self, program, dir=True, point=True):
         # Get the program
         program = self.programs[program]
