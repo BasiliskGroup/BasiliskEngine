@@ -33,6 +33,7 @@ else:
 for node, collider in self.collider.collision_normals.items():
     if node.tags != 'exit': continue
     self.node_handler.scene.level += 1
+    self.node_handler.scene.audio_handler.play_sound_group('step')
     load_scene(self.node_handler.scene, f'room{self.node_handler.scene.level}')
     self.node_handler.scene.add_john()
     

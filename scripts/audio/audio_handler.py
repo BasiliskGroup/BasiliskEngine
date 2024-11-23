@@ -38,10 +38,10 @@ class AudioHandler:
 
         self.make_playlist('music', ['song'])
 
-        self.add_sound_group('door', ('door'))
+        self.add_sound_group('door', ['door'])
         self.add_sound_group('hit', ('hit1', 'hit2', 'hit3', 'hit4', 'hit5'))
         self.add_sound_group('slice', ('slice1', 'slice2', 'slice3'))
-        self.add_sound_group('step', ('step1', 'step2', 'step3', 'step4'))
+        self.add_sound_group('step', ['step1', 'step2', 'step3'])
         self.add_sound_group('john', ('john1', 'john2'))
 
         self.current_track = None
