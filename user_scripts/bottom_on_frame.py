@@ -1,3 +1,4 @@
+import sys
 
 # movement
 velocity = 20 * delta_time
@@ -50,4 +51,5 @@ if self.node_handler.scene.level == 5:
         
     for node in self.collider.collision_normals.keys(): # DOI check
         if node.tags != 'declaration': continue
-        # TODO add end cutscene
+        self.node_handler.scene.cutscene_handler.play_cutscene("outro")
+        sys.exit()
