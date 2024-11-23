@@ -1,6 +1,4 @@
-from math import sqrt
 import random
-
 
 # level 5
 if self.level == 5:
