@@ -592,4 +592,10 @@ elif self.level == 5:
     self.light_handler.add(pos=(30, 110, -205.5), color=(0.525, 0.831, 1), diffuse=3)
     self.light_handler.add(pos=(-30, 110, -205.5), color=(0.525, 0.831, 1), diffuse=3)
     
+    num = 7
+    for i in range(1, num - 1): 
+        self.light_handler.add(pos=(20, -20 + 160 / num * i, -110), color=(0.8, 0.6, 0.1), diffuse=25)
+        self.light_handler.add(pos=(-20, -20 + 160 / num * i, -75), color=(0.8, 0.6, 0.1), diffuse=25)
+    
+    
 self.light_handler.write('batch')

@@ -137,7 +137,10 @@
             "uri": "hungarian_flooring_normal.png"
         },
         {
-            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.jpg"
+            "uri": "Poliigon_GrassPatchyGround_4585_BaseColor.png"
+        },
+        {
+            "uri": "cursor.png"
         },
         {
             "uri": "dancing_tv.png"
@@ -155,10 +158,10 @@
             "uri": "colors.png"
         },
         {
-            "uri": "pine_tree.jpg"
+            "uri": "dark-wood-stain_normal-ogl.png"
         },
         {
-            "uri": "dark-wood-stain_normal-ogl.png"
+            "uri": "pine_tree.png"
         },
         {
             "uri": "metal.png"
@@ -176,7 +179,7 @@
             "uri": "andrew.png"
         },
         {
-            "uri": "oak_tree.jpg"
+            "uri": "oak_tree.png"
         },
         {
             "uri": "presidential_crest.png"
@@ -197,7 +200,7 @@
             "uri": "woodframe1b-albedo.png"
         },
         {
-            "uri": "firewall.JPG"
+            "uri": "firewall.png"
         },
         {
             "uri": "antique_veneer1_albedo.png"
@@ -278,10 +281,13 @@
             "uri": "briefing_room.png"
         },
         {
-            "uri": "dancing_poster.png"
+            "uri": "whitehouse.png"
         },
         {
-            "uri": "whitehouse.jpg"
+            "uri": "clicktostart.png"
+        },
+        {
+            "uri": "dancing_poster.png"
         },
         {
             "uri": "declaration.png"
@@ -290,16 +296,19 @@
             "uri": "hungarian_flooring.png"
         },
         {
+            "uri": "your_ad.png"
+        },
+        {
             "uri": "harris_drink.png"
+        },
+        {
+            "uri": "america.png"
         },
         {
             "uri": "antique_veneer1_Normal-ogl.png"
         },
         {
             "uri": "biden_falling.png"
-        },
-        {
-            "uri": "america.jpg"
         },
         {
             "uri": "oak-wood-bare_albedo.png"
@@ -309,9 +318,6 @@
         },
         {
             "uri": "black-tile1_normal-ogl.png"
-        },
-        {
-            "uri": "your_ad.jpeg"
         },
         {
             "uri": "brick_normal.png"
@@ -329,10 +335,10 @@
             "uri": "Poliigon_GrassPatchyGround_4585_Normal.png"
         },
         {
-            "uri": "sample-image.png"
+            "uri": "casing.png"
         },
         {
-            "uri": "casing.jpg"
+            "uri": "sample-image.png"
         },
         {
             "uri": "asher.png"
@@ -611,6 +617,12 @@
         },
         {
             "sampler": 80
+        },
+        {
+            "sampler": 81
+        },
+        {
+            "sampler": 82
         }
     ],
     "materials": [
@@ -626,7 +638,7 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 18,
+                    "index": 19,
                     "texCoord": 1
                 }
             }
@@ -643,12 +655,12 @@
                 "metallicFactor": 0.4000000059604645,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 29,
+                    "index": 30,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 46,
+                "index": 47,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -665,7 +677,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 54,
+                    "index": 56,
                     "texCoord": 1
                 }
             },
@@ -687,12 +699,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 26,
+                    "index": 27,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 33,
+                "index": 34,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -727,7 +739,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 78,
+                    "index": 80,
                     "texCoord": 1
                 }
             }
@@ -757,7 +769,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 19,
+                    "index": 20,
                     "texCoord": 1
                 }
             }
@@ -800,7 +812,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 53,
+                    "index": 55,
                     "texCoord": 1
                 }
             }
@@ -817,7 +829,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 25,
+                    "index": 26,
                     "texCoord": 1
                 }
             }
@@ -834,7 +846,7 @@
                 "metallicFactor": 0.10000000149011612,
                 "roughnessFactor": 40.0,
                 "baseColorTexture": {
-                    "index": 24,
+                    "index": 25,
                     "texCoord": 1
                 }
             }
@@ -851,7 +863,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 57,
+                    "index": 61,
                     "texCoord": 1
                 }
             }
@@ -868,7 +880,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 79,
+                    "index": 81,
                     "texCoord": 1
                 }
             }
@@ -885,12 +897,12 @@
                 "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 29,
+                    "index": 30,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 46,
+                "index": 47,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -1753,7 +1765,7 @@
                 0.0
             ],
             "mesh": 30,
-            "material": 1
+            "material": 12
         },
         {
             "name": "cylinder",
@@ -1774,7 +1786,7 @@
                 0.0
             ],
             "mesh": 30,
-            "material": 1
+            "material": 12
         },
         {
             "name": "cylinder",

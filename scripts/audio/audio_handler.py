@@ -23,7 +23,6 @@ class AudioHandler:
         self.sound_groups = {}
 
         self.make_playlist('music', ['song'])
-        self.add_sound_group()
 
         self.current_track = None
         self.current_playlist = None
