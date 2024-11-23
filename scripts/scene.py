@@ -11,6 +11,7 @@ from scripts.audio.audio_handler import AudioHandler
 from scripts.particles.particle import ParticleHandler
 from scripts.render.sky import Sky
 from scripts.skeletons.skeleton_handler import SkeletonHandler
+from scripts.video.start_screen import StartScreen
 from scripts.skeletons.joints import * 
 from scripts.file_manager.load_scene import load_scene
 from scripts.file_manager.preload import preload

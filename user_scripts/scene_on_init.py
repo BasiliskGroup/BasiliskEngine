@@ -34,6 +34,16 @@ self.clicked_skeleton = None
 
 # Rendering scripts
 self.overlay = Overlay(self)
+self.start_screen = StartScreen(self)
 self.overlay_time = 0
+
+# Intro sequence
+self.start_screen.start()
+self.ctx.viewport = (0, 0, *self.engine.win_size)
+self.use()
+self.cutscene_handler.play_cutscene("intro")
 self.audio_handler.play_playlist("music")
-# self.cutscene_handler.play_cutscene("intro")
+pg.event.set_grab(True)
+pg.mouse.set_visible(False)
+self.ctx.viewport = (0, 0, *self.engine.win_size)
+self.use()
