@@ -18,6 +18,7 @@ from scripts.skeletons.animation import *
 from scripts.skeletons.joints import *
 from scripts.render.vbo_handler import CubeVBO, RuntimeVBO
 from random import randint, uniform
+from user_scripts.delaunay import delunay_triangulation, Point
 from scripts.generic.math_functions import get_model_matrix
 import moderngl as mgl
 

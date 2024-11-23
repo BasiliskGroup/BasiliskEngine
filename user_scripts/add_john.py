@@ -1,6 +1,4 @@
 import glm
-from scripts.skeletons.animation import *
-from scripts.skeletons.joints import *
 
 # Add all the materials needed for john
 if "baby_blue" not in self.material_handler.materials: self.material_handler.add("baby_blue", color=(.69, .97, 1), specular=.5, specular_exponent=64)

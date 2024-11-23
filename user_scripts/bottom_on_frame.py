@@ -1,4 +1,3 @@
-from scripts.file_manager.load_scene import load_scene
 
 # movement
 velocity = 20 * delta_time

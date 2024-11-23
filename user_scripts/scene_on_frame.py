@@ -1,6 +1,6 @@
-from user_scripts.delaunay import delunay_triangulation, Point
 from math import sqrt
 import random
+
 
 # level 5
 if self.level == 5:
@@ -68,9 +68,9 @@ if not self.clicked and self.project.engine.mouse_buttons[0]: # if left click
     self.camera.rotate = rotate
 
 elif self.clicked and not self.project.engine.mouse_buttons[0]:
-    
     # get the dpos of the mouse 
-    mouse_position = glm.vec2([int(self.project.engine.mouse_position[i]) for i in range(2)])
+    mouse_position = self.project.engine.mouse_position
+    mouse_position = glm.vec2([int(i) for i in mouse_position])
     self.click_position = mouse_position
     self.clicked = False
     
@@ -83,7 +83,12 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
         # converts the points on screen to vectors projected from the camera
         inv_proj, inv_view = glm.inverse(self.camera.m_proj), glm.inverse(self.camera.m_view)
         diff = (glm.vec2(self.click_position) - glm.vec2(self.click_anchor)) / 25
-        points = [self.click_anchor + diff * i for i in range(26)]
+
+        # points = [self_click_anchor + diff * i for i in range(26)]
+        points = []
+        for i in range(26):
+            points.append(self.click_anchor + diff * i)
+
         vecs = []
         for point in points:
             ndc   = glm.vec4(2 * point[0] / self.project.engine.win_size[0] - 1, 1 - 2 * point[1] / self.project.engine.win_size[1], 1, 1)
@@ -136,7 +141,9 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
             for middle in sorted_triangles['middle']:
                 
                 # determine edges and points (should always be 2)
-                aboves = [point_is_above(world_points[middle[i]], self.camera.position, plane_normal) for i in range(3)]
+                # aboves = [point_is_above(world_points[middle[i]], self.camera.position, plane_normal) for i in range(3)]
+                aboves = []
+                for i in range(3): aboves.append(point_is_above(world_points[middle[i]], self.camera.position, plane_normal))
                 cut_indices = []
                 for i in range(3):
                     if aboves[i] == aboves[(i + 1) % 3]: continue # if edge crosses plane
@@ -149,7 +156,8 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                     
                     # determine if intersection has already been added
                     for wp_index, wp in enumerate(world_points[edge_index:]):
-                        if all([abs(wp[i] - intersection[i]) < 1e-3 for i in range(3)]):  # if points are close enough
+                        #if all([abs(wp[i] - intersection[i]) < 1e-3 for i in range(3)]):  # if points are close enough
+                        if abs(wp[0] - intersection[0]) < 1e-3 and abs(wp[1] - intersection[1]) < 1e-3 and abs(wp[2] - intersection[2]) < 1e-3:
                             cut_indices.append(wp_index + edge_index)
                             break
                     else: 
@@ -194,7 +202,10 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                 
                 # add trapezoid triangles
                 for trapezoid in trapezoids[key]: 
-                    t = [world_points[i] for i in trapezoid]
+                    t = []
+                    for i in trapezoid:
+                        t.append(world_points[i])
+                    #t = [world_points[i] for i in trapezoid]
                     
                     center = (t[0] + t[1] + t[2] + t[3]) / 4
                     c1 = glm.cross(t[2] - center, t[3] - center)
@@ -225,7 +236,8 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                     exists = False
                     
                     for triangle in sorted_triangles[key]:
-                        if any([index == triangle[i] for i in range(3)]):
+                        #if any([index == triangle[i] for i in range(3)]):
+                        if index == triangle[0] or index == triangle[1] or index == triangle[2]:
                             exists = True
                             break
                     

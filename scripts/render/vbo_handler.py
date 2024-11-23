@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from pyobjloader import load_model
-#from scripts.model import load_model
+# from pyobjloader import load_model
+from scripts.render.pyobjloader import load_model
 from numba import njit
 from uuid import uuid4
 
