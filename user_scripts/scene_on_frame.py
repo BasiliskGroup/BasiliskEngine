@@ -164,7 +164,7 @@ elif self.clicked and not self.project.engine.mouse_buttons[0]:
                         last_index += 1
                 
 #     def add_particles(self, type=2, life=1.0, pos=(0, 0, 0), clr=(1.0, 1.0, 1.0), scale=1.0, vel=(0, 3, 0), accel=(0, -10, 0)):
-                cut_index_3d = [world_points[w] for w in cut_indices]
+                cut_index_3d = [world_points[cut_indices[0]], world_points[cut_indices[1]]]
                 particle_dir = (cut_index_3d[1] - cut_index_3d[0]) / 10
                 for w in range(11):
                     self.particle_handler.add_particles(type=1, life=0.3, pos=cut_index_3d[0] + particle_dir * w, clr=(0.9 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1), 0.2 + random.uniform(-0.1, 0.1)), vel=[random.uniform(-1.5, 1.5) for _ in range(3)], accel=(0, 0, 0))

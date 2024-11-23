@@ -3,6 +3,7 @@ import pygame as pg
 import moderngl as mgl
 from scripts.project import Project
 import glm
+
 # import cudart
 
 class Engine:
@@ -22,7 +23,7 @@ class Engine:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # Pygame display init
-        pg.display.set_mode(self.win_size, vsync=False, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+        pg.display.set_mode(self.win_size, vsync=False, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE | pg.FULLSCREEN)
         # Lock mouse in place and hide
         pg.event.set_grab(True)
         pg.mouse.set_visible(False)
