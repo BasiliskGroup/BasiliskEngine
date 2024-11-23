@@ -550,6 +550,8 @@ setattr(head, 'saved_rotation', glm.quat())
 # PointLight(pos=(-40, 15, -20), color=(0.525, 0.831, 1), diffuse=5),
 # PointLight(pos=(40, 15, -20), color=(0.525, 0.831, 1), diffuse=5),
 
+self.light_handler.clear()
+
 if self.level == 0:
     
     self.light_handler.add(pos=(-15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
@@ -584,6 +586,9 @@ elif self.level == 4:
     self.light_handler.add(pos=(15, 10, 18.5), color=(1, 0.7, 0.3), diffuse=5)
     self.light_handler.add(pos=(-15, 25, -58.5), color=(1, 0.7, 0.3), diffuse=5)
     self.light_handler.add(pos=(15, 25, -58.5), color=(1, 0.7, 0.3), diffuse=5)
+    
+    self.light_handler.add(pos=(-39, 38, -25), color=(0.7, 0, 1), diffuse=5)
+    self.light_handler.add(pos=(38, 39, 2), color=(0, 1, 0), diffuse=5)
     
 elif self.level == 5:
     

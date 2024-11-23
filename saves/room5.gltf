@@ -203,6 +203,9 @@
             "uri": "firewall.png"
         },
         {
+            "uri": "move.png"
+        },
+        {
             "uri": "antique_veneer1_albedo.png"
         },
         {
@@ -348,6 +351,9 @@
         },
         {
             "uri": "lantern_normal.png"
+        },
+        {
+            "uri": "scroll.png"
         },
         {
             "uri": "gavin_creep.png"
@@ -623,6 +629,12 @@
         },
         {
             "sampler": 82
+        },
+        {
+            "sampler": 83
+        },
+        {
+            "sampler": 84
         }
     ],
     "materials": [
@@ -655,12 +667,12 @@
                 "metallicFactor": 0.4000000059604645,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 30,
+                    "index": 31,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 47,
+                "index": 48,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -677,7 +689,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 56,
+                    "index": 57,
                     "texCoord": 1
                 }
             },
@@ -699,12 +711,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 27,
+                    "index": 28,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 34,
+                "index": 35,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -739,7 +751,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 80,
+                    "index": 82,
                     "texCoord": 1
                 }
             }
@@ -812,7 +824,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 55,
+                    "index": 56,
                     "texCoord": 1
                 }
             }
@@ -829,7 +841,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 26,
+                    "index": 27,
                     "texCoord": 1
                 }
             }
@@ -863,7 +875,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 61,
+                    "index": 62,
                     "texCoord": 1
                 }
             }
@@ -880,7 +892,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 81,
+                    "index": 83,
                     "texCoord": 1
                 }
             }
@@ -897,12 +909,12 @@
                 "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 30,
+                    "index": 31,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 47,
+                "index": 48,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -1217,7 +1229,7 @@
         },
         {
             "name": "cube",
-            "tags": "",
+            "tags": "declaration",
             "translation": [
                 0.0,
                 100.0,

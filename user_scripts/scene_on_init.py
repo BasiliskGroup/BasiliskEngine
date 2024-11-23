@@ -8,7 +8,7 @@ with open(f'user_scripts/walking_animation.py') as file: self.walking_animation 
 with open(f'user_scripts/head_on_frame.py')     as file: self.head_on_frame     = compile(file.read(), 'head_on_frame', 'exec')
 
 # levels
-self.level = 5
+self.level = 0
 
 # john
 self.add_john_compile = add_john
@@ -38,12 +38,12 @@ self.start_screen = StartScreen(self)
 self.overlay_time = 0
 
 # Intro sequence
-# self.start_screen.start()
-# self.ctx.viewport = (0, 0, *self.engine.win_size)
-# self.use()
-# self.cutscene_handler.play_cutscene("intro")
-# self.audio_handler.play_playlist("music")
-# pg.event.set_grab(True)
-# pg.mouse.set_visible(False)
-# self.ctx.viewport = (0, 0, *self.engine.win_size)
-# self.use()
+self.start_screen.start()
+self.ctx.viewport = (0, 0, *self.engine.win_size)
+self.use()
+self.cutscene_handler.play_cutscene("intro")
+self.audio_handler.play_playlist("music")
+pg.event.set_grab(True)
+pg.mouse.set_visible(False)
+self.ctx.viewport = (0, 0, *self.engine.win_size)
+self.use()

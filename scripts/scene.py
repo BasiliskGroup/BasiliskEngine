@@ -54,7 +54,7 @@ class Scene:
 
         # Makes a free cam
 
-        load_scene(self, "room5")
+        load_scene(self, "room0")
         self.on_render = None
         if not editor: 
             self.load_user_scripts()
