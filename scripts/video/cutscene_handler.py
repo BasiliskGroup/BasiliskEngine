@@ -79,3 +79,5 @@ class CutsceneHandler:
 
             self.dt = self.clock.tick() / 1000
             self.draw()
+    
+        
