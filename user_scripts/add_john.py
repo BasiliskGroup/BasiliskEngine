@@ -538,6 +538,7 @@ john_bottom.on_frame = self.walking_animation
 setattr(left_foot, 'saved_rotation', glm.quat())
 setattr(right_foot, 'saved_rotation', glm.quat())
 setattr(bottom, 'saved_rotation', glm.quat())
+setattr(bottom, 'speak_time', 0)
 setattr(middle, 'saved_rotation', glm.quat())
 setattr(top, 'saved_rotation', glm.quat())
 setattr(head, 'saved_rotation', glm.quat())

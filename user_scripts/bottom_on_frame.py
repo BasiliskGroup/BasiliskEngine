@@ -1,4 +1,11 @@
 import sys
+import random
+
+# speaking
+self.speak_time += delta_time
+if self.speak_time > 1 and random.randint(1, 30) == 1:
+    self.node_handler.scene.audio_handler.play_sound_group('john')
+    self.speak_time = 0
 
 # movement
 velocity = 20 * delta_time
