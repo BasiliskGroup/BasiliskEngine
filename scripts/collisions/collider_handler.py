@@ -63,11 +63,14 @@ class ColliderHandler():
                 collider1.has_collided = True
                 collider2.has_collided = True
                 
-                rel_vel = (node1.physics_body.velocity if node1.physics_body else glm.vec3(0)) - (node2.physics_body.velocity if node2.physics_body else glm.vec3(0))
-                n_rel_vel = glm.dot(rel_vel, normal)
-                if abs(n_rel_vel) > 3: 
-                    collider1.has_hard_collided = True
-                    collider2.has_hard_collided = True
+                # rel_vel = (node1.physics_body.velocity if node1.physics_body else glm.vec3(0)) - (node2.physics_body.velocity if node2.physics_body else glm.vec3(0))
+                # n_rel_vel = abs(glm.dot(rel_vel, normal))
+                # if n_rel_vel > 3: 
+                #     collider1.has_hard_collided = n_rel_vel
+                #     collider2.has_hard_collided = n_rel_vel
+                
+                if node1.physics_body: prev_vel1 = glm.vec3(node1.physics_body.velocity)
+                if node2.physics_body: prev_vel2 = glm.vec3(node2.physics_body.velocity)
                 
                 if collider1.static: 
                     node2.position += normal * distance
@@ -85,6 +88,9 @@ class ColliderHandler():
                 #for both physics bodies
                 if not (node1.physics_body or node2.physics_body): continue
                 calculate_collisions(normal, collider1, collider2, node1.physics_body, node2.physics_body, contact_points, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.geometric_center, node2.geometric_center)
+                
+                if node1.physics_body and glm.length(prev_vel1 - node1.physics_body.velocity) > 5: collider1.has_hard_collided = True
+                if node2.physics_body and glm.length(prev_vel2 - node2.physics_body.velocity) > 5: collider2.has_hard_collided = True
                 
     def resolve_broad_collisions(self) -> dict:
         """
