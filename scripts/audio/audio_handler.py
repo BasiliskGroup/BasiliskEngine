@@ -6,7 +6,21 @@ music = {
 }
 
 sounds = {
-    
+    'door' : 'audio/sounds/door1.mp3',
+    'hit1' : 'audio/sounds/hit1.mp3',
+    'hit2' : 'audio/sounds/hit2.mp3',
+    'hit3' : 'audio/sounds/hit3.mp3',
+    'hit4' : 'audio/sounds/hit4.mp3',
+    'hit5' : 'audio/sounds/hit5.mp3',
+    'slice1' : 'audio/sounds/slice1.mp3',
+    'slice2' : 'audio/sounds/slice2.mp3',
+    'slice3' : 'audio/sounds/slice3.mp3',
+    'step1' : 'audio/sounds/step1.mp3',
+    'step2' : 'audio/sounds/step2.mp3',
+    'step3' : 'audio/sounds/step3.mp3',
+    'step4' : 'audio/sounds/step4.mp3',
+    'john1' : 'audio/sounds/john1.mp3',
+    'john2' : 'audio/sounds/john2.mp3'
 }
 
 class AudioHandler:
@@ -23,7 +37,12 @@ class AudioHandler:
         self.sound_groups = {}
 
         self.make_playlist('music', ['song'])
-        self.add_sound_group()
+
+        self.add_sound_group('door', ('door'))
+        self.add_sound_group('hit', ('hit1', 'hit2', 'hit3', 'hit4', 'hit5'))
+        self.add_sound_group('slice', ('slice1', 'slice2', 'slice3'))
+        self.add_sound_group('step', ('step1', 'step2', 'step3', 'step4'))
+        self.add_sound_group('john', ('john1', 'john2'))
 
         self.current_track = None
         self.current_playlist = None
