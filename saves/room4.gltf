@@ -83,6 +83,9 @@
             "uri": "american_flag.obj"
         },
         {
+            "uri": "Chandiler.obj"
+        },
+        {
             "uri": "fridge_001.obj"
         },
         {
@@ -102,6 +105,9 @@
         },
         {
             "uri": "closet_001.obj"
+        },
+        {
+            "uri": "cobweb.obj"
         },
         {
             "uri": "dish_002.obj"
@@ -248,6 +254,9 @@
             "uri": "wispy_grass_normal.png"
         },
         {
+            "uri": "cobweb.png"
+        },
+        {
             "uri": "denim1_albedo.png"
         },
         {
@@ -305,6 +314,9 @@
             "uri": "brick_normal.png"
         },
         {
+            "uri": "rock-slab-wall_normal-ogl.png"
+        },
+        {
             "uri": "dark-wood-stain_albedo.png"
         },
         {
@@ -339,6 +351,9 @@
         },
         {
             "uri": "soft-blanket_albedo.png"
+        },
+        {
+            "uri": "rock-slab-wall_albedo.png"
         },
         {
             "uri": "ethan_washington.png"
@@ -581,6 +596,15 @@
         },
         {
             "sampler": 76
+        },
+        {
+            "sampler": 77
+        },
+        {
+            "sampler": 78
+        },
+        {
+            "sampler": 79
         }
     ],
     "materials": [
@@ -609,7 +633,7 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 58,
+                    "index": 59,
                     "texCoord": 1
                 }
             },
@@ -636,20 +660,20 @@
             "name": "Material_3",
             "pbrMetallicRoughness": {
                 "baseColorFactor": [
-                    0.800000011920929,
-                    0.800000011920929,
-                    0.800000011920929,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ],
-                "metallicFactor": 1.0,
+                "metallicFactor": 0.20000000298023224,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 40,
+                    "index": 76,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 54,
+                "index": 63,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -710,7 +734,7 @@
                 "metallicFactor": 0.5,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 57,
+                    "index": 58,
                     "texCoord": 1
                 }
             }
@@ -727,7 +751,7 @@
                 "metallicFactor": 0.30000001192092896,
                 "roughnessFactor": 16.0,
                 "baseColorTexture": {
-                    "index": 56,
+                    "index": 57,
                     "texCoord": 1
                 }
             }
@@ -744,12 +768,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 64.0,
                 "baseColorTexture": {
-                    "index": 39,
+                    "index": 76,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 69,
+                "index": 71,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -766,12 +790,12 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 22,
+                    "index": 24,
                     "texCoord": 1
                 }
             },
             "normalTexture": {
-                "index": 8,
+                "index": 55,
                 "texCoord": 1,
                 "scale": 1
             }
@@ -805,7 +829,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 45,
+                    "index": 46,
                     "texCoord": 1
                 }
             }
@@ -822,7 +846,7 @@
                 "metallicFactor": 1.0,
                 "roughnessFactor": 32.0,
                 "baseColorTexture": {
-                    "index": 70,
+                    "index": 72,
                     "texCoord": 1
                 }
             }
@@ -967,7 +991,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 7
         },
         {
@@ -1093,7 +1117,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 29,
+            "mesh": 30,
             "material": 7
         },
         {
@@ -1261,7 +1285,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 37,
             "material": 9
         },
         {
@@ -1282,7 +1306,7 @@
                 3.140000104904175,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 37,
             "material": 9
         },
         {
@@ -1303,7 +1327,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 37,
             "material": 9
         },
         {
@@ -1324,7 +1348,7 @@
                 0.0,
                 0.0
             ],
-            "mesh": 35,
+            "mesh": 37,
             "material": 9
         },
         {
