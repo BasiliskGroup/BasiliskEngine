@@ -42,6 +42,7 @@ self.overlay_time = 0
 # self.ctx.viewport = (0, 0, *self.engine.win_size)
 # self.use()
 self.cutscene_handler.play_cutscene("intro")
+self.audio_handler.set_volume(50)
 self.audio_handler.play_playlist("music")
 # pg.event.set_grab(True)
 # pg.mouse.set_visible(False)

@@ -51,6 +51,9 @@ class AudioHandler:
     def update_volume(self):
         pg.mixer.music.set_volume(100/100)
 
+    def set_volume(self, volume):
+        pg.mixer.music.set_volume(volume)
+
     def make_playlist(self, name, songs):
         self.playlists[name] = [music[song] for song in songs]
 
