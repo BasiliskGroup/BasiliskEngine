@@ -43,7 +43,11 @@ if keys[pg.K_r]:
     
 # level 5
 if self.node_handler.scene.level == 5:
-    for node in self.collider.collision_normals.keys():
+    for node in self.collider.collision_normals.keys(): # lava check
         if node.tags != 'lava': continue
         load_scene(self.node_handler.scene, f'room{self.node_handler.scene.level}')
         self.node_handler.scene.add_john()
+        
+    for node in self.collider.collision_normals.keys(): # DOI check
+        if node.tags != 'declaration': continue
+        # TODO add end cutscene
