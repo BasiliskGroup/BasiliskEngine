@@ -2,16 +2,15 @@ import moderngl as mgl
 
 
 class Scene():
-    """
-    Basilisk scene object. Contains all nodes for the scene
-    """
-
     engine: any
     """Parent engine of the scene"""
     ctx: mgl.Context
     """Reference to the engine context"""
 
     def __init__(self) -> None:
+        """
+    Basilisk scene object. Contains all nodes for the scene
+    """
         ...
 
     def update(self) -> None:

@@ -1,11 +1,9 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as pg
 import moderngl as mgl
 
 class Engine():
-    """
-    Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with basilisk
-    """
-
     win_size: tuple
     """Size of the engine window in pixels"""
     ctx: mgl.Context
@@ -33,7 +31,17 @@ class Engine():
     previous_mouse_buttons: list
     """bool list containing the state of all mouse buttons at the previous frame"""
 
-    def __init__(self, win_size=(800, 800), vsync=False, title="Basilisk Engine") -> None:
+    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False) -> None:
+        """
+        Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with Basilisk
+        Args:
+            win_size: tuple
+                The initial window size of the engine
+            title: str
+                The title of the engine window
+            vsync: bool
+                Flag for running engine with vsync enabled
+        """
         # Save the window size
         self.win_size = win_size
 
