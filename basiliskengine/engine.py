@@ -1,0 +1,134 @@
+import pygame as pg
+import moderngl as mgl
+
+class Engine():
+    """
+    Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with basilisk
+    """
+
+    win_size: tuple
+    """Size of the engine window in pixels"""
+    ctx: mgl.Context
+    """ModernGL context used by the engine"""
+    scene: any
+    """Scene currently being updated and rendered by the engine"""
+    clock: pg.Clock
+    """Pygame clock used to keep track of time between frames"""
+    delta_time: float
+    """Time in seconds that passed between the last frame"""
+    time: float
+    """Total time the engine has been running"""
+    running: bool
+    """True if the engine is still running"""
+    events: list
+    """List of all pygame"""
+    keys: list
+    """bool list containing the state of all keys this frame"""
+    previous_keys: list
+    """bool list containing the state of all keys at the previous frame"""
+    mouse_position: tuple
+    """int tuple containing the position of the mouse in the window"""
+    mouse_buttons: list
+    """bool list containing the state of all mouse buttons this frame"""
+    previous_mouse_buttons: list
+    """bool list containing the state of all mouse buttons at the previous frame"""
+
+    def __init__(self, win_size=(800, 800), vsync=False, title="Basilisk Engine") -> None:
+        # Save the window size
+        self.win_size = win_size
+
+        # Initialize pygame and OpenGL attributes
+        pg.init()
+        pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
+        pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
+        pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
+        # Pygame display init
+        pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+        pg.display.set_caption(title)
+        pg.display.set_icon(pg.image.load("basilisk.png"))
+
+        # MGL context setup
+        self.ctx = mgl.create_context()
+        self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
+
+        # Time variables
+        self.clock = pg.time.Clock()
+        self.delta_time = 0
+        self.time = 0
+
+        # Initialize input lists
+        self.previous_keys = []
+        self.previous_mouse_buttons = []
+
+        # Scene being used by the engine
+        self.scene = None
+
+        # Set the scene to running
+        self.running = True
+
+    def update(self) -> None:
+        """
+        Updates all input, physics, and time variables. Renders the current scene.
+        """
+
+        # Tick the clock and get delta time
+        self.delta_time = self.clock.tick()
+        self.time += self.delta_time
+
+        # Get inputs and events
+        self.events = pg.event.get()
+        self.keys = pg.key.get_pressed()
+        self.mouse_buttons = pg.mouse.get_pressed()
+        self.mouse_position = pg.mouse.get_pos()
+        
+        # Loop through all pygame events
+        for event in self.events:
+            if event.type == pg.QUIT: # Quit the engine
+                self.quit()
+                return
+            if event.type == pg.VIDEORESIZE:
+                # Updates the viewport
+                self.win_size = (event.w, event.h)
+                self.ctx.viewport = (0, 0, event.w, event.h)
+
+        # Update the scene if possible
+        if self.scene: self.scene.update()
+
+        # Render after the scene and engine has been updated
+        self.render()
+
+        # Update the previous input lists for the next frame
+        self.previous_keys = self.keys
+        self.previous_mouse_buttons = self.mouse_buttons
+
+    def render(self) -> None:
+        """
+        Renders the scene currently being used by the engine
+        """
+        
+        # Set the ctx for rendering
+        self.ctx.screen.use()
+        self.ctx.clear()
+
+        # Render the scene
+        if self.scene:self.scene.render()
+
+        # Flip pygame display buffer
+        pg.display.flip()
+
+    def quit(self) -> None:
+        """
+        Stops the engine and releases all memory
+        """
+
+        pg.quit()
+        self.ctx.release()
+        self.running = False
+
+    @property
+    def scene(self): return self._scene
+
+    @scene.setter
+    def scene(self, value):
+        self._scene = value
+        if self._scene: self._scene.set_engine(self)
