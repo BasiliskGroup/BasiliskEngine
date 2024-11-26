@@ -54,3 +54,10 @@ class Node():
         """
 
         ...
+
+    def __repr__(self) -> str:
+        """
+        Returns a string representation of the node
+        """
+
+        return f'<Bailisk Node | {self.name}, {self.mesh}, ({self.position})>'
