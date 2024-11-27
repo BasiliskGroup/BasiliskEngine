@@ -6,6 +6,8 @@ from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
 
 class Node():
+    node_handler: ...
+    """The internal node handler from the scene"""
     position: glm.vec3
     """The position of the node in meters with swizzle xyz"""
     scale: glm.vec3
@@ -46,6 +48,7 @@ class Node():
     """List of nodes that this node is a parent of"""
 
     def __init__(self, 
+            node_handler,
             position: glm.vec3=None, 
             scale: glm.vec3=None, 
             rotation: glm.quat=None, 
@@ -70,6 +73,7 @@ class Node():
         Contains mesh data, translation, material, physics, collider, and descriptive information. 
         Base building block for populating a Basilisk scene.
         """
+        self.node_handler = node_handler
         
         self.position = position if position else glm.vec3(0, 0, 0)
         self.scale    = scale    if scale    else glm.vec3(1, 1, 1)
@@ -95,6 +99,71 @@ class Node():
         self.name = name
         self.tags = tags if tags else []
         self.children = []
+        
+    def update(self, dt: float):
+        """
+        Updates the node's movement variables based on the delta time
+        """
+        self.position += self.velocity
+        self.rotation += ... # TODO add rotational velocity increase
+        
+        if self.physics_body:
+            self.velocity = ...
+            self.rotational_velocity = ...
+        
+    def sync_data(self, dt: float): # TODO only needed for child nodes now
+        ...
+        
+    def get_nodes(self, require_mesh: bool=False, require_collider: bool=False, require_physics_body: bool=False, filter_material: Material=None, filter_tags: list[str]=None) -> list: 
+        """
+        Returns the nodes matching the required filters from this branch of the nodes
+        """
+        # adds self to nodes list if it matches the criteria
+        nodes = []
+        if  (not require_mesh or self.mesh) \
+        and (not require_collider or self.collider) \
+        and (not require_physics_body or self.physics_body) \
+        and (not filter_material or self.material == filter_material) \
+        and (not filter_tags or all([tag in self.tags for tag in filter_tags])): 
+            nodes.append(self)
+        
+        # adds children to nodes list if they match the criteria
+        for node in self.children: nodes.extend(node.get_nodes(require_mesh, require_collider, require_physics_body, filter_material, filter_tags))
+        return node 
+        
+    def adopt_child(self, node): # TODO determine the best way for the user to do this through the scene
+        ...
+        
+    def add_child(self): # TODO add node constructor
+        ... 
+        
+    def get_inverse_inertia(self): # TODO add checks for collider and physics body
+        ...
+        
+    def apply_force(self, force: glm.vec3, dt: float):
+        """
+        Applies a force at the center of the node
+        """
+        self.apply_offset_force(force, glm.vec3(0.0), dt)
+        
+    def apply_offset_force(self, force: glm.vec3, offset: glm.vec3, dt: float):
+        """
+        Applies a force at the given offset
+        """
+        # translation
+        assert self.physics_body, 'Node: Cannot apply a force to a node that doesn\'t have a physics body'
+        self.velocity = force / self.mass * dt
+        
+        # rotation
+        torque = glm.cross(offset, force)
+        self.apply_torque(torque, dt)
+        
+    def apply_torque(self, torque: glm.vec3, dt: float):
+        """
+        Applies a torque on the node
+        """
+        assert self.physics_body, 'Node: Cannot apply a torque to a node that doesn\'t have a physics body'
+        ...
 
     def __repr__(self) -> str:
         """
@@ -147,6 +216,8 @@ class Node():
     def y(self): return self._position.y
     @property
     def z(self): return self._position.z
+    @property
+    def static(self): return not (self.physics_body or self.velocity or self.rotational_velocity)
     
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
