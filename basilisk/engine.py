@@ -2,6 +2,7 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as pg
 import moderngl as mgl
+from basilisk.config import Config
 
 class Engine():
     win_size: tuple
@@ -12,6 +13,8 @@ class Engine():
     """Scene currently being updated and rendered by the engine"""
     clock: pg.Clock
     """Pygame clock used to keep track of time between frames"""
+    config: Config
+    """Object containing all global attributes"""
     delta_time: float
     """Time in seconds that passed between the last frame"""
     time: float
@@ -58,6 +61,9 @@ class Engine():
         # MGL context setup
         self.ctx = mgl.create_context()
         self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
+        
+        # Global attributes referenced by the handlers
+        self.set_configurations()
 
         # Time variables
         self.clock = pg.time.Clock()
@@ -123,6 +129,17 @@ class Engine():
 
         # Flip pygame display buffer
         pg.display.flip()
+
+    def set_configurations(self):
+        """
+        Sets global configurations. These attributs are not used by the engine, just the handlers
+        """
+
+        # Create a config object
+        self.config = Config()
+
+        # Set the attributes on the config object
+        setattr(self.config, "texture_sizes", (128, 256, 512, 1024, 2048))
 
     def quit(self) -> None:
         """

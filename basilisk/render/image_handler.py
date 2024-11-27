@@ -43,7 +43,11 @@ class ImageHandler():
         Generates texutre arrays for all the images. Updates the index of the image instance
         """
 
-        ...
+        # Release any existsing texture arrays
+        for texture_array in self.texture_arrays.values():
+            texture_array.release()
+
+        
 
     def write(self, shader_program: mgl.Program) -> None:
         """
