@@ -1,7 +1,8 @@
+import os
+import sys
+import numpy as np
 import moderngl as mgl
 import glm
-import numpy as np
-import os
 from PIL import Image as PIL_Image
 
 
@@ -50,5 +51,4 @@ class Image():
         """
         Returns a string representation of the object
         """
-        
-        return f'<Basilisk Image | {self.name}, ({self.size}x{self.size})>'
+        return f'<Basilisk Image | {self.name}, ({self.size}x{self.size}), {sys.getsizeof(self.data) / 1024 / 1024:.2} mb>'

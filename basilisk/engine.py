@@ -139,7 +139,8 @@ class Engine():
         self.config = Config()
 
         # Set the attributes on the config object
-        setattr(self.config, "texture_sizes", (128, 256, 512, 1024, 2048))
+        setattr(self.config, "chunk_size", 40)
+        setattr(self.config, "render_distance", 5)
 
     def quit(self) -> None:
         """

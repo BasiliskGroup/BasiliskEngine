@@ -7,11 +7,10 @@ engine = bsk.Engine()
 scene = bsk.Scene()
 engine.scene = scene
 
-node = bsk.Node()
+mesh = bsk.Mesh('cube.obj')
 img = bsk.Image("basilisk.png")
-mtl = bsk.Material('my_mtl', color=(2, 5, 3))
-
-shader_handler = bsk.ShaderHandler(scene)
+mtl = bsk.Material('my_mtl', color=(2, 5, 3), texture=img, normal=img)
+node = bsk.Node(mesh=mesh, material=mtl)
 
 while engine.running:
     engine.update()

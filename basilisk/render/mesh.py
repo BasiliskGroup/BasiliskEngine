@@ -60,3 +60,7 @@ class Mesh():
 
         # Model will no longer be used
         del model
+
+    def __repr__(self) -> str:
+        size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024
+        return f'<Basilisk Mesh | {len(self.data)} vertices, {size:.2} mb>'

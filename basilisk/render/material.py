@@ -5,7 +5,7 @@ from ..render.image import Image
 class Material():
     name: str = None
     """Name of the material"""  
-    index: glm.int32
+    index: 0
     """Index of the material in the material uniform"""  
     color: glm.vec3 = glm.vec3(1, 1, 1)
     """Color multiplier of the material"""   
@@ -37,7 +37,7 @@ class Material():
                 PBR attributes of the material
         """
         
-        self.index = glm.int32(0)
+        self.index = 0
         
         self.name         = name
         self.color        = color

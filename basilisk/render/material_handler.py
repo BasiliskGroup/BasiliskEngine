@@ -57,6 +57,7 @@ class MaterialHandler():
 
         # Get data from the materials
         for i, mtl in enumerate(self.materials):
+            mtl.index = i
             material_data[i] = mtl.get_data()
 
         # Create texture from data
