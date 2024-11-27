@@ -9,8 +9,8 @@ class Image():
     """Name of the image"""   
     index: glm.ivec2
     """Location of the image in the texture arrays"""
-    texture: mgl.Texture
-    """Moderngl texture of the image"""
+    data: np.ndarray
+    """Array of the texture data"""
     size: int
     """The width and height in pixels of the image"""
 
@@ -27,7 +27,6 @@ class Image():
         # Get name from path
         self.name = path.split('/')[-1].split('\\')[-1].split('.')[0]
 
-
         # Set the texture
         # Load image
         img = PIL_Image.open(path).convert('RGBA')
@@ -35,8 +34,8 @@ class Image():
         size_buckets = engine.config.texture_sizes
         self.size = size_buckets[np.argmin(np.array([abs(size - img.size[0]) for size in size_buckets]))]
         img = img.resize((self.size, self.size)) 
-        # Create a texture
-        self.texture = engine.ctx.texture(img.size, components=4, data=img.tobytes())
+        # Get the image data
+        self.data = img.tobytes()
 
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
@@ -46,11 +45,4 @@ class Image():
         Returns a string representation of the object
         """
         
-        return f'<Basilisk Image | {self.name}, {self.texture}, ({self.size}x{self.size})>'
-
-    def __del__(self) -> None:
-        """
-        Releases texture data
-        """
-
-        self.texture.release()
+        return f'<Basilisk Image | {self.name}, ({self.size}x{self.size})>'

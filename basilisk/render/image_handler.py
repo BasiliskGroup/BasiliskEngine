@@ -1,5 +1,6 @@
 import moderngl as mgl
 import glm
+import numpy as np
 
 
 class ImageHandler():
@@ -47,7 +48,25 @@ class ImageHandler():
         for texture_array in self.texture_arrays.values():
             texture_array.release()
 
-        
+        self.texture_arrays = {size : [] for size in self.engine.config.texture_sizes}
+
+        for image in self.images:
+            # Add the image data to the array
+            self.texture_arrays[image.size].append(image.data)
+            # Update the image index
+            image.index = glm.ivec2(self.engine.config.texture_sizes.index(image.size), len(self.texture_arrays[image.size]) - 1)
+
+        for size in self.texture_arrays:
+            # Get the rray data and attributes
+            array_data = np.array(self.texture_arrays[size], dtype='f4')
+            dim = (size, size, len(self.texture_arrays[size]))
+
+            # Make the array
+            self.texture_arrays[size] = self.ctx.texture_array(size=dim, components=4, data=array_data)
+            # Texture OpenGl settings
+            self.texture_arrays[size].build_mipmaps()
+            self.texture_arrays[size].filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+            self.texture_arrays[size].anisotropy = 32.0
 
     def write(self, shader_program: mgl.Program) -> None:
         """
@@ -57,7 +76,10 @@ class ImageHandler():
                 Destination of the texture array write
         """
 
-        ...
+        for i, size in enumerate(self.engine.config.texture_sizes):
+            if not size in self.texture_arrays: continue
+            shader_program[f'textureArrays[{i}].array'] = i + 3
+            self.texture_arrays[size].use(location=i+3)
 
     def get(self, identifier: str | int) -> any:
         """
@@ -77,3 +99,10 @@ class ImageHandler():
         
         # No matching image found
         return None
+    
+    def __del__(self):
+        """
+        Deallocates all texture arrays
+        """
+        
+        [texture_array.release() for texture_array in self.texture_arrays]
