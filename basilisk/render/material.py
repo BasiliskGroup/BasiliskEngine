@@ -14,11 +14,11 @@ class Material():
     normal: Image = None
     """Key/name of the normal image in the image handler. If the image given does not exist, it must be loaded"""
     # PBR attributes  
-    roughness: glm.float32
+    roughness: float
     """The PBR roughness of the material"""
-    metallicness: glm.float32
+    metallicness: float
     """The PBR metallicness of the material"""
-    specular: glm.float32
+    specular: float
     """The PBR specular value of the material"""
 
     def __init__(self, name: str, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=0.5, metallicness: float=0.0, specular: float=0.5) -> None:
@@ -46,6 +46,24 @@ class Material():
         self.roughness    = roughness
         self.metallicness = metallicness
         self.specular     = specular
+
+    def get_data(self) -> list:
+        """
+        Returns a list containing all the gpu data in the material.
+        Used by the material handler
+        """
+
+        # Add color and PBR data
+        data = [self.color.x, self.color.y, self.color.z, self.roughness, self.metallicness, self.specular]
+
+        # Add texture data
+        if self.texture: data.extend([1, self.texture.index.x, self.texture.index.y])
+        else: data.extend([0, 0, 0])
+        # Add normal data
+        if self.normal: data.extend([1, self.normal.index.x, self.normal.index.y])
+        else: data.extend([0, 0, 0])
+
+        return data
 
     def __repr__(self) -> str:
         return f'<Basilisk Material | {self.name}, ({self.color.x}, {self.color.y}, {self.color.z}), {self.texture}>'
@@ -88,28 +106,28 @@ class Material():
             raise TypeError(f"Material: Invalid normal value type {type(value)}")
 
     @roughness.setter
-    def roughness(self, value: float | glm.float32):
-        if isinstance(value, float):
-            self._roughness = glm.float32(value)
+    def roughness(self, value: float | int | glm.float32):
+        if isinstance(value, float) or isinstance(value, int):
+            self._roughness = float(value)
         elif isinstance(value, glm.float32):
-            self._roughness = glm.float32(value.value)
+            self._roughness = float(value.value)
         else:
             raise TypeError(f"Material: Invalid roughness value type {type(value)}")
 
     @metallicness.setter
-    def metallicness(self, value: float | glm.float32):
-        if isinstance(value, float):
-            self._metallicness = glm.float32(value)
+    def metallicness(self, value: float | int | glm.float32):
+        if isinstance(value, float) or isinstance(value, int):
+            self._metallicness = float(value)
         elif isinstance(value, glm.float32):
-            self._metallicness = glm.float32(value.value)
+            self._metallicness = float(value.value)
         else:
             raise TypeError(f"Material: Invalid metallicness value type {type(value)}")
         
     @specular.setter
-    def specular(self, value: float | glm.float32):
-        if isinstance(value, float):
-            self._specular = glm.float32(value)
+    def specular(self, value: float | int | glm.float32):
+        if isinstance(value, float) or isinstance(value, int):
+            self._specular = float(value)
         elif isinstance(value, glm.float32):
-            self._specular = glm.float32(value.value)
+            self._specular = float(value.value)
         else:
             raise TypeError(f"Material: Invalid specular value type {type(value)}")

@@ -1,6 +1,7 @@
 import moderngl as mgl
 import glm
 import numpy as np
+import os
 from PIL import Image as PIL_Image
 
 
@@ -25,6 +26,10 @@ class Image():
                 The string path to the image
         """
         
+        # Verify the path type
+        if not isinstance(path, str) and not isinstance(path, os.PathLike):
+            raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.PathLike')
+
         # Get name from path
         self.name = path.split('/')[-1].split('\\')[-1].split('.')[0]
 

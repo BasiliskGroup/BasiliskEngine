@@ -1,5 +1,6 @@
 import glm
 from .render.mesh import Mesh
+from .render.material import Material
 
 class Node():
     position: glm.vec3
@@ -12,7 +13,7 @@ class Node():
     """The forward facing vector of the node"""
     mesh: Mesh
     """The mesh of the node stored as a basilisk mesh object"""
-    material: None
+    material: Material
     """The mesh of the node stored as a basilisk material object"""
     velocity: glm.vec3
     """The translational velocity of the node"""

@@ -1,5 +1,6 @@
 import numpy as np
 import glm
+import os
 from pyobjloader import load_model
 
 class Mesh():
@@ -28,6 +29,10 @@ class Mesh():
                 path to the .obj file of the model
         """
         
+        # Verify the path type
+        if not isinstance(path, str) and not isinstance(path, os.PathLike):
+            raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.path')
+
         # Load the model from file
         model = load_model(path)
 
