@@ -1,6 +1,9 @@
 import glm
 import numpy as np
 from .render.mesh import Mesh
+from .render.material import Material
+from .physics.physics_body import PhysicsBody
+from .collisions.collider import Collider
 
 class Node():
     position: glm.vec3
@@ -13,7 +16,7 @@ class Node():
     """The forward facing vector of the node"""
     mesh: Mesh
     """The mesh of the node stored as a basilisk mesh object"""
-    material: None
+    material: Material
     """The mesh of the node stored as a basilisk material object"""
     velocity: glm.vec3
     """The translational velocity of the node"""
@@ -77,15 +80,17 @@ class Node():
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.quat(1, 0, 0, 0)
         
-        if physics: ...
+        if physics: self.physics_body: PhysicsBody = PhysicsBody(mass = mass)
         elif mass: raise ValueError('Node cannot have mass if it does not have physics')
+        else: self.physics_body = None
         
-        if collisions: ...
+        if collisions: self.collider: Collider = ...
         elif collider:         raise ValueError('Node cannot have collider mesh if it does not allow collisions')
         elif static_friction:  raise ValueError('Node cannot have static friction if it does not allow collisions')
         elif kinetic_friction: raise ValueError('Node cannot have kinetic friction if it does not allow collisions')
         elif elasticity:       raise ValueError('Node cannot have elasticity if it does not allow collisions')
         elif collision_group:  raise ValueError('Node cannot have collider group if it does not allow collisions')
+        else: self.collider = None
         
         self.name = name
         self.tags = tags if tags else []
@@ -112,8 +117,30 @@ class Node():
     def velocity(self): return self._velocity
     @property
     def rotational_velocity(self): return self._rotational_velocity
-    
-    
+    @property
+    def mass(self): 
+        if self.physics_body: return self.physics_body.mass
+        raise RuntimeError('Node: Cannot access the mass of a node that has no physics body')
+    @property
+    def static_friction(self):
+        if self.collider: return self.collider.static_friction
+        raise RuntimeError('Node: Cannot access the static friction of a node that has no collider')
+    @property
+    def kinetic_friction(self):
+        if self.collider: return self.collider.kinetic_friction
+        raise RuntimeError('Node: Cannot access the kinetic friction of a node that has no collider')
+    @property
+    def elasticity(self):
+        if self.collider: return self.collider.elasticity
+        raise RuntimeError('Node: Cannot access the elasticity of a node that has no collider')
+    @property
+    def collision_group(self):
+        if self.collider: return self.collider.collision_group
+        raise RuntimeError('Node: Cannot access the collision_group of a node that has no collider')
+    @property
+    def name(self): return self._name
+    @property
+    def tags(self): return self._tags
     @property
     def x(self): return self._position.x # TODO test these functions
     @property
@@ -175,12 +202,48 @@ class Node():
             else: raise ValueError(f'Node: Invalid number of values for rotational velocity. Expected 3 or 4, got {len(value)}')
         else: raise TypeError(f'Node: Invalid rotational velocity value type {type(value)}')
         
+    @mass.setter
+    def mass(self, value: int | float):
+        if not self.physics_body: raise RuntimeError('Node: Cannot set the mass of a node that has no physics body')
+        if isinstance(value, int) or isinstance(value, float): self.physics_body.mass = value
+        else: raise TypeError(f'Node: Invalid mass value type {type(value)}')
         
+    @static_friction.setter
+    def static_friction(self, value: int | float):
+        if not self.collider: raise RuntimeError('Node: Cannot set the static friction of a node that has no physics body')
+        if isinstance(value, int) or isinstance(value, float): self.collider.static_friction = value
+        else: raise TypeError(f'Node: Invalid static friction value type {type(value)}')
+    
+    @kinetic_friction.setter
+    def kinetic_friction(self, value: int | float):
+        if not self.collider: raise RuntimeError('Node: Cannot set the kinetic friction of a node that has no physics body')
+        if isinstance(value, int) or isinstance(value, float): self.collider.kinetic_friction = value
+        else: raise TypeError(f'Node: Invalid kinetic friction value type {type(value)}')
         
+    @elasticity.setter
+    def elasticity(self, value: int | float):
+        if not self.collider: raise RuntimeError('Node: Cannot set the elasticity of a node that has no physics body')
+        if isinstance(value, int) or isinstance(value, float): self.collider.elasticity = value
+        else: raise TypeError(f'Node: Invalid elasticity value type {type(value)}')
         
+    @collision_group.setter
+    def collision_group(self, value: str):
+        if not self.collider: raise RuntimeError('Node: Cannot set the collision gruop of a node that has no physics body')
+        if isinstance(value, str): self.collider.collision_group = value
+        else: raise TypeError(f'Node: Invalid collision group value type {type(value)}')
         
+    @name.setter
+    def name(self, value: str):
+        if isinstance(value, str): self._name = value
+        else: raise TypeError(f'Node: Invalid name value type {type(value)}')
         
-        
+    @tags.setter
+    def tags(self, value: list[str]):
+        if isinstance(value, list) or isinstance(value, tuple):
+            for tag in value:
+                if not isinstance(tag, str): raise TypeError(f'Node: Invalid tag value in tags list of type {type(tag)}')
+            self._tags = value
+        else: raise TypeError(f'Node: Invalid tags value type {type(value)}')
         
     @x.setter
     def x(self, value: int | float):
