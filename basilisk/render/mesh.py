@@ -21,7 +21,7 @@ class Mesh():
     center_of_mass: glm.vec3
     """The center of mass of the mesh calculated from the inertia tensor algorithm"""
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str | os.PathLike) -> None:
         """
         Mesh object containing all the data needed to render an object and perform physics/collisions on it
         Args:
