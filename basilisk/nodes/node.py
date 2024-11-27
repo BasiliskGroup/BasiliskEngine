@@ -1,9 +1,9 @@
 import glm
 import numpy as np
-from .render.mesh import Mesh
-from .render.material import Material
-from .physics.physics_body import PhysicsBody
-from .collisions.collider import Collider
+from ..render.mesh import Mesh
+from ..render.material import Material
+from ..physics.physics_body import PhysicsBody
+from ..collisions.collider import Collider
 
 class Node():
     position: glm.vec3
