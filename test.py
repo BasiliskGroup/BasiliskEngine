@@ -1,5 +1,7 @@
 import basilisk as bsk
 import glm
+import numpy as np
+import os
 
 engine = bsk.Engine()
 scene = bsk.Scene()
