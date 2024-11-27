@@ -22,6 +22,21 @@ class Material():
     """The PBR specular value of the material"""
 
     def __init__(self, name: str, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=0.5, metallicness: float=0.0, specular: float=0.5) -> None:
+        """
+        Basilisk Material object. Contains the data and images references used by the material.
+        Args:
+            name: str
+                Identifier to be used by user
+            color: tuple
+                Base color of the material. Applies to textures as well
+            texture: Basilisk Image
+                The albedo map (color texture) of the material
+            normal: Basilisk Image
+                The normal map of the material.
+            roughness & metallicness & specular: float
+                PBR attributes of the material
+        """
+        
         self.index = glm.int32(0)
         
         self.name         = name
@@ -50,24 +65,27 @@ class Material():
 
     @color.setter
     def color(self, value: tuple | list | glm.vec3 | np.ndarray):
-        if isinstance(value, tuple) or isinstance(value, list) or isinstance(value, glm.vec3) or isinstance(value, np.ndarray):
+        if isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) != 3: raise ValueError(f"Material: Invalid number of values for color. Expected 3 values, got {len(value)} values")
+            self._color = glm.vec3(value)
+        elif isinstance(value, glm.vec3):
             self._color = glm.vec3(value)
         else:
-            raise ValueError(f"Material: Invalid color value type {type(value)}")
+            raise TypeError(f"Material: Invalid color value type {type(value)}")
         
     @texture.setter
     def texture(self, value: Image | None):
         if isinstance(value, Image) or isinstance(value, type(None)):
             self._texture = value
         else:
-            raise ValueError(f"Material: Invalid texture value type {type(value)}")
+            raise TypeError(f"Material: Invalid texture value type {type(value)}")
         
     @normal.setter
     def normal(self, value: Image | None):
         if isinstance(value, Image) or isinstance(value, type(None)):
             self._normal = value
         else:
-            raise ValueError(f"Material: Invalid normal value type {type(value)}")
+            raise TypeError(f"Material: Invalid normal value type {type(value)}")
 
     @roughness.setter
     def roughness(self, value: float | glm.float32):
@@ -76,7 +94,7 @@ class Material():
         elif isinstance(value, glm.float32):
             self._roughness = glm.float32(value.value)
         else:
-            raise ValueError(f"Material: Invalid roughness value type {type(value)}")
+            raise TypeError(f"Material: Invalid roughness value type {type(value)}")
 
     @metallicness.setter
     def metallicness(self, value: float | glm.float32):
@@ -85,7 +103,7 @@ class Material():
         elif isinstance(value, glm.float32):
             self._metallicness = glm.float32(value.value)
         else:
-            raise ValueError(f"Material: Invalid metallicness value type {type(value)}")
+            raise TypeError(f"Material: Invalid metallicness value type {type(value)}")
         
     @specular.setter
     def specular(self, value: float | glm.float32):
@@ -94,4 +112,4 @@ class Material():
         elif isinstance(value, glm.float32):
             self._specular = glm.float32(value.value)
         else:
-            raise ValueError(f"Material: Invalid specular value type {type(value)}")
+            raise TypeError(f"Material: Invalid specular value type {type(value)}")
