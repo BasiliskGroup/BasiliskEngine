@@ -1,4 +1,5 @@
 import glm
+import numpy as np
 from .render.mesh import Mesh
 
 class Node():
@@ -97,4 +98,101 @@ class Node():
 
         return f'<Bailisk Node | {self.name}, {self.mesh}, ({self.position})>'
     
+    @property
+    def position(self): return self._position
+    @property
+    def scale(self):    return self._scale
+    @property
+    def rotation(self): return self._rotation
+    @property
+    def forward(self):  return self._forward
+    # TODO add property for Mesh
+    # TODO add property for Material
+    @property
+    def velocity(self): return self._velocity
+    @property
+    def rotational_velocity(self): return self._rotational_velocity
     
+    
+    @property
+    def x(self): return self._position.x # TODO test these functions
+    @property
+    def y(self): return self._position.y
+    @property
+    def z(self): return self._position.z
+    
+    @position.setter
+    def position(self, value: tuple | list | glm.vec3 | np.ndarray):
+        if isinstance(value, glm.vec3): self._position = glm.vec3(value)
+        elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) != 3: raise ValueError(f'Node: Invalid number of values for position. Expected 3, got {len(value)}')
+            self._position = glm.vec3(value)
+        else: raise TypeError(f'Node: Invalid position value type {type(value)}')
+    
+    @scale.setter
+    def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
+        if isinstance(value, glm.vec3): self._scale = glm.vec3(value)
+        elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) != 3: raise ValueError(f'Node: Invalid number of values for scale. Expected 3, got {len(value)}')
+            self._scale = glm.vec3(value)
+        else: raise TypeError(f'Node: Invalid scale value type {type(value)}')
+        
+    @rotation.setter
+    def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
+        if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self._rotation = glm.quat(value)
+        elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) == 3: self._rotation = glm.quat(glm.vec3(*value))
+            elif len(value) == 4: self._rotation = glm.quat(*value)
+            else: raise ValueError(f'Node: Invalid number of values for rotation. Expected 3 or 4, got {len(value)}')
+        else: raise TypeError(f'Node: Invalid rotation value type {type(value)}')
+        
+    @forward.setter
+    def forward(self, value: tuple | list | glm.vec3 | np.ndarray):
+        if isinstance(value, glm.vec3): self._forward = glm.vec3(value)
+        elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) != 3: raise ValueError(f'Node: Invalid number of values for forward. Expected 3, got {len(value)}')
+            self._forward = glm.vec3(value)
+        else: raise TypeError(f'Node: Invalid forward value type {type(value)}')
+        
+    # TODO add setter for Mesh
+    
+    # TODO add setter for Material
+    
+    @velocity.setter
+    def velocity(self, value: tuple | list | glm.vec3 | np.ndarray):
+        if isinstance(value, glm.vec3): self._velocity = glm.vec3(value)
+        elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) != 3: raise ValueError(f'Node: Invalid number of values for velocity. Expected 3, got {len(value)}')
+            self._velocity = glm.vec3(value)
+        else: raise TypeError(f'Node: Invalid velocity value type {type(value)}')
+        
+    @rotational_velocity.setter
+    def rotational_velocity(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
+        if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self._rotational_velocity = glm.quat(value)
+        elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) == 3: self._rotational_velocity = glm.quat(glm.vec3(*value))
+            elif len(value) == 4: self._rotational_velocity = glm.quat(*value)
+            else: raise ValueError(f'Node: Invalid number of values for rotational velocity. Expected 3 or 4, got {len(value)}')
+        else: raise TypeError(f'Node: Invalid rotational velocity value type {type(value)}')
+        
+        
+        
+        
+        
+        
+        
+        
+    @x.setter
+    def x(self, value: int | float):
+        if isinstance(value, int) or isinstance(value, float): self._position.x = value
+        else: raise TypeError(f'Node: Invalid positional x value type {type(value)}')
+        
+    @y.setter
+    def y(self, value: int | float):
+        if isinstance(value, int) or isinstance(value, float): self._position.y = value
+        else: raise TypeError(f'Node: Invalid positional y value type {type(value)}')
+        
+    @z.setter
+    def z(self, value: int | float):
+        if isinstance(value, int) or isinstance(value, float): self._position.z = value
+        else: raise TypeError(f'Node: Invalid positional z value type {type(value)}')
