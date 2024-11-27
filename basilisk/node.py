@@ -53,7 +53,7 @@ class Node():
             physics: bool=False, 
             mass: float=None, 
             collisions: bool=False, 
-            collider: str='box', 
+            collider: str=None, 
             static_friction: float=None, 
             kinetic_friction: float=None, 
             elasticity: float=None, 
@@ -96,3 +96,5 @@ class Node():
         """
 
         return f'<Bailisk Node | {self.name}, {self.mesh}, ({self.position})>'
+    
+    
