@@ -3,6 +3,9 @@ import glm
 import numpy as np
 
 
+texture_sizes = (128, 256, 512, 1024, 2048)
+
+
 class ImageHandler():
     engine: any
     """Back refernce to the parent engine"""
@@ -48,13 +51,13 @@ class ImageHandler():
         for texture_array in self.texture_arrays.values():
             texture_array.release()
 
-        self.texture_arrays = {size : [] for size in self.engine.config.texture_sizes}
+        self.texture_arrays = {size : [] for size in texture_sizes}
 
         for image in self.images:
             # Add the image data to the array
             self.texture_arrays[image.size].append(image.data)
             # Update the image index
-            image.index = glm.ivec2(self.engine.config.texture_sizes.index(image.size), len(self.texture_arrays[image.size]) - 1)
+            image.index = glm.ivec2(texture_sizes.index(image.size), len(self.texture_arrays[image.size]) - 1)
 
         for size in self.texture_arrays:
             # Get the rray data and attributes
@@ -76,7 +79,7 @@ class ImageHandler():
                 Destination of the texture array write
         """
 
-        for i, size in enumerate(self.engine.config.texture_sizes):
+        for i, size in enumerate(texture_sizes):
             if not size in self.texture_arrays: continue
             shader_program[f'textureArrays[{i}].array'] = i + 3
             self.texture_arrays[size].use(location=i+3)

@@ -4,6 +4,9 @@ import numpy as np
 from PIL import Image as PIL_Image
 
 
+texture_sizes = (128, 256, 512, 1024, 2048)
+
+
 class Image():
     name: str
     """Name of the image"""   
@@ -14,12 +17,10 @@ class Image():
     size: int
     """The width and height in pixels of the image"""
 
-    def __init__(self, engine, path: str) -> None:
+    def __init__(self, path: str) -> None:
         """
         A basilisk image object that contains a moderngl texture
         Args:
-            engine: bsk.Engine
-                The engine that the image should be part of
             path: str
                 The string path to the image
         """
@@ -31,7 +32,7 @@ class Image():
         # Load image
         img = PIL_Image.open(path).convert('RGBA')
         # Set the size in one of the size buckets
-        size_buckets = engine.config.texture_sizes
+        size_buckets = texture_sizes
         self.size = size_buckets[np.argmin(np.array([abs(size - img.size[0]) for size in size_buckets]))]
         img = img.resize((self.size, self.size)) 
         # Get the image data
