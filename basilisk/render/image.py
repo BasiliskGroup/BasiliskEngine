@@ -18,7 +18,7 @@ class Image():
     size: int
     """The width and height in pixels of the image"""
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str | os.PathLike) -> None:
         """
         A basilisk image object that contains a moderngl texture
         Args:
