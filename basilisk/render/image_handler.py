@@ -30,6 +30,7 @@ class ImageHandler():
         self.ctx    = scene.engine.ctx
 
         self.images = []
+        self.texture_arrays = {size : [] for size in texture_sizes}
 
     def add(self, image: any) -> None:
         """
@@ -41,14 +42,18 @@ class ImageHandler():
         
         if image not in self.images:
             self.images.append(image)
+            self.write(self.scene.shader_handler.programs['batch'])
 
-    def generaate_texture_array(self) -> None:
+    def generate_texture_array(self) -> None:
         """
         Generates texutre arrays for all the images. Updates the index of the image instance
         """
 
+        print("I AM GENERATING")
+
         # Release any existsing texture arrays
         for texture_array in self.texture_arrays.values():
+            if not texture_array: continue
             texture_array.release()
 
         self.texture_arrays = {size : [] for size in texture_sizes}
@@ -59,9 +64,10 @@ class ImageHandler():
             # Update the image index
             image.index = glm.ivec2(texture_sizes.index(image.size), len(self.texture_arrays[image.size]) - 1)
 
+
         for size in self.texture_arrays:
             # Get the rray data and attributes
-            array_data = np.array(self.texture_arrays[size], dtype='f4')
+            array_data = np.array(self.texture_arrays[size])
             dim = (size, size, len(self.texture_arrays[size]))
 
             # Make the array
@@ -78,6 +84,8 @@ class ImageHandler():
             shader_program: mgl.Program:
                 Destination of the texture array write
         """
+
+        self.generate_texture_array()
 
         for i, size in enumerate(texture_sizes):
             if not size in self.texture_arrays: continue
@@ -108,4 +116,4 @@ class ImageHandler():
         Deallocates all texture arrays
         """
         
-        [texture_array.release() for texture_array in self.texture_arrays]
+        # [texture_array.release() for texture_array in self.texture_arrays]

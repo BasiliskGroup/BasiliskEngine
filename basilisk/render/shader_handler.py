@@ -12,7 +12,7 @@ class ShaderHandler:
     """Back reference to the parent scene"""
     ctx: mgl.Context
     """Back reference to the parent context"""
-    shader_programs: dict = {}
+    programs: dict = {}
     """Dictionary containing all the shaders"""
     shader_uniforms: dict = {}
     """Dictionary all the uniforms present in a shader"""
@@ -59,7 +59,7 @@ class ShaderHandler:
 
         # Create a program with shaders
         program = self.ctx.program(vertex_shader=vertex_shader, fragment_shader=fragment_shader)
-        self.shader_programs[name] = program
+        self.programs[name] = program
 
     def get_uniforms_values(self) -> None:
         """
@@ -74,12 +74,12 @@ class ShaderHandler:
             'cameraPosition' : self.scene.camera.position,
         }
 
-    def write_uniforms(self) -> None:
+    def write(self) -> None:
         """
         Writes all of the uniforms in every shader program.
         """
 
-        self.get_all_uniforms()
+        self.get_uniforms_values()
         for uniform in self.uniform_values:
             for program in self.programs:
                 if not uniform in self.shader_uniforms[program]: continue  # Does not write uniforms not in the shader

@@ -3,33 +3,55 @@ import moderngl as mgl
 
 
 class Batch():
+    chunk: ...
+    """Reference to the parent chunk of the batch"""
+    ctx: mgl.Context
+    """Reference to the context of the parent engine"""
+    program: mgl.Program
+    """Reference to the program used by batches"""
     vao: mgl.VertexArray
     """The vertex array of the batch. Used for rendering"""
     vbo: mgl.Buffer
     """Buffer containing all the batch data"""
 
-    def __init__(self, chunk: list, static=False) -> None:
+    def __init__(self, chunk) -> None:
         """
         Basilik batch object
         Contains all the data for a chunk batch to be stored and rendered
         """
         
+        # Back references
+        self.chunk = chunk
+        self.ctx = chunk.chunk_handler.engine.ctx
+        self.program = chunk.chunk_handler.program
+
+        # Set intial values
+        self.vbo = None
+        self.vao = None
+
+    def batch(self) -> bool:
+        """
+        Batches all the node meshes in the chunks bounds.
+        Returns True if batch was successful.
+        """
+
         # Empty list to contain all vertex data of models in the chunk
         batch_data = []
 
         # Loop through each node in the chunk, adding the nodes's mesh to batch_data
-        for node in chunk:
+        for node in self.chunk.nodes:
             # Check that the node should be used
             if not node.mesh: continue
-            if node.static != static: continue
-            # Get data from the node and mesh
-            vertex_data = node.mesh.data
-            model_data = np.array([*node.position, *node.rotation, *node.scale, node.material.index])
+            if node.static != self.chunk.static: continue
+
+            # Get data from the mesh node
+            mesh_data = node.mesh.data
+            node_data = np.array([*node.position, *node.rotation, *node.scale, node.material.index])
 
             # Create an array to hold the node's data
-            object_data = np.zeros(shape=(vertex_data.shape[0], 24), dtype='f4')
-            object_data[:,:14] = vertex_data
-            object_data[:,14:] = model_data
+            object_data = np.zeros(shape=(mesh_data.shape[0], 25), dtype='f4')
+            object_data[:,:14] = mesh_data
+            object_data[:,14:] = node_data
 
             # Add to the chunk mesh
             batch_data.append(object_data)
@@ -39,17 +61,27 @@ class Batch():
         else: batch_data = np.array(batch_data, dtype='f4')
 
         # If there are no verticies, delete the chunk
-        if len(batch_data) == 0:
-            if chunk_key in chunks:
-                del chunks[chunk_key]
-            if chunk_key in batches: 
-                batches[chunk_key].release()
-                del batches[chunk_key]
-            return
+        if len(batch_data) == 0: return False
 
-        # Release any existing chunk mesh
-        if chunk_key in batches: batches[chunk_key].release()
+        if self.vbo: self.vbo.release()
+        if self.vao: self.vao.release()
 
         # Create the vbo and the vao from mesh data
-        vbo = self.ctx.buffer(batch_data)
-        vao = self.ctx.vertex_array(self.program, [(vbo, '3f 2f 3f 3f 3f 3f 3f 3f 1f', *['in_position', 'in_uv', 'in_normal', 'in_tangent', 'in_bitangent', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_material'])], skip_errors=True)
+        self.vbo = self.ctx.buffer(batch_data)
+        self.vao = self.ctx.vertex_array(self.program, [(self.vbo, 
+                                                         '3f 2f 3f 3f 3f 3f 4f 3f 1f', 
+                                                         *['in_position', 'in_uv', 'in_normal', 'in_tangent', 'in_bitangent', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_material'])], 
+                                                         skip_errors=True)
+        
+        return True
+
+    def __repr__(self) -> str:
+        return f'<Basilisk Batch | {self.chunk.chunk_key}, {self.vbo.size / 1024  / 1024} mb>'
+
+    def __del__(self) -> None:
+        """
+        Deallocates the mesh vbo and vao
+        """
+        
+        if self.vbo: self.vbo.release()
+        if self.vao: self.vao.release()

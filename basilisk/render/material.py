@@ -21,7 +21,7 @@ class Material():
     specular: float
     """The PBR specular value of the material"""
 
-    def __init__(self, name: str, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=0.5, metallicness: float=0.0, specular: float=0.5) -> None:
+    def __init__(self, name: str, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=16.0, metallicness: float=0.0, specular: float=0.5) -> None:
         """
         Basilisk Material object. Contains the data and images references used by the material.
         Args:
@@ -54,7 +54,7 @@ class Material():
         """
 
         # Add color and PBR data
-        data = [self.color.x, self.color.y, self.color.z, self.roughness, self.metallicness, self.specular]
+        data = [self.color.x / 255.0, self.color.y / 255.0, self.color.z / 255.0, self.roughness, self.metallicness, self.specular]
 
         # Add texture data
         if self.texture: data.extend([1, self.texture.index.x, self.texture.index.y])

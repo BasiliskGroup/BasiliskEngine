@@ -4,10 +4,9 @@ from ..render.mesh import Mesh
 from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
+from ..render.chunk import Chunk
 
 class Node():
-    node_handler: ...
-    """The internal node handler from the scene"""
     position: glm.vec3
     """The position of the node in meters with swizzle xyz"""
     scale: glm.vec3
@@ -44,36 +43,38 @@ class Node():
     """The name of the node for reference"""  
     tags: list[str]
     """Tags are used to sort nodes into separate groups"""
+    static: bool
+    """Objects that don't move should be marked as static"""
+    chunk: Chunk
     children: list
     """List of nodes that this node is a parent of"""
 
     def __init__(self, 
-            node_handler,
-            position: glm.vec3=None, 
-            scale: glm.vec3=None, 
-            rotation: glm.quat=None, 
-            forward: glm.vec3=None, 
-            mesh: Mesh=None, 
-            material: None=None, 
-            velocity: glm.vec3=None, 
+            position:            glm.vec3=None, 
+            scale:               glm.vec3=None, 
+            rotation:            glm.quat=None, 
+            forward:             glm.vec3=None, 
+            mesh:                Mesh=None, 
+            material:            Material=None, 
+            velocity:            glm.vec3=None, 
             rotational_velocity: glm.quat=None, 
-            physics: bool=False, 
-            mass: float=None, 
-            collisions: bool=False, 
-            collider: str=None, 
-            static_friction: float=None, 
-            kinetic_friction: float=None, 
-            elasticity: float=None, 
-            collision_group :float=None, 
-            name: str='', 
-            tags: list[str]=None
+            physics:             bool=False, 
+            mass:                float=None, 
+            collisions:          bool=False, 
+            collider:            str=None, 
+            static_friction:     float=None, 
+            kinetic_friction:    float=None, 
+            elasticity:          float=None, 
+            collision_group :    float=None, 
+            name:                str='', 
+            tags:                list[str]=None,
+            static:              bool=True
         ) -> None:
         """
         Basilisk node object. 
         Contains mesh data, translation, material, physics, collider, and descriptive information. 
         Base building block for populating a Basilisk scene.
         """
-        self.node_handler = node_handler
         
         self.position = position if position else glm.vec3(0, 0, 0)
         self.scale    = scale    if scale    else glm.vec3(1, 1, 1)
@@ -98,6 +99,8 @@ class Node():
         
         self.name = name
         self.tags = tags if tags else []
+        self.static = static and not (self.physics_body or self.velocity or self.rotational_velocity)
+        self.chunk = None
         self.children = []
         
     def update(self, dt: float):
@@ -216,8 +219,6 @@ class Node():
     def y(self): return self._position.y
     @property
     def z(self): return self._position.z
-    @property
-    def static(self): return not (self.physics_body or self.velocity or self.rotational_velocity)
     
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
@@ -315,7 +316,7 @@ class Node():
                 if not isinstance(tag, str): raise TypeError(f'Node: Invalid tag value in tags list of type {type(tag)}')
             self._tags = value
         else: raise TypeError(f'Node: Invalid tags value type {type(value)}')
-        
+
     @x.setter
     def x(self, value: int | float):
         if isinstance(value, int) or isinstance(value, float): self._position.x = value

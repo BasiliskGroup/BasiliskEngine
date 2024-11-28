@@ -86,8 +86,9 @@ class Engine():
         """
 
         # Tick the clock and get delta time
-        self.delta_time = self.clock.tick()
+        self.delta_time = self.clock.tick() / 1000
         self.time += self.delta_time
+        pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
 
         # Get inputs and events
         self.events = pg.event.get()
@@ -104,6 +105,15 @@ class Engine():
                 # Updates the viewport
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
+            if event.type == pg.KEYUP:
+                if event.key == pg.K_ESCAPE:
+                    # Unlock mouse
+                    pg.event.set_grab(False)
+                    pg.mouse.set_visible(True)
+            if event.type == pg.MOUSEBUTTONUP:
+                # Lock mouse
+                pg.event.set_grab(True)
+                pg.mouse.set_visible(False)
 
         # Update the scene if possible
         if self.scene: self.scene.update()

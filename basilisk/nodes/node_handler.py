@@ -1,4 +1,8 @@
+import glm
 from .node import Node
+from ..render.chunk_handler import ChunkHandler
+from ..render.mesh import Mesh
+from ..render.material import Material
 
 class NodeHandler():
     scene: ...
@@ -7,6 +11,57 @@ class NodeHandler():
     """The list of root nodes in the scene"""
     
     def __init__(self, scene):
+        """
+        Contains all the nodes in the scene.
+        Handles chunking and batching of nodes
+        """
+        
         self.scene = scene
         self.nodes = []
+        self.chunk_handler = ChunkHandler(scene)
+
+    def update(self):
+        """
+        Updates the nodes and chunks in the scene
+        """
+        
+        self.chunk_handler.update()
+
+    def render(self):
+        """
+        Updates the node meshes in the scene
+        """
+        
+        self.chunk_handler.render()
+
+    def add(self, 
+            position:            glm.vec3=None, 
+            scale:               glm.vec3=None, 
+            rotation:            glm.quat=None, 
+            forward:             glm.vec3=None, 
+            mesh:                Mesh=None, 
+            material:            Material=None, 
+            velocity:            glm.vec3=None, 
+            rotational_velocity: glm.quat=None, 
+            physics:             bool=False, 
+            mass:                float=None, 
+            collisions:          bool=False, 
+            collider:            str=None, 
+            static_friction:     float=None, 
+            kinetic_friction:    float=None, 
+            elasticity:          float=None, 
+            collision_group :    float=None, 
+            name:                str='', 
+            tags:                list[str]=None,
+            static:              bool=True) -> Node:
+        """
+        Adds a new node to the node handler
+        """
+        
+        node = Node(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
+
+        self.nodes.append(node)
+        self.chunk_handler.add(node)
+
+        return node
         

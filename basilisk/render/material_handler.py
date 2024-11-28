@@ -1,4 +1,5 @@
 import moderngl as mgl
+from ..render.image_handler import ImageHandler
 from ..render.material import Material
 import numpy as np
 
@@ -30,6 +31,8 @@ class MaterialHandler():
         self.materials = []
         self.data_texture = None
 
+        self.image_handler = ImageHandler(scene)
+
 
     def add(self, material: Material) -> None:
         """
@@ -38,8 +41,14 @@ class MaterialHandler():
         
         # Check that the material is not already in the scene
         if material in self.materials: return None
+        # Add images
+        if material.texture: self.image_handler.add(material.texture)
+        if material.normal:  self.image_handler.add(material.normal)
+
         # Add the material
         self.materials.append(material)
+        # Write materials
+        self.write(self.scene.shader_handler.programs['batch'])
 
     def generate_material_texture(self) -> None:
         """
@@ -68,6 +77,8 @@ class MaterialHandler():
         """
         Writes all material data to the given shader
         """
+
+        self.generate_material_texture()
 
         shader_program[f'materialsTexture'] = 9
         self.data_texture.use(location=9)

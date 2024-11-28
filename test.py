@@ -1,16 +1,16 @@
 import basilisk as bsk
-import glm
-import numpy as np
-import os
 
 engine = bsk.Engine()
 scene = bsk.Scene()
 engine.scene = scene
 
-mesh = bsk.Mesh('cube.obj')
-img = bsk.Image("basilisk.png")
-mtl = bsk.Material('my_mtl', color=(2, 5, 3), texture=img, normal=img)
-node = bsk.Node(mesh=mesh, material=mtl)
+cube_mesh = bsk.Mesh('cube.obj')
+
+brick = bsk.Image("brick.png")
+brick_normal = bsk.Image("brick_normal.png")
+brick_mtl = bsk.Material('my_mtl', texture=brick, normal=brick_normal)
+
+scene.add_node(mesh=cube_mesh, material=brick_mtl)
 
 while engine.running:
     engine.update()

@@ -1,5 +1,11 @@
 import moderngl as mgl
-
+import glm
+from .render.shader_handler import ShaderHandler
+from .nodes.node_handler import NodeHandler
+from .render.mesh import Mesh
+from .render.material import Material
+from .render.material_handler import MaterialHandler
+from .render.camera import Camera
 
 class Scene():
     engine: any
@@ -9,8 +15,9 @@ class Scene():
 
     def __init__(self) -> None:
         """
-    Basilisk scene object. Contains all nodes for the scene
-    """
+        Basilisk scene object. Contains all nodes for the scene
+        """
+
         ...
 
     def update(self) -> None:
@@ -18,18 +25,49 @@ class Scene():
         Updates the physics and in the scene
         """
         
-        ...
+        self.camera.update()
+        self.node_handler.update()
 
     def render(self) -> None:
         """
         Renders all the nodes with meshes in the scene
         """
 
-        ...
+        self.shader_handler.write()
+        self.node_handler.render()
     
+    def add_node(self, 
+            position:            glm.vec3=None, 
+            scale:               glm.vec3=None, 
+            rotation:            glm.quat=None, 
+            forward:             glm.vec3=None, 
+            mesh:                Mesh=None, 
+            material:            Material=None, 
+            velocity:            glm.vec3=None, 
+            rotational_velocity: glm.quat=None, 
+            physics:             bool=False, 
+            mass:                float=None, 
+            collisions:          bool=False, 
+            collider:            str=None, 
+            static_friction:     float=None, 
+            kinetic_friction:    float=None, 
+            elasticity:          float=None, 
+            collision_group :    float=None, 
+            name:                str='', 
+            tags:                list[str]=None,
+            static:              bool=True):
+        
+        self.node_handler.add(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
+        
+        self.material_handler.add(material)
+
     def set_engine(self, engine: any) -> None:
         """
         Sets the back references to the engine and creates handlers with the context
         """
         self.engine = engine
         self.ctx = engine.ctx
+        self.camera = Camera(self)
+        self.shader_handler = ShaderHandler(self)
+        self.node_handler = NodeHandler(self)
+        self.material_handler = MaterialHandler(self)
