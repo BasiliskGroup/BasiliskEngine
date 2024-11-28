@@ -69,8 +69,8 @@ class ShaderHandler:
         """
         
         self.uniform_values = {
-            'm_proj' : self.scene.camera.m_proj,
-            'm_view' : self.scene.camera.m_view,
+            'projectionMatrix' : self.scene.camera.m_proj,
+            'viewMatrix' : self.scene.camera.m_view,
             'cameraPosition' : self.scene.camera.position,
         }
 

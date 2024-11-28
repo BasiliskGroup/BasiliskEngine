@@ -5,6 +5,7 @@ from .nodes.node_handler import NodeHandler
 from .render.mesh import Mesh
 from .render.material import Material
 from .render.material_handler import MaterialHandler
+from .render.light_handler import LightHandler
 from .render.camera import Camera
 
 class Scene():
@@ -18,7 +19,14 @@ class Scene():
         Basilisk scene object. Contains all nodes for the scene
         """
 
-        ...
+        self.engine = None
+        self.ctx    = None
+
+        self.camera           = None
+        self.shader_handler   = None
+        self.node_handler     = None
+        self.material_handler = None
+        self.light_handler    = None
 
     def update(self) -> None:
         """
@@ -57,17 +65,22 @@ class Scene():
             tags:                list[str]=None,
             static:              bool=True):
         
-        self.node_handler.add(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
-        
-        self.material_handler.add(material)
+        if material: self.material_handler.add(material)
+        else: material = self.material_handler.base
+
+        return self.node_handler.add(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
+
 
     def set_engine(self, engine: any) -> None:
         """
         Sets the back references to the engine and creates handlers with the context
         """
+
         self.engine = engine
-        self.ctx = engine.ctx
-        self.camera = Camera(self)
-        self.shader_handler = ShaderHandler(self)
-        self.node_handler = NodeHandler(self)
+        self.ctx    = engine.ctx
+
+        self.camera           = Camera(self)
+        self.shader_handler   = ShaderHandler(self)
+        self.node_handler     = NodeHandler(self)
         self.material_handler = MaterialHandler(self)
+        self.light_handler    = LightHandler(self)

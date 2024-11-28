@@ -30,9 +30,9 @@ class MaterialHandler():
         # Initialize data
         self.materials = []
         self.data_texture = None
+        self.set_base()
 
         self.image_handler = ImageHandler(scene)
-
 
     def add(self, material: Material) -> None:
         """
@@ -102,6 +102,14 @@ class MaterialHandler():
         # No matching material found
         return None
     
+    def set_base(self):
+        """
+        Creates a base material
+        """
+        
+        self.base = Material('Base')
+        self.materials.append(self.base)
+
     def __del__(self) -> None:
         """
         Releases the material data texture

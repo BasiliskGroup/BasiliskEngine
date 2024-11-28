@@ -6,77 +6,88 @@ layout (location = 2) in vec3 in_normal;
 layout (location = 3) in vec3 in_tangent;
 layout (location = 4) in vec3 in_bitangent;
 
-layout (location = 5) in vec3 obj_position;
-layout (location = 6) in vec4 obj_rotation;
-layout (location = 7) in vec3 obj_scale;
+layout (location = 5) in vec3  obj_position;
+layout (location = 6) in vec4  obj_rotation;
+layout (location = 7) in vec3  obj_scale;
 layout (location = 8) in float obj_material;
 
+// Variables passed on to the fragment shader
 out vec2 uv;
 out vec3 normal;
 out vec3 position;
 out mat3 TBN;
 
-flat out vec3 mtlColor;
-flat out float roughness;
-flat out float metallicness;
-flat out float specular;
-flat out int hasAlbedoMap;
-flat out vec2 albedoMap;
-flat out int hasNormalMap;
-flat out vec2 normalMap;
+// Material struct sent to fragment shader
+struct Material {
+    vec3 color;
+    float roughness;
+    float metallicness;
+    float specular;
+    int hasAlbedoMap;
+    vec2 albedoMap;
+    int hasNormalMap;
+    vec2 normalMap;
+};
+flat out Material mtl;
 
-uniform mat4 m_proj;
-uniform mat4 m_view;
+// Uniforms
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
 uniform sampler2D materialsTexture;
 
-void main() {
-    vec4 rot = obj_rotation;
-
-    mat4 m_rot = mat4(
+// Function to get the model matrix from node position, rotation, and scale
+mat4 getModelMatrix(vec3 pos, vec4 rot, vec3 scl) {
+    mat4 translation = mat4(
+        1    , 0    , 0    , 0,
+        0    , 1    , 0    , 0,
+        0    , 0    , 1    , 0,
+        pos.x, pos.y, pos.z, 1
+    );
+    mat4 rotation = mat4(
         1 - 2 * (rot.z * rot.z + rot.w * rot.w), 2 * (rot.y * rot.z - rot.w * rot.x), 2 * (rot.y * rot.w + rot.z * rot.x), 0,
         2 * (rot.y * rot.z + rot.w * rot.x), 1 - 2 * (rot.y * rot.y + rot.w * rot.w), 2 * (rot.z * rot.w - rot.y * rot.x), 0,
         2 * (rot.y * rot.w - rot.z * rot.x), 2 * (rot.z * rot.w + rot.y * rot.x), 1 - 2 * (rot.y * rot.y + rot.z * rot.z), 0,
         0, 0, 0, 1
     );
-
-    mat4 m_trans = mat4(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        obj_position.x, obj_position.y, obj_position.z, 1
+    mat4 scale = mat4(
+        scl.x, 0    , 0    , 0,
+        0    , scl.y, 0    , 0,
+        0    , 0    , scl.z, 0,
+        0    , 0    , 0    , 1
     );
+    return translation * rotation * scale;
+}
 
-    mat4 m_scale = mat4(
-        obj_scale.x, 0          , 0          , 0,
-        0          , obj_scale.y, 0          , 0,
-        0          , 0          , obj_scale.z, 0,
-        0          , 0          , 0          , 1
-    );
+// Function to get the TBN matrix for normal mapping
+mat3 getTBN(mat4 modelMatrix, vec3 normal, vec3 tangent, vec3 bitangent){
+    normal = normalize(mat3(transpose(inverse(modelMatrix))) * normal);
+    vec3 T = normalize(vec3(modelMatrix * vec4(tangent,   0.0)));
+    vec3 B = normalize(vec3(modelMatrix * vec4(bitangent, 0.0)));
+    vec3 N = normalize(vec3(modelMatrix * vec4(normal,    0.0)));
+    return mat3(T, B, N);
+}
 
-    mat4 m_model = m_trans * m_rot * m_scale;
+void main() {
+    // Set the model matrix
+    mat4 modelMatrix = getModelMatrix(obj_position, obj_rotation, obj_scale);
 
-    position = (m_model * vec4(in_position, 1.0)).xyz;
-
-    normal = normalize(mat3(transpose(inverse(m_model))) * in_normal);
-    vec3 T = normalize(vec3(m_model * vec4(in_tangent,   0.0)));
-    vec3 B = normalize(vec3(m_model * vec4(in_bitangent, 0.0)));
-    vec3 N = normalize(vec3(m_model * vec4(in_normal,    0.0)));
-    TBN = mat3(T, B, N);
-    
+    // Set out variables
+    position = (modelMatrix * vec4(in_position, 1.0)).xyz;
+    normal = normalize(mat3(transpose(inverse(modelMatrix))) * in_normal);
+    TBN = getTBN(modelMatrix, normal, in_tangent, in_bitangent);
     uv = in_uv;
-    int materialID = int(obj_material);
-
-    // Get the material attributes from material texture
-    mtlColor  = vec3(texelFetch(materialsTexture, ivec2(0, 0  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * 12), 0).r);
     
-    roughness    = texelFetch(materialsTexture, ivec2(0, 3  + materialID * 12), 0).r;
-    metallicness = texelFetch(materialsTexture, ivec2(0, 4  + materialID * 12), 0).r;
-    specular     = texelFetch(materialsTexture, ivec2(0, 5  + materialID * 12), 0).r;
-    
-    hasAlbedoMap = int(texelFetch(materialsTexture, ivec2(0, 6  + materialID * 12), 0).r);
-    albedoMap = vec2(texelFetch(materialsTexture, ivec2(0, 7  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 8  + materialID * 12), 0).r);
-    hasNormalMap = int(texelFetch(materialsTexture, ivec2(0, 9  + materialID * 12), 0).r);
-    normalMap = vec2(texelFetch(materialsTexture, ivec2(0, 10 + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 11 + materialID * 12), 0).r);    
+    // Get the material
+    int materialID     = int(obj_material);
+    mtl.color          = vec3(texelFetch(materialsTexture, ivec2(0, 0  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * 12), 0).r);
+    mtl.roughness      = texelFetch(materialsTexture, ivec2(0, 3  + materialID * 12), 0).r;
+    mtl.metallicness   = texelFetch(materialsTexture, ivec2(0, 4  + materialID * 12), 0).r;
+    mtl.specular       = texelFetch(materialsTexture, ivec2(0, 5  + materialID * 12), 0).r;
+    mtl.hasAlbedoMap   = int(texelFetch(materialsTexture, ivec2(0, 6  + materialID * 12), 0).r);
+    mtl.albedoMap      = vec2(texelFetch(materialsTexture, ivec2(0, 7  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 8  + materialID * 12), 0).r);
+    mtl.hasNormalMap   = int(texelFetch(materialsTexture, ivec2(0, 9  + materialID * 12), 0).r);
+    mtl.normalMap      = vec2(texelFetch(materialsTexture, ivec2(0, 10 + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 11 + materialID * 12), 0).r);    
 
-    gl_Position = m_proj * m_view * m_model * vec4(in_position, 1.0);
+    // Set the fragment position
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(in_position, 1.0);
 }

@@ -7,14 +7,11 @@ struct textArray {
     sampler2DArray array;
 };
 
-struct DirLight {
+struct DirectionalLight {
     vec3 direction;
-  
+    float intensity;
     vec3 color;
-
     float ambient;
-    float diffuse;
-    float specular;
 };  
 
 struct Material {
@@ -29,27 +26,21 @@ struct Material {
     vec2 normalMap;
 };
 
-
 in vec2 uv;
 in vec3 normal;
 in vec3 position;
 in mat3 TBN;
 
 // Material attributes
-flat in vec3 mtlColor;
-flat in float roughness;
-flat in float metallicness;
-flat in float specular;
-flat in int hasAlbedoMap;
-flat in vec2 albedoMap;
-flat in int hasNormalMap;
-flat in vec2 normalMap;
+flat in Material mtl;
 
 // Uniforms
 uniform vec3 cameraPosition;
+uniform DirectionalLight dirLight;
+uniform textArray textureArrays[5];
 
 
-vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 albedo) {
+vec3 CalcDirLight(DirectionalLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 albedo) {
     // Vector between the view and light vectors
     vec3 halfVector = normalize((viewDir - light.direction) / 2);
     // Lambertian Diffuse
@@ -58,35 +49,35 @@ vec3 CalcDirLight(DirLight light, Material mtl, vec3 normal, vec3 viewDir, vec3 
     float specular = pow(max(dot(normal, halfVector), 0.0), mtl.roughness);
 
     // Final result
-    return (diff * light.diffuse + specular * light.specular) * albedo;
+    return (diff + specular + light.ambient) * light.intensity * albedo * light.color;
 }
 
+vec3 getAlbedo(Material mtl, vec2 uv, float gamma) {
+    vec3 albedo = mtl.color;
+    if (bool(mtl.hasAlbedoMap)){
+        albedo *= pow(texture(textureArrays[int(round(mtl.albedoMap.x))].array, vec3(uv, round(mtl.albedoMap.y))).rgb, vec3(gamma));
+    }
+    return albedo;
+}
 
-uniform textArray textureArrays[5];
-
+vec3 getNormal(Material mtl, vec3 normal, mat3 TBN){
+    if (bool(mtl.hasNormalMap)) {
+        vec3 nomral_map_fragment = texture(textureArrays[int(round(mtl.normalMap.x))].array, vec3(uv, round(mtl.normalMap.y))).rgb;
+        normal = nomral_map_fragment * 2.0 - 1.0;
+        normal = normalize(TBN * normal); 
+    }
+    return normal;
+}
 
 void main() {
     float gamma = 2.2;
-    Material mtl = Material(mtlColor, roughness, metallicness, specular, hasAlbedoMap, albedoMap, hasNormalMap, normalMap);
-    DirLight dirLight = DirLight(normalize(vec3(1.5, -2.0, 1.0)), vec3(1.0, 1.0, 1.0), 0.05, 0.8, 1.0);
-
-    vec3 albedo = mtl.color;
-    if (bool(mtl.hasAlbedoMap)) {
-        albedo = pow(texture(textureArrays[int(round(mtl.albedoMap.x))].array, vec3(uv, round(mtl.albedoMap.y))).rgb, vec3(gamma)) * mtl.color;
-    }
-
-    vec3 normalDirection = normal;
-    if (bool(mtl.hasNormalMap)) {
-        vec3 nomral_map_fragment = texture(textureArrays[int(round(mtl.normalMap.x))].array, vec3(uv, round(mtl.normalMap.y))).rgb;
-        normalDirection = nomral_map_fragment * 2.0 - 1.0;
-        normalDirection = normalize(TBN * normalDirection); 
-    }
-
     vec3 viewDir = vec3(normalize(cameraPosition - position));
 
-    vec3 light_result = CalcDirLight(dirLight, mtl, normalDirection, viewDir, albedo);
+    vec3 albedo = getAlbedo(mtl, uv, gamma);
+    vec3 normal = getNormal(mtl, normal, TBN);
+
+    vec3 light_result = CalcDirLight(dirLight, mtl, normal, viewDir, albedo);
+    light_result = pow(light_result, vec3(1.0/gamma));
 
     fragColor = vec4(light_result, 1.0);
-    // Gamma correction
-    fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
 }
