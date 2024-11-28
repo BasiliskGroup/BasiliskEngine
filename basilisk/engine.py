@@ -105,6 +105,7 @@ class Engine():
                 # Updates the viewport
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
+                self.scene.camera.use()
             if event.type == pg.KEYUP:
                 if event.key == pg.K_ESCAPE:
                     # Unlock mouse

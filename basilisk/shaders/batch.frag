@@ -50,15 +50,18 @@ vec3 CalcDirLight(DirectionalLight light, Material mtl, vec3 N, vec3 L, vec3 H) 
     return (diff + spec * diff * mtl.specular + light.ambient) * light.intensity * light.color;
 }
 
-vec3 CalcDirLightBurley(DirectionalLight light, Material mtl, vec3 N, vec3 L, vec3 V, vec3 H, float ndotl, float ndotv, float ldoth) {
+// Diffuse model as outlined by Burley: https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
+vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 L, vec3 V, vec3 H) {
 
-    float FL = SchlickFresnel(ndotl);
-    float FV = SchlickFresnel(ndotv);
+    float cos_theta_l = max(dot(N, L), 0.0);
+    float cos_theta_V = max(dot(N, V), 0.0);
+    float cos_theta_D = max(dot(L, H), 0.0); // Also equal to dot(V, H) by symetry
 
-    float F90 = mtl.roughness * pow(ldoth, 2.0);
-    float Fd = mix(1.0, F90, FL) * mix(1.0, F90, FV);
+    float FD90 = 0.5 + 2 * mtl.roughness * cos_theta_D * cos_theta_D;
 
-    return Fd * light.intensity * (light.color / 3.1415) + light.ambient;
+    vec3 Fd = (albedo / 3.1415) * (1 + (FD90 - 1) * pow(1 - cos_theta_l, 5)) * (1 + (FD90 - 1) * pow(1 - cos_theta_V, 5));
+    return Fd * cos_theta_l * light.intensity * light.color;
+
 }
 
 vec3 getAlbedo(Material mtl, vec2 uv, float gamma) {
@@ -89,16 +92,10 @@ void main() {
     vec3 L = normalize(-dirLight.direction);                   // light direction
     vec3 V = normalize(cameraPosition - position);  // view vector
     vec3 H = normalize(L + V);                      // half vector
-    float ndotl = max(dot(N, L), 0.0);
-    float ndotv = max(dot(N, V), 0.0);
-    float ndoth = max(dot(N, H), 0.0);
-    float ldoth = dot(L, H);
 
     // vec3 light_result = CalcDirLight(dirLight, mtl, N, L, H) / 10000000;
-    vec3 light_result = albedo * CalcDirLightBurley(dirLight, mtl, N, L, V, H, ndotl, ndotv, ldoth);
+    vec3 light_result = PrincipledDiffuse(dirLight, mtl, albedo, N, L, V, H) + dirLight.ambient;
     light_result = pow(light_result, vec3(1.0/gamma));
-    vec3 light_result2 = albedo * CalcDirLight(dirLight, mtl, N, L, H);
-    light_result2 = pow(light_result2, vec3(1.0/gamma));
 
     fragColor = vec4(light_result, 1.0);
 }

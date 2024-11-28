@@ -11,11 +11,20 @@ SPEED = 25
 SENSITIVITY = 0.15
 
 class Camera:
-    """
-    Camera object to get view and projection matricies. Movement built in
-    """
+    engine: ...
+    """Back reference to the parent engine"""
+    scene: ...
+    """Back reference to the parent scene"""
+    aspect_ratio: float
+    """Aspect ratio of the engine window"""
+    position: glm.vec3
+    """Location of the camera (maters)"""
+
     def __init__(self, scene, position=(0, 0, 20), yaw=-90, pitch=0) -> None:
-        # Stores the engine to acces viewport and inputs
+        """
+        Camera object to get view and projection matricies. Movement built in
+        """
+        # Back references
         self.scene  = scene
         self.engine = scene.engine
         # The initial aspect ratio of the screen
@@ -37,6 +46,10 @@ class Camera:
         self.m_proj = self.get_projection_matrix()
 
     def update(self) -> None:
+        """
+        Updates the camera position and rotaiton based on user input
+        """
+        
         self.move()
         self.rotate()
         self.update_camera_vectors()
@@ -104,31 +117,3 @@ class Camera:
     
     def __repr__(self):
         return f'<Basilisk Camera | Position: {self.position}, Facing: {self.forward}>'
-    
-# camera that will be attached to node
-class FollowCamera(Camera):
-    def __init__(self, engine, radius, scene, yaw=-90, pitch=0):
-        self.anchor = glm.vec3(0, 0, 0)
-        self.radius = radius
-        self.scene = scene
-        super().__init__(engine, scene, (0, 0, 0), yaw, pitch)
-        
-    def move(self):
-        pass # does nothing since movement is locked to parent
-    
-    def get_view_matrix(self) -> glm.mat4x4:
-        distance = self.radius
-        node, point = self.get_model_node_at(position=self.anchor-self.forward*3, forward=-self.forward, has_collider=True, max_distance=self.radius) # 
-        if point: distance = glm.length(self.anchor - point)
-        self.position = self.anchor - self.forward * distance
-        return glm.lookAt(self.position, self.anchor, self.up)
-    
-class StaticCamera(Camera):
-    def __init__(self, engine, position=(0, 0, 20), yaw=-90, pitch=0):
-        super().__init__(engine, position, yaw, pitch)
-        
-    def rotate(self):
-        pass
-    
-    def move(self):
-        pass

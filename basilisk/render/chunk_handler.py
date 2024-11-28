@@ -64,13 +64,16 @@ class ChunkHandler():
         for chunk in self.updated_chunks[0]: 
             if chunk.update(): continue
             removes.append((0, chunk))
+            print(chunk)
         for chunk in self.updated_chunks[1]: 
             if chunk.update(): continue
             removes.append((1, chunk))
+            print(chunk)
 
         # Remove any empty chunks
         for chunk_tuple in removes:
-            self.chunks[chunk_tuple[0]].remove(chunk_tuple[1])
+            if chunk_tuple[1] not in self.chunks[chunk_tuple[0]]: continue
+            del self.chunks[chunk_tuple[0]][chunk_tuple[1]]
 
         # Clears the set of updated chunks so that they are not updated unless they are updated again
         self.updated_chunks = [set(), set()]

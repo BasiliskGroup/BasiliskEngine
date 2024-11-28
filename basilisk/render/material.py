@@ -21,7 +21,7 @@ class Material():
     specular: float
     """The PBR specular value of the material"""
 
-    def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=0.2, metallicness: float=0.0, specular: float=0.5) -> None:
+    def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=1.0, metallicness: float=0.0, specular: float=0.5) -> None:
         """
         Basilisk Material object. Contains the data and images references used by the material.
         Args:

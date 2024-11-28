@@ -76,6 +76,8 @@ class Node():
         Base building block for populating a Basilisk scene.
         """
         
+        self.chunk = None
+
         self.position = position if position else glm.vec3(0, 0, 0)
         self.scale    = scale    if scale    else glm.vec3(1, 1, 1)
         self.rotation = rotation if rotation else glm.quat(1, 0, 0, 0)
@@ -100,7 +102,6 @@ class Node():
         self.name = name
         self.tags = tags if tags else []
         self.static = static and not (self.physics_body or self.velocity or self.rotational_velocity)
-        self.chunk = None
         self.children = []
         
     def update(self, dt: float):
@@ -227,6 +228,7 @@ class Node():
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for position. Expected 3, got {len(value)}')
             self._position = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid position value type {type(value)}')
+        if self.chunk: self.chunk.update()
     
     @scale.setter
     def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
@@ -235,7 +237,8 @@ class Node():
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for scale. Expected 3, got {len(value)}')
             self._scale = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid scale value type {type(value)}')
-        
+        if self.chunk: self.chunk.update()
+
     @rotation.setter
     def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
         if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self._rotation = glm.quat(value)
@@ -244,6 +247,7 @@ class Node():
             elif len(value) == 4: self._rotation = glm.quat(*value)
             else: raise ValueError(f'Node: Invalid number of values for rotation. Expected 3 or 4, got {len(value)}')
         else: raise TypeError(f'Node: Invalid rotation value type {type(value)}')
+        if self.chunk: self.chunk.update()
         
     @forward.setter
     def forward(self, value: tuple | list | glm.vec3 | np.ndarray):
