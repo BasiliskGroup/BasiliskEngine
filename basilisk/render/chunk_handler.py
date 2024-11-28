@@ -72,11 +72,6 @@ class ChunkHandler():
         for chunk_tuple in removes:
             self.chunks[chunk_tuple[0]].remove(chunk_tuple[1])
 
-        # for chunk in self.chunks[0].values():
-        #     print(chunk.batch)
-        # for chunk in self.chunks[1].values():
-        #     print(chunk.batch)
-
         # Clears the set of updated chunks so that they are not updated unless they are updated again
         self.updated_chunks = [set(), set()]
 

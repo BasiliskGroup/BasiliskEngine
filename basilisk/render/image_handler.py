@@ -40,16 +40,15 @@ class ImageHandler():
                 The existing image that is to be added to the scene.
         """
         
-        if image not in self.images:
-            self.images.append(image)
-            self.write(self.scene.shader_handler.programs['batch'])
+        if image in self.images: return
+
+        self.images.append(image)
+        self.write(self.scene.shader_handler.programs['batch'])
 
     def generate_texture_array(self) -> None:
         """
         Generates texutre arrays for all the images. Updates the index of the image instance
         """
-
-        print("I AM GENERATING")
 
         # Release any existsing texture arrays
         for texture_array in self.texture_arrays.values():
