@@ -34,7 +34,7 @@ class Engine():
     previous_mouse_buttons: list
     """bool list containing the state of all mouse buttons at the previous frame"""
 
-    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False) -> None:
+    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False, grab_mouse=True) -> None:
         """
         Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with Basilisk
         Args:
@@ -71,8 +71,12 @@ class Engine():
         self.time = 0
 
         # Initialize input lists
-        self.previous_keys = []
-        self.previous_mouse_buttons = []
+        self.keys = pg.key.get_pressed()
+        self.mouse_buttons = pg.mouse.get_pressed()
+        self.mouse_position = pg.mouse.get_pos()
+        self.previous_keys = self.keys
+        self.previous_mouse_buttons = self.mouse_position
+        self.grab_mouse = grab_mouse
 
         # Scene being used by the engine
         self.scene = None
@@ -107,11 +111,11 @@ class Engine():
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()
             if event.type == pg.KEYUP:
-                if event.key == pg.K_ESCAPE:
+                if event.key == pg.K_ESCAPE and self.grab_mouse:
                     # Unlock mouse
                     pg.event.set_grab(False)
                     pg.mouse.set_visible(True)
-            if event.type == pg.MOUSEBUTTONUP:
+            if event.type == pg.MOUSEBUTTONUP and self.grab_mouse:
                 # Lock mouse
                 pg.event.set_grab(True)
                 pg.mouse.set_visible(False)
@@ -164,8 +168,20 @@ class Engine():
 
     @property
     def scene(self): return self._scene
+    @property
+    def grab_mouse(self): return self._grab_mouse
 
     @scene.setter
     def scene(self, value):
         self._scene = value
         if self._scene: self._scene.set_engine(self)
+
+    @grab_mouse.setter
+    def grab_mouse(self, value):
+        self._grab_mouse = value
+        if self._grab_mouse:
+            pg.event.set_grab(True)
+            pg.mouse.set_visible(False)
+        else:
+            pg.event.set_grab(False)
+            pg.mouse.set_visible(True)

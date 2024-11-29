@@ -41,6 +41,8 @@ class MaterialHandler():
         
         # Check that the material is not already in the scene
         if material in self.materials: return None
+        # Update the material's handler
+        material.material_handler = self
         # Add images
         if material.texture: self.image_handler.add(material.texture)
         if material.normal:  self.image_handler.add(material.normal)
@@ -48,7 +50,7 @@ class MaterialHandler():
         # Add the material
         self.materials.append(material)
         # Write materials
-        self.write(self.scene.shader_handler.programs['batch'])
+        self.write()
 
     def generate_material_texture(self) -> None:
         """
@@ -73,10 +75,12 @@ class MaterialHandler():
         material_data = np.ravel(material_data)
         self.data_texture = self.ctx.texture((1, len(material_data)), components=1, dtype='f4', data=material_data)
 
-    def write(self, shader_program: mgl.Program) -> None:
+    def write(self, shader_program: mgl.Program=None) -> None:
         """
         Writes all material data to the given shader
         """
+
+        if shader_program == None: shader_program = self.scene.shader_handler.programs['batch']
 
         self.generate_material_texture()
 

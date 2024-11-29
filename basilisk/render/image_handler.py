@@ -44,6 +44,7 @@ class ImageHandler():
 
         self.images.append(image)
         self.write(self.scene.shader_handler.programs['batch'])
+        self.write(self.scene.shader_handler.programs['draw'])
 
     def generate_texture_array(self) -> None:
         """

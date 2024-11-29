@@ -3,6 +3,8 @@ import numpy as np
 from ..render.image import Image
 
 class Material():
+    material_handler: ...
+    """Back reference to the parent material handler"""
     name: str = None
     """Name of the material"""  
     index: 0
@@ -36,6 +38,9 @@ class Material():
             roughness & metallicness & specular: float
                 PBR attributes of the material
         """
+
+        # Set handler only when used by a scene
+        self.material_handler = None
         
         self.index = 0
         
@@ -46,6 +51,7 @@ class Material():
         self.roughness    = roughness
         self.metallicness = metallicness
         self.specular     = specular
+
 
     def get_data(self) -> list:
         """
@@ -90,6 +96,7 @@ class Material():
             self._color = glm.vec3(value)
         else:
             raise TypeError(f"Material: Invalid color value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
         
     @texture.setter
     def texture(self, value: Image | None):
@@ -97,6 +104,7 @@ class Material():
             self._texture = value
         else:
             raise TypeError(f"Material: Invalid texture value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
         
     @normal.setter
     def normal(self, value: Image | None):
@@ -104,6 +112,7 @@ class Material():
             self._normal = value
         else:
             raise TypeError(f"Material: Invalid normal value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
 
     @roughness.setter
     def roughness(self, value: float | int | glm.float32):
@@ -113,6 +122,7 @@ class Material():
             self._roughness = float(value.value)
         else:
             raise TypeError(f"Material: Invalid roughness value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
 
     @metallicness.setter
     def metallicness(self, value: float | int | glm.float32):
@@ -122,6 +132,7 @@ class Material():
             self._metallicness = float(value.value)
         else:
             raise TypeError(f"Material: Invalid metallicness value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
         
     @specular.setter
     def specular(self, value: float | int | glm.float32):
@@ -131,3 +142,4 @@ class Material():
             self._specular = float(value.value)
         else:
             raise TypeError(f"Material: Invalid specular value type {type(value)}")
+        if self.material_handler: self.material_handler.write()

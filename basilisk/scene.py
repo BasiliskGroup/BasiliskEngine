@@ -6,7 +6,8 @@ from .render.mesh import Mesh
 from .render.material import Material
 from .render.material_handler import MaterialHandler
 from .render.light_handler import LightHandler
-from .render.camera import Camera
+from .render.camera import Camera, FreeCamera
+from .draw.draw_handler import DrawHandler
 
 class Scene():
     engine: any
@@ -27,6 +28,7 @@ class Scene():
         self.node_handler     = None
         self.material_handler = None
         self.light_handler    = None
+        self.draw_handler     = None
 
     def update(self) -> None:
         """
@@ -43,6 +45,7 @@ class Scene():
 
         self.shader_handler.write()
         self.node_handler.render()
+        self.draw_handler.render()
     
     def add_node(self, 
             position:            glm.vec3=None, 
@@ -79,8 +82,20 @@ class Scene():
         self.engine = engine
         self.ctx    = engine.ctx
 
-        self.camera           = Camera(self)
+        self.camera           = FreeCamera()
         self.shader_handler   = ShaderHandler(self)
         self.node_handler     = NodeHandler(self)
         self.material_handler = MaterialHandler(self)
         self.light_handler    = LightHandler(self)
+        self.draw_handler     = DrawHandler(self)
+
+    @property
+    def camera(self): return self._camera
+
+    @camera.setter
+    def camera(self, value: Camera):
+        if not value: return
+        if not isinstance(value, Camera):
+            raise TypeError(f'Scene: Invalid camera type: {type(value)}. Expected type bsk.Camera')
+        self._camera = value
+        self._camera.scene = self

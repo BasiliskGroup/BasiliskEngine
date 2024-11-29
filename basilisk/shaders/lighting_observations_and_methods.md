@@ -12,7 +12,7 @@ Where $L_e$ is the emitted light and $L_r$ is the reflected light.
 ## Terms
 It is helpful to establish a number of terms a vectors that will be used in coming sections.
 
-...
+![alt text](image.png)
 
 Where:
 - $\vec n$ is the surface normal
