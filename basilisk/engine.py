@@ -2,7 +2,8 @@ import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as pg
 import moderngl as mgl
-from basilisk.config import Config
+from .config import Config
+from .input.mouse import Mouse
 
 class Engine():
     win_size: tuple
@@ -27,12 +28,8 @@ class Engine():
     """bool list containing the state of all keys this frame"""
     previous_keys: list
     """bool list containing the state of all keys at the previous frame"""
-    mouse_position: tuple
-    """int tuple containing the position of the mouse in the window"""
-    mouse_buttons: list
-    """bool list containing the state of all mouse buttons this frame"""
-    previous_mouse_buttons: list
-    """bool list containing the state of all mouse buttons at the previous frame"""
+    mouse: Mouse
+    """Object containing information about the user's mouse"""
 
     def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False, grab_mouse=True) -> None:
         """
@@ -72,11 +69,8 @@ class Engine():
 
         # Initialize input lists
         self.keys = pg.key.get_pressed()
-        self.mouse_buttons = pg.mouse.get_pressed()
-        self.mouse_position = pg.mouse.get_pos()
         self.previous_keys = self.keys
-        self.previous_mouse_buttons = self.mouse_position
-        self.grab_mouse = grab_mouse
+        self.mouse = Mouse(grab=grab_mouse)
 
         # Scene being used by the engine
         self.scene = None
@@ -97,8 +91,7 @@ class Engine():
         # Get inputs and events
         self.events = pg.event.get()
         self.keys = pg.key.get_pressed()
-        self.mouse_buttons = pg.mouse.get_pressed()
-        self.mouse_position = pg.mouse.get_pos()
+        self.mouse.update(self.events)
         
         # Loop through all pygame events
         for event in self.events:
@@ -110,15 +103,6 @@ class Engine():
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()
-            if event.type == pg.KEYUP:
-                if event.key == pg.K_ESCAPE and self.grab_mouse:
-                    # Unlock mouse
-                    pg.event.set_grab(False)
-                    pg.mouse.set_visible(True)
-            if event.type == pg.MOUSEBUTTONUP and self.grab_mouse:
-                # Lock mouse
-                pg.event.set_grab(True)
-                pg.mouse.set_visible(False)
 
         # Update the scene if possible
         if self.scene: self.scene.update()
@@ -128,7 +112,6 @@ class Engine():
 
         # Update the previous input lists for the next frame
         self.previous_keys = self.keys
-        self.previous_mouse_buttons = self.mouse_buttons
 
     def render(self) -> None:
         """
@@ -168,20 +151,8 @@ class Engine():
 
     @property
     def scene(self): return self._scene
-    @property
-    def grab_mouse(self): return self._grab_mouse
-
+    
     @scene.setter
     def scene(self, value):
         self._scene = value
         if self._scene: self._scene.set_engine(self)
-
-    @grab_mouse.setter
-    def grab_mouse(self, value):
-        self._grab_mouse = value
-        if self._grab_mouse:
-            pg.event.set_grab(True)
-            pg.mouse.set_visible(False)
-        else:
-            pg.event.set_grab(False)
-            pg.mouse.set_visible(True)
