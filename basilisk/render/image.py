@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import moderngl as mgl
 import glm
+import pygame as pg
 from PIL import Image as PIL_Image
 
 
@@ -19,14 +20,19 @@ class Image():
     size: int
     """The width and height in pixels of the image"""
 
-    def __init__(self, path: str | os.PathLike) -> None:
+    def __init__(self, path: str | os.PathLike | pg.Surface) -> None:
         """
         A basilisk image object that contains a moderngl texture
         Args:
-            path: str
-                The string path to the image
+            path: str | os.PathLike | pg.Surface
+                The string path to the image. Can also read a pygame surface
         """
         
+        # Check if the user is loading a pygame surface
+        if isinstance(path, pg.Surface):
+            self.from_pg_surface(path)
+            return
+
         # Verify the path type
         if not isinstance(path, str) and not isinstance(path, os.PathLike):
             raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.PathLike')
@@ -43,6 +49,22 @@ class Image():
         img = img.resize((self.size, self.size)) 
         # Get the image data
         self.data = img.tobytes()
+
+        # Default index value (to be set by image handler)
+        self.index = glm.ivec2(1, 1)
+
+    def from_pg_surface(self, surf: pg.Surface) -> None:
+        """
+        Loads a basilisk image from a pygame surface
+        Args:
+        """
+        
+        # Set the size in one of the size buckets
+        size_buckets = texture_sizes
+        self.size = size_buckets[np.argmin(np.array([abs(size - surf.get_size()[0]) for size in size_buckets]))]
+        surf = pg.transform.scale(surf, (self.size, self.size)).convert_alpha()
+        # Get image data
+        self.data = pg.image.tobytes(surf, 'RGBA')
 
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
