@@ -1,5 +1,6 @@
 import glm
 import numpy as np
+from ..generic.vec3 import Vec3
 from ..render.mesh import Mesh
 from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
@@ -7,11 +8,11 @@ from ..collisions.collider import Collider
 from ..render.chunk import Chunk
 
 class Node():
-    position: glm.vec3
+    position: Vec3
     """The position of the node in meters with swizzle xyz"""
-    scale: glm.vec3
+    scale: Vec3
     """The scale of the node in meters in each direction"""
-    rotation: glm.quat
+    rotation: glm.quat # TODO add custom quat class
     """The rotation of the node"""
     forward: glm.vec3
     """The forward facing vector of the node"""
@@ -46,12 +47,13 @@ class Node():
     static: bool
     """Objects that don't move should be marked as static"""
     chunk: Chunk
+    """""" # TODO Jonah description
     children: list
     """List of nodes that this node is a parent of"""
 
     def __init__(self, 
-            position:            glm.vec3=None, 
-            scale:               glm.vec3=None, 
+            position:            Vec3=None, 
+            scale:               Vec3=None, 
             rotation:            glm.quat=None, 
             forward:             glm.vec3=None, 
             mesh:                Mesh=None, 
@@ -78,8 +80,8 @@ class Node():
         
         self.chunk = None
 
-        self.position = position if position else glm.vec3(0, 0, 0)
-        self.scale    = scale    if scale    else glm.vec3(1, 1, 1)
+        self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
+        self.internal_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
         self.rotation = rotation if rotation else glm.quat(1, 0, 0, 0)
         self.forward  = forward  if forward  else glm.vec3(1, 0, 0)
         self.mesh     = mesh     if mesh     else None # TODO add default cube mesh
@@ -177,9 +179,9 @@ class Node():
         return f'<Bailisk Node | {self.name}, {self.mesh}, ({self.position})>'
     
     @property
-    def position(self): return self._position
+    def position(self): return self.internal_position.data
     @property
-    def scale(self):    return self._scale
+    def scale(self):    return self.internal_scale.data
     @property
     def rotation(self): return self._rotation
     @property
@@ -215,27 +217,27 @@ class Node():
     @property
     def tags(self): return self._tags
     @property
-    def x(self): return self._position.x # TODO test these functions
+    def x(self): return self.internal_position.data.x # TODO test these functions
     @property
-    def y(self): return self._position.y
+    def y(self): return self.internal_position.data.y
     @property
-    def z(self): return self._position.z
+    def z(self): return self.internal_position.data.z
     
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
-        if isinstance(value, glm.vec3): self._position = glm.vec3(value)
+        if isinstance(value, glm.vec3): self.internal_position.data = glm.vec3(value)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for position. Expected 3, got {len(value)}')
-            self._position = glm.vec3(value)
+            self.internal_position.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid position value type {type(value)}')
         if self.chunk: self.chunk.update()
     
     @scale.setter
     def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
-        if isinstance(value, glm.vec3): self._scale = glm.vec3(value)
+        if isinstance(value, glm.vec3): self.internal_scale.data = glm.vec3(value)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for scale. Expected 3, got {len(value)}')
-            self._scale = glm.vec3(value)
+            self.internal_scale.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid scale value type {type(value)}')
         if self.chunk: self.chunk.update()
 
@@ -323,15 +325,15 @@ class Node():
 
     @x.setter
     def x(self, value: int | float):
-        if isinstance(value, int) or isinstance(value, float): self._position.x = value
+        if isinstance(value, int) or isinstance(value, float): self.internal_position.data.x = value
         else: raise TypeError(f'Node: Invalid positional x value type {type(value)}')
         
     @y.setter
     def y(self, value: int | float):
-        if isinstance(value, int) or isinstance(value, float): self._position.y = value
+        if isinstance(value, int) or isinstance(value, float): self.internal_position.data.y = value
         else: raise TypeError(f'Node: Invalid positional y value type {type(value)}')
         
     @z.setter
     def z(self, value: int | float):
-        if isinstance(value, int) or isinstance(value, float): self._position.z = value
+        if isinstance(value, int) or isinstance(value, float): self.internal_position.data.z = value
         else: raise TypeError(f'Node: Invalid positional z value type {type(value)}')
