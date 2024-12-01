@@ -22,7 +22,7 @@ class Node():
     """The mesh of the node stored as a basilisk material object"""
     velocity: glm.vec3
     """The translational velocity of the node"""
-    rotational_velocity: glm.quat 
+    rotational_velocity: glm.vec3
     """The rotational velocity of the node"""
     physics: bool
     """Allows the node's movement to be affected by the physics engine and collisions"""
@@ -51,7 +51,7 @@ class Node():
     children: list
     """List of nodes that this node is a parent of"""
 
-    def __init__(self, 
+    def __init__(self, node_handler,
             position:            Vec3=None, 
             scale:               Vec3=None, 
             rotation:            glm.quat=None, 
@@ -59,7 +59,7 @@ class Node():
             mesh:                Mesh=None, 
             material:            Material=None, 
             velocity:            glm.vec3=None, 
-            rotational_velocity: glm.quat=None, 
+            rotational_velocity: glm.vec3=None, 
             physics:             bool=False, 
             mass:                float=None, 
             collisions:          bool=False, 
@@ -78,6 +78,7 @@ class Node():
         Base building block for populating a Basilisk scene.
         """
         
+        self.node_handler = node_handler
         self.chunk = None
 
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
@@ -87,9 +88,9 @@ class Node():
         self.mesh     = mesh     if mesh     else None # TODO add default cube mesh
         self.material = material if material else None # TODO add default base material
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
-        self.rotational_velocity = rotational_velocity if rotational_velocity else glm.quat(1, 0, 0, 0)
+        self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
-        if physics: self.physics_body: PhysicsBody = PhysicsBody(mass = mass)
+        if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass)
         elif mass: raise ValueError('Node cannot have mass if it does not have physics')
         else: self.physics_body = None
         
@@ -106,21 +107,28 @@ class Node():
         self.static = static and not (self.physics_body or self.velocity or self.rotational_velocity)
         self.children = []
         
-    def update(self, dt: float):
+    def update(self, dt: float) -> None:
         """
         Updates the node's movement variables based on the delta time
         """
-        self.position += self.velocity
-        self.rotation += ... # TODO add rotational velocity increase
+        self.position += dt * self.velocity
+        self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
+        self.rotation = glm.normalize(self.rotation)
         
         if self.physics_body:
-            self.velocity = ...
-            self.rotational_velocity = ...
+            self.velocity += self.physics_body.get_delta_velocity(dt)
+            self.rotational_velocity += self.physics_body.get_delta_rotational_velocity(dt)
         
-    def sync_data(self, dt: float): # TODO only needed for child nodes now
+    def sync_data(self, dt: float) -> None: # TODO only needed for child nodes now
         ...
         
-    def get_nodes(self, require_mesh: bool=False, require_collider: bool=False, require_physics_body: bool=False, filter_material: Material=None, filter_tags: list[str]=None) -> list: 
+    def get_nodes(self, 
+            require_mesh: bool=False, 
+            require_collider: bool=False, 
+            require_physics_body: bool=False, 
+            filter_material: Material=None, 
+            filter_tags: list[str]=None
+        ) -> list: 
         """
         Returns the nodes matching the required filters from this branch of the nodes
         """
@@ -137,22 +145,22 @@ class Node():
         for node in self.children: nodes.extend(node.get_nodes(require_mesh, require_collider, require_physics_body, filter_material, filter_tags))
         return node 
         
-    def adopt_child(self, node): # TODO determine the best way for the user to do this through the scene
+    def adopt_child(self, node) -> None: # TODO determine the best way for the user to do this through the scene
         ...
         
-    def add_child(self): # TODO add node constructor
+    def add_child(self) -> None: # TODO add node constructor
         ... 
         
-    def get_inverse_inertia(self): # TODO add checks for collider and physics body
+    def get_inverse_inertia(self) -> glm.mat3x3: # TODO add checks for collider and physics body
         ...
         
-    def apply_force(self, force: glm.vec3, dt: float):
+    def apply_force(self, force: glm.vec3, dt: float) -> None:
         """
         Applies a force at the center of the node
         """
         self.apply_offset_force(force, glm.vec3(0.0), dt)
         
-    def apply_offset_force(self, force: glm.vec3, offset: glm.vec3, dt: float):
+    def apply_offset_force(self, force: glm.vec3, offset: glm.vec3, dt: float) -> None:
         """
         Applies a force at the given offset
         """
@@ -164,7 +172,7 @@ class Node():
         torque = glm.cross(offset, force)
         self.apply_torque(torque, dt)
         
-    def apply_torque(self, torque: glm.vec3, dt: float):
+    def apply_torque(self, torque: glm.vec3, dt: float) -> None:
         """
         Applies a torque on the node
         """
@@ -272,12 +280,11 @@ class Node():
         else: raise TypeError(f'Node: Invalid velocity value type {type(value)}')
         
     @rotational_velocity.setter
-    def rotational_velocity(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
-        if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self._rotational_velocity = glm.quat(value)
+    def rotational_velocity(self, value: tuple | list | glm.vec3 | np.ndarray):
+        if isinstance(value, glm.vec3): self._rotational_velocity = glm.vec3(value)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
-            if len(value) == 3: self._rotational_velocity = glm.quat(glm.vec3(*value))
-            elif len(value) == 4: self._rotational_velocity = glm.quat(*value)
-            else: raise ValueError(f'Node: Invalid number of values for rotational velocity. Expected 3 or 4, got {len(value)}')
+            if len(value) != 3: raise ValueError(f'Node: Invalid number of values for rotational velocity. Expected 3, got {len(value)}')
+            self._rotational_velocity = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid rotational velocity value type {type(value)}')
         
     @mass.setter
