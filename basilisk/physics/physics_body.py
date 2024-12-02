@@ -31,3 +31,6 @@ class PhysicsBody():
         for rotational_acceleration in self.physics_engine.rotational_accelerations: dw += rotational_acceleration * dt
         # TODO add torques
         return dw
+    
+    def __repr__(self) -> str:
+        return f'<Physics Body| {self.mass}>'

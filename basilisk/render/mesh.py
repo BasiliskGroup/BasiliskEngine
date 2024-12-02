@@ -2,6 +2,7 @@ import numpy as np
 import glm
 import os
 from pyobjloader import load_model
+from ..generic.matrices import compute_inertia_moment, compute_inertia_product
 
 class Mesh():
     data: np.ndarray
@@ -36,7 +37,6 @@ class Mesh():
         # Load the model from file
         model = load_model(path)
 
-
         # Get the vertex data
         if len(model.vertex_data[0]) == 8:
             self.data = model.vertex_data.copy()
@@ -60,6 +60,41 @@ class Mesh():
 
         # Model will no longer be used
         del model
+        
+        # generate geometric data (caclulated assuming scale = (1, 1, 1) and density = 1)
+        self.volume = 0
+        self.geometric_center = 0
+        self.center_of_mass = 0
+        
+        ia = ib = ic = iap = ibp = icp = 0
+        for triangle in self.indices:
+            pts = [self.points[t] for t in triangle]
+            det_j = glm.dot(pts[0], glm.cross(pts[1], pts[2]))
+            tet_volume = det_j / 6
+            
+            ia += det_j * (compute_inertia_moment(pts, 1) + compute_inertia_moment(pts, 2))
+            ib += det_j * (compute_inertia_moment(pts, 0) + compute_inertia_moment(pts, 2))
+            ic += det_j * (compute_inertia_moment(pts, 0) + compute_inertia_moment(pts, 1))
+            iap += det_j * compute_inertia_product(pts, 1, 2)
+            ibp += det_j * compute_inertia_product(pts, 0, 1)
+            icp += det_j * compute_inertia_product(pts, 0, 2)
+            
+            self.volume += tet_volume
+            self.center_of_mass += tet_volume * (pts[0] + pts[1] + pts[2]) / 4
+            
+        self.center_of_mass /= self.volume
+        ia = ia / 60 - self.volume * (self.center_of_mass[1] ** 2 + self.center_of_mass[2] ** 2)
+        ib = ib / 60 - self.volume * (self.center_of_mass[0] ** 2 + self.center_of_mass[2] ** 2)
+        ic = ic / 60 - self.volume * (self.center_of_mass[0] ** 2 + self.center_of_mass[1] ** 2)
+        iap = iap / 120 - self.volume * self.center_of_mass[1] * self.center_of_mass[2]
+        ibp = ibp / 120 - self.volume * self.center_of_mass[0] * self.center_of_mass[1]
+        icp = icp / 120 - self.volume * self.center_of_mass[0] * self.center_of_mass[2]
+        
+        self.inertia_tensor = glm.mat3x3(
+             ia,  -ibp, -icp,
+            -ibp,  ib,  -iap,
+            -icp, -iap,  ic
+        )
 
     def __repr__(self) -> str:
         size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024
