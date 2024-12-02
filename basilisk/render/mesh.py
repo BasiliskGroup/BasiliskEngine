@@ -62,9 +62,16 @@ class Mesh():
         del model
         
         # generate geometric data (caclulated assuming scale = (1, 1, 1) and density = 1)
+        maximum = glm.vec3(0.0)
+        minimum = glm.vec3(0.0)
+        for pt in self.points:
+            for i in range(3):
+                if maximum[i] < pt[i]: maximum[i] = pt[i]
+                if minimum[i] > pt[i]: minimum[i] = pt[i]
+        self.geometric_center = (glm.vec3(maximum) + glm.vec3(minimum)) / 2
+        
         self.volume = 0
-        self.geometric_center = 0
-        self.center_of_mass = 0
+        self.center_of_mass = glm.vec3(0.0)
         
         ia = ib = ic = iap = ibp = icp = 0
         for triangle in self.indices:
@@ -95,6 +102,12 @@ class Mesh():
             -ibp,  ib,  -iap,
             -icp, -iap,  ic
         )
+        
+        print(path)
+        print(self.geometric_center)
+        print(self.center_of_mass)
+        print(self.volume)
+        print()
 
     def __repr__(self) -> str:
         size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024
