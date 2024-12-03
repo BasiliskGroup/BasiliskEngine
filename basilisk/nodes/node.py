@@ -6,6 +6,7 @@ from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
 from ..render.chunk import Chunk
+from ..generic.matrices import get_rotation_matrix
 
 class Node():
     position: Vec3
@@ -90,7 +91,7 @@ class Node():
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
-        if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass)
+        if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass if mass else 1.0)
         elif mass: raise ValueError('Node cannot have mass if it does not have physics')
         else: self.physics_body = None
         
@@ -151,9 +152,6 @@ class Node():
     def add_child(self) -> None: # TODO add node constructor
         ... 
         
-    def get_inverse_inertia(self) -> glm.mat3x3: # TODO add checks for collider and physics body
-        ...
-        
     def apply_force(self, force: glm.vec3, dt: float) -> None:
         """
         Applies a force at the center of the node
@@ -178,6 +176,36 @@ class Node():
         """
         assert self.physics_body, 'Node: Cannot apply a torque to a node that doesn\'t have a physics body'
         ...
+    
+    # TODO change geometric variables into properties
+    def get_inverse_inertia(self) -> glm.mat3x3:
+        """
+        Transforms the mesh inertia tensor and inverts it
+        """
+        if not (self.mesh and self.physics_body): return None 
+        inertia_tensor = self.mesh.get_inertia_tensor(self.scale)
+    
+        # mass
+        if self.physics_body: inertia_tensor *= self.physics_body.mass
+                
+        # rotation
+        rotation_matrix = get_rotation_matrix(self.rotation)
+        inertia_tensor = rotation_matrix * inertia_tensor * glm.transpose(rotation_matrix)
+        
+        return glm.inverse(inertia_tensor)
+        
+    def get_geometric_center(self) -> glm.vec3: 
+        ...
+        
+    def get_center_of_mass(self) -> glm.vec3:
+        ...
+        
+    def get_volume(self) -> glm.vec3:
+        """
+        Gets volume from mesh and scales to node
+        """
+        if not self.mesh: return None 
+        return self.mesh.volume * self.scale.x * self.scale.y * self.scale.z
 
     def __repr__(self) -> str:
         """

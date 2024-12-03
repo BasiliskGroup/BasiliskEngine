@@ -2,7 +2,9 @@ import glm
 
 # transform matrices
 def get_model_matrix(position: glm.vec3, scale: glm.vec3, rotation: glm.quat) -> glm.mat4x4:
-    """gets projection matrix from object data"""
+    """
+    Gets projection matrix from object data
+    """
     # create blank matrix
     model_matrix = glm.mat4x4()
     # translate, rotate, and scale
@@ -14,8 +16,25 @@ def get_model_matrix(position: glm.vec3, scale: glm.vec3, rotation: glm.quat) ->
     
     return model_matrix
 
-def get_rotation_matrix(rotation: glm.quat) -> glm.mat3x3: # 
-    return glm.mat3x3()
+def get_scale_matrix(scale: glm.vec3) -> glm.mat3x3:
+    """
+    Gets the scaling matrix from a scale vector
+    """
+    return glm.mat3x3(
+        scale.x, 0, 0,
+        0, scale.y, 0,
+        0, 0, scale.z
+    )
+
+def get_rotation_matrix(q: glm.quat) -> glm.mat3x3:
+    """
+    Gets the rotation matrix representation of a quaternion
+    """
+    return glm.mat3x3(
+        2 * (q[0] ** 2 + q[1] ** 2) - 1, 2 * (q[1] * q[2] - q[0] * q[3]), 2 * (q[1] * q[3] + q[0] * q[2]),
+        2 * (q[1] * q[2] + q[0] * q[3]), 2 * (q[0] ** 2 + q[2] ** 2) - 1, 2 * (q[2] * q[3] - q[0] * q[1]),
+        2 * (q[1] * q[3] - q[0] * q[2]), 2 * (q[2] * q[3] + q[0] * q[1]), 2 * (q[0] ** 2 + q[3] ** 2) - 1
+    )
 
 # inertia tensors
 def compute_inertia_moment(t:list[glm.vec3], i:int) -> float:

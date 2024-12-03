@@ -11,8 +11,6 @@ class Mesh():
     """All the unique points of the mesh given by the model file"""  
     indices: np.ndarray
     """Indices of the triangles corresponding to the points array"""  
-    inertia_tensor: glm.mat3x3
-    """Stores the mass distribution of an object as a matrix"""
     bvh: any
     """Data structure allowing the access of closest points more efficiently"""
     volume: float
@@ -53,7 +51,6 @@ class Mesh():
             tangents[:,:] += [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
             self.data = np.hstack([self.data, tangents])
 
-
         # Mesh points and triangles used for physics/collisions
         self.points = model.vertex_points.copy()
         self.indices = model.point_indices.copy()
@@ -61,7 +58,7 @@ class Mesh():
         # Model will no longer be used
         del model
         
-        # generate geometric data (caclulated assuming scale = (1, 1, 1) and density = 1)
+        # generate geometric data
         maximum = glm.vec3(0.0)
         minimum = glm.vec3(0.0)
         for pt in self.points:
@@ -70,14 +67,35 @@ class Mesh():
                 if minimum[i] > pt[i]: minimum[i] = pt[i]
         self.geometric_center = (glm.vec3(maximum) + glm.vec3(minimum)) / 2
         
+        # volume and center of mass
         self.volume = 0
         self.center_of_mass = glm.vec3(0.0)
+        for triangle in self.indices:
+            pts = [glm.vec3(self.points[t]) for t in triangle]
+            det_j = glm.dot(pts[0], glm.cross(pts[1], pts[2]))
+            tet_volume = det_j / 6
+            self.volume += tet_volume
+            self.center_of_mass += tet_volume * (pts[0] + pts[1] + pts[2]) / 4
+        self.center_of_mass /= self.volume
+        
+    def get_inertia_tensor(self, scale: glm.vec3) -> glm.mat3x3:
+        """
+        Getsbthe inertia tensor of the mesh with the given scale and mass 1
+        """
+        # scale variables
+        center_of_mass = self.center_of_mass * scale
+        volume = self.volume * scale.x * scale.y * scale.z
+        
+        # uses density = 1 to calculate variables, should be the same for mass = 1 since they are only spatial variables
+        points = self.points.copy()
+        points[:, 0] *= scale.x
+        points[:, 1] *= scale.y
+        points[:, 2] *= scale.z
         
         ia = ib = ic = iap = ibp = icp = 0
         for triangle in self.indices:
-            pts = [self.points[t] for t in triangle]
+            pts = [points[t] for t in triangle]
             det_j = glm.dot(pts[0], glm.cross(pts[1], pts[2]))
-            tet_volume = det_j / 6
             
             ia += det_j * (compute_inertia_moment(pts, 1) + compute_inertia_moment(pts, 2))
             ib += det_j * (compute_inertia_moment(pts, 0) + compute_inertia_moment(pts, 2))
@@ -86,29 +104,21 @@ class Mesh():
             ibp += det_j * compute_inertia_product(pts, 0, 1)
             icp += det_j * compute_inertia_product(pts, 0, 2)
             
-            self.volume += tet_volume
-            self.center_of_mass += tet_volume * (pts[0] + pts[1] + pts[2]) / 4
-            
-        self.center_of_mass /= self.volume
-        ia = ia / 60 - self.volume * (self.center_of_mass[1] ** 2 + self.center_of_mass[2] ** 2)
-        ib = ib / 60 - self.volume * (self.center_of_mass[0] ** 2 + self.center_of_mass[2] ** 2)
-        ic = ic / 60 - self.volume * (self.center_of_mass[0] ** 2 + self.center_of_mass[1] ** 2)
-        iap = iap / 120 - self.volume * self.center_of_mass[1] * self.center_of_mass[2]
-        ibp = ibp / 120 - self.volume * self.center_of_mass[0] * self.center_of_mass[1]
-        icp = icp / 120 - self.volume * self.center_of_mass[0] * self.center_of_mass[2]
+        # since tensor was calc with density = 1. we say mass = density / volume = 1 / volume
+        ia = ia / volume / 60 - volume * (center_of_mass[1] ** 2 + center_of_mass[2] ** 2)
+        ib = ib / volume / 60 - volume * (center_of_mass[0] ** 2 + center_of_mass[2] ** 2)
+        ic = ic / volume / 60 - volume * (center_of_mass[0] ** 2 + center_of_mass[1] ** 2)
+        iap = iap / volume / 120 - volume * center_of_mass[1] * center_of_mass[2]
+        ibp = ibp / volume / 120 - volume * center_of_mass[0] * center_of_mass[1]
+        icp = icp / volume / 120 - volume * center_of_mass[0] * center_of_mass[2]
         
-        self.inertia_tensor = glm.mat3x3(
-             ia,  -ibp, -icp,
-            -ibp,  ib,  -iap,
-            -icp, -iap,  ic
+        return glm.mat3x3(
+            ia, -ibp, -icp,
+            -ibp, ib, -iap,
+            -icp, -iap, ic
         )
-        
-        print(path)
-        print(self.geometric_center)
-        print(self.center_of_mass)
-        print(self.volume)
-        print()
 
     def __repr__(self) -> str:
         size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024
         return f'<Basilisk Mesh | {len(self.data)} vertices, {size:.2} mb>'
+    

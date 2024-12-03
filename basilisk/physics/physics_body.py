@@ -8,7 +8,7 @@ class PhysicsBody():
 
     def __init__(self, physics_engine, mass:float=1.0) -> None:
         self.physics_engine = physics_engine
-        self.mass = mass
+        self.mass = mass 
         
     def get_delta_velocity(self, dt: float) -> glm.vec3:
         """
