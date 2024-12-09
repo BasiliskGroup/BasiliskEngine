@@ -2,7 +2,10 @@ import numpy as np
 import glm
 import os
 from pyobjloader import load_model
+from .narrow_bvh import NarrowBVH
 from ..generic.matrices import compute_inertia_moment, compute_inertia_product
+from ..generic.meshes import get_extreme_points_np
+
 
 class Mesh():
     data: np.ndarray
@@ -19,6 +22,10 @@ class Mesh():
     """The geometric center of the mesh"""
     center_of_mass: glm.vec3
     """The center of mass of the mesh calculated from the inertia tensor algorithm"""
+    half_dimensions: glm.vec3
+    """The aligned half dimensions to the untransformed mesh"""
+    bvh: NarrowBVH
+    """BVH for accessing triangle intersections with a line"""
 
     def __init__(self, path: str | os.PathLike) -> None:
         """
@@ -59,13 +66,9 @@ class Mesh():
         del model
         
         # generate geometric data
-        maximum = glm.vec3(0.0)
-        minimum = glm.vec3(0.0)
-        for pt in self.points:
-            for i in range(3):
-                if maximum[i] < pt[i]: maximum[i] = pt[i]
-                if minimum[i] > pt[i]: minimum[i] = pt[i]
+        maximum, minimum = get_extreme_points_np(self.points)
         self.geometric_center = (glm.vec3(maximum) + glm.vec3(minimum)) / 2
+        self.half_dimensions  = maximum - self.geometric_center
         
         # volume and center of mass
         self.volume = 0
@@ -77,6 +80,9 @@ class Mesh():
             self.volume += tet_volume
             self.center_of_mass += tet_volume * (pts[0] + pts[1] + pts[2]) / 4
         self.center_of_mass /= self.volume
+        
+        # data structrues
+        self.bvh = NarrowBVH(self)
         
     def get_inertia_tensor(self, scale: glm.vec3) -> glm.mat3x3:
         """

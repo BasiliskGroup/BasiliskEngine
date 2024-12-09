@@ -15,7 +15,7 @@ mud_mtl = bsk.Material(texture=mud, normal=mud_normal)
 
 scene.add_node(
     position=(0, 0, -1), 
-    scale=(1, 1, 1),
+    scale=(1, 2, 3),
     mesh=cube_mesh, 
     material=mud_mtl,
     velocity=(0, 0.1, 0),
@@ -24,7 +24,7 @@ scene.add_node(
     mass=1
 )
 
-scene.node_handler.nodes[0].get_inverse_inertia()
+print(scene.node_handler.nodes[0].geometric_center)
 
-# while engine.running:
-#     engine.update()
+while engine.running:
+    engine.update()

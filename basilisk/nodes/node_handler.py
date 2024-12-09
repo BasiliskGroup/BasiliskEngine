@@ -1,7 +1,7 @@
 import glm
 from .node import Node
 from ..render.chunk_handler import ChunkHandler
-from ..render.mesh import Mesh
+from ..mesh.mesh import Mesh
 from ..render.material import Material
 
 class NodeHandler():

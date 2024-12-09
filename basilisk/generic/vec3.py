@@ -1,6 +1,7 @@
 import glm
 import numpy as np
 
+
 class Vec3():
     def __init__(self, *args, callback=None):
         self.callback = callback

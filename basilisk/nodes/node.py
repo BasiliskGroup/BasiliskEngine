@@ -1,12 +1,18 @@
 import glm
 import numpy as np
 from ..generic.vec3 import Vec3
-from ..render.mesh import Mesh
+from ..mesh.mesh import Mesh
 from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
 from ..render.chunk import Chunk
-from ..generic.matrices import get_rotation_matrix
+from ..generic.matrices import get_model_matrix
+
+# class NodeError(ValueError):
+#     def __init__(self, node: str):
+#         self.node = node
+        
+# raise NodeError("moew")
 
 class Node():
     position: Vec3
@@ -92,15 +98,17 @@ class Node():
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
         if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass if mass else 1.0)
-        elif mass: raise ValueError('Node cannot have mass if it does not have physics')
+        elif mass: raise ValueError('Node: cannot have mass if it does not have physics')
         else: self.physics_body = None
         
-        if collisions: self.collider: Collider = ...
-        elif collider:         raise ValueError('Node cannot have collider mesh if it does not allow collisions')
-        elif static_friction:  raise ValueError('Node cannot have static friction if it does not allow collisions')
-        elif kinetic_friction: raise ValueError('Node cannot have kinetic friction if it does not allow collisions')
-        elif elasticity:       raise ValueError('Node cannot have elasticity if it does not allow collisions')
-        elif collision_group:  raise ValueError('Node cannot have collider group if it does not allow collisions')
+        if collisions: 
+            if not mesh: raise ValueError('Node: cannot collide if it doezsnt have a mesh')
+            self.collider: Collider = ...
+        elif collider:         raise ValueError('Node: cannot have collider mesh if it does not allow collisions')
+        elif static_friction:  raise ValueError('Node: cannot have static friction if it does not allow collisions')
+        elif kinetic_friction: raise ValueError('Node: cannot have kinetic friction if it does not allow collisions')
+        elif elasticity:       raise ValueError('Node: cannot have elasticity if it does not allow collisions')
+        elif collision_group:  raise ValueError('Node: cannot have collider group if it does not allow collisions')
         else: self.collider = None
         
         self.name = name
@@ -135,11 +143,14 @@ class Node():
         """
         # adds self to nodes list if it matches the criteria
         nodes = []
-        if  (not require_mesh or self.mesh) \
-        and (not require_collider or self.collider) \
-        and (not require_physics_body or self.physics_body) \
-        and (not filter_material or self.material == filter_material) \
-        and (not filter_tags or all([tag in self.tags for tag in filter_tags])): 
+    
+        if all([
+            (not require_mesh or self.mesh),
+            (not require_collider or self.collider),
+            (not require_physics_body or self.physics_body),
+            (not filter_material or self.material == filter_material),
+            (not filter_tags or all([tag in self.tags for tag in filter_tags]))
+        ]): 
             nodes.append(self)
         
         # adds children to nodes list if they match the criteria
@@ -189,23 +200,10 @@ class Node():
         if self.physics_body: inertia_tensor *= self.physics_body.mass
                 
         # rotation
-        rotation_matrix = get_rotation_matrix(self.rotation)
+        rotation_matrix = glm.mat3_cast(self.rotation)
         inertia_tensor = rotation_matrix * inertia_tensor * glm.transpose(rotation_matrix)
         
         return glm.inverse(inertia_tensor)
-        
-    def get_geometric_center(self) -> glm.vec3: 
-        ...
-        
-    def get_center_of_mass(self) -> glm.vec3:
-        ...
-        
-    def get_volume(self) -> glm.vec3:
-        """
-        Gets volume from mesh and scales to node
-        """
-        if not self.mesh: return None 
-        return self.mesh.volume * self.scale.x * self.scale.y * self.scale.z
 
     def __repr__(self) -> str:
         """
@@ -258,6 +256,22 @@ class Node():
     def y(self): return self.internal_position.data.y
     @property
     def z(self): return self.internal_position.data.z
+    
+    # TODO add descriptions in the class header
+    @property
+    def model_matrix(self): return get_model_matrix(self.position, self.scale, self.rotation) # TODO set this to lazy update
+    @property
+    def geometric_center(self): 
+        if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
+        return self.model_matrix * self.mesh.geometric_center
+    @property
+    def center_of_mass(self): 
+        if not self.mesh: raise RuntimeError('Node: Cannot retrieve center of mass if node does not have mesh')
+        return self.model_matrix * self.mesh.center_of_mass
+    @property
+    def volume(self):
+        if not self.mesh: raise RuntimeError('Node: Cannot retrieve volume if node does not have mesh')
+        return self.mesh.volume * self.scale.x * self.scale.y * self.scale.z
     
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
