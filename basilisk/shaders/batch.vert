@@ -60,7 +60,6 @@ mat4 getModelMatrix(vec3 pos, vec4 rot, vec3 scl) {
 
 // Function to get the TBN matrix for normal mapping
 mat3 getTBN(mat4 modelMatrix, vec3 normal, vec3 tangent, vec3 bitangent){
-    normal = normalize(mat3(transpose(inverse(modelMatrix))) * normal);
     vec3 T = normalize(vec3(modelMatrix * vec4(tangent,   0.0)));
     vec3 B = normalize(vec3(modelMatrix * vec4(bitangent, 0.0)));
     vec3 N = normalize(vec3(modelMatrix * vec4(normal,    0.0)));
@@ -74,7 +73,7 @@ void main() {
     // Set out variables
     position = (modelMatrix * vec4(in_position, 1.0)).xyz;
     normal = normalize(mat3(transpose(inverse(modelMatrix))) * in_normal);
-    TBN = getTBN(modelMatrix, normal, in_tangent, in_bitangent);
+    TBN = getTBN(modelMatrix, in_normal, in_tangent, in_bitangent);
     uv = in_uv;
     
     // Get the material
