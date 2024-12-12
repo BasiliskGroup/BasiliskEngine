@@ -20,6 +20,4 @@ test_mtl  = bsk.Material(roughness=0.0 , texture=mud, normal=mud_normal)
 scene.add_node(position=(0, 0, 0), mesh=sphere_mesh, material=test_mtl)
 
 while engine.running:
-    test_mtl.roughness = cos(engine.time * 10) / 2 + 0.5
-    # scene.light_handler.directional_light.direction = (cos(engine.time), -.5, sin(engine.time))
     engine.update()
