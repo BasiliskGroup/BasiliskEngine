@@ -157,4 +157,3 @@ $$a = \frac{1}{\alpha tan\theta_S}$$
 The second function is taken from [Acerola's physically based model](https://github.com/GarrettGunnell/Disney-PBR/blob/main/Assets/Shaders/DisneyBRDF.shader) which is largely based on Burleys 2012 paper:
 
 $$G_1(\vec H, \vec S) = \frac{1}{\vec n \cdot \vec S + \sqrt{\sqrt{(\vec S \cdot \vec X)\alpha_{g_x}} + \sqrt{(\vec S \cdot \vec Y)\alpha_{g_y}} + \sqrt{\vec n \cdot \vec S}}}$$
-
