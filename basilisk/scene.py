@@ -1,12 +1,14 @@
 import moderngl as mgl
 import glm
 from .render.shader_handler import ShaderHandler
-from .nodes.node_handler import NodeHandler
-from .render.mesh import Mesh
+from .mesh.mesh import Mesh
 from .render.material import Material
 from .render.material_handler import MaterialHandler
 from .render.light_handler import LightHandler
 from .render.camera import Camera, FreeCamera
+from .nodes.node_handler import NodeHandler
+from .physics.physics_engine import PhysicsEngine
+from .collisions.collider_handler import ColliderHandler
 from .draw.draw_handler import DrawHandler
 
 class Scene():
@@ -84,6 +86,8 @@ class Scene():
 
         self.camera           = FreeCamera()
         self.shader_handler   = ShaderHandler(self)
+        self.physics_engine   = PhysicsEngine()
+        self.collider_handler = ColliderHandler(self)
         self.node_handler     = NodeHandler(self)
         self.material_handler = MaterialHandler(self)
         self.light_handler    = LightHandler(self)

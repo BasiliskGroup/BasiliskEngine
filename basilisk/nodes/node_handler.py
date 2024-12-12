@@ -1,7 +1,7 @@
 import glm
 from .node import Node
 from ..render.chunk_handler import ChunkHandler
-from ..render.mesh import Mesh
+from ..mesh.mesh import Mesh
 from ..render.material import Material
 
 class NodeHandler():
@@ -24,7 +24,7 @@ class NodeHandler():
         """
         Updates the nodes and chunks in the scene
         """
-        
+        for node in self.nodes: node.update(self.scene.engine.delta_time)
         self.chunk_handler.update()
 
     def render(self):
@@ -53,15 +53,32 @@ class NodeHandler():
             collision_group :    float=None, 
             name:                str='', 
             tags:                list[str]=None,
-            static:              bool=True) -> Node:
+            static:              bool=True
+        ) -> Node:
         """
         Adds a new node to the node handler
         """
         
-        node = Node(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
+        node = Node(self, position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
 
         self.nodes.append(node)
         self.chunk_handler.add(node)
 
         return node
         
+    def get(self, name: str) -> Node: # TODO switch to full filter and adapt to search roots
+        """
+        Returns the first node with the given traits
+        """
+        for node in self.nodes:
+            if node.name == name: return node
+        return None
+    
+    def get_all(self, name: str) -> Node:
+        """
+        Returns all nodes with the given traits
+        """
+        nodes = []
+        for node in self.nodes:
+            if node.name == name: nodes.append(node)
+        return nodes

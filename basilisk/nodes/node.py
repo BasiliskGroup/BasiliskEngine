@@ -1,11 +1,18 @@
 import glm
 import numpy as np
 from ..generic.vec3 import Vec3
-from ..render.mesh import Mesh
+from ..mesh.mesh import Mesh
 from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
 from ..render.chunk import Chunk
+from ..generic.matrices import get_model_matrix
+
+# class NodeError(ValueError):
+#     def __init__(self, node: str):
+#         self.node = node
+        
+# raise NodeError("moew")
 
 class Node():
     position: Vec3
@@ -22,7 +29,7 @@ class Node():
     """The mesh of the node stored as a basilisk material object"""
     velocity: glm.vec3
     """The translational velocity of the node"""
-    rotational_velocity: glm.quat 
+    rotational_velocity: glm.vec3
     """The rotational velocity of the node"""
     physics: bool
     """Allows the node's movement to be affected by the physics engine and collisions"""
@@ -51,7 +58,7 @@ class Node():
     children: list
     """List of nodes that this node is a parent of"""
 
-    def __init__(self, 
+    def __init__(self, node_handler,
             position:            Vec3=None, 
             scale:               Vec3=None, 
             rotation:            glm.quat=None, 
@@ -59,7 +66,7 @@ class Node():
             mesh:                Mesh=None, 
             material:            Material=None, 
             velocity:            glm.vec3=None, 
-            rotational_velocity: glm.quat=None, 
+            rotational_velocity: glm.vec3=None, 
             physics:             bool=False, 
             mass:                float=None, 
             collisions:          bool=False, 
@@ -78,6 +85,7 @@ class Node():
         Base building block for populating a Basilisk scene.
         """
         
+        self.node_handler = node_handler
         self.chunk = None
 
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
@@ -87,18 +95,20 @@ class Node():
         self.mesh     = mesh     if mesh     else None # TODO add default cube mesh
         self.material = material if material else None # TODO add default base material
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
-        self.rotational_velocity = rotational_velocity if rotational_velocity else glm.quat(1, 0, 0, 0)
+        self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
-        if physics: self.physics_body: PhysicsBody = PhysicsBody(mass = mass)
-        elif mass: raise ValueError('Node cannot have mass if it does not have physics')
+        if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass if mass else 1.0)
+        elif mass: raise ValueError('Node: cannot have mass if it does not have physics')
         else: self.physics_body = None
         
-        if collisions: self.collider: Collider = ...
-        elif collider:         raise ValueError('Node cannot have collider mesh if it does not allow collisions')
-        elif static_friction:  raise ValueError('Node cannot have static friction if it does not allow collisions')
-        elif kinetic_friction: raise ValueError('Node cannot have kinetic friction if it does not allow collisions')
-        elif elasticity:       raise ValueError('Node cannot have elasticity if it does not allow collisions')
-        elif collision_group:  raise ValueError('Node cannot have collider group if it does not allow collisions')
+        if collisions: 
+            if not mesh: raise ValueError('Node: cannot collide if it doezsnt have a mesh')
+            self.collider: Collider = ...
+        elif collider:         raise ValueError('Node: cannot have collider mesh if it does not allow collisions')
+        elif static_friction:  raise ValueError('Node: cannot have static friction if it does not allow collisions')
+        elif kinetic_friction: raise ValueError('Node: cannot have kinetic friction if it does not allow collisions')
+        elif elasticity:       raise ValueError('Node: cannot have elasticity if it does not allow collisions')
+        elif collision_group:  raise ValueError('Node: cannot have collider group if it does not allow collisions')
         else: self.collider = None
         
         self.name = name
@@ -106,53 +116,60 @@ class Node():
         self.static = static and not (self.physics_body or self.velocity or self.rotational_velocity)
         self.children = []
         
-    def update(self, dt: float):
+    def update(self, dt: float) -> None:
         """
         Updates the node's movement variables based on the delta time
         """
-        self.position += self.velocity
-        self.rotation += ... # TODO add rotational velocity increase
+        self.position += dt * self.velocity
+        self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
+        self.rotation = glm.normalize(self.rotation)
         
         if self.physics_body:
-            self.velocity = ...
-            self.rotational_velocity = ...
+            self.velocity += self.physics_body.get_delta_velocity(dt)
+            self.rotational_velocity += self.physics_body.get_delta_rotational_velocity(dt)
         
-    def sync_data(self, dt: float): # TODO only needed for child nodes now
+    def sync_data(self, dt: float) -> None: # TODO only needed for child nodes now
         ...
         
-    def get_nodes(self, require_mesh: bool=False, require_collider: bool=False, require_physics_body: bool=False, filter_material: Material=None, filter_tags: list[str]=None) -> list: 
+    def get_nodes(self, 
+            require_mesh: bool=False, 
+            require_collider: bool=False, 
+            require_physics_body: bool=False, 
+            filter_material: Material=None, 
+            filter_tags: list[str]=None
+        ) -> list: 
         """
         Returns the nodes matching the required filters from this branch of the nodes
         """
         # adds self to nodes list if it matches the criteria
         nodes = []
-        if  (not require_mesh or self.mesh) \
-        and (not require_collider or self.collider) \
-        and (not require_physics_body or self.physics_body) \
-        and (not filter_material or self.material == filter_material) \
-        and (not filter_tags or all([tag in self.tags for tag in filter_tags])): 
+    
+        if all([
+            (not require_mesh or self.mesh),
+            (not require_collider or self.collider),
+            (not require_physics_body or self.physics_body),
+            (not filter_material or self.material == filter_material),
+            (not filter_tags or all([tag in self.tags for tag in filter_tags]))
+        ]): 
             nodes.append(self)
         
         # adds children to nodes list if they match the criteria
         for node in self.children: nodes.extend(node.get_nodes(require_mesh, require_collider, require_physics_body, filter_material, filter_tags))
         return node 
         
-    def adopt_child(self, node): # TODO determine the best way for the user to do this through the scene
+    def adopt_child(self, node) -> None: # TODO determine the best way for the user to do this through the scene
         ...
         
-    def add_child(self): # TODO add node constructor
+    def add_child(self) -> None: # TODO add node constructor
         ... 
         
-    def get_inverse_inertia(self): # TODO add checks for collider and physics body
-        ...
-        
-    def apply_force(self, force: glm.vec3, dt: float):
+    def apply_force(self, force: glm.vec3, dt: float) -> None:
         """
         Applies a force at the center of the node
         """
         self.apply_offset_force(force, glm.vec3(0.0), dt)
         
-    def apply_offset_force(self, force: glm.vec3, offset: glm.vec3, dt: float):
+    def apply_offset_force(self, force: glm.vec3, offset: glm.vec3, dt: float) -> None:
         """
         Applies a force at the given offset
         """
@@ -164,12 +181,29 @@ class Node():
         torque = glm.cross(offset, force)
         self.apply_torque(torque, dt)
         
-    def apply_torque(self, torque: glm.vec3, dt: float):
+    def apply_torque(self, torque: glm.vec3, dt: float) -> None:
         """
         Applies a torque on the node
         """
         assert self.physics_body, 'Node: Cannot apply a torque to a node that doesn\'t have a physics body'
         ...
+    
+    # TODO change geometric variables into properties
+    def get_inverse_inertia(self) -> glm.mat3x3:
+        """
+        Transforms the mesh inertia tensor and inverts it
+        """
+        if not (self.mesh and self.physics_body): return None 
+        inertia_tensor = self.mesh.get_inertia_tensor(self.scale)
+    
+        # mass
+        if self.physics_body: inertia_tensor *= self.physics_body.mass
+                
+        # rotation
+        rotation_matrix = glm.mat3_cast(self.rotation)
+        inertia_tensor = rotation_matrix * inertia_tensor * glm.transpose(rotation_matrix)
+        
+        return glm.inverse(inertia_tensor)
 
     def __repr__(self) -> str:
         """
@@ -223,6 +257,22 @@ class Node():
     @property
     def z(self): return self.internal_position.data.z
     
+    # TODO add descriptions in the class header
+    @property
+    def model_matrix(self): return get_model_matrix(self.position, self.scale, self.rotation) # TODO set this to lazy update
+    @property
+    def geometric_center(self): 
+        if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
+        return self.model_matrix * self.mesh.geometric_center
+    @property
+    def center_of_mass(self): 
+        if not self.mesh: raise RuntimeError('Node: Cannot retrieve center of mass if node does not have mesh')
+        return self.model_matrix * self.mesh.center_of_mass
+    @property
+    def volume(self):
+        if not self.mesh: raise RuntimeError('Node: Cannot retrieve volume if node does not have mesh')
+        return self.mesh.volume * self.scale.x * self.scale.y * self.scale.z
+    
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self.internal_position.data = glm.vec3(value)
@@ -272,12 +322,11 @@ class Node():
         else: raise TypeError(f'Node: Invalid velocity value type {type(value)}')
         
     @rotational_velocity.setter
-    def rotational_velocity(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
-        if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self._rotational_velocity = glm.quat(value)
+    def rotational_velocity(self, value: tuple | list | glm.vec3 | np.ndarray):
+        if isinstance(value, glm.vec3): self._rotational_velocity = glm.vec3(value)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
-            if len(value) == 3: self._rotational_velocity = glm.quat(glm.vec3(*value))
-            elif len(value) == 4: self._rotational_velocity = glm.quat(*value)
-            else: raise ValueError(f'Node: Invalid number of values for rotational velocity. Expected 3 or 4, got {len(value)}')
+            if len(value) != 3: raise ValueError(f'Node: Invalid number of values for rotational velocity. Expected 3, got {len(value)}')
+            self._rotational_velocity = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid rotational velocity value type {type(value)}')
         
     @mass.setter
