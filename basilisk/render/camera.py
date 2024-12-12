@@ -8,7 +8,7 @@ NEAR = 0.1
 FAR = 350
 
 # Camera movement constants
-SPEED = 25
+SPEED = 10
 SENSITIVITY = 0.15
 
 class Camera:

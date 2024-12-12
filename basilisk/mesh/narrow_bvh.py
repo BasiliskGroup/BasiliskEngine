@@ -4,17 +4,9 @@ from .narrow_primative import NarrowPrimative
 from ..generic.abstract_bvh import AbstractAABB as BVH
 from ..generic.meshes import get_extreme_points_np, get_aabb_surface_area
 
-# meta algoithms: 
-# 1. Bin counts
-# 2. Travel Cost 
-# 3. Intersection Cost
-# 4. Partition Buffer
-
-# Other optimizations
-# Parallelize Bins
 
 class NarrowBVH(BVH):
-    root: NarrowAABB
+    root: NarrowAABB | NarrowPrimative
     """Root aabb used for the start of all collisions"""
     primatives: list[NarrowPrimative]
     """All of the primatives in the BVH associated with triangles in the mesh"""
@@ -49,7 +41,7 @@ class NarrowBVH(BVH):
             # sort primatives along axis and determine if it is lowest cost
             primatives.sort(key=lambda p: p.geometric_center[axis])
             aabb = self.calculate_primative_aabb(primatives[:count]) + self.calculate_primative_aabb(primatives[count:])
-            cost = get_aabb_surface_area(aabb[0], aabb[1]) + get_aabb_surface_area(aabb[2], aabb[3])
+            cost = get_aabb_surface_area(aabb[0], aabb[1])  + get_aabb_surface_area(aabb[2], aabb[3])
             
             if best_cost < 0 or cost < best_cost:
                 best_cost  = cost
@@ -68,4 +60,25 @@ class NarrowBVH(BVH):
         for primative in primatives: 
             points.update([tuple(self.mesh.points[t]) for t in self.mesh.indices[primative.index]])
         return list(get_extreme_points_np(list(points)))
-        
+    
+    def get_possible_triangles(self, point: glm.vec3, vec: glm.vec3) -> list[int]:
+        """
+        Determines the closest intersecting on the bvh
+        """
+        if isinstance(self.root, NarrowAABB): return self.root.get_possible_triangles(point, vec)
+        index = self.root.is_possible_triangle(point, vec)
+        return [index] if index != -1 else []
+    
+    def get_best_dot(self, vec: glm.vec3) -> int:
+        """
+        Returns the best triangle with the highest dot product with the vector from the geometric center to its AABB
+        """
+        if isinstance(self.root, NarrowAABB): return self.root.get_best_dot(vec)
+        return self.root.index
+    
+    def get_all_aabbs(self) -> list[tuple[glm.vec3, glm.vec3, int]]:
+        """
+        Returns all AABBs, their extreme points, and their layer
+        """
+        if isinstance(self.root, NarrowAABB): return self.root.get_all_aabbs(0)
+        return [(self.root.top_right, self.root.bottom_left, 0)]
