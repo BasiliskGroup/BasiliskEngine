@@ -32,6 +32,7 @@ class Collider():
     def __init__(self, collider_handler, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None):
         self.collider_handler = collider_handler
         self.node = node
+        self.mesh = self.node.mesh
         self.static_friction = static_friction
         self.kinetic_friction = kinetic_friction
         self.elasticity = elasticity

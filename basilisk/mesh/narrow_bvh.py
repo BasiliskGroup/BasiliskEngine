@@ -13,7 +13,7 @@ class NarrowBVH(BVH):
     mesh: ...
     """Back reference to the parent mesh"""
     
-    def __init__(self, mesh):
+    def __init__(self, mesh) -> None:
         self.mesh       = mesh
         self.primatives = []
         for index, triangle in enumerate(self.mesh.indices):

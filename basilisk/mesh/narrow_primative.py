@@ -11,7 +11,7 @@ class NarrowPrimative():
     index: int
     """the index of the triangle in the mesh"""
 
-    def __init__(self, top_right:glm.vec3, bottom_left:glm.vec3, index: int):
+    def __init__(self, top_right:glm.vec3, bottom_left:glm.vec3, index: int) -> None:
         self.top_right        = top_right
         self.bottom_left      = bottom_left
         self.geometric_center = (self.top_right + self.bottom_left) / 2

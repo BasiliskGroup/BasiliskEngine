@@ -120,9 +120,9 @@ class Node():
         """
         Updates the node's movement variables based on the delta time
         """
-        self.position += dt * self.velocity
-        self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
-        self.rotation = glm.normalize(self.rotation)
+        # self.position += dt * self.velocity
+        # self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
+        # self.rotation = glm.normalize(self.rotation)
         
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)

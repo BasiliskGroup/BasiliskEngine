@@ -15,7 +15,7 @@ class NarrowAABB(AABB):
     b: AABB | NarrowPrimative
     """Child AABB or Collider 2"""
 
-    def __init__(self, top_right:glm.vec3, bottom_left:glm.vec3, a: AABB, b: AABB):
+    def __init__(self, top_right:glm.vec3, bottom_left:glm.vec3, a: AABB, b: AABB) -> None:
         self.top_right = top_right
         self.bottom_left = bottom_left
         self.geometric_center = (top_right + bottom_left) / 2
