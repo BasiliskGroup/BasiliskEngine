@@ -1,5 +1,6 @@
 import glm
 from .broad_aabb import BroadAABB
+from ..collider import Collider
 from ...generic.abstract_bvh import AbstractBVH as BVH
 
 class BroadBVH(BVH):
@@ -11,24 +12,30 @@ class BroadBVH(BVH):
     def __init__(self, collider_handler) -> None:
         self.collider_handler = collider_handler
         
-    def build_tree(self) -> None:
+    def add(self, collider):
         """
-        Generates BVH tree from collider handler
+        Adds a single collider to the bvh tree
         """
-        colliders = self.collider_handler.colliders
-        
-        if not len(colliders): 
-            self.root = None
+        # test if tree needs to be initiated
+        if not self.root: 
+            self.root = collider # TODO ensure that this is final format for primative
             return
         
-        if len(colliders) == 1: 
-            self.root = colliders[0] # TODO ensure that this is final format for primative
+        # check if root is primative
+        if isinstance(self.root, Collider): 
+            self.root = BroadAABB(self.root, collider)
             return
         
-        for collider in colliders: self.add(collider)
+        # find the best sibling (c_best only used during the recursion)
+        c_best, sibling, old_parent = self.root.find_sibling(collider, None, 1e10, 0)
+        new_parent = BroadAABB(sibling, collider)
         
-    def add(self, collider): ...
-    
+        # if the sibling was not the root
+        if old_parent:
+            if old_parent.a == sibling: old_parent.a = new_parent
+            else:                       old_parent.b = new_parent
+        else: self.root = new_parent
+        
     def remove(self, collider): ...
     
     def rotate(self): ...
