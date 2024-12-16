@@ -89,17 +89,8 @@ for aabb in aabbs:
     
     x1, y1, z1 = aabb[1]
     x2, y2, z2 = aabb[0]
-
-    vertices = [
-        glm.vec3(x1, y1, z1),
-        glm.vec3(x1, y1, z2),
-        glm.vec3(x1, y2, z1),
-        glm.vec3(x1, y2, z2),
-        glm.vec3(x2, y1, z1),
-        glm.vec3(x2, y1, z2),
-        glm.vec3(x2, y2, z1),
-        glm.vec3(x2, y2, z2),
-    ]
+    
+    vertices = [glm.vec3(x, y, z) for z in (z1, z2) for y in (y1, y2) for x in (x1, x2)]
     
     edges = [
         (vertices[0], vertices[1]),

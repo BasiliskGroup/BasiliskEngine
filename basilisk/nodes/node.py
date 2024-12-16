@@ -97,13 +97,20 @@ class Node():
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
-        if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass if mass else 1.0)
+        if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass = mass if mass else 1.0)
         elif mass: raise ValueError('Node: cannot have mass if it does not have physics')
         else: self.physics_body = None
         
         if collisions: 
             if not mesh: raise ValueError('Node: cannot collide if it doezsnt have a mesh')
-            self.collider: Collider = ...
+            self.collider: Collider = self.node_handler.scene.collider_handler.add(
+                node = self,
+                box_mesh = True if collider == 'box' else False,
+                static_friction = static_friction,
+                kinetic_friction = kinetic_friction,
+                elasticity = elasticity,
+                collision_group = collision_group
+            )
         elif collider:         raise ValueError('Node: cannot have collider mesh if it does not allow collisions')
         elif static_friction:  raise ValueError('Node: cannot have static friction if it does not allow collisions')
         elif kinetic_friction: raise ValueError('Node: cannot have kinetic friction if it does not allow collisions')

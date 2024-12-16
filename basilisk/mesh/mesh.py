@@ -201,3 +201,13 @@ class Mesh():
     def __repr__(self) -> str:
         size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024
         return f'<Basilisk Mesh | {len(self.data)} vertices, {size:.2} mb>'
+    
+    @property
+    def top_right(self): return self.bvh.root.top_right
+    @property
+    def bottom_left(self): return self.bvh.root.bottom_left
+    @property
+    def aabb_points(self): 
+        x1, y1, z1 = self.top_right
+        x2, y2, z2 = self.bottom_left
+        return [glm.vec3(x, y, z) for z in (z1, z2) for y in (y1, y2) for x in (x1, x2)]
