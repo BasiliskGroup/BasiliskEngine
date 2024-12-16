@@ -11,6 +11,7 @@ from .physics.physics_engine import PhysicsEngine
 from .collisions.collider_handler import ColliderHandler
 from .draw.draw_handler import DrawHandler
 
+
 class Scene():
     engine: any
     """Parent engine of the scene"""

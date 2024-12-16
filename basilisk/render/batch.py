@@ -39,25 +39,21 @@ class Batch():
         batch_data = []
 
         # Loop through each node in the chunk, adding the nodes's mesh to batch_data
+        index = 0
         for node in self.chunk.nodes:
             # Check that the node should be used
             if not node.mesh: continue
             if node.static != self.chunk.static: continue
 
-            # Get data from the mesh node
-            mesh_data = node.mesh.data
-            node_data = np.array([*node.position, *node.rotation, *node.scale, node.material.index])
-
-            # Create an array to hold the node's data
-            object_data = np.zeros(shape=(mesh_data.shape[0], 25), dtype='f4')
-            object_data[:,:14] = mesh_data
-            object_data[:,14:] = node_data
-
+            # Get the data from the node
+            node_data = node.get_data()
+            # Update the index
+            node.data_index = index
+            index += len(node_data)
             # Add to the chunk mesh
-            batch_data.append(object_data)
+            batch_data.append(node_data)
 
         # Combine all meshes into a single array
-        if len(batch_data) > 1: batch_data = np.vstack(batch_data)
         else: batch_data = np.array(batch_data, dtype='f4')
 
         # If there are no verticies, delete the chunk

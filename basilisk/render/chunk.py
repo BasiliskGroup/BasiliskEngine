@@ -49,6 +49,11 @@ class Chunk():
         # Batch the chunk nodes, return success bit
         return self.batch.batch()
 
+    def node_update_callback(self, node):
+        data = node.get_data()
+        self.batch.vbo.write(data, node.data_index * 25 * 4)
+        # self.chunk_handler.updated_chunks[self.static].add(self)
+
     def add(self, node):
         """
         Adds an existing node to the chunk. Updates the node's chunk reference

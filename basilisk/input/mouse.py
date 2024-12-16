@@ -9,6 +9,11 @@ class Mouse():
         self.grab = grab
 
     def update(self, events):
+        """
+        Updates all mouse state variables.
+        Checks for mouse-related events.
+        """
+        
         self.x, self.y = pg.mouse.get_pos()
         self.previous_buttons = self.buttons
         self.buttons = pg.mouse.get_pressed()

@@ -17,6 +17,12 @@ class App():
         self.mud_normal = bsk.Image('tests/mud_normal.png')
         self.mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
 
+        # n = 5
+        # for x in range(n):
+        #     for y in range(n):
+        #         for z in range(n):
+        #             self.scene.add_node(position=(x * 4, y * 4, z * 4), mesh=self.sphere_mesh)
+       
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
         self.cam_rot = 0
@@ -38,12 +44,15 @@ class App():
             if 60 < self.engine.mouse.y < 90:
                 self.mtl.roughness = min(max((self.engine.mouse.x - 50) / 200, 0.0), 1.0)
             if 90 < self.engine.mouse.y < 120:
-                self.node.rotation = glm.quat(1, min(max((self.engine.mouse.x - 50) / 200, 0.0), 1.0), 0, 0)
+                self.node.rotation.y = min(max((self.engine.mouse.x - 50) / 200, 0.0), 1.0)
+            if 120 < self.engine.mouse.y < 150:
+                self.node.scale.y = min(max((self.engine.mouse.x - 50) / 200, 0.0), 1.0)
 
     def draw(self):
         self.draw_slider(1, self.cam_rot)
         self.draw_slider(2, self.mtl.roughness)
-        self.draw_slider(3, self.node.rotation.x)
+        self.draw_slider(3, self.node.rotation.y)
+        self.draw_slider(4, self.node.scale.y)
 
     def draw_slider(self, y, value):
         bsk.draw.rect(self.engine, (100, 100, 100, 150), (50, y * 30 + 10, 200, 10))

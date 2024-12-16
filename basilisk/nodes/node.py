@@ -88,6 +88,10 @@ class Node():
         self.node_handler = node_handler
         self.chunk = None
 
+        self.previous_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
+        self.previous_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
+        self.previous_rotation: glm.quat = rotation if rotation else glm.quat(1, 0, 0, 0)
+
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
         self.internal_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
         self.rotation = rotation if rotation else glm.quat(1, 0, 0, 0)
@@ -114,6 +118,7 @@ class Node():
         self.name = name
         self.tags = tags if tags else []
         self.static = static and not (self.physics_body or self.velocity or self.rotational_velocity)
+        self.data_index = 0
         self.children = []
         
     def update(self, dt: float) -> None:
@@ -123,7 +128,8 @@ class Node():
         self.position += dt * self.velocity
         self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
         self.rotation = glm.normalize(self.rotation)
-        
+        self.scale = self.scale
+
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
             self.rotational_velocity += self.physics_body.get_delta_rotational_velocity(dt)
@@ -205,6 +211,22 @@ class Node():
         
         return glm.inverse(inertia_tensor)
 
+    def get_data(self) -> np.ndarray:
+        """
+        Gets the node batch data for chunk batching
+        """
+        
+        # Get data from the mesh node
+        mesh_data = self.mesh.data
+        node_data = np.array([*self.position, *self.rotation, *self.scale, self.material.index])
+
+        # Create an array to hold the node's data
+        data = np.zeros(shape=(mesh_data.shape[0], 25), dtype='f4')
+        data[:,:14] = mesh_data
+        data[:,14:] = node_data
+
+        return data
+
     def __repr__(self) -> str:
         """
         Returns a string representation of the node
@@ -280,7 +302,7 @@ class Node():
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for position. Expected 3, got {len(value)}')
             self.internal_position.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid position value type {type(value)}')
-        if self.chunk: self.chunk.update()
+        self.update_position()
     
     @scale.setter
     def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
@@ -289,7 +311,7 @@ class Node():
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for scale. Expected 3, got {len(value)}')
             self.internal_scale.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid scale value type {type(value)}')
-        if self.chunk: self.chunk.update()
+        self.update_scale()
 
     @rotation.setter
     def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
@@ -299,8 +321,50 @@ class Node():
             elif len(value) == 4: self._rotation = glm.quat(*value)
             else: raise ValueError(f'Node: Invalid number of values for rotation. Expected 3 or 4, got {len(value)}')
         else: raise TypeError(f'Node: Invalid rotation value type {type(value)}')
-        if self.chunk: self.chunk.update()
+        self.update_rotation()
+
+    def update_position(self):
+        """
+        Updates the rotation
+        """
         
+        thresh = 0.01
+        cur  = self.position
+        prev = self.previous_position
+
+        if self.chunk and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh):
+            self.chunk.node_update_callback(self)
+            self.previous_position = self.position
+
+    def update_scale(self):
+        """
+        Updates the rotation
+        """
+        
+        thresh = 0.01
+        cur  = self.scale
+        prev = self.previous_scale
+
+        print('asd')
+
+        if self.chunk and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh):
+            self.chunk.node_update_callback(self)
+            self.previous_scale = self.scale
+
+    def update_rotation(self):
+        """
+        Updates the rotation 
+        """
+        
+        thresh = 0.01
+        cur  = self.rotation
+        prev = self.previous_rotation
+
+        if self.chunk and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh or abs(cur.w - prev.w) > thresh):
+            self.chunk.node_update_callback(self)
+            self.previous_rotation = self.rotation
+
+
     @forward.setter
     def forward(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self._forward = glm.vec3(value)

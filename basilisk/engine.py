@@ -104,9 +104,9 @@ class Engine():
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()
 
+
         # Update the scene if possible
         if self.scene: self.scene.update()
-
         # Render after the scene and engine has been updated
         self.render()
 

@@ -64,11 +64,9 @@ class ChunkHandler():
         for chunk in self.updated_chunks[0]: 
             if chunk.update(): continue
             removes.append((0, chunk))
-            print(chunk)
         for chunk in self.updated_chunks[1]: 
             if chunk.update(): continue
             removes.append((1, chunk))
-            print(chunk)
 
         # Remove any empty chunks
         for chunk_tuple in removes:
