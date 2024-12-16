@@ -352,8 +352,6 @@ class Node():
         cur  = self.scale
         prev = self.previous_scale
 
-        print('asd')
-
         if self.chunk and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh):
             self.chunk.node_update_callback(self)
             self.previous_scale = self.scale

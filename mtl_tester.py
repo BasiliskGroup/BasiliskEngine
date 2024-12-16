@@ -17,11 +17,11 @@ class App():
         self.mud_normal = bsk.Image('tests/mud_normal.png')
         self.mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
 
-        # n = 5
-        # for x in range(n):
-        #     for y in range(n):
-        #         for z in range(n):
-        #             self.scene.add_node(position=(x * 4, y * 4, z * 4), mesh=self.sphere_mesh)
+        n = 5
+        for x in range(n):
+            for y in range(n):
+                for z in range(n):
+                    self.scene.add_node(position=(x * 4, y * 4, z * 4), mesh=self.sphere_mesh)
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
