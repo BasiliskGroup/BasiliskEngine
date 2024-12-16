@@ -35,14 +35,15 @@ def get_aabb_line_collision(top_right:glm.vec3, bottom_left:glm.vec3, point:glm.
     tmin, tmax = -1e10, 1e10
     for i in range(3):
         if vec[i] != 0:
-            tlow   = (bottom_left[i] - point[i]) / vec[i]
-            thigh  = (top_right[i]   - point[i]) / vec[i]
-            tentry = min(tlow, thigh)
-            texit  = max(tlow, thigh)
-            tmin   = max(tmin, tentry)
-            tmax   = min(tmax, texit)
-        elif point[i] < bottom_left[i] or point[i] > top_right: return False
-    return tmin <= tmax and tmax >= 0 and tmin <= 1
+            inv_dir = 1.0 / vec[i]
+            t1 = (bottom_left[i] - point[i]) * inv_dir
+            t2 = (top_right[i]   - point[i]) * inv_dir
+            t1, t2 = min(t1, t2), max(t1, t2)
+            tmin   = max(tmin, t1)
+            tmax   = min(tmax, t2)
+            if tmin > tmax: return False
+        elif point[i] < bottom_left[i] or point[i] > top_right[i]: return False
+    return tmax >= 0 and tmin <= 1
 
 def moller_trumbore(point:glm.vec3, vec:glm.vec3, triangle:list[glm.vec3], epsilon:float=1e-7) -> glm.vec3 | None:
     """
