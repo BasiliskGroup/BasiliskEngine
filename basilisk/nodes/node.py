@@ -90,7 +90,7 @@ class Node():
 
         self.previous_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
         self.previous_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
-        self.previous_rotation: glm.quat = rotation if rotation else glm.quat(1, 0, 0, 0)
+        self.previous_rotation: glm.quat = glm.quat(rotation) if rotation else glm.quat(1, 0, 0, 0)
 
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
         self.internal_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)

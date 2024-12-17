@@ -8,7 +8,7 @@ engine = bsk.Engine()
 scene = bsk.Scene()
 engine.scene = scene
 
-cube_mesh = bsk.Mesh('tests/cube.obj')
+cube_mesh = bsk.cube
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 
 mud = bsk.Image("tests/mud.png")
