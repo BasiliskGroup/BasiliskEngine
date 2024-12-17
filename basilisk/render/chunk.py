@@ -50,9 +50,10 @@ class Chunk():
         return self.batch.batch()
 
     def node_update_callback(self, node):
+        if not self.batch.vbo: return
+        
         data = node.get_data()
         self.batch.vbo.write(data, node.data_index * 25 * 4)
-        # self.chunk_handler.updated_chunks[self.static].add(self)
 
     def add(self, node):
         """
