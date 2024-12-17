@@ -11,6 +11,7 @@ class BroadBVH(BVH):
     
     def __init__(self, collider_handler) -> None:
         self.collider_handler = collider_handler
+        self.root = None
         
     def add(self, collider):
         """
@@ -35,6 +36,13 @@ class BroadBVH(BVH):
             if old_parent.a == sibling: old_parent.a = new_parent
             else:                       old_parent.b = new_parent
         else: self.root = new_parent
+        
+    def get_all_aabbs(self) -> list[tuple[glm.vec3, glm.vec3, int]]:
+        """
+        Returns all AABBs, their extreme points, and their layer
+        """
+        if isinstance(self.root, BroadAABB): return self.root.get_all_aabbs(0)
+        return [(self.root.top_right, self.root.bottom_left, 0)]
         
     def remove(self, collider): ...
     

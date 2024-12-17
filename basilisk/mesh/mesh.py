@@ -212,6 +212,15 @@ class Mesh():
         x2, y2, z2 = self.bottom_left
         return [glm.vec3(x, y, z) for z in (z1, z2) for y in (y1, y2) for x in (x1, x2)]
 
+# built-in cube mesh with custom functions
 dire = os.path.dirname(__file__)
 path = os.path.join(dire, 'built-in', 'cube.obj')
 cube = Mesh(path)
+
+def get_best_dot(vec: glm.vec3) -> glm.vec3:
+    """
+    Gets the best dot point of a cube
+    """
+    return glm.vec3([-1 if v < 0 else 1 for v in vec])
+
+cube.get_best_dot = get_best_dot

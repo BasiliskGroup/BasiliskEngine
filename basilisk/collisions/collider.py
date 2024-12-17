@@ -23,9 +23,9 @@ class Collider():
     """Stores the highest velocity from a collision on this collider from the last frame"""  
     collisions: dict # {node : (normal, velocity, depth)} TODO determine which variables need to be stored
     """Stores data from collisions in the previous frame"""
-    aabb_top_right: glm.vec3
+    top_right: glm.vec3
     """AABB most positive corner"""
-    aabb_bottom_left: glm.vec3
+    bottom_left: glm.vec3
     """AABB most negative corner"""
     aabb_surface_area: float
     """The surface area of the collider's AABB"""
@@ -47,14 +47,13 @@ class Collider():
     def has_collided(self): return bool(self.collisions)
     @property
     def half_dimensions(self): # TODO look for optimization
-        points = transform_points(self.mesh.aabb_points, self.node.model_matrix)
-        top_right = glm.max(points)
+        top_right = glm.max(self.obb_points)
         return top_right - self.node.geometric_center
     @property
-    def aabb_bottom_left(self): return self.node.geometric_center - self.half_dimensions
+    def bottom_left(self): return self.node.geometric_center - self.half_dimensions
     @property
-    def aabb_top_right(self): return self.node.geometric_center + self.half_dimensions
+    def top_right(self): return self.node.geometric_center + self.half_dimensions
     @property
-    def aabb_surface_area(self): return get_aabb_surface_area(self.aabb_top_right, self.aabb_bottom_left)
+    def aabb_surface_area(self): return get_aabb_surface_area(self.top_right, self.bottom_left)
     @property
     def obb_points(self): return transform_points(self.mesh.aabb_points, self.node.model_matrix)

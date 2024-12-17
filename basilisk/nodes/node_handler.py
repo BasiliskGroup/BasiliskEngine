@@ -88,3 +88,12 @@ class NodeHandler():
         for node in self.nodes:
             if node.name == name: nodes.append(node)
         return nodes
+    
+    def remove(self, node: Node) -> None: 
+        """
+        Removes a node and all of its children from their handlers
+        """
+        # TODO add support for recursive nodes
+        if node.physics_body: self.scene.physics_engine.remove(node.physics_body)
+        if node.collider: self.scene.collider_handler.remove(node.collider)
+        node.node_handler = None

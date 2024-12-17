@@ -8,7 +8,6 @@ def get_model_matrix(position: glm.vec3, scale: glm.vec3, rotation: glm.quat) ->
     """
     translation_matrix  = glm.translate(glm.mat4(1.0), position)
     rotation_matrix     = glm.mat4_cast(rotation)
-    print(rotation_matrix)
     scale_matrix        = glm.scale(glm.mat4(1.0), scale)
     model_matrix        = translation_matrix * glm.transpose(rotation_matrix) * scale_matrix
     return model_matrix
