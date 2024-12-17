@@ -211,3 +211,7 @@ class Mesh():
         x1, y1, z1 = self.top_right
         x2, y2, z2 = self.bottom_left
         return [glm.vec3(x, y, z) for z in (z1, z2) for y in (y1, y2) for x in (x1, x2)]
+
+dire = os.path.dirname(__file__)
+path = os.path.join(dire, 'built-in', 'cube.obj')
+cube = Mesh(path)
