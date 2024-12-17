@@ -15,7 +15,6 @@ uniform textArray textureArrays[5];
 void main() {
     if (bool(usesImage)) {
         fragColor = texture(textureArrays[int(round(imageIndex.x))].array, vec3(uv, round(imageIndex.y)));
-        // fragColor = vec4(1, 0, 0, 1);
     }
     else {
         fragColor = color;

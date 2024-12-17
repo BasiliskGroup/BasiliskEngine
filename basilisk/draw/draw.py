@@ -1,6 +1,8 @@
 from ..engine import Engine
 from ..render.image import Image
+from ..draw.font_renderer import FontRenderer
 
+font_renderer = FontRenderer()
 
 def rect(engine: Engine, color: tuple, rect: tuple) -> None:
     """
@@ -64,7 +66,7 @@ def line(engine: Engine, color: tuple, p1: tuple, p2: tuple, thickness: int=1) -
     # Draw the line
     draw_handler.draw_line(color, p1, p2, thickness)
 
-def blit(engine, image: Image, rect: tuple):
+def blit(engine: Engine, image: Image, rect: tuple):
     """
     Blits a basilisk image to the engine screen.
     Args:
@@ -82,3 +84,19 @@ def blit(engine, image: Image, rect: tuple):
 
     # Blit the image
     draw_handler.blit(image, rect)
+
+def text(engine: Engine, text: str, position: tuple, scale: float=1.0):
+    """
+    Renders text do the screen
+    USE SPARINGLY, INEFFICIENT IMPLAMENTATION
+    """
+    
+    # Render the text if it has not been cached
+    if text not in font_renderer.text_renders:
+        surf = font_renderer.render(text).convert_alpha()
+        text_image = Image(surf)
+        font_renderer.text_renders[text] = (text_image, surf.get_rect())
+    
+    # Blit the text image
+    img, rect = font_renderer.text_renders[text]
+    blit(engine, img, (position[0] - rect[2] * scale / 2, position[1] - rect[3] * scale / 2, rect[2] * scale, rect[3] * scale))

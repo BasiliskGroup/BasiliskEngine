@@ -53,6 +53,8 @@ class DrawHandler():
         self.vao = self.ctx.vertex_array(self.program, [(self.vbo, '2f 4f 1i', *['in_position', 'in_color', 'in_uses_image'])], skip_errors=True)
 
         # Render the VAO
+        self.ctx.enable(mgl.BLEND)
+        self.ctx.blend_equation = mgl.ADDITIVE_BLENDING
         self.vao.render()
 
         # Clera the draw data

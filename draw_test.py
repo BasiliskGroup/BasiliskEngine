@@ -20,5 +20,6 @@ while engine.running:
     bsk.draw.circle(engine, (255, 255, 0), (200, 600), 100)
     bsk.draw.blit(engine, brick, (100, 200, 200, 200))
     bsk.draw.blit(engine, pg_img, (500, 300, 150, 150))
+    bsk.draw.text(engine, "test", (400, 400), 3)
 
     engine.update()
