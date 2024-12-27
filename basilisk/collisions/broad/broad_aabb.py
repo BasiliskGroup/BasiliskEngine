@@ -48,9 +48,20 @@ class BroadAABB(AABB):
         return c_best, best_aabb, best_parent
     
     def get_collided(self, collider: Collider) -> list[Collider]:
-        ...
+        """
+        Returns which objects may be colliding from the BVH
+        """
+        if not collide_aabb_aabb(self.top_right, self.bottom_left, collider.top_right, collider.bottom_left): return []
         
-    def get_all_aabbs(self, layer: int) -> list[tuple[glm.vec3, glm.vec3, int]]:
+        # test children
+        possible = []
+        if isinstance(self.a, BroadAABB): possible.extend(self.a.get_collided(collider))
+        elif collide_aabb_aabb(self.a.top_right, self.a.bottom_left, collider.top_right, collider.bottom_left): possible.append(self.a)
+        if isinstance(self.b, BroadAABB): possible.extend(self.b.get_collided(collider))
+        elif collide_aabb_aabb(self.b.top_right, self.b.bottom_left, collider.top_right, collider.bottom_left): possible.append(self.b)
+        return possible
+        
+    def get_all_aabbs(self, layer: int) -> list[tuple[glm.vec3, glm.vec3, int]]: # TODO test function
         """
         Returns all AABBs, their extreme points, and their layer
         """

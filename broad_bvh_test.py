@@ -87,5 +87,16 @@ while engine.running:
                     mesh=cube_mesh
                 )
                 aabb_edges.append(aabb_edge)
+                
+            # obb axes
+            rot_mat = glm.transpose(glm.mat3_cast(node.rotation))
+            for i in range(3):
+                scene.add_node(
+                    position = node.position + rot_mat[i] * 3,
+                    scale = (0.1, 0.1, 0.1),
+                    rotation = node.rotation,
+                    material=materials[6],
+                    mesh=cube_mesh
+                )
     
     engine.update()

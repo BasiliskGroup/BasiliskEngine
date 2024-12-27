@@ -1,5 +1,6 @@
 import glm
 from ..generic.meshes import transform_points, get_aabb_surface_area
+from ..generic.matrices import get_model_matrix
 from ..mesh.mesh import Mesh
 
 class Collider():

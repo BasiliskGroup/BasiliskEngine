@@ -37,15 +37,19 @@ class BroadBVH(BVH):
             else:                       old_parent.b = new_parent
         else: self.root = new_parent
         
-    def get_all_aabbs(self) -> list[tuple[glm.vec3, glm.vec3, int]]:
+    def get_all_aabbs(self) -> list[tuple[glm.vec3, glm.vec3, int]]: # TODO test function
         """
         Returns all AABBs, their extreme points, and their layer
         """
         if isinstance(self.root, BroadAABB): return self.root.get_all_aabbs(0)
         return [(self.root.top_right, self.root.bottom_left, 0)]
         
-    def remove(self, collider): ...
+    def remove(self, collider: Collider): ...
     
     def rotate(self): ...
         
-    def get_collided(self, collider): ... 
+    def get_collided(self, collider: Collider):
+        """
+        Returns which objects may be colliding from the BVH
+        """
+        return self.root.get_collided(collider)

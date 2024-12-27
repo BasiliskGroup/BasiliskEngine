@@ -1,6 +1,8 @@
 import glm
 from .collider import Collider
 from .broad.broad_bvh import BroadBVH
+from ..mesh.cube import cube
+from ..generic.collisions import get_sat_axes
 
 class ColliderHandler():
     scene: ...
@@ -37,7 +39,70 @@ class ColliderHandler():
         Resets collider collision values and resolves all collisions in the scene
         """
         for collider in self.colliders: collider.collisions = {}
+        
+    def collide_obb_obb(self, collider1: Collider, collider2: Collider) -> tuple[glm.vec3, float] | None:
+        """
+        Finds the minimal penetrating vector for an obb obb collision, return None if not colliding. Uses SAT. 
+        """
+        axes = get_sat_axes(collider1.node.rotation, collider2.node.rotation)     
+        points1 = collider1.obb_points # TODO remove once oobb points are lazy updated, switch to just using property
+        points2 = collider2.obb_points
+                
+        # test axes
+        small_axis    = None
+        small_overlap = 1e10
+        for axis in axes: # TODO add optimization for points on cardinal axis of cuboid
+            # "project" points
+            proj1 = [glm.dot(p, axis) for p in points1]
+            proj2 = [glm.dot(p, axis) for p in points2]
+            max1, min1 = max(proj1), min(proj1)
+            max2, min2 = max(proj2), min(proj2)
+            if max1 < min2 or max2 < min1: return None
+            
+            # if lines are not intersecting
+            overlap = min(max1, max2) - max(min1, min2)
+            if overlap < 0 or overlap > small_overlap: continue
+            small_overlap = overlap
+            small_axis    = axis
+            
+        return small_axis, small_overlap
     
-    def resolve_broad_collisions(self): ...
+    def collide_obb_obb_decision(self, collider1: Collider, collider2: Collider) -> bool:
+        """
+        Determines if two obbs are colliding Uses SAT. 
+        """
+        axes = get_sat_axes(collider1.node.rotation, collider2.node.rotation)     
+        points1 = collider1.obb_points # TODO remove once oobb points are lazy updated, switch to just using property
+        points2 = collider2.obb_points
+                
+        # test axes
+        for axis in axes: # TODO add optimization for points on cardinal axis of cuboid
+            # "project" points
+            proj1 = [glm.dot(p, axis) for p in points1]
+            proj2 = [glm.dot(p, axis) for p in points2]
+            max1, min1 = max(proj1), min(proj1)
+            max2, min2 = max(proj2), min(proj2)
+            if max1 < min2 or max2 < min1: return False
+            
+        return True
+    
+    def resolve_broad_collisions(self) -> set[tuple[Collider, Collider]]:
+        """
+        Determines which colliders collide with each other from the BVH
+        """
+        collisions = set()
+        for collider1 in self.colliders:
+            
+            # traverse bvh to find aabb aabb collisions
+            colliding = self.bvh.get_collided(collider1)
+            for collider2 in colliding:
+                if collider1 == collider2: continue
+                if (collider1, collider2) in collisions or (collider2, collider1) in collisions: continue # TODO find a secure way for ordering colliders
+                
+                # run broad collision for specified mesh types
+                if max(len(collider1.mesh.points), len(collider2.mesh.points)) > 250:  # contains at least one "large" mesh TODO write heuristic algorithm for determining large meshes
+                    ...
+                
+                collisions.add((collider1, collider2)) # TODO find a secure way for ordering colliders
     
     def resolve_narrow_collisions(self): ...
