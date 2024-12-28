@@ -22,8 +22,12 @@ class Material():
     """The PBR metallicness of the material"""
     specular: float
     """The PBR specular value of the material"""
+    sheen: float
+    """Amount of sheen the material exhibits. Additive lobe"""
+    sheen_tint: glm.vec3 = glm.vec3(1, 1, 1)
+    """Tint color of the sheen lobe"""
 
-    def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=1.0, metallicness: float=0.0, specular: float=0.5) -> None:
+    def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness: float=1.0, metallicness: float=0.0, specular: float=0.5, sheen: float=0.0, sheen_tint: tuple=(255.0, 255.0, 255.0), subsurface: float=1.0) -> None:
         """
         Basilisk Material object. Contains the data and images references used by the material.
         Args:
@@ -35,7 +39,7 @@ class Material():
                 The albedo map (color texture) of the material
             normal: Basilisk Image
                 The normal map of the material.
-            roughness & metallicness & specular: float
+            roughness & metallicness & specular & sheen & sheen_tint & subsurface: float
                 PBR attributes of the material
         """
 
@@ -51,6 +55,9 @@ class Material():
         self.roughness    = roughness
         self.metallicness = metallicness
         self.specular     = specular
+        self.sheen        = sheen
+        self.sheen_tint   = sheen_tint
+        self.subsurface   = subsurface
 
 
     def get_data(self) -> list:
@@ -60,8 +67,12 @@ class Material():
         """
 
         # Add color and PBR data
-        data = [self.color.x / 255.0, self.color.y / 255.0, self.color.z / 255.0, self.roughness, self.metallicness, self.specular]
+        data = [self.color.x / 255.0, self.color.y / 255.0, self.color.z / 255.0, self.roughness, self.metallicness, self.specular, self.sheen]
 
+        # Add sheen tint
+        data.extend([self.sheen_tint.x / 255.0, self.sheen_tint.y / 255.0, self.sheen_tint.z / 255.0])
+        # Add subsurface
+        data.append(self.subsurface)
         # Add texture data
         if self.texture: data.extend([1, self.texture.index.x, self.texture.index.y])
         else: data.extend([0, 0, 0])
@@ -86,6 +97,12 @@ class Material():
     def metallicness(self): return self._metallicness
     @property
     def specular(self):     return self._specular
+    @property
+    def sheen(self):        return self._sheen
+    @property
+    def sheen_tint(self):   return self._sheen_tint
+    @property
+    def subsurface(self):   return self._subsurface
 
     @color.setter
     def color(self, value: tuple | list | glm.vec3 | np.ndarray):
@@ -142,4 +159,35 @@ class Material():
             self._specular = float(value.value)
         else:
             raise TypeError(f"Material: Invalid specular value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
+
+    @sheen.setter
+    def sheen(self, value: float | int | glm.float32):
+        if isinstance(value, float) or isinstance(value, int):
+            self._sheen = float(value)
+        elif isinstance(value, glm.float32):
+            self._sheen = float(value.value)
+        else:
+            raise TypeError(f"Material: Invalid sheen value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
+
+    @sheen_tint.setter
+    def sheen_tint(self, value: tuple | list | glm.vec3 | np.ndarray):
+        if isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
+            if len(value) != 3: raise ValueError(f"Material: Invalid number of values for sheen tint. Expected 3 values, got {len(value)} values")
+            self._sheen_tint = glm.vec3(value)
+        elif isinstance(value, glm.vec3):
+            self._sheen_tint = glm.vec3(value)
+        else:
+            raise TypeError(f"Material: Invalid sheen tint value type {type(value)}")
+        if self.material_handler: self.material_handler.write()
+
+    @subsurface.setter
+    def subsurface(self, value: float | int | glm.float32):
+        if isinstance(value, float) or isinstance(value, int):
+            self._subsurface = float(value)
+        elif isinstance(value, glm.float32):
+            self._subsurface = float(value.value)
+        else:
+            raise TypeError(f"Material: Invalid subsurface value type {type(value)}")
         if self.material_handler: self.material_handler.write()

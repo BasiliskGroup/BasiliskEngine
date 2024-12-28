@@ -23,6 +23,9 @@ struct Material {
     float roughness;
     float metallicness;
     float specular;
+    float sheen;
+    vec3 sheenTint;
+    float subsurface;
     int hasAlbedoMap;
     vec2 albedoMap;
     int hasNormalMap;
@@ -77,15 +80,20 @@ void main() {
     uv = in_uv;
     
     // Get the material
+    int mtl_size = 17;
     int materialID     = int(obj_material);
-    mtl.color          = vec3(texelFetch(materialsTexture, ivec2(0, 0  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * 12), 0).r);
-    mtl.roughness      = texelFetch(materialsTexture, ivec2(0, 3  + materialID * 12), 0).r;
-    mtl.metallicness   = texelFetch(materialsTexture, ivec2(0, 4  + materialID * 12), 0).r;
-    mtl.specular       = texelFetch(materialsTexture, ivec2(0, 5  + materialID * 12), 0).r;
-    mtl.hasAlbedoMap   = int(texelFetch(materialsTexture, ivec2(0, 6  + materialID * 12), 0).r);
-    mtl.albedoMap      = vec2(texelFetch(materialsTexture, ivec2(0, 7  + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 8  + materialID * 12), 0).r);
-    mtl.hasNormalMap   = int(texelFetch(materialsTexture, ivec2(0, 9  + materialID * 12), 0).r);
-    mtl.normalMap      = vec2(texelFetch(materialsTexture, ivec2(0, 10 + materialID * 12), 0).r, texelFetch(materialsTexture, ivec2(0, 11 + materialID * 12), 0).r);    
+    mtl.color          = vec3(texelFetch(materialsTexture, ivec2(0, 0 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * mtl_size), 0).r);
+    mtl.roughness      = texelFetch(materialsTexture, ivec2(0, 3 + materialID * mtl_size), 0).r;
+    mtl.metallicness   = texelFetch(materialsTexture, ivec2(0, 4 + materialID * mtl_size), 0).r;
+    mtl.specular       = texelFetch(materialsTexture, ivec2(0, 5 + materialID * mtl_size), 0).r;
+    mtl.sheen          = texelFetch(materialsTexture, ivec2(0, 6 + materialID * mtl_size), 0).r;
+    mtl.sheenTint      = vec3(texelFetch(materialsTexture, ivec2(0, 7 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 8 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 9 + materialID * mtl_size), 0).r);
+    mtl.subsurface     = texelFetch(materialsTexture, ivec2(0, 10 + materialID * mtl_size), 0).r;
+    
+    mtl.hasAlbedoMap   = int(texelFetch(materialsTexture,  ivec2(0, 11  + materialID * mtl_size), 0).r);
+    mtl.albedoMap      = vec2(texelFetch(materialsTexture, ivec2(0, 12  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 13  + materialID * mtl_size), 0).r);
+    mtl.hasNormalMap   = int(texelFetch(materialsTexture,  ivec2(0, 14  + materialID * mtl_size), 0).r);
+    mtl.normalMap      = vec2(texelFetch(materialsTexture, ivec2(0, 15  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 16 + materialID * mtl_size), 0).r);    
 
     // Set the fragment position
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(in_position, 1.0);
