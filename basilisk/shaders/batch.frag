@@ -19,7 +19,9 @@ struct Material {
     float roughness;
     float metallicness;
     float specular;
-
+    float sheen;
+    vec3 sheenTint;
+    float subsurface;
     int hasAlbedoMap;
     vec2 albedoMap;
     int hasNormalMap;
@@ -43,25 +45,29 @@ float SchlickFresnel(float value){
     return pow(clamp(1 - value, 0.0, 1.0), 5);
 }
 
-vec3 CalcDirLight(DirectionalLight light, Material mtl, vec3 N, vec3 L, vec3 H) {
-    float diff = max(dot(L, N), 0.0);
-    float spec = pow(max(dot(N, H), 0.0), mtl.roughness);
-    // Final result
-    return (diff + spec * diff * mtl.specular + light.ambient) * light.intensity * light.color;
-}
-
 // Diffuse model as outlined by Burley: https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 L, vec3 V, vec3 H) {
 
+    // Diffuse from roughness of mtl
     float cos_theta_l = max(dot(N, L), 0.0);
     float cos_theta_V = max(dot(N, V), 0.0);
     float cos_theta_D = max(dot(L, H), 0.0); // Also equal to dot(V, H) by symetry
 
-    float FD90 = 0.5 + 2 * mtl.roughness * cos_theta_D * cos_theta_D;
+    float fD90 = 0.5 + 2 * mtl.roughness * cos_theta_D * cos_theta_D;
 
-    vec3 Fd = (albedo / 3.1415) * (1 + (FD90 - 1) * pow(1 - cos_theta_l, 5)) * (1 + (FD90 - 1) * pow(1 - cos_theta_V, 5));
-    return Fd * cos_theta_l * light.intensity * light.color;
+    vec3 fD = (albedo / 3.1415) * (1 + (fD90 - 1) * pow(1 - cos_theta_l, 5)) * (1 + (fD90 - 1) * pow(1 - cos_theta_V, 5));
 
+
+    // Sheen lobe
+    vec3 fS = mtl.sheen * pow((1 - cos_theta_D), 5) * mtl.sheenTint;
+    
+
+    // Subsurface approximation
+    float fSS90 = mtl.roughness * cos_theta_D * cos_theta_D;
+    float FSS = (1 / 3.1415) * (1 + (fSS90 - 1) * pow(1 - cos_theta_l, 5)) * (1 + (fSS90 - 1) * pow(1 - cos_theta_V, 5));
+    vec3 fSS = albedo * 1.25 * (FSS * (1 / (cos_theta_l + cos_theta_V) - 0.5) + 0.5);
+
+    return (mix(fD, fSS, mtl.subsurface) + fS) * cos_theta_l * light.intensity * light.color;
 }
 
 vec3 getAlbedo(Material mtl, vec2 uv, float gamma) {
@@ -88,12 +94,11 @@ void main() {
     vec3 normal = getNormal(mtl, normal, TBN);
 
     // Lighting variables
-    vec3 N = normalize(normal);                                // normal
-    vec3 L = normalize(-dirLight.direction);                   // light direction
+    vec3 N = normalize(normal);                     // normal
+    vec3 L = normalize(-dirLight.direction);        // light direction
     vec3 V = normalize(cameraPosition - position);  // view vector
     vec3 H = normalize(L + V);                      // half vector
 
-    // vec3 light_result = CalcDirLight(dirLight, mtl, N, L, H) / 10000000;
     vec3 light_result = PrincipledDiffuse(dirLight, mtl, albedo, N, L, V, H) + dirLight.ambient;
     light_result = pow(light_result, vec3(1.0/gamma));
 
