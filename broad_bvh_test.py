@@ -20,20 +20,23 @@ materials = [bsk.Material(color=(255 * (i & 4), 255 * (i & 2), 255 * (i & 1))) f
 aabb_edges = []
 is_pressed = False
 
+radius = 20
+
 while engine.running:
     keys = pg.key.get_pressed()
     if keys[pg.K_k] and not is_pressed: is_pressed = True
     if not keys[pg.K_k] and is_pressed: 
         is_pressed = False
         
-        node = scene.add_node(
-            position=[random.uniform(-10, 10), random.uniform(-3, -10), random.uniform(-10, 10)], 
-            scale=[random.uniform(0.5, 2) for _ in range(3)],
-            rotation=[random.uniform(-10, 10), random.uniform(-3, -10), random.uniform(-10, 10)], 
-            mesh=cube_mesh, 
-            material=mud_mtl,
-            collisions=True
-        )
+        for i in range(5):
+            node = scene.add_node(
+                position=[random.uniform(-radius, radius), random.uniform(-3, -radius), random.uniform(-radius, radius)], 
+                scale=[random.uniform(0.5, 2) for _ in range(3)],
+                rotation=[random.uniform(-radius, radius), random.uniform(-3, -radius), random.uniform(-radius, radius)], 
+                mesh=cube_mesh, 
+                material=materials[i % 6],
+                collisions=True
+            )
         
         # vertices = node.collider.obb_points
     

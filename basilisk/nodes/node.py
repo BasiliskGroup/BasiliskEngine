@@ -1,25 +1,22 @@
 import glm
 import numpy as np
 from ..generic.vec3 import Vec3
+from ..generic.quat import Quat
+from ..generic.matrices import get_model_matrix
 from ..mesh.mesh import Mesh
+from ..mesh.cube import cube
 from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
 from ..render.chunk import Chunk
-from ..generic.matrices import get_model_matrix
 
-# class NodeError(ValueError):
-#     def __init__(self, node: str):
-#         self.node = node
-        
-# raise NodeError("moew")
 
 class Node():
     position: Vec3
     """The position of the node in meters with swizzle xyz"""
     scale: Vec3
     """The scale of the node in meters in each direction"""
-    rotation: glm.quat # TODO add custom quat class
+    rotation: Quat
     """The rotation of the node"""
     forward: glm.vec3
     """The forward facing vector of the node"""
@@ -59,8 +56,8 @@ class Node():
     """List of nodes that this node is a parent of"""
 
     def __init__(self, node_handler,
-            position:            Vec3=None, 
-            scale:               Vec3=None, 
+            position:            glm.vec3=None, 
+            scale:               glm.vec3=None, 
             rotation:            glm.quat=None, 
             forward:             glm.vec3=None, 
             mesh:                Mesh=None, 
@@ -85,26 +82,26 @@ class Node():
         Base building block for populating a Basilisk scene.
         """
         
+        # parents
         self.node_handler = node_handler
         self.chunk = None
 
-        self.previous_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
-        self.previous_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
-        self.previous_rotation: glm.quat = glm.quat(rotation) if rotation else glm.quat(1, 0, 0, 0)
-
+        # node data
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
         self.internal_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
-        self.rotation = rotation if rotation else glm.quat(1, 0, 0, 0)
+        self.internal_rotation: Quat = Quat(rotation) if rotation else Quat(1, 0, 0, 0)
         self.forward  = forward  if forward  else glm.vec3(1, 0, 0)
-        self.mesh     = mesh     if mesh     else None # TODO add default cube mesh
+        self.mesh     = mesh     if mesh     else cube
         self.material = material if material else None # TODO add default base material
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
+        # physics body
         if physics: self.physics_body: PhysicsBody = self.node_handler.scene.physics_engine.add(mass = mass if mass else 1.0)
         elif mass: raise ValueError('Node: cannot have mass if it does not have physics')
         else: self.physics_body = None
         
+        # collider
         if collisions: 
             if not mesh: raise ValueError('Node: cannot collide if it doezsnt have a mesh')
             self.collider: Collider = self.node_handler.scene.collider_handler.add(
@@ -122,11 +119,38 @@ class Node():
         elif collision_group:  raise ValueError('Node: cannot have collider group if it does not allow collisions')
         else: self.collider = None
         
+        # information and recursion
         self.name = name
         self.tags = tags if tags else []
         self.static = static and not (self.physics_body or self.velocity or self.rotational_velocity)
         self.data_index = 0
         self.children = []
+        
+        # default callback functions for node transform
+        self.previous_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
+        self.previous_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
+        self.previous_rotation: Quat = Quat(rotation) if rotation else Quat(1, 0, 0, 0) # TODO Do these need to be the callback class or can they just be glm? 
+        
+        self.position_updated = False
+        self.scale_updated    = False
+        self.rotation_updated  = False
+        
+        # callback function to be added to the custom Vec3 and Quat classes
+        def position_callback():
+            # print('position')
+            self.position_updated = True
+            
+        def scale_callback():
+            # print('scale')
+            self.scale_updated = True
+            
+        def rotation_callback():
+            # print('rotation')
+            self.rotation_updated = True
+        
+        self.internal_position.callback = position_callback
+        self.internal_scale.callback    = scale_callback
+        self.internal_rotation.callback = rotation_callback
         
     def update(self, dt: float) -> None:
         """
@@ -246,7 +270,7 @@ class Node():
     @property
     def scale(self):    return self.internal_scale.data
     @property
-    def rotation(self): return self._rotation
+    def rotation(self): return self.internal_rotation.data
     @property
     def forward(self):  return self._forward
     # TODO add property for Mesh
@@ -322,15 +346,15 @@ class Node():
 
     @rotation.setter
     def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
-        if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self._rotation = glm.quat(value)
+        if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self.internal_rotation.data = glm.quat(value)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
-            if len(value) == 3: self._rotation = glm.quat(glm.vec3(*value))
-            elif len(value) == 4: self._rotation = glm.quat(*value)
+            if len(value) == 3: self.internal_rotation.data = glm.quat(glm.vec3(*value))
+            elif len(value) == 4: self.internal_rotation.data = glm.quat(*value)
             else: raise ValueError(f'Node: Invalid number of values for rotation. Expected 3 or 4, got {len(value)}')
         else: raise TypeError(f'Node: Invalid rotation value type {type(value)}')
         self.update_rotation()
 
-    def update_position(self):
+    def update_position(self): # TODO Could these be repeated in a Vec3/Quat Callback function? 
         """
         Updates the rotation
         """

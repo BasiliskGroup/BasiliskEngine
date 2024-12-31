@@ -13,7 +13,7 @@ class BroadBVH(BVH):
         self.collider_handler = collider_handler
         self.root = None
         
-    def add(self, collider):
+    def add(self, collider: Collider):
         """
         Adds a single collider to the bvh tree
         """
@@ -24,18 +24,30 @@ class BroadBVH(BVH):
         
         # check if root is primative
         if isinstance(self.root, Collider): 
-            self.root = BroadAABB(self.root, collider)
+            sibling = self.root
+            self.root      = BroadAABB(sibling, collider, None)
+            sibling.parent = collider.parent = self.root
             return
         
         # find the best sibling (c_best only used during the recursion)
-        c_best, sibling, old_parent = self.root.find_sibling(collider, None, 1e10, 0)
-        new_parent = BroadAABB(sibling, collider)
+        c_best, sibling = self.root.find_sibling(collider, 1e10, 0)
+        old_parent = sibling.parent
+        new_parent = BroadAABB(sibling, collider, old_parent)
         
         # if the sibling was not the root
         if old_parent:
             if old_parent.a == sibling: old_parent.a = new_parent
             else:                       old_parent.b = new_parent
         else: self.root = new_parent
+        
+        sibling.parent = new_parent
+        collider.parent = new_parent
+        
+        # walk back up tree and refit TODO add tree rotations
+        aabb = new_parent
+        while aabb:
+            aabb.update_points()
+            aabb = aabb.parent
         
     def get_all_aabbs(self) -> list[tuple[glm.vec3, glm.vec3, int]]: # TODO test function
         """
