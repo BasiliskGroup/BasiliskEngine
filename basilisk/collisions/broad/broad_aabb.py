@@ -14,38 +14,59 @@ class BroadAABB(AABB):
     """furthest positive vertex of the AABB"""
     bottom_left: glm.vec3
     """furthest negative vertex of the AABB"""
+    parent: AABB
+    """Back reference to the parent AABB"""
     
-    def __init__(self, a: AABB | Collider, b: AABB | Collider) -> None:
+    def __init__(self, a: AABB | Collider, b: AABB | Collider, parent: AABB) -> None:
         self.a = a
         self.b = b
+        self.parent = parent
         
         # calculate extreme points
+        self.update_points()
+        
+    def update_points(self) -> None:
+        """
+        Updates the extreme points of the AABB based on the children
+        """
         self.top_right   = glm.max(self.a.top_right, self.b.top_right)
         self.bottom_left = glm.min(self.a.bottom_left, self.b.bottom_left)
         
-    def find_sibling(self, collider: Collider, parent: AABB, c_best: float, inherited: float) -> tuple[float, AABB, AABB]:
+    def find_sibling(self, collider: Collider, c_best: float, inherited: float) -> tuple[float, AABB | Collider]:
         """
         Determines the best sibling for inserting a collider into the BVH
         """
+        # compute estimate sa
+        top_right   = glm.max(self.top_right, collider.top_right)
+        bottom_left = glm.min(self.bottom_left, collider.bottom_left)
+        union_area  = get_aabb_surface_area(top_right, bottom_left)
+        
         # compute lowest cost and determine if children are a viable option
-        delta_c = self.surface_area
-        c_low   = collider.aabb_surface_area + delta_c + inherited
-        c       = collider.aabb_surface_area + inherited
+        c = union_area + inherited
         if c < c_best: c_best = c
         
+        delta_surface_area = union_area - self.surface_area ############
+        c_low   = collider.aabb_surface_area + delta_surface_area + inherited
+        
         # investigate children
-        best_aabb, best_parent = self, parent
-        if c_low >= c_best: return c_best, best_aabb, best_parent
+        best_sibling = self
+        # if c_low >= c_best: return c_best, best_sibling
+        
         for child in (self.a, self.b):
+            if isinstance(child, BroadAABB): 
+                child_c, child_aabb = child.find_sibling(collider, c_best, inherited + delta_surface_area)
+            else: 
+                # compute cost for child
+                top_right   = glm.max(self.top_right, child.top_right)
+                bottom_left = glm.min(self.bottom_left, child.bottom_left)
+                union_area  = get_aabb_surface_area(top_right, bottom_left)
+                child_delta = union_area - child.aabb_surface_area
+                
+                child_c, child_aabb = child_delta + inherited, child
             
-            if isinstance(child, BroadAABB): child_c, child_aabb = child.find_sibling(collider, self, c_best, inherited + delta_c)
-            else: child_c, child_aabb = child.aabb_surface_area + inherited, child
-            if child_c < c_best: 
-                c_best      = child_c
-                best_aabb   = child_aabb
-                best_parent = self
+            if child_c < c_best: c_best, best_sibling = child_c, child_aabb
             
-        return c_best, best_aabb, best_parent
+        return c_best, best_sibling
     
     def get_collided(self, collider: Collider) -> list[Collider]:
         """

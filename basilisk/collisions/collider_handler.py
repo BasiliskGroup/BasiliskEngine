@@ -38,7 +38,11 @@ class ColliderHandler():
         """
         Resets collider collision values and resolves all collisions in the scene
         """
+        # reset collision data
         for collider in self.colliders: collider.collisions = {}
+        # TODO update BVH
+        possible = self.resolve_broad_collisions()
+        # TODO narrow collision & save data
         
     def collide_obb_obb(self, collider1: Collider, collider2: Collider) -> tuple[glm.vec3, float] | None:
         """
@@ -101,8 +105,10 @@ class ColliderHandler():
                 
                 # run broad collision for specified mesh types
                 if max(len(collider1.mesh.points), len(collider2.mesh.points)) > 250:  # contains at least one "large" mesh TODO write heuristic algorithm for determining large meshes
-                    ...
+                    if not self.collide_obb_obb_decision(collider1, collider2): continue # TODO combine into short circuit ^
                 
                 collisions.add((collider1, collider2)) # TODO find a secure way for ordering colliders
+                
+        return collisions
     
     def resolve_narrow_collisions(self): ...

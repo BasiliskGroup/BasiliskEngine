@@ -1,6 +1,7 @@
 import glm
+from ..generic.abstract_bvh import AbstractAABB as AABB
 from ..generic.meshes import transform_points, get_aabb_surface_area
-from ..generic.matrices import get_model_matrix
+from ..mesh.cube import cube
 from ..mesh.mesh import Mesh
 
 class Collider():
@@ -30,19 +31,22 @@ class Collider():
     """AABB most negative corner"""
     aabb_surface_area: float
     """The surface area of the collider's AABB"""
+    parent: AABB
+    """Reference to the parent AABB in the broad BVH"""
     mesh: Mesh
     """Reference to the colliding mesh"""
 
     def __init__(self, collider_handler, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None):
         self.collider_handler = collider_handler
         self.node = node
-        self.mesh = self.node.mesh
+        self.mesh = cube if box_mesh else self.node.mesh
         self.static_friction = static_friction
         self.kinetic_friction = kinetic_friction
         self.elasticity = elasticity
         self.collision_group = collision_group
         self.collision_velocity = 0
         self.collisions = {}
+        self.parent = None
         
     @property
     def has_collided(self): return bool(self.collisions)
