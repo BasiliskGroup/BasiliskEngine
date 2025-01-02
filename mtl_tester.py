@@ -15,6 +15,8 @@ class App():
         self.sphere_mesh = bsk.Mesh('tests/sphere.obj')
         self.mud = bsk.Image('tests/mud.png')
         self.mud_normal = bsk.Image('tests/mud_normal.png')
+        self.cloth_albedo = bsk.Image('tests/cloth_albedo.png')
+        self.cloth_normal = bsk.Image('tests/cloth_normal.png')
         self.mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
