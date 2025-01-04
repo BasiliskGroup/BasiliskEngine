@@ -5,6 +5,7 @@ from pyobjloader import load_model
 from .narrow_bvh import NarrowBVH
 from ..generic.matrices import compute_inertia_moment, compute_inertia_product
 from ..generic.meshes import get_extreme_points_np, moller_trumbore
+from .mesh_from_data import from_data
 
 
 class Mesh():
@@ -27,20 +28,21 @@ class Mesh():
     bvh: NarrowBVH
     """BVH for accessing triangle intersections with a line"""
 
-    def __init__(self, path: str | os.PathLike) -> None:
+    def __init__(self, data: str | os.PathLike | np.ndarray) -> None:
         """
         Mesh object containing all the data needed to render an object and perform physics/collisions on it
         Args:
-            path: str
-                path to the .obj file of the model
+            data: str
+                path to the .obj file of the model or an array of the mesh data
         """
         
         # Verify the path type
-        if not isinstance(path, str) and not isinstance(path, os.PathLike):
-            raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.path')
-
-        # Load the model from file
-        model = load_model(path)
+        if isinstance(data, str) or isinstance(data, os.PathLike):  # Load the model from file
+            model = load_model(data)
+        elif isinstance(data, np.ndarray):                          # Load the model from array of data
+            model = from_data(data)
+        else:                                                       # Invalid data type
+            raise TypeError(f'Invalid path type: {type(data)}. Expected a string or os.path')
 
         # Get the vertex data
         if len(model.vertex_data[0]) == 8:
