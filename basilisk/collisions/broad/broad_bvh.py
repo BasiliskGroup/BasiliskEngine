@@ -30,7 +30,7 @@ class BroadBVH(BVH):
             return
         
         # find the best sibling (c_best only used during the recursion)
-        c_best, sibling = self.root.find_sibling(collider, 1e10, 0)
+        c_best, sibling = self.root.find_sibling(collider, 0)
         old_parent = sibling.parent
         new_parent = BroadAABB(sibling, collider, old_parent)
         

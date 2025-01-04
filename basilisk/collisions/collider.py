@@ -48,12 +48,19 @@ class Collider():
         self.collisions = {}
         self.parent = None
         
+        # lazy update variables TODO change to distinguish between static and nonstatic objects
+        self.needs_obb = True
+        self.needs_half_dimensions = True
+        
     @property
     def has_collided(self): return bool(self.collisions)
     @property
     def half_dimensions(self): # TODO look for optimization
-        top_right = glm.max(self.obb_points)
-        return top_right - self.node.geometric_center
+        if self.needs_half_dimensions: 
+            top_right = glm.max(self.obb_points)
+            self._half_dimensions = top_right - self.node.geometric_center
+            self.needs_half_dimensions = False
+        return self._half_dimensions
     @property
     def bottom_left(self): return self.node.geometric_center - self.half_dimensions
     @property
@@ -61,4 +68,8 @@ class Collider():
     @property
     def aabb_surface_area(self): return get_aabb_surface_area(self.top_right, self.bottom_left)
     @property
-    def obb_points(self): return transform_points(self.mesh.aabb_points, self.node.model_matrix)
+    def obb_points(self): 
+        if self.needs_obb: 
+            self._obb_points = transform_points(self.mesh.aabb_points, self.node.model_matrix)
+            self.needs_obb = False
+        return self._obb_points

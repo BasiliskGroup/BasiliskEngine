@@ -137,15 +137,15 @@ class Node():
         
         # callback function to be added to the custom Vec3 and Quat classes
         def position_callback():
-            # print('position')
+            print('position')
             self.position_updated = True
             
         def scale_callback():
-            # print('scale')
+            print('scale')
             self.scale_updated = True
             
         def rotation_callback():
-            # print('rotation')
+            print('rotation')
             self.rotation_updated = True
         
         self.internal_position.callback = position_callback
@@ -156,6 +156,14 @@ class Node():
         """
         Updates the node's movement variables based on the delta time
         """
+        # update all hard-to-update variables
+        
+        
+        # reset updates
+        self.position_updated = False
+        self.scale_updated    = False
+        self.rotation_updated = False
+        
         self.position += dt * self.velocity
         self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
         self.rotation = glm.normalize(self.rotation)

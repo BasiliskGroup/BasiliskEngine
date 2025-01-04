@@ -96,7 +96,7 @@ class Quat():
     @data.setter
     def data(self, value: glm.quat):
         self._data = value
-        if self.callback: self.callback()
+        if self.callback and all(abs(self.data[i] - value[i]) > 1e-12 for i in range(4)): self.callback()
         
     @w.setter
     def w(self, value):
