@@ -85,6 +85,10 @@ class Node():
         # parents
         self.node_handler = node_handler
         self.chunk = None
+        
+        # lazy update variables
+        self.needs_geometric_center = True
+        self.needs_model_matrix = True
 
         # node data
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
@@ -312,7 +316,7 @@ class Node():
     @property
     def tags(self): return self._tags
     @property
-    def x(self): return self.internal_position.data.x # TODO test these functions
+    def x(self): return self.internal_position.data.x
     @property
     def y(self): return self.internal_position.data.y
     @property
@@ -320,11 +324,18 @@ class Node():
     
     # TODO add descriptions in the class header
     @property
-    def model_matrix(self): return get_model_matrix(self.position, self.scale, self.rotation) # TODO set this to lazy update
+    def model_matrix(self): 
+        if self.needs_model_matrix: 
+            self._model_matrix = get_model_matrix(self.position, self.scale, self.rotation)
+            self.needs_model_matrix = False
+        return self._model_matrix
     @property
-    def geometric_center(self): 
-        if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
-        return self.model_matrix * self.mesh.geometric_center
+    def geometric_center(self): # assumes the node has a mesh
+        # if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
+        if self.needs_geometric_center: 
+            self._geometric_center = self.model_matrix * self.mesh.geometric_center
+            self.needs_geometric_center = False
+        return self._geometric_center
     @property
     def center_of_mass(self): 
         if not self.mesh: raise RuntimeError('Node: Cannot retrieve center of mass if node does not have mesh')

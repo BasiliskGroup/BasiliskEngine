@@ -21,9 +21,9 @@ blue = bsk.Material(color=(0, 0, 255))
 
 aabb_edges = []
 is_pressed = False
-radius = 50
+radius = 200
 
-for _ in range(50):
+for _ in range(400):
     scene.add_node(
         position=[random.uniform(-radius, radius), random.uniform(-3, -radius), random.uniform(-radius, radius)], 
         scale=[random.uniform(0.5, 2) for _ in range(3)],
@@ -52,6 +52,5 @@ while engine.running:
     if keys[pg.K_p]: node.position -= (0, 0.01, 0)
     
     possible = scene.collider_handler.resolve_broad_collisions()
-    # print(possible)
     
     engine.update()

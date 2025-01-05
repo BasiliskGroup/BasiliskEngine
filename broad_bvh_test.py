@@ -20,7 +20,7 @@ materials = [bsk.Material(color=(255 * (i & 4), 255 * (i & 2), 255 * (i & 1))) f
 aabb_edges = []
 is_pressed = False
 
-radius = 20
+radius = 50
 
 while engine.running:
     keys = pg.key.get_pressed()

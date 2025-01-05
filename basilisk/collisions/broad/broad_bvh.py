@@ -2,6 +2,7 @@ import glm
 from .broad_aabb import BroadAABB
 from ..collider import Collider
 from ...generic.abstract_bvh import AbstractBVH as BVH
+from ...generic.meshes import get_aabb_surface_area
 
 class BroadBVH(BVH):
     root: BroadAABB
@@ -13,7 +14,7 @@ class BroadBVH(BVH):
         self.collider_handler = collider_handler
         self.root = None
         
-    def add(self, collider: Collider):
+    def add(self, collider: Collider) -> None:
         """
         Adds a single collider to the bvh tree
         """
@@ -47,6 +48,7 @@ class BroadBVH(BVH):
         aabb = new_parent
         while aabb:
             aabb.update_points()
+            self.rotate(aabb)
             aabb = aabb.parent
         
     def get_all_aabbs(self) -> list[tuple[glm.vec3, glm.vec3, int]]: # TODO test function
@@ -56,11 +58,44 @@ class BroadBVH(BVH):
         if isinstance(self.root, BroadAABB): return self.root.get_all_aabbs(0)
         return [(self.root.top_right, self.root.bottom_left, 0)]
         
-    def remove(self, collider: Collider): ...
+    def remove(self, collider: Collider) -> None: ...
     
-    def rotate(self): ...
+    def rotate(self, aabb: BroadAABB) -> None:
+        """
+        Rotates the BVH tree to reduce surface area of internal AABBs
+        """
+        # determine if rotation is possible
+        parent: BroadAABB | None = aabb.parent
+        if not parent: return
         
-    def get_collided(self, collider: Collider):
+        grand = parent.parent
+        if not grand: return
+        
+        # determine if swapping 
+        aunt = grand.b if grand.a == parent else grand.a
+        sibling = parent.b if parent.a == aabb else parent.a
+        
+        top_right   = glm.max(aunt.top_right, sibling.top_right)
+        bottom_left = glm.min(aunt.bottom_left, sibling.bottom_left)
+        aunt_sibling_area = get_aabb_surface_area(top_right, bottom_left)
+        
+        if aunt_sibling_area > parent.surface_area: return
+        
+        # rotate tree if necessary
+        if grand.a == aunt: grand.a = aabb
+        else:               grand.b = aabb
+        
+        if parent.a == aabb: parent.a = aunt
+        else:                parent.b = aunt
+        
+        # reset parents and update points to resize AABBs
+        aunt.parent = parent
+        aabb.parent = grand
+        
+        parent.update_points()
+        grand.update_points()
+        
+    def get_collided(self, collider: Collider) -> list[Collider]:
         """
         Returns which objects may be colliding from the BVH
         """
