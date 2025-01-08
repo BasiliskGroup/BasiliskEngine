@@ -92,7 +92,7 @@ while engine.running:
                 aabb_edges.append(aabb_edge)
                 
             # obb axes
-            rot_mat = glm.transpose(glm.mat3_cast(node.rotation))
+            rot_mat = glm.transpose(glm.mat3_cast(glm.inverse(node.rotation)))
             for i in range(3):
                 scene.add_node(
                     position = node.position + rot_mat[i] * 3,
