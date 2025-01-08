@@ -38,7 +38,7 @@ class Mesh():
         
         # Verify the path type
         if isinstance(data, str) or isinstance(data, os.PathLike):  # Load the model from file
-            model = load_model(data)
+            model = load_model(data, calculate_tangents=True)
         elif isinstance(data, np.ndarray):                          # Load the model from array of data
             model = from_data(data)
         else:                                                       # Invalid data type
