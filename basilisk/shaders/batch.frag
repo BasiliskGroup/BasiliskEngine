@@ -15,21 +15,25 @@ struct DirectionalLight {
 };  
 
 struct Material {
-    vec3 color;
+    vec3  color;
     float roughness;
-    float metallicness;
-    float specular;
-    float sheen;
-    vec3 sheenTint;
     float subsurface;
-    int hasAlbedoMap;
-    vec2 albedoMap;
-    int hasNormalMap;
-    vec2 normalMap;
+    float sheen;
+    vec3  sheenTint;
+    float anisotropic;
+    float specular;
+    float metallicness;
+    vec3  specularTint;
+    float clearcoat;
+    float clearcoatGloss;
+    
+    int   hasAlbedoMap;
+    vec2  albedoMap;
+    int   hasNormalMap;
+    vec2  normalMap;
 };
 
 in vec2 uv;
-in vec3 normal;
 in vec3 position;
 in mat3 TBN;
 
@@ -46,31 +50,8 @@ float SchlickFresnel(float value){
 }
 
 // Diffuse model as outlined by Burley: https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
-// vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 L, vec3 V, vec3 H) {
-
-//     // Diffuse from roughness of mtl
-//     float cos_theta_l = max(dot(N, L), 0.0);
-//     float cos_theta_V = max(dot(N, V), 0.0);
-//     float cos_theta_D = max(dot(L, H), 0.0); // Also equal to dot(V, H) by symetry
-
-//     float fD90 = 0.5 + 2 * mtl.roughness * cos_theta_D * cos_theta_D;
-
-//     float fD = (1 / 3.1415) * (1 + (fD90 - 1) * pow(1 - cos_theta_l, 5)) * (1 + (fD90 - 1) * pow(1 - cos_theta_V, 5));
-
-
-//     // Sheen lobe
-//     vec3 fS = mtl.sheen * pow((1 - cos_theta_D), 5) * mtl.sheenTint;
-    
-
-//     // Subsurface approximation
-//     float fSS90 = mtl.roughness * cos_theta_D * cos_theta_D;
-//     float FSS = (1 / 3.1415) * (1 + (fSS90 - 1) * pow(1 - cos_theta_l, 5)) * (1 + (fSS90 - 1) * pow(1 - cos_theta_V, 5));
-//     float fSS = 1.25 * (FSS * (1 / (cos_theta_l + cos_theta_V) - 0.5) + 0.5);
-
-//     return (albedo * mix(fD, fSS, mtl.subsurface) + fS) * cos_theta_l * light.intensity * light.color;
-// }
-
-vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 L, vec3 V, vec3 H) {
+// Much help from Acerola's video on the topic: https://www.youtube.com/watch?v=KkOkx0FiHDA&t=570s
+vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 L, vec3 V, vec3 H, vec3 X, vec3 Y) {
 
     // Diffuse from roughness of mtl
     float cos_theta_l = max(dot(N, L), 0.0);
@@ -91,6 +72,14 @@ vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N
     // Subsurface
     float Fss = mix(1.0, Fss90, FL) * mix(1.0, Fss90, FV);
     float ss = 1.25 * (Fss * ((1 / (cos_theta_l + cos_theta_V)) - 0.5) + 0.5);
+
+    // Specular
+    // float alpha = mtl.roughness * mtl.roughness;
+    // float aspect = sqrt(1 - 0.9 * mtl.anisotropic);
+    // float alpha_x = alpha / aspect;
+    // float alpha_y = alpha * aspect;
+
+    // vec3 D_GTR_aniso = (1 / 3.1415) * (alpha_x / alpha_y) * (1 / ((H )))
 
     return ((1 / 3.1415) * albedo * mix(Fd, ss, mtl.subsurface) + fS) * cos_theta_l * light.intensity * light.color;
 }
@@ -115,16 +104,20 @@ void main() {
     float gamma = 2.2;
     vec3 viewDir = vec3(normalize(cameraPosition - position));
 
-    vec3 albedo = getAlbedo(mtl, uv, gamma);
-    vec3 normal = getNormal(mtl, normal, TBN);
+    vec3 albedo    = getAlbedo(mtl, uv, gamma);
+    vec3 normal    = getNormal(mtl, TBN[2], TBN);
+    vec3 tangent   = getNormal(mtl, TBN[0], TBN);
+    vec3 bitangent = getNormal(mtl, TBN[1], TBN);
 
     // Lighting variables
     vec3 N = normalize(normal);                     // normal
     vec3 L = normalize(-dirLight.direction);        // light direction
     vec3 V = normalize(cameraPosition - position);  // view vector
     vec3 H = normalize(L + V);                      // half vector
+    vec3 X = normalize(tangent);                    // Tangent Vector
+    vec3 Y = normalize(bitangent);                  // Bitangent Vector
 
-    vec3 light_result = PrincipledDiffuse(dirLight, mtl, albedo, N, L, V, H) + dirLight.ambient;
+    vec3 light_result = PrincipledDiffuse(dirLight, mtl, albedo, N, L, V, H, X, Y) + dirLight.ambient;
     light_result = pow(light_result, vec3(1.0/gamma));
 
     fragColor = vec4(light_result, 1.0);
