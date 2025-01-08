@@ -1,6 +1,7 @@
 import glm
 import numpy as np
 
+
 # transformations
 def transform_points(points: np.ndarray, model_matrix: glm.mat4x4) -> list[glm.vec3]:
     """
