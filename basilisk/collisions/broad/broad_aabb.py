@@ -32,7 +32,7 @@ class BroadAABB(AABB):
         self.top_right   = glm.max(self.a.top_right, self.b.top_right)
         self.bottom_left = glm.min(self.a.bottom_left, self.b.bottom_left)
         
-    def find_sibling(self, collider: Collider, c_best: float, inherited: float) -> tuple[float, AABB | Collider]:
+    def find_sibling(self, collider: Collider, inherited: float) -> tuple[float, AABB | Collider]:
         """
         Determines the best sibling for inserting a collider into the BVH
         """
@@ -42,27 +42,25 @@ class BroadAABB(AABB):
         union_area  = get_aabb_surface_area(top_right, bottom_left)
         
         # compute lowest cost and determine if children are a viable option
-        c = union_area + inherited
-        if c < c_best: c_best = c
+        c_best = union_area + inherited
         
-        delta_surface_area = union_area - self.surface_area ############
-        c_low   = collider.aabb_surface_area + delta_surface_area + inherited
+        delta_surface_area = union_area - self.surface_area 
+
+        c_low = collider.aabb_surface_area + delta_surface_area + inherited
         
         # investigate children
         best_sibling = self
-        # if c_low >= c_best: return c_best, best_sibling
+        if c_low >= c_best: return c_best, best_sibling
         
         for child in (self.a, self.b):
-            if isinstance(child, BroadAABB): 
-                child_c, child_aabb = child.find_sibling(collider, c_best, inherited + delta_surface_area)
+            if isinstance(child, BroadAABB): child_c, child_aabb = child.find_sibling(collider, inherited + delta_surface_area)
             else: 
                 # compute cost for child
                 top_right   = glm.max(self.top_right, child.top_right)
                 bottom_left = glm.min(self.bottom_left, child.bottom_left)
                 union_area  = get_aabb_surface_area(top_right, bottom_left)
-                child_delta = union_area - child.aabb_surface_area
-                
-                child_c, child_aabb = child_delta + inherited, child
+
+                child_c, child_aabb = union_area + inherited, child
             
             if child_c < c_best: c_best, best_sibling = child_c, child_aabb
             

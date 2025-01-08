@@ -94,7 +94,7 @@ class Vec3():
     @data.setter
     def data(self, value: glm.vec3):
         self._data = value
-        if self.callback: self.callback()
+        if self.callback and all(abs(self.data[i] - value[i]) > 1e-12 for i in range(3)): self.callback()
 
     @x.setter
     def x(self, value):

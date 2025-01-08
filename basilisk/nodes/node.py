@@ -85,6 +85,10 @@ class Node():
         # parents
         self.node_handler = node_handler
         self.chunk = None
+        
+        # lazy update variables
+        self.needs_geometric_center = True
+        self.needs_model_matrix = True
 
         # node data
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
@@ -137,15 +141,15 @@ class Node():
         
         # callback function to be added to the custom Vec3 and Quat classes
         def position_callback():
-            # print('position')
+            print('position')
             self.position_updated = True
             
         def scale_callback():
-            # print('scale')
+            print('scale')
             self.scale_updated = True
             
         def rotation_callback():
-            # print('rotation')
+            print('rotation')
             self.rotation_updated = True
         
         self.internal_position.callback = position_callback
@@ -156,6 +160,14 @@ class Node():
         """
         Updates the node's movement variables based on the delta time
         """
+        # update all hard-to-update variables
+        
+        
+        # reset updates
+        self.position_updated = False
+        self.scale_updated    = False
+        self.rotation_updated = False
+        
         self.position += dt * self.velocity
         self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
         self.rotation = glm.normalize(self.rotation)
@@ -304,7 +316,7 @@ class Node():
     @property
     def tags(self): return self._tags
     @property
-    def x(self): return self.internal_position.data.x # TODO test these functions
+    def x(self): return self.internal_position.data.x
     @property
     def y(self): return self.internal_position.data.y
     @property
@@ -312,11 +324,18 @@ class Node():
     
     # TODO add descriptions in the class header
     @property
-    def model_matrix(self): return get_model_matrix(self.position, self.scale, self.rotation) # TODO set this to lazy update
+    def model_matrix(self): 
+        if self.needs_model_matrix: 
+            self._model_matrix = get_model_matrix(self.position, self.scale, self.rotation)
+            self.needs_model_matrix = False
+        return self._model_matrix
     @property
-    def geometric_center(self): 
-        if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
-        return self.model_matrix * self.mesh.geometric_center
+    def geometric_center(self): # assumes the node has a mesh
+        # if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
+        if self.needs_geometric_center: 
+            self._geometric_center = self.model_matrix * self.mesh.geometric_center
+            self.needs_geometric_center = False
+        return self._geometric_center
     @property
     def center_of_mass(self): 
         if not self.mesh: raise RuntimeError('Node: Cannot retrieve center of mass if node does not have mesh')
