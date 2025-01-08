@@ -5,6 +5,7 @@ from .broad.broad_bvh import BroadBVH
 from ..mesh.cube import cube
 from ..generic.collisions import get_sat_axes
 from .narrow.gjk import collide_gjk
+from .narrow.epa import get_epa_from_gjk
 
 class ColliderHandler():
     scene: ...
@@ -121,19 +122,28 @@ class ColliderHandler():
         for collision in broad_collisions: # assumes that broad collisions are unique
             collider1 = collision[0]
             collider2 = collision[1]
-            node1 = collider1.node
-            node2 = collider2.node
+            node1: Node = collider1.node
+            node2: Node = collider2.node
             
             # get peneration data or quit early if no collision is found
             if collider1.mesh == cube and collider2.mesh == cube: # obb-obb collision
                 
                 # run SAT for obb-obb (includes peneration)
                 data = self.collide_obb_obb(collider1, collider2)
+                if not data: continue
+                
+                vec, distance = data
                 
             else: # use gjk to determine collisions between non-cuboid meshes
-                data, simplex = collide_gjk(node1, node2)
+                has_collided, simplex = collide_gjk(node1, node2)
+                if not has_collided: continue
                 
-            if not data: continue # no collision happened
+                face, polytope = get_epa_from_gjk(node1, node2, simplex)
+                vec, distance  = face[1], face[0]
+                
+            print('\033[92m', vec, distance, '\033[0m')
+            # resolve collision penetration
+            node2.position -= vec * distance
             
             collided.append(node1)
             collided.append(node2)

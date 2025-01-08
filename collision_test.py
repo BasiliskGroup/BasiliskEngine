@@ -10,7 +10,7 @@ engine.scene = scene
 cube_mesh = bsk.cube
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 
-meshes = [sphere_mesh]
+meshes = [cube_mesh]
 
 # materials
 mud = bsk.Image("tests/mud.png")
@@ -21,7 +21,7 @@ red = bsk.Material(color=(255, 0, 0))
 blue = bsk.Material(color=(0, 0, 255))
 
 is_pressed = False
-radius = 8
+radius = 0.5
 
 nodes = [scene.add_node(
     position=[random.uniform(-radius, radius), random.uniform(-3, -radius), random.uniform(-radius, radius)], 
@@ -30,16 +30,25 @@ nodes = [scene.add_node(
     mesh=random.choice(meshes), 
     material=blue,
     collisions=True
-) for _ in range(50)]
+) for _ in range(2)]
+
+# broad collision detection
+possible = scene.collider_handler.resolve_broad_collisions()
+# print(len(possible))
+is_pressed = False
 
 while engine.running:
     
     # reset object colors
-    for node in nodes: 
+    for node in nodes:
         node.material = blue
     
     # control one object, idk which one it is good luck
     keys = pg.key.get_pressed()
+    if keys[pg.K_q] and not is_pressed: is_pressed = True
+    if not keys[pg.K_q] and is_pressed: 
+        collided = scene.collider_handler.resolve_narrow_collisions(possible)
+        is_pressed = False
     if keys[pg.K_u]: nodes[0].position += (0.01, 0, 0)
     if keys[pg.K_j]: nodes[0].position -= (0.01, 0, 0)
     if keys[pg.K_h]: nodes[0].position -= (0, 0, 0.01)
@@ -47,13 +56,10 @@ while engine.running:
     if keys[pg.K_o]: nodes[0].position += (0, 0.01, 0)
     if keys[pg.K_p]: nodes[0].position -= (0, 0.01, 0)
     
-    # broad collision detection
-    possible = scene.collider_handler.resolve_broad_collisions()
-    # print(len(possible))
-    collided = scene.collider_handler.resolve_narrow_collisions(possible)
     
-    for node in collided:
-        node.material = red
+    
+    # for node in collided:
+    #     node.material = red
     
     # set color of colliding objects
     # for collision in possible:
