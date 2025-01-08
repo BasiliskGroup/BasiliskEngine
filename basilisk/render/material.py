@@ -26,24 +26,24 @@ class Material():
     """Amount of subsurface scattering the material exhibits. Value in range [0, 1]. Lerps between diffuse and subsurface lobes"""
     sheen: float
     """Amount of sheen the material exhibits. Additive lobe"""
-    sheen_tint: glm.vec3 = glm.vec3(255.0, 255.0, 255.0)
-    """Tinted color of the sheen lobe. Set to white by default"""
+    sheen_tint: float
+    """Amount that the sheen is tinted to the base color. Set to white by default"""
     anisotropic: float
     """The amount of anisotropic behaviour the materials specular lobe exhibits"""
     specular: float
     """The strength of the specular lobe of the material"""
     metallicness: float
     """The metallicness of the material, which dictates how much light the surfaces diffuses"""
-    specular_tint: glm.vec3 = glm.vec3(255.0, 255.0, 255.0)
-    """Tinted color of the specular lobe. Set to white by default"""
+    specular_tint: float
+    """Amount that the specular is tinted to the base color. Set to white by default"""
     clearcoat: float
     """Amount of clearcoat the material exhibits. Additive lobe"""
     clearcoat_gloss: float
     """The glossiness of the clearcoat layer. 0 For a satin appearance, 1 for a gloss appearance"""
 
     def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, 
-                 roughness: float=0.0, subsurface: float=0.0, sheen: float=0.0, sheen_tint: glm.vec3=glm.vec3(255.0, 255.0, 255.0),
-                 anisotropic: float=0.0, specular: float=1.0, metallicness: float=0.0, specular_tint: glm.vec3=glm.vec3(255.0, 255.0, 255.0),
+                 roughness: float=0.0, subsurface: float=0.0, sheen: float=0.0, sheen_tint: float=0.5,
+                 anisotropic: float=0.0, specular: float=1.0, metallicness: float=0.0, specular_tint: float=0.0,
                  clearcoat: float=0.0, clearcoat_gloss: float=0.0) -> None:
         """
         Basilisk Material object. Contains the data and images references used by the material.
@@ -86,8 +86,7 @@ class Material():
 
         # Add color and PBR data
         data = [self.color.x         / 255.0, self.color.y         / 255.0, self.color.z         / 255.0, self.roughness,   self.subsurface, self.sheen,
-                self.sheen_tint.x    / 255.0, self.sheen_tint.y    / 255.0, self.sheen_tint.z    / 255.0, self.anisotropic, self.specular,   self.metallicness,
-                self.specular_tint.x / 255.0, self.specular_tint.y / 255.0, self.specular_tint.z / 255.0, self.clearcoat,   self.clearcoat_gloss]
+                self.sheen_tint, self.anisotropic, self.specular,   self.metallicness, self.specular_tint, self.clearcoat,   self.clearcoat_gloss]
         
         # Add texture data
         if self.texture: data.extend([1, self.texture.index.x, self.texture.index.y])
@@ -162,8 +161,8 @@ class Material():
         if self.material_handler: self.material_handler.write()
 
     @sheen_tint.setter
-    def sheen_tint(self, value: tuple | list | glm.vec3 | np.ndarray):
-        self._sheen_tint = validate_glm_vec3("Material", "sheen tint", value)
+    def sheen_tint(self, value: float | int | glm.float32):
+        self._sheen_tint = validate_float("Material", "sheen tint", value)
         if self.material_handler: self.material_handler.write()
 
     @anisotropic.setter
@@ -182,8 +181,8 @@ class Material():
         if self.material_handler: self.material_handler.write()
 
     @specular_tint.setter
-    def specular_tint(self, value: tuple | list | glm.vec3 | np.ndarray):
-        self._specular_tint = validate_glm_vec3("Material", "specular tint", value)
+    def specular_tint(self, value: float | int | glm.float32):
+        self._specular_tint = validate_float("Material", "specular tint", value)
         if self.material_handler: self.material_handler.write()
     
     @clearcoat.setter

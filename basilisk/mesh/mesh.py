@@ -1,7 +1,8 @@
 import numpy as np
 import glm
 import os
-from pyobjloader import load_model
+# from pyobjloader import load_model
+from .model import load_model
 from .narrow_bvh import NarrowBVH
 from ..generic.matrices import compute_inertia_moment, compute_inertia_product
 from ..generic.meshes import get_extreme_points_np, moller_trumbore

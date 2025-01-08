@@ -13,22 +13,20 @@ layout (location = 8) in float obj_material;
 
 // Variables passed on to the fragment shader
 out vec2 uv;
-out vec3 normal;
-out vec3 tangent;
 out vec3 position;
 out mat3 TBN;
 
 // Material struct sent to fragment shader
 struct Material {
-    vec3  color;    
+    vec3  color;
     float roughness;
     float subsurface;
     float sheen;
-    vec3  sheenTint;
+    float sheenTint;
     float anisotropic;
     float specular;
     float metallicness;
-    vec3  specularTint;
+    float specularTint;
     float clearcoat;
     float clearcoatGloss;
     
@@ -85,7 +83,7 @@ void main() {
     uv       = in_uv;
     
     // Get the material
-    int mtl_size = 23;
+    int mtl_size = 19;
     int materialID     = int(obj_material);
     mtl.color          = vec3(texelFetch(materialsTexture, ivec2(0, 0 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * mtl_size), 0).r);
     
@@ -93,18 +91,18 @@ void main() {
     mtl.roughness      = texelFetch(materialsTexture, ivec2(0, 3 + materialID * mtl_size), 0).r;
     mtl.subsurface     = texelFetch(materialsTexture, ivec2(0, 4 + materialID * mtl_size), 0).r;
     mtl.sheen          = texelFetch(materialsTexture, ivec2(0, 5 + materialID * mtl_size), 0).r;
-    mtl.sheenTint      = vec3(texelFetch(materialsTexture, ivec2(0, 6 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 7 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 8 + materialID * mtl_size), 0).r);
-    mtl.anisotropic    = texelFetch(materialsTexture, ivec2(0, 9 + materialID * mtl_size), 0).r;
-    mtl.specular       = texelFetch(materialsTexture, ivec2(0, 10 + materialID * mtl_size), 0).r;
-    mtl.metallicness   = texelFetch(materialsTexture, ivec2(0, 11 + materialID * mtl_size), 0).r;
-    mtl.specularTint   = vec3(texelFetch(materialsTexture, ivec2(0, 12 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 13 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 14 + materialID * mtl_size), 0).r);
-    mtl.clearcoat      = texelFetch(materialsTexture, ivec2(0, 15 + materialID * mtl_size), 0).r;
-    mtl.clearcoatGloss = texelFetch(materialsTexture, ivec2(0, 16 + materialID * mtl_size), 0).r;
+    mtl.sheenTint      = texelFetch(materialsTexture, ivec2(0, 6 + materialID * mtl_size), 0).r;
+    mtl.anisotropic    = texelFetch(materialsTexture, ivec2(0, 7 + materialID * mtl_size), 0).r;
+    mtl.specular       = texelFetch(materialsTexture, ivec2(0, 8 + materialID * mtl_size), 0).r;
+    mtl.metallicness   = texelFetch(materialsTexture, ivec2(0, 9 + materialID * mtl_size), 0).r;
+    mtl.specularTint   = texelFetch(materialsTexture, ivec2(0, 10 + materialID * mtl_size), 0).r;
+    mtl.clearcoat      = texelFetch(materialsTexture, ivec2(0, 11 + materialID * mtl_size), 0).r;
+    mtl.clearcoatGloss = texelFetch(materialsTexture, ivec2(0, 12 + materialID * mtl_size), 0).r;
     
-    mtl.hasAlbedoMap   = int(texelFetch(materialsTexture,  ivec2(0, 17  + materialID * mtl_size), 0).r);
-    mtl.albedoMap      = vec2(texelFetch(materialsTexture, ivec2(0, 18  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 19  + materialID * mtl_size), 0).r);
-    mtl.hasNormalMap   = int(texelFetch(materialsTexture,  ivec2(0, 20  + materialID * mtl_size), 0).r);
-    mtl.normalMap      = vec2(texelFetch(materialsTexture, ivec2(0, 21  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 22 + materialID * mtl_size), 0).r);    
+    mtl.hasAlbedoMap   = int(texelFetch(materialsTexture,  ivec2(0, 13  + materialID * mtl_size), 0).r);
+    mtl.albedoMap      = vec2(texelFetch(materialsTexture, ivec2(0, 14  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 15  + materialID * mtl_size), 0).r);
+    mtl.hasNormalMap   = int(texelFetch(materialsTexture,  ivec2(0, 16  + materialID * mtl_size), 0).r);
+    mtl.normalMap      = vec2(texelFetch(materialsTexture, ivec2(0, 17  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 18 + materialID * mtl_size), 0).r);    
 
     // Set the fragment position
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(in_position, 1.0);

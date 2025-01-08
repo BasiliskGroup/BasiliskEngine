@@ -82,7 +82,7 @@ $$f_D = \frac{baseColor}{\pi}lerp(1, F_{d90}, (1 - cos\theta_l)^5)lerp(1, F_{d90
 However, in order to perserve physical plausibility, we did not choose to assume linearity.
 
 #### Sheen and Sheen Tint
-The sheen is an additive lobe to the diffuse term that behave much like a fresnel factor, adding extra reflectance to the material at grazing angles. The sheen tint paramter allows for this reflectance to be tinted toward a given color value. The value of the sheen is given by:
+The sheen is an additive lobe to the diffuse term that behave much like a fresnel factor, adding extra reflectance to the material at grazing angles. The sheen tint paramter specifies how much the sheen should be tinted toward the base color. The value of the sheen is given by:
 
 $$f_{Sheen} = sheen\cdot(1 - cos\theta_d)^5\cdot sheenTint$$
 
@@ -122,9 +122,9 @@ Therefore, we can view the GGX distribution as the GTR distribution with $\gamma
 
 $$D_{GTR_2} = \frac{\alpha^2}{\pi((\alpha^2 - 1) cos^2 \theta_h + 1)^2}$$
 
-To add more artistic control over the specular shape, Disney makes use of the Anisotropic version of the GGX distribution function:
+To add more artistic control over the specular shape, Disney makes use of the Anisotropic version of the GGX distribution function. This is the function used in Basilisk:
 
-$$D_{GTR_{2aniso}}=\frac1\pi \frac{\alpha_x}{\alpha_y}\frac{1}{(\frac{(\vec h \cdot \vec X)^2}{\alpha_x^2} + \frac{(\vec h \cdot \vec Y)^2}{\alpha_y^2}) + (\vec h \cdot \vec n)^2}$$
+$$D_{GTR_{2aniso}}=\frac1\pi \frac{1}{\alpha_x\alpha_y}\frac{1}{((\frac{\vec h \cdot \vec X}{\alpha_x})^2 + (\frac{\vec h \cdot \vec Y}{\alpha_y})^2 + (\vec h \cdot \vec n)^2)^2}$$
 
 Where $\alpha_x$ and $\alpha_y$ are given by:
 

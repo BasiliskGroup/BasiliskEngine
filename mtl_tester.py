@@ -12,12 +12,16 @@ class App():
 
         self.scene.camera = bsk.StaticCamera(position=(0, 0, 4))
 
-        self.sphere_mesh = bsk.Mesh('tests/sphere.obj')
+        self.sphere_mesh = bsk.Mesh('tests/demo_sphere.obj')
         self.mud = bsk.Image('tests/mud.png')
         self.mud_normal = bsk.Image('tests/mud_normal.png')
         self.cloth_albedo = bsk.Image('tests/cloth_albedo.png')
         self.cloth_normal = bsk.Image('tests/cloth_normal.png')
-        self.mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
+        self.foil_normal = bsk.Image('tests/foil_normal.png')
+        self.mud_mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
+        self.foil_mtl = bsk.Material(normal=self.foil_normal)
+
+        self.mtl = self.mud_mtl
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
@@ -32,6 +36,12 @@ class App():
             self.engine.mouse.grab = True
         if self.engine.keys[pg.K_3]:
             self.engine.mouse.set_pos(400, 400)
+        if self.engine.keys[pg.K_m]:
+            self.node.material = self.mud_mtl
+            self.mtl = self.mud_mtl
+        if self.engine.keys[pg.K_f]:
+            self.node.material = self.foil_mtl
+            self.mtl = self.foil_mtl
 
         if self.engine.mouse.left_down:
             if 30 < self.engine.mouse.y < 60:
@@ -43,12 +53,33 @@ class App():
                 self.mtl.sheen = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
             if 120 < self.engine.mouse.y < 150:
                 self.mtl.subsurface = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
+            if 150 < self.engine.mouse.y < 180:
+                self.mtl.metallicness = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
+            if 180 < self.engine.mouse.y < 210:
+                self.mtl.anisotropic = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
+            if 210 < self.engine.mouse.y < 240:
+                self.mtl.specular = min(max((self.engine.mouse.x - 90) / 200 * 2, 0.0), 2.0)
+            if 240 < self.engine.mouse.y < 270:
+                self.mtl.specular_tint = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
+            if 270 < self.engine.mouse.y < 300:
+                self.mtl.sheen_tint = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
+            if 300 < self.engine.mouse.y < 330:
+                self.mtl.clearcoat = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
+            if 330 < self.engine.mouse.y < 360:
+                self.mtl.clearcoat_gloss = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
 
     def draw(self):
         self.draw_slider(1, self.cam_rot, title="Light")
         self.draw_slider(2, self.mtl.roughness, title="Roughness")
         self.draw_slider(3, self.mtl.sheen, title="Sheen")
         self.draw_slider(4, self.mtl.subsurface, title="Subsurface")
+        self.draw_slider(5, self.mtl.metallicness, title="Metallicness")
+        self.draw_slider(6, self.mtl.anisotropic, title="Anisotropic")
+        self.draw_slider(7, self.mtl.specular / 2, title="Specular")
+        self.draw_slider(8, self.mtl.specular_tint, title="Specular Tint")
+        self.draw_slider(9, self.mtl.sheen_tint, title="Sheen Tint")
+        self.draw_slider(10, self.mtl.clearcoat, title="Clearcoat")
+        self.draw_slider(11, self.mtl.clearcoat_gloss, title="Clearcoat Gloss")
 
     def draw_slider(self, y, value, title=None):
         if title: bsk.draw.text(self.engine, title, (45, y * 30 + 15), scale=0.25)

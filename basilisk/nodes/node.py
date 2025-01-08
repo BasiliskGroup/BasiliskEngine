@@ -286,7 +286,8 @@ class Node():
     @property
     def forward(self):  return self._forward
     # TODO add property for Mesh
-    # TODO add property for Material
+    @property
+    def material(self): return self._material
     @property
     def velocity(self): return self._velocity
     @property
@@ -423,7 +424,14 @@ class Node():
         
     # TODO add setter for Mesh
     
-    # TODO add setter for Material
+    @material.setter
+    def material(self, value: Material):
+        if isinstance(value, Material): 
+            self._material = value
+            self.node_handler.scene.material_handler.add(value)
+            if not self.chunk: return
+            self.chunk.node_update_callback(self)
+        else: raise TypeError(f'Node: Invalid material value type {type(value)}')
     
     @velocity.setter
     def velocity(self, value: tuple | list | glm.vec3 | np.ndarray):
