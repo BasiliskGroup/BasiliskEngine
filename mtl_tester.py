@@ -56,6 +56,8 @@ class App():
             self.scene.sky = self.base_sky
         if self.engine.keys[pg.K_6]:
             self.scene.sky = self.sunset_sky
+        if self.engine.keys[pg.K_p]:
+            self.scene.frame.save()
 
         if self.engine.mouse.left_down:
             if 30 < self.engine.mouse.y < 60:

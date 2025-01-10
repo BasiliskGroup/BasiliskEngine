@@ -32,7 +32,7 @@ class Engine():
     mouse: Mouse
     """Object containing information about the user's mouse"""
 
-    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False, grab_mouse=True) -> None:
+    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False, grab_mouse=True, headless=False) -> None:
         """
         Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with Basilisk
         Args:
@@ -42,25 +42,32 @@ class Engine():
                 The title of the engine window
             vsync: bool
                 Flag for running engine with vsync enabled
+            headless: bool
+                Flag for headless rendering
         """
         # Save the window size
         self.win_size = win_size
 
+        pg.init()  
         # Initialize pygame and OpenGL attributes
-        pg.init()
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # Pygame display init
-        pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+        if headless:
+            pg.display.set_mode((300, 50), vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
+            pg.display.iconify()
+        else:
+            pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
         pg.display.set_caption(title)
         pg.display.set_icon(pg.image.load("basilisk.png"))
 
         # MGL context setup
         self.ctx = mgl.create_context()
         self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
-        
+
         # Global attributes referenced by the handlers
+        self.headless = headless
         self.set_configurations()
 
         # Time variables
@@ -104,6 +111,7 @@ class Engine():
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()
+                self.scene.frame.set_textures()
 
 
         # Update the scene if possible

@@ -11,6 +11,7 @@ from .physics.physics_engine import PhysicsEngine
 from .collisions.collider_handler import ColliderHandler
 from .draw.draw_handler import DrawHandler
 from .render.sky import Sky
+from .render.frame import Frame
 
 
 class Scene():
@@ -34,6 +35,7 @@ class Scene():
         self.light_handler    = None
         self.draw_handler     = None
         self.sky              = None
+        self.frame            = None
 
     def update(self) -> None:
         """
@@ -48,10 +50,14 @@ class Scene():
         Renders all the nodes with meshes in the scene
         """
 
+        self.frame.use()
         self.shader_handler.write()
         self.sky.render()
         self.node_handler.render()
         self.draw_handler.render()
+
+        if self.engine.headless: return
+        self.frame.render()
     
     def add_node(self, 
             position:            glm.vec3=None, 
@@ -96,6 +102,7 @@ class Scene():
         self.material_handler = MaterialHandler(self)
         self.light_handler    = LightHandler(self)
         self.draw_handler     = DrawHandler(self)
+        self.frame            = Frame(self)
         self.sky              = Sky(self.engine)
 
     @property
