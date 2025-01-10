@@ -3,7 +3,6 @@ from .node import Node
 from ..render.chunk_handler import ChunkHandler
 from ..mesh.mesh import Mesh
 from ..render.material import Material
-import time
 
 
 class NodeHandler():

@@ -1,6 +1,5 @@
 import basilisk as bsk
-
-from math import cos, sin
+import cudart
 
 engine = bsk.Engine()
 scene = bsk.Scene()

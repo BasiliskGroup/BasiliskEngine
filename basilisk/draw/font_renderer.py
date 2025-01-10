@@ -1,9 +1,9 @@
 import pygame as pg
 
 class FontRenderer():
-    def __init__(self):
+    def __init__(self, root):
         pg.font.init()
-        self.font = pg.font.Font("basilisk/draw/Roboto-Regular.ttf", 48)
+        self.font = pg.font.Font(root + '/bsk_assets/Roboto-Regular.ttf', 48)
         self.text_renders = {}
 
     def render(self, text, color=(255, 255, 255), bold=False, underline=False, italic=False):

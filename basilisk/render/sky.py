@@ -13,7 +13,7 @@ class Sky:
         self.scene = engine.scene
         self.ctx   = engine.ctx
         
-        if not sky_texture: sky_texture = 'basilisk/bsk_assets/skybox.png'
+        if not sky_texture: sky_texture = engine.root + '/bsk_assets/skybox.png'
 
         self.set_renderer()
         self.set_texture(sky_texture)

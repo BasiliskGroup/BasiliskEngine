@@ -4,6 +4,7 @@ import pygame as pg
 import moderngl as mgl
 from .config import Config
 from .input.mouse import Mouse
+from .mesh.cube import Cube
 import time
 
 class Engine():
@@ -31,6 +32,8 @@ class Engine():
     """bool list containing the state of all keys at the previous frame"""
     mouse: Mouse
     """Object containing information about the user's mouse"""
+    root: str
+    """Path to the root directory containing internal data"""
 
     def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False, grab_mouse=True, headless=False) -> None:
         """
@@ -60,7 +63,6 @@ class Engine():
         else:
             pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
         pg.display.set_caption(title)
-        pg.display.set_icon(pg.image.load("basilisk.png"))
 
         # MGL context setup
         self.ctx = mgl.create_context()
@@ -69,7 +71,12 @@ class Engine():
         # Global attributes referenced by the handlers
         self.headless = headless
         self.set_configurations()
+        self.root = os.path.dirname(__file__)
+        self.cube = Cube(self)
 
+        # Update the icon
+        pg.display.set_icon(pg.image.load(self.root + '/bsk_assets/basilisk.png'))
+        
         # Time variables
         self.clock = pg.time.Clock()
         self.delta_time = 0

@@ -33,9 +33,9 @@ class ShaderHandler:
         self.programs = {}
         self.shader_uniforms = {}
 
-        self.load('batch', 'basilisk/shaders/batch.vert', 'basilisk/shaders/batch.frag')
-        self.load('draw', 'basilisk/shaders/draw.vert', 'basilisk/shaders/draw.frag')
-        self.load('sky', 'basilisk/shaders/sky.vert', 'basilisk/shaders/sky.frag')
+        self.load('batch', self.engine.root + '/shaders/batch.vert', self.engine.root + '/shaders/batch.frag')
+        self.load('draw', self.engine.root + '/shaders/draw.vert', self.engine.root + '/shaders/draw.frag')
+        self.load('sky', self.engine.root + '/shaders/sky.vert', self.engine.root + '/shaders/sky.frag')
 
     def load(self, name: str, vert_path: str, frag_path: str) -> None:
         """

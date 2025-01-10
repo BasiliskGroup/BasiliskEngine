@@ -2,6 +2,7 @@ import basilisk as bsk
 import glm
 from math import cos, sin
 import pygame as pg
+import cudart
 
 class App():
     def __init__(self):
