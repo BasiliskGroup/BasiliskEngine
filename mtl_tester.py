@@ -34,8 +34,8 @@ class App():
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
-        self.base_sky = bsk.Sky(self.engine, 'tests\skybox.png')
-        self.sunset_sky = bsk.Sky(self.engine, 'tests\SkySkybox.png')
+        self.base_sky = bsk.Sky(self.engine, 'tests/skybox.png')
+        self.sunset_sky = bsk.Sky(self.engine, 'tests/SkySkybox.png')
 
         self.cam_rot = 0
 

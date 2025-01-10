@@ -67,12 +67,16 @@ class ColliderHandler():
             if max1 < min2 or max2 < min1: return None
             
             # if lines are not intersecting
-            overlap = min(max1, max2) - max(min1, min2)
-            # if overlap > small_overlap: continue
+            if   max1 > max2 and min1 < min2: overlap = min(max1 - min2, max2 - min1)
+            elif max2 > max1 and min2 < min1: overlap = min(max1 - min2, max2 - min1)
+            else:                             overlap = min(max1, max2) - max(min1, min2) # TODO check if works with containment
+            
+            if abs(overlap) > abs(small_overlap): continue
             small_overlap = overlap
             small_axis    = axis
         
         print(axes.index(small_axis), glm.length(small_axis))
+        print('overlap:', small_overlap)
             
         return small_axis, small_overlap
     
@@ -147,9 +151,9 @@ class ColliderHandler():
                 vec *= -1
                 
             print('\033[92m', vec, distance, '\033[0m')
-            # resolve collision penetration
-            node1.position += vec * distance
             
+            # resolve collision penetration
+            node2.position -= vec * distance
             
             collided.append((node1, node2, vec * distance))
             

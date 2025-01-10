@@ -24,11 +24,11 @@ is_pressed = False
 radius = 0.5
 
 nodes = [scene.add_node(
-    position=[random.uniform(-radius, radius), random.uniform(-3, -radius), random.uniform(-radius, radius)], 
+    position=[random.uniform(-radius, radius) for __ in range(3)], 
     scale=[random.uniform(0.5, 2) for _ in range(3)],
-    rotation=[random.uniform(-radius, radius), random.uniform(-3, -radius), random.uniform(-radius, radius)], 
+    rotation=[random.uniform(-radius, radius), random.uniform(-3, radius), random.uniform(-radius, radius)], 
     mesh=random.choice(meshes), 
-    material=materials[_ % 6],
+    material=materials[_ % 2],
     collisions=True
 ) for _ in range(2)]
 
