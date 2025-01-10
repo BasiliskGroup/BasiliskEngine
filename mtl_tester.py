@@ -22,10 +22,12 @@ class App():
         self.foil_normal = bsk.Image('tests/foil_normal.png')
         self.mud_mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
         self.foil_mtl = bsk.Material(normal=self.foil_normal)
+        self.cloth_mtl = bsk.Material(texture=self.cloth_albedo, normal=self.cloth_normal)
 
         self.mtl = bsk.Material()
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
+        self.node = self.scene.add_node(position=(3, 0, 0), material=self.mtl)
 
         self.base_sky = bsk.Sky(self.engine, 'tests\skybox.png')
         self.sunset_sky = bsk.Sky(self.engine, 'tests\SkySkybox.png')
@@ -47,6 +49,9 @@ class App():
         if self.engine.keys[pg.K_f]:
             self.node.material = self.foil_mtl
             self.mtl = self.foil_mtl
+        if self.engine.keys[pg.K_c]:
+            self.node.material = self.cloth_mtl
+            self.mtl = self.cloth_mtl
         if self.engine.keys[pg.K_5]:
             self.scene.sky = self.base_sky
         if self.engine.keys[pg.K_6]:

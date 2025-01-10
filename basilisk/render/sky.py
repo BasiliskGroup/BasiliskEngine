@@ -1,7 +1,5 @@
-import os
 import numpy as np
 from PIL import Image as PIL_Image
-import moderngl as mgl
 
 class Sky:
     texture_cube=None
@@ -24,8 +22,6 @@ class Sky:
         """
         Render the skybox to current render destination
         """
-
-        self.ctx.disable(flags=mgl.CULL_FACE)
         self.vao.render()
 
     def write(self):

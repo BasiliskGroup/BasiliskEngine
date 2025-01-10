@@ -26,12 +26,8 @@ class NodeHandler():
         """
         Updates the nodes and chunks in the scene
         """
-        t1 = time.time()
         for node in self.nodes: node.update(self.scene.engine.delta_time)
-        t2 = time.time()
         self.chunk_handler.update()
-
-        # print(f"Node: {t2-t1}")
 
     def render(self):
         """

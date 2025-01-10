@@ -4,6 +4,7 @@ import pygame as pg
 import moderngl as mgl
 from .config import Config
 from .input.mouse import Mouse
+import time
 
 class Engine():
     win_size: tuple
