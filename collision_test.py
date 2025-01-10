@@ -28,7 +28,7 @@ nodes = [scene.add_node(
     scale=[random.uniform(0.5, 2) for _ in range(3)],
     rotation=[random.uniform(-radius, radius), random.uniform(-3, -radius), random.uniform(-radius, radius)], 
     mesh=random.choice(meshes), 
-    material=blue,
+    material=materials[_ % 6],
     collisions=True
 ) for _ in range(2)]
 
@@ -39,24 +39,30 @@ is_pressed = False
 
 while engine.running:
     
-    # reset object colors
-    for node in nodes:
-        node.material = blue
+    # # reset object colors
+    # for node in nodes:
+    #     node.material = blue
     
     # control one object, idk which one it is good luck
     keys = pg.key.get_pressed()
     if keys[pg.K_q] and not is_pressed: is_pressed = True
     if not keys[pg.K_q] and is_pressed: 
+        
         collided = scene.collider_handler.resolve_narrow_collisions(possible)
+        for collision in collided:
+            node1 = collision[0]
+            node2 = collision[1]
+            vec = collision[2]
+            
+            scene.add_node(
+                position=node1.position - vec, 
+                scale=[0.1, 0.1, 0.1],
+                mesh=random.choice(meshes), 
+                material=materials[5],
+                collisions=True
+            )
+            
         is_pressed = False
-    if keys[pg.K_u]: nodes[0].position += (0.01, 0, 0)
-    if keys[pg.K_j]: nodes[0].position -= (0.01, 0, 0)
-    if keys[pg.K_h]: nodes[0].position -= (0, 0, 0.01)
-    if keys[pg.K_k]: nodes[0].position += (0, 0, 0.01)
-    if keys[pg.K_o]: nodes[0].position += (0, 0.01, 0)
-    if keys[pg.K_p]: nodes[0].position -= (0, 0.01, 0)
-    
-    
     
     # for node in collided:
     #     node.material = red
