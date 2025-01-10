@@ -113,6 +113,7 @@ class MaterialHandler():
         
         self.base = Material('Base')
         self.materials.append(self.base)
+        self.write()
 
     def __del__(self) -> None:
         """

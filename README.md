@@ -3,7 +3,19 @@
 Basilisk Engine is a Python package for effortless 3D rendering and simulation.
 
 # Features
-...
+## Rendering
+Basilisk Engine uses a versatile and efficient physically based rendering pipeline, allowing for photorealistic and stylized rendering in real-time.
+
+<p align="center">
+    <img src="mud.png" alt="mud" width="400"/>
+    <img src="foil.png" alt="foil" width="400"/>
+    <img src="cloth.png" alt="mud" width="400"/>
+    <img src="floor.png" alt="mud" width="400"/>
+</p>
+
+## Physics
+
+## Performance
 
 # Getting Started
 ...

@@ -10,6 +10,8 @@ from .nodes.node_handler import NodeHandler
 from .physics.physics_engine import PhysicsEngine
 from .collisions.collider_handler import ColliderHandler
 from .draw.draw_handler import DrawHandler
+from .render.sky import Sky
+from .render.frame import Frame
 
 
 class Scene():
@@ -32,6 +34,8 @@ class Scene():
         self.material_handler = None
         self.light_handler    = None
         self.draw_handler     = None
+        self.sky              = None
+        self.frame            = None
 
     def update(self) -> None:
         """
@@ -46,9 +50,14 @@ class Scene():
         Renders all the nodes with meshes in the scene
         """
 
+        self.frame.use()
         self.shader_handler.write()
+        self.sky.render()
         self.node_handler.render()
         self.draw_handler.render()
+
+        if self.engine.headless: return
+        self.frame.render()
     
     def add_node(self, 
             position:            glm.vec3=None, 
@@ -93,9 +102,13 @@ class Scene():
         self.material_handler = MaterialHandler(self)
         self.light_handler    = LightHandler(self)
         self.draw_handler     = DrawHandler(self)
+        self.frame            = Frame(self)
+        self.sky              = Sky(self.engine)
 
     @property
     def camera(self): return self._camera
+    @property
+    def sky(self): return self._sky
 
     @camera.setter
     def camera(self, value: Camera):
@@ -104,3 +117,12 @@ class Scene():
             raise TypeError(f'Scene: Invalid camera type: {type(value)}. Expected type bsk.Camera')
         self._camera = value
         self._camera.scene = self
+
+    @sky.setter
+    def sky(self, value: Sky):
+        if not value: return
+        if not isinstance(value, Sky):
+            raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky')
+        self._sky = value
+        self._sky.write()
+

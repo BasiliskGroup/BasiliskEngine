@@ -12,18 +12,30 @@ class App():
 
         self.scene.camera = bsk.StaticCamera(position=(0, 0, 4))
 
-        self.sphere_mesh = bsk.Mesh('tests/demo_sphere.obj')
+        self.sphere_mesh = bsk.Mesh('tests/sphere.obj')
+        self.monkey_mesh = bsk.Mesh('tests/monkey.obj')
+
         self.mud = bsk.Image('tests/mud.png')
         self.mud_normal = bsk.Image('tests/mud_normal.png')
         self.cloth_albedo = bsk.Image('tests/cloth_albedo.png')
         self.cloth_normal = bsk.Image('tests/cloth_normal.png')
         self.foil_normal = bsk.Image('tests/foil_normal.png')
+        self.floor_albedo = bsk.Image('tests/floor_albedo.png')
+        self.floor_normal = bsk.Image('tests/floor_normal.png')
+
         self.mud_mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
         self.foil_mtl = bsk.Material(normal=self.foil_normal)
+        self.cloth_mtl = bsk.Material(texture=self.cloth_albedo, normal=self.cloth_normal)
+        self.floor_mtl = bsk.Material(texture=self.floor_albedo, normal=self.floor_normal)
 
-        self.mtl = self.mud_mtl
+        self.mtl = bsk.Material()
+       
+        self.show_menu = True
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
+
+        self.base_sky = bsk.Sky(self.engine, 'tests\skybox.png')
+        self.sunset_sky = bsk.Sky(self.engine, 'tests\SkySkybox.png')
 
         self.cam_rot = 0
 
@@ -31,9 +43,11 @@ class App():
         if self.engine.keys[pg.K_1]:
             self.scene.camera = bsk.StaticCamera(position=(0, 0, 4))
             self.engine.mouse.grab = False
+            self.show_menu = True
         if self.engine.keys[pg.K_2]:
             self.scene.camera = bsk.FreeCamera(position=(0, 0, 4))
             self.engine.mouse.grab = True
+            self.show_menu = False
         if self.engine.keys[pg.K_3]:
             self.engine.mouse.set_pos(400, 400)
         if self.engine.keys[pg.K_m]:
@@ -42,11 +56,23 @@ class App():
         if self.engine.keys[pg.K_f]:
             self.node.material = self.foil_mtl
             self.mtl = self.foil_mtl
+        if self.engine.keys[pg.K_c]:
+            self.node.material = self.cloth_mtl
+            self.mtl = self.cloth_mtl
+        if self.engine.keys[pg.K_f]:
+            self.node.material = self.floor_mtl
+            self.mtl = self.floor_mtl
+        if self.engine.keys[pg.K_5]:
+            self.scene.sky = self.base_sky
+        if self.engine.keys[pg.K_6]:
+            self.scene.sky = self.sunset_sky
+        if self.engine.keys[pg.K_p]:
+            self.scene.frame.save()
 
         if self.engine.mouse.left_down:
             if 30 < self.engine.mouse.y < 60:
                 self.cam_rot = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
-                self.scene.light_handler.directional_light.direction = (cos(self.cam_rot * 6.28), -.5, sin(self.cam_rot * 6.28))
+                self.scene.light_handler.directional_lights[0].direction = (cos(self.cam_rot * 6.28), -.5, sin(self.cam_rot * 6.28))
             if 60 < self.engine.mouse.y < 90:
                 self.mtl.roughness = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
             if 90 < self.engine.mouse.y < 120:
@@ -89,7 +115,7 @@ class App():
     def start(self):
         while self.engine.running:
             self.update()
-            self.draw()
+            if self.show_menu: self.draw()
             self.engine.update()
 
 app = App()

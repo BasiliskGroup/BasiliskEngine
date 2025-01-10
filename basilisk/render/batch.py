@@ -54,7 +54,9 @@ class Batch():
             batch_data.append(node_data)
 
         # Combine all meshes into a single array
+        if len(batch_data) > 1: batch_data = np.vstack(batch_data)
         else: batch_data = np.array(batch_data, dtype='f4')
+
 
         # If there are no verticies, delete the chunk
         if len(batch_data) == 0: return False
