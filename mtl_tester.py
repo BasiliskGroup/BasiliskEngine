@@ -20,9 +20,13 @@ class App():
         self.cloth_albedo = bsk.Image('tests/cloth_albedo.png')
         self.cloth_normal = bsk.Image('tests/cloth_normal.png')
         self.foil_normal = bsk.Image('tests/foil_normal.png')
+        self.floor_albedo = bsk.Image('tests/floor_albedo.png')
+        self.floor_normal = bsk.Image('tests/floor_normal.png')
+
         self.mud_mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
         self.foil_mtl = bsk.Material(normal=self.foil_normal)
         self.cloth_mtl = bsk.Material(texture=self.cloth_albedo, normal=self.cloth_normal)
+        self.floor_mtl = bsk.Material(texture=self.floor_albedo, normal=self.floor_normal)
 
         self.mtl = bsk.Material()
        
@@ -55,6 +59,9 @@ class App():
         if self.engine.keys[pg.K_c]:
             self.node.material = self.cloth_mtl
             self.mtl = self.cloth_mtl
+        if self.engine.keys[pg.K_f]:
+            self.node.material = self.floor_mtl
+            self.mtl = self.floor_mtl
         if self.engine.keys[pg.K_5]:
             self.scene.sky = self.base_sky
         if self.engine.keys[pg.K_6]:

@@ -10,6 +10,7 @@ Basilisk Engine uses a versatile and efficient physically based rendering pipeli
     <img src="mud.png" alt="mud" width="400"/>
     <img src="foil.png" alt="foil" width="400"/>
     <img src="cloth.png" alt="mud" width="400"/>
+    <img src="floor.png" alt="mud" width="400"/>
 </p>
 
 ## Physics
