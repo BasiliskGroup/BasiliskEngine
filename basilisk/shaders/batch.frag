@@ -217,6 +217,9 @@ void main() {
     vec3 reflect_sky = texture(skyboxTexture, reflect(-V, N)).rgb;
 
     LightResult lightResult;
+    lightResult.diffuse   = vec3(0.0);
+    lightResult.specular  = vec3(0.0);
+    lightResult.clearcoat = vec3(0.0);
 
     // Add result from each directional light in the scene
     for (int i = 0; i < numDirLights; i++) {
