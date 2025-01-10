@@ -51,7 +51,7 @@ class ColliderHandler():
         """
         Finds the minimal penetrating vector for an obb obb collision, return None if not colliding. Uses SAT. 
         """
-        axes = get_sat_axes(collider1.node.rotation, collider2.node.rotation)     
+        axes = get_sat_axes(collider1.node.rotation, collider2.node.rotation) # axes are normaized
         points1 = collider1.obb_points # TODO remove once oobb points are lazy updated, switch to just using property
         points2 = collider2.obb_points
                 
@@ -68,9 +68,11 @@ class ColliderHandler():
             
             # if lines are not intersecting
             overlap = min(max1, max2) - max(min1, min2)
-            if overlap < 0 or overlap > small_overlap: continue
+            # if overlap > small_overlap: continue
             small_overlap = overlap
             small_axis    = axis
+        
+        print(axes.index(small_axis), glm.length(small_axis))
             
         return small_axis, small_overlap
     
@@ -141,12 +143,15 @@ class ColliderHandler():
                 face, polytope = get_epa_from_gjk(node1, node2, simplex)
                 vec, distance  = face[1], face[0]
                 
+            if glm.dot(vec, node2.position - node1.position) > 0:
+                vec *= -1
+                
             print('\033[92m', vec, distance, '\033[0m')
             # resolve collision penetration
-            node2.position -= vec * distance
+            node1.position += vec * distance
             
-            collided.append(node1)
-            collided.append(node2)
+            
+            collided.append((node1, node2, vec * distance))
             
             # TODO add penetration resolution
             # TODO add impulse
