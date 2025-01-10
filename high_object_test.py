@@ -1,5 +1,7 @@
 import basilisk as bsk
-import cudart
+import glm
+
+from math import cos, sin
 
 engine = bsk.Engine()
 scene = bsk.Scene()
@@ -14,10 +16,12 @@ mud_mtl = bsk.Material(texture=mud, normal=mud_normal)
 n = 15
 d = 8
 
+nodes = []
+
 for x in range(-n, n):
     for y in range(-n, n):
         for z in range(-n, n):
-            scene.add_node(position=(x * d, y * d, z * d), mesh=cube_mesh, material=mud_mtl)
+            nodes.append(scene.add_node(position=(x * d, y * d, z * d), mesh=cube_mesh))
 
 while engine.running:
     engine.update()
