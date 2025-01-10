@@ -4,17 +4,21 @@ from PIL import Image as PIL_Image
 import moderngl as mgl
 
 class Sky:
-    def __init__(self, scene):
+    texture_cube=None
+    vbo          = None
+    vao          = None
+    def __init__(self, engine, sky_texture: str | list=None):
         """
         Handler for all skybox rendering
         """
         
-        self.scene = scene
-        self.ctx   = scene.ctx
-        self.texture_cube = None
+        self.scene = engine.scene
+        self.ctx   = engine.ctx
+        
+        if not sky_texture: sky_texture = 'basilisk/bsk_assets/skybox.png'
 
         self.set_renderer()
-        self.set_texture('tests/skybox.png')
+        self.set_texture(sky_texture)
 
     def render(self):
         """
@@ -40,6 +44,9 @@ class Sky:
         List items should be string paths.
         The six images should be should be in the following order: right, left, top, bottom, front, back
         """
+
+        # Release any existing memory
+        if self.texture_cube: self.texture_cube.release()
 
         # Function-Scoped data
         images = None
@@ -77,9 +84,15 @@ class Sky:
         for i, data in enumerate(images):
             self.texture_cube.write(face=i, data=data)
 
-        self.write()
-
     def set_renderer(self):
+        """
+        
+        """
+        
+        # Release any existing memory
+        if self.vbo: self.vbo.release()
+        if self.vao: self.vao.release()
+        
         # Get the cube vertex data
         vertices = [(-1, -1, 1), ( 1, -1,  1), (1,  1,  1), (-1, 1,  1),
                     (-1, 1, -1), (-1, -1, -1), (1, -1, -1), ( 1, 1, -1)]
@@ -105,5 +118,5 @@ class Sky:
         """
         
         if self.texture_cube: self.texture_cube.release()
-        self.vbo.release()
-        self.vao.release()
+        if self.vbo: self.vbo.release()
+        if self.vao: self.vao.release()

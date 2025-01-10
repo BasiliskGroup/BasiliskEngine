@@ -27,6 +27,9 @@ class App():
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
+        self.base_sky = bsk.Sky(self.engine, 'tests\skybox.png')
+        self.sunset_sky = bsk.Sky(self.engine, 'tests\SkySkybox.png')
+
         self.cam_rot = 0
 
     def update(self):
@@ -44,6 +47,10 @@ class App():
         if self.engine.keys[pg.K_f]:
             self.node.material = self.foil_mtl
             self.mtl = self.foil_mtl
+        if self.engine.keys[pg.K_5]:
+            self.scene.sky = self.base_sky
+        if self.engine.keys[pg.K_6]:
+            self.scene.sky = self.sunset_sky
 
         if self.engine.mouse.left_down:
             if 30 < self.engine.mouse.y < 60:

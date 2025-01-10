@@ -8,3 +8,4 @@ from .render.material import Material
 from .render.shader_handler import ShaderHandler
 from .draw import draw
 from .render.camera import FreeCamera, StaticCamera
+from .render.sky import Sky

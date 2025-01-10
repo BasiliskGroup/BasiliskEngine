@@ -96,10 +96,12 @@ class Scene():
         self.material_handler = MaterialHandler(self)
         self.light_handler    = LightHandler(self)
         self.draw_handler     = DrawHandler(self)
-        self.sky              = Sky(self)
+        self.sky              = Sky(self.engine)
 
     @property
     def camera(self): return self._camera
+    @property
+    def sky(self): return self._sky
 
     @camera.setter
     def camera(self, value: Camera):
@@ -108,3 +110,12 @@ class Scene():
             raise TypeError(f'Scene: Invalid camera type: {type(value)}. Expected type bsk.Camera')
         self._camera = value
         self._camera.scene = self
+
+    @sky.setter
+    def sky(self, value: Sky):
+        if not value: return
+        if not isinstance(value, Sky):
+            raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky')
+        self._sky = value
+        self._sky.write()
+
