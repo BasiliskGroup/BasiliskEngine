@@ -12,7 +12,9 @@ class App():
 
         self.scene.camera = bsk.StaticCamera(position=(0, 0, 4))
 
-        self.sphere_mesh = bsk.Mesh('tests/demo_sphere.obj')
+        self.sphere_mesh = bsk.Mesh('tests/sphere.obj')
+        self.monkey_mesh = bsk.Mesh('tests/monkey.obj')
+
         self.mud = bsk.Image('tests/mud.png')
         self.mud_normal = bsk.Image('tests/mud_normal.png')
         self.cloth_albedo = bsk.Image('tests/cloth_albedo.png')
@@ -23,7 +25,7 @@ class App():
 
         self.mtl = bsk.Material()
        
-        self.node = self.scene.add_node(mesh=self.sphere_mesh)
+        self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
         self.cam_rot = 0
 

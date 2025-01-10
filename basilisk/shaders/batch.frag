@@ -229,6 +229,7 @@ void main() {
         lightResult.clearcoat += dirLightResult.clearcoat * lightFactor;
     }
 
+    lightResult.specular =  min(vec3(1.0), lightResult.specular);
     lightResult.specular *= mix(vec3(1.0), reflect_sky, mtl.metallicness) * luminance(reflect_sky);
     lightResult.diffuse  *= mix(vec3(1.0), ambient_sky, 0.25);
 
