@@ -33,6 +33,12 @@ struct Material {
     vec2  normalMap;
 };
 
+struct LightResult {
+    vec3 diffuse;
+    vec3 specular;
+    vec3 clearcoat;
+};
+
 in vec2 uv;
 in vec3 position;
 in mat3 TBN;
@@ -42,8 +48,12 @@ flat in Material mtl;
 
 // Uniforms
 uniform vec3 cameraPosition;
-uniform DirectionalLight dirLight;
-uniform textArray textureArrays[5];
+const int    maxDirLights = 5;
+uniform      DirectionalLight dirLights[maxDirLights];
+uniform int  numDirLights;
+uniform      textArray textureArrays[5];
+uniform samplerCube skyboxTexture;
+
 
 float luminance(vec3 color) {
     return dot(color, vec3(0.299, 0.587, 0.114));
@@ -56,8 +66,7 @@ float sqr(float x) {
 float SchlickFresnel(float x) {
     x = clamp(1.0 - x, 0.0, 1.0);
     float x2 = x * x;
-
-    return x2 * x2 * x; // While this is equivalent to pow(1 - x, 5) it is two less mult instructions
+    return x2 * x2 * x;
 }
 
 float GTR1(float ndoth, float a) {
@@ -83,7 +92,12 @@ float AnisotropicSmithGGX(float ndots, float sdotx, float sdoty, float ax, float
 
 // Diffuse model as outlined by Burley: https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // Much help from Acerola's video on the topic: https://www.youtube.com/watch?v=KkOkx0FiHDA&t=570s
-vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 L, vec3 V, vec3 H, vec3 X, vec3 Y) {
+LightResult PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 V, vec3 X, vec3 Y) {
+
+    LightResult result;
+
+    vec3 L = normalize(-light.direction);        // light direction
+    vec3 H = normalize(L + V);                      // half vector
 
     // Commonly used values
     float cos_theta_l = clamp(dot(N, L), 0.0, 1.0);
@@ -148,13 +162,14 @@ vec3 PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N
     float Fr = mix(0.04, 1.0, FH);
     float Gr = SmithGGX(cos_theta_l, cos_theta_V, 0.25);
 
-    // Lobes
-    vec3 specular = vec3(Ds * F * G);
-    vec3 diffuse  = (1 / 3.1415) * albedo * (mix(Fd, ss, mtl.subsurface) + Fsheen) * (1.0 - mtl.metallicness);
-    vec3 clearcoat = vec3(0.25 * mtl.clearcoat * Gr * Fr * Dr);
+    // Result for all lobes
 
+    result.diffuse =   max(vec3(0.0), (1 / 3.1415) * albedo * (mix(Fd, ss, mtl.subsurface) + Fsheen) * (1.0 - mtl.metallicness) * cos_theta_l);
+    result.specular =  max(vec3(0.0), vec3(Ds * F * G) * cos_theta_l);
+    result.clearcoat = max(vec3(0.0), vec3(0.25 * mtl.clearcoat * Gr * Fr * Dr) * cos_theta_l);
 
-    return (diffuse + specular + clearcoat) * cos_theta_l * light.intensity * light.color;
+    // Combine lobes and multiply weakening factor and light attributes
+    return result;
 }
 
 vec3 getAlbedo(Material mtl, vec2 uv, float gamma) {
@@ -165,11 +180,15 @@ vec3 getAlbedo(Material mtl, vec2 uv, float gamma) {
     return albedo;
 }
 
-vec3 getNormal(Material mtl, vec3 normal, mat3 TBN){
+vec3 getNormal(Material mtl, mat3 TBN){
+    // Isolate the normal vector from the TBN basis
+    vec3 normal = TBN[2];
+    // Apply normal map if the material has one
     if (bool(mtl.hasNormalMap)) {
         normal = texture(textureArrays[int(round(mtl.normalMap.x))].array, vec3(uv, round(mtl.normalMap.y))).rgb * 2.0 - 1.0;
         normal = normalize(TBN * normal); 
     }
+    // Return vector
     return normal;
 }
 
@@ -177,24 +196,49 @@ void main() {
     float gamma = 2.2;
     vec3 viewDir = vec3(normalize(cameraPosition - position));
 
+    // Get lighting vectors
     vec3 albedo    = getAlbedo(mtl, uv, gamma);
-    vec3 normal    = getNormal(mtl, TBN[2], TBN);
+    vec3 normal    = getNormal(mtl, TBN);
     vec3 tangent   = TBN[0];
     vec3 bitangent = TBN[1];
 
+    // Orthogonalize the tangent and bitangent according to the mapped normal vector
     tangent = tangent - dot(normal, tangent) * normal;
     bitangent = bitangent - dot(normal, bitangent) * normal - dot(tangent, bitangent) * tangent;
 
     // Lighting variables
     vec3 N = normalize(normal);                     // normal
-    vec3 L = normalize(-dirLight.direction);        // light direction
     vec3 V = normalize(cameraPosition - position);  // view vector
-    vec3 H = normalize(L + V);                      // half vector
     vec3 X = normalize(tangent);                    // Tangent Vector
     vec3 Y = normalize(bitangent);                  // Bitangent Vector
 
-    vec3 light_result = PrincipledDiffuse(dirLight, mtl, albedo, N, L, V, H, X, Y) + dirLight.ambient;
-    light_result = pow(light_result, vec3(1.0/gamma));
+    // Indirect lighting
+    vec3 ambient_sky = texture(skyboxTexture, N).rgb;
+    vec3 reflect_sky = texture(skyboxTexture, reflect(-V, N)).rgb;
 
-    fragColor = vec4(light_result, 1.0);
+    LightResult lightResult;
+
+    // Add result from each directional light in the scene
+    for (int i = 0; i < numDirLights; i++) {
+        // Caculate the light for the directional light
+        LightResult dirLightResult = PrincipledDiffuse(dirLights[i], mtl, albedo, N, V, X, Y);
+        vec3 lightFactor = dirLights[i].intensity * dirLights[i].color;
+        // Add each lobe
+        lightResult.diffuse   += dirLightResult.diffuse * lightFactor;
+        lightResult.specular  += dirLightResult.specular * lightFactor;
+        lightResult.clearcoat += dirLightResult.clearcoat * lightFactor;
+    }
+
+    lightResult.specular *= mix(vec3(1.0), reflect_sky, mtl.metallicness) * luminance(reflect_sky);
+    lightResult.diffuse  *= mix(vec3(1.0), ambient_sky, 0.25);
+
+    vec3 finalColor = albedo * 0.3 * mix(vec3(1.0), reflect_sky, mtl.metallicness);
+    finalColor += (lightResult.diffuse + lightResult.specular + lightResult.clearcoat);
+
+    // light_result *= mix(vec3(1.0), texture(skyboxTexture, reflect(-V, N)).rgb, mtl.metallicness);
+    // Gamma correction
+    finalColor = pow(finalColor, vec3(1.0/gamma));
+
+    // Output fragment color
+    fragColor = vec4(finalColor, 1.0);
 }

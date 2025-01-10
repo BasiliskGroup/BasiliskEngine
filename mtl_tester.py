@@ -21,7 +21,7 @@ class App():
         self.mud_mtl = bsk.Material(texture=self.mud, normal=self.mud_normal)
         self.foil_mtl = bsk.Material(normal=self.foil_normal)
 
-        self.mtl = self.mud_mtl
+        self.mtl = bsk.Material()
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
@@ -46,7 +46,7 @@ class App():
         if self.engine.mouse.left_down:
             if 30 < self.engine.mouse.y < 60:
                 self.cam_rot = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
-                self.scene.light_handler.directional_light.direction = (cos(self.cam_rot * 6.28), -.5, sin(self.cam_rot * 6.28))
+                self.scene.light_handler.directional_lights[0].direction = (cos(self.cam_rot * 6.28), -.5, sin(self.cam_rot * 6.28))
             if 60 < self.engine.mouse.y < 90:
                 self.mtl.roughness = min(max((self.engine.mouse.x - 90) / 200, 0.0), 1.0)
             if 90 < self.engine.mouse.y < 120:

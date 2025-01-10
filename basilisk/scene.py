@@ -10,6 +10,7 @@ from .nodes.node_handler import NodeHandler
 from .physics.physics_engine import PhysicsEngine
 from .collisions.collider_handler import ColliderHandler
 from .draw.draw_handler import DrawHandler
+from .render.sky import Sky
 
 
 class Scene():
@@ -32,6 +33,7 @@ class Scene():
         self.material_handler = None
         self.light_handler    = None
         self.draw_handler     = None
+        self.sky              = None
 
     def update(self) -> None:
         """
@@ -47,6 +49,7 @@ class Scene():
         """
 
         self.shader_handler.write()
+        self.sky.render()
         self.node_handler.render()
         self.draw_handler.render()
     
@@ -93,6 +96,7 @@ class Scene():
         self.material_handler = MaterialHandler(self)
         self.light_handler    = LightHandler(self)
         self.draw_handler     = DrawHandler(self)
+        self.sky              = Sky(self)
 
     @property
     def camera(self): return self._camera

@@ -26,9 +26,9 @@ class LightHandler():
         self.ctx    = scene.engine.ctx
 
         # Intialize light variables
-        self.directional_light = None
-        self.directional_light = DirectionalLight(self)
-        self.point_lights      = []
+        self.directional_lights = None
+        self.directional_lights = [DirectionalLight(self, direction=dir, intensity=intensity) for dir, intensity in zip(((1, -1, 1), (-.1, 3, -.1)), (1, .05))]
+        self.point_lights       = []
 
         # Initalize uniforms
         self.write()
@@ -40,11 +40,15 @@ class LightHandler():
 
         if not program: program = self.scene.shader_handler.programs['batch']
 
-        if directional and self.directional_light:
-            program['dirLight.direction'].write(self.directional_light.direction)
-            program['dirLight.intensity'].write(glm.float32(self.directional_light.intensity))
-            program['dirLight.color'    ].write(self.directional_light.color / 255.0)
-            program['dirLight.ambient'  ].write(glm.float32(self.directional_light.ambient))
+        if directional and self.directional_lights:
+
+            program['numDirLights'].write(glm.int32(len(self.directional_lights)))
+
+            for i, light in enumerate(self.directional_lights):
+                program[f'dirLights[{i}].direction'].write(light.direction)
+                program[f'dirLights[{i}].intensity'].write(glm.float32(light.intensity))
+                program[f'dirLights[{i}].color'    ].write(light.color / 255.0)
+                program[f'dirLights[{i}].ambient'  ].write(glm.float32(light.ambient))
         
         if point:
             ...

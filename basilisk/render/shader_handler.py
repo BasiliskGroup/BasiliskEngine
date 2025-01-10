@@ -35,6 +35,7 @@ class ShaderHandler:
 
         self.load('batch', 'basilisk/shaders/batch.vert', 'basilisk/shaders/batch.frag')
         self.load('draw', 'basilisk/shaders/draw.vert', 'basilisk/shaders/draw.frag')
+        self.load('sky', 'basilisk/shaders/sky.vert', 'basilisk/shaders/sky.frag')
 
     def load(self, name: str, vert_path: str, frag_path: str) -> None:
         """

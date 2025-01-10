@@ -21,7 +21,7 @@ def validate_glm_vec3(module: str, name: str, value: tuple | list | glm.vec3 | n
         raise TypeError(f"{module}: Invalid {name} value type {type(value)}. Expected glm.vec3")
 
 def validate_image(module: str, name: str, value: Image | None) -> Image | None:
-    "Accepts none as a value for no image"
+    """Accepts none as a value for no image"""
     if isinstance(value, Image) or isinstance(value, type(None)):
         return value
     else:
