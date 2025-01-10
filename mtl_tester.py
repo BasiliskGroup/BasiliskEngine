@@ -26,8 +26,9 @@ class App():
 
         self.mtl = bsk.Material()
        
+        self.show_menu = True
+       
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
-        self.node = self.scene.add_node(position=(3, 0, 0), material=self.mtl)
 
         self.base_sky = bsk.Sky(self.engine, 'tests\skybox.png')
         self.sunset_sky = bsk.Sky(self.engine, 'tests\SkySkybox.png')
@@ -38,9 +39,11 @@ class App():
         if self.engine.keys[pg.K_1]:
             self.scene.camera = bsk.StaticCamera(position=(0, 0, 4))
             self.engine.mouse.grab = False
+            self.show_menu = True
         if self.engine.keys[pg.K_2]:
             self.scene.camera = bsk.FreeCamera(position=(0, 0, 4))
             self.engine.mouse.grab = True
+            self.show_menu = False
         if self.engine.keys[pg.K_3]:
             self.engine.mouse.set_pos(400, 400)
         if self.engine.keys[pg.K_m]:
@@ -105,7 +108,7 @@ class App():
     def start(self):
         while self.engine.running:
             self.update()
-            self.draw()
+            if self.show_menu: self.draw()
             self.engine.update()
 
 app = App()
