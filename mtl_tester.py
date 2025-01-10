@@ -23,7 +23,7 @@ class App():
 
         self.mtl = bsk.Material()
        
-        self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
+        self.node = self.scene.add_node(mesh=self.sphere_mesh)
 
         self.cam_rot = 0
 

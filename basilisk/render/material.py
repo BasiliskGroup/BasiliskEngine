@@ -42,9 +42,9 @@ class Material():
     """The glossiness of the clearcoat layer. 0 For a satin appearance, 1 for a gloss appearance"""
 
     def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, 
-                 roughness: float=0.0, subsurface: float=0.0, sheen: float=0.0, sheen_tint: float=0.5,
+                 roughness: float=0.7, subsurface: float=0.2, sheen: float=0.5, sheen_tint: float=0.5,
                  anisotropic: float=0.0, specular: float=1.0, metallicness: float=0.0, specular_tint: float=0.0,
-                 clearcoat: float=0.0, clearcoat_gloss: float=0.0) -> None:
+                 clearcoat: float=0.5, clearcoat_gloss: float=0.25) -> None:
         """
         Basilisk Material object. Contains the data and images references used by the material.
         Args:
