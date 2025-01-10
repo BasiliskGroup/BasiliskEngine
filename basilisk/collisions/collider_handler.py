@@ -75,8 +75,8 @@ class ColliderHandler():
             small_overlap = overlap
             small_axis    = axis
         
-        print(axes.index(small_axis), glm.length(small_axis))
-        print('overlap:', small_overlap)
+        # print(axes.index(small_axis), glm.length(small_axis))
+        # print('overlap:', small_overlap)
             
         return small_axis, small_overlap
     
@@ -152,10 +152,10 @@ class ColliderHandler():
             if glm.dot(vec, node2.position - node1.position) > 0:
                 vec *= -1
                 
-            print('\033[92m', vec, distance, '\033[0m')
+            # print('\033[92m', vec, distance, '\033[0m')
             
             # resolve collision penetration
-            node2.position -= vec * distance
+            # node2.position -= vec * distance
             
             collided.append((node1, node2, vec * distance))
             

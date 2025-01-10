@@ -94,6 +94,7 @@ class Node():
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
         self.internal_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
         self.internal_rotation: Quat = Quat(rotation) if rotation else Quat(1, 0, 0, 0)
+        
         self.forward  = forward  if forward  else glm.vec3(1, 0, 0)
         self.mesh     = mesh     if mesh     else cube
         self.material = material if material else None # TODO add default base material
@@ -141,15 +142,15 @@ class Node():
         
         # callback function to be added to the custom Vec3 and Quat classes
         def position_callback():
-            print('position')
+            self.chunk.node_update_callback(self)
             self.position_updated = True
             
         def scale_callback():
-            print('scale')
+            self.chunk.node_update_callback(self)
             self.scale_updated = True
             
         def rotation_callback():
-            print('rotation')
+            self.chunk.node_update_callback(self)
             self.rotation_updated = True
         
         self.internal_position.callback = position_callback
@@ -161,17 +162,15 @@ class Node():
         Updates the node's movement variables based on the delta time
         """
         # update all hard-to-update variables
-        
+
         
         # reset updates
         self.position_updated = False
         self.scale_updated    = False
         self.rotation_updated = False
         
-        self.position += dt * self.velocity
-        self.rotation += 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity)
-        self.rotation = glm.normalize(self.rotation)
-        self.scale = self.scale
+        if any(self.velocity): self.position += dt * self.velocity
+        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation + 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity))
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
@@ -348,21 +347,19 @@ class Node():
     
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
-        if isinstance(value, glm.vec3): self.internal_position.data = glm.vec3(value)
+        if isinstance(value, glm.vec3): self.internal_position.data = value
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for position. Expected 3, got {len(value)}')
             self.internal_position.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid position value type {type(value)}')
-        self.update_position()
     
     @scale.setter
     def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
-        if isinstance(value, glm.vec3): self.internal_scale.data = glm.vec3(value)
+        if isinstance(value, glm.vec3): self.internal_scale.data = value
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for scale. Expected 3, got {len(value)}')
             self.internal_scale.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid scale value type {type(value)}')
-        self.update_scale()
 
     @rotation.setter
     def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
@@ -372,51 +369,10 @@ class Node():
             elif len(value) == 4: self.internal_rotation.data = glm.quat(*value)
             else: raise ValueError(f'Node: Invalid number of values for rotation. Expected 3 or 4, got {len(value)}')
         else: raise TypeError(f'Node: Invalid rotation value type {type(value)}')
-        self.update_rotation()
-
-    def update_position(self): # TODO Could these be repeated in a Vec3/Quat Callback function? 
-        """
-        Updates the rotation
-        """
-        
-        thresh = 0.01
-        cur  = self.position
-        prev = self.previous_position
-
-        if self.chunk and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh):
-            self.chunk.node_update_callback(self)
-            self.previous_position = self.position
-
-    def update_scale(self):
-        """
-        Updates the rotation
-        """
-        
-        thresh = 0.01
-        cur  = self.scale
-        prev = self.previous_scale
-
-        if self.chunk and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh):
-            self.chunk.node_update_callback(self)
-            self.previous_scale = self.scale
-
-    def update_rotation(self):
-        """
-        Updates the rotation 
-        """
-        
-        thresh = 0.01
-        cur  = self.rotation
-        prev = self.previous_rotation
-
-        if self.chunk and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh or abs(cur.w - prev.w) > thresh):
-            self.chunk.node_update_callback(self)
-            self.previous_rotation = self.rotation
-
 
     @forward.setter
     def forward(self, value: tuple | list | glm.vec3 | np.ndarray):
-        if isinstance(value, glm.vec3): self._forward = glm.vec3(value)
+        if isinstance(value, glm.vec3): self._forward = value
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for forward. Expected 3, got {len(value)}')
             self._forward = glm.vec3(value)
@@ -494,15 +450,15 @@ class Node():
 
     @x.setter
     def x(self, value: int | float):
-        if isinstance(value, int) or isinstance(value, float): self.internal_position.data.x = value
+        if isinstance(value, int) or isinstance(value, float): self.internal_position.x = value
         else: raise TypeError(f'Node: Invalid positional x value type {type(value)}')
         
     @y.setter
     def y(self, value: int | float):
-        if isinstance(value, int) or isinstance(value, float): self.internal_position.data.y = value
+        if isinstance(value, int) or isinstance(value, float): self.internal_position.y = value
         else: raise TypeError(f'Node: Invalid positional y value type {type(value)}')
         
     @z.setter
     def z(self, value: int | float):
-        if isinstance(value, int) or isinstance(value, float): self.internal_position.data.z = value
+        if isinstance(value, int) or isinstance(value, float): self.internal_position.z = value
         else: raise TypeError(f'Node: Invalid positional z value type {type(value)}')

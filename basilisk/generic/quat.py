@@ -5,6 +5,7 @@ import numpy as np
 class Quat():
     def __init__(self, *args, callback=None):
         self.callback = callback
+        self.prev_data = glm.quat(1, 0, 0, 0)
         self.set_data(*args)
        
     def normalize(self):
@@ -94,9 +95,16 @@ class Quat():
     def z(self): return self.data.z
     
     @data.setter
-    def data(self, value: glm.quat):
+    def data(self, value: glm.vec3):
         self._data = value
-        if self.callback and all(abs(self.data[i] - value[i]) > 1e-12 for i in range(4)): self.callback()
+        
+        cur = self._data
+        prev = self.prev_data
+        thresh = 1e-6
+        
+        if self.callback and (abs(cur.w - prev.w) > thresh or abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh): 
+            self.prev_data = self._data            
+            self.callback()
         
     @w.setter
     def w(self, value):

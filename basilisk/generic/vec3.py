@@ -5,6 +5,7 @@ import numpy as np
 class Vec3():
     def __init__(self, *args, callback=None):
         self.callback = callback
+        self.prev_data = glm.vec3(0.0)
         self.set_data(*args)
        
     def normalize(self):
@@ -94,7 +95,14 @@ class Vec3():
     @data.setter
     def data(self, value: glm.vec3):
         self._data = value
-        if self.callback and all(abs(self.data[i] - value[i]) > 1e-12 for i in range(3)): self.callback()
+        
+        cur = self._data
+        prev = self.prev_data
+        thresh = 1e-6
+        
+        if self.callback and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh): 
+            self.prev_data = self._data            
+            self.callback()
 
     @x.setter
     def x(self, value):
