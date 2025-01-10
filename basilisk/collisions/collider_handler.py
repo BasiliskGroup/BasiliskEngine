@@ -147,6 +147,8 @@ class ColliderHandler():
                 face, polytope = get_epa_from_gjk(node1, node2, simplex)
                 vec, distance  = face[1], face[0]
                 
+                distance *= -1
+                
             if glm.dot(vec, node2.position - node1.position) > 0:
                 vec *= -1
                 
