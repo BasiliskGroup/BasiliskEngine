@@ -1,7 +1,6 @@
 import glm
 from ..generic.abstract_bvh import AbstractAABB as AABB
 from ..generic.meshes import transform_points, get_aabb_surface_area
-from ..mesh.cube import cube
 from ..mesh.mesh import Mesh
 
 class Collider():
@@ -39,7 +38,7 @@ class Collider():
     def __init__(self, collider_handler, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None):
         self.collider_handler = collider_handler
         self.node = node
-        self.mesh = cube if box_mesh else self.node.mesh
+        self.mesh = self.collider_handler.cube if box_mesh else self.node.mesh
         self.static_friction = static_friction
         self.kinetic_friction = kinetic_friction
         self.elasticity = elasticity

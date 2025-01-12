@@ -4,7 +4,6 @@ from ..generic.vec3 import Vec3
 from ..generic.quat import Quat
 from ..generic.matrices import get_model_matrix
 from ..mesh.mesh import Mesh
-from ..mesh.cube import cube
 from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
@@ -96,7 +95,7 @@ class Node():
         self.internal_rotation: Quat = Quat(rotation) if rotation else Quat(1, 0, 0, 0)
         
         self.forward  = forward  if forward  else glm.vec3(1, 0, 0)
-        self.mesh     = mesh     if mesh     else cube
+        self.mesh     = mesh     if mesh     else self.node_handler.scene.engine.cube
         self.material = material if material else None # TODO add default base material
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)

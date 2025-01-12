@@ -1,0 +1,8 @@
+graft bsk_assets
+graft shaders
+global-include *.obj *.png *.jpg *.ttf *.vert *.frag
+include *.obj *.png *.jpg *.ttf *.vert *.frag
+recursive-include bsk_assets *
+recursive-include bsk_assets *.obj *.png *.jpg *.ttf
+recursive-include shaders *
+recursive-include shaders *.vert *.frag

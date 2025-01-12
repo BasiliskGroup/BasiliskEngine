@@ -1,8 +1,5 @@
 from ..engine import Engine
 from ..render.image import Image
-from ..draw.font_renderer import FontRenderer
-
-font_renderer = FontRenderer()
 
 def rect(engine: Engine, color: tuple, rect: tuple) -> None:
     """
@@ -91,6 +88,8 @@ def text(engine: Engine, text: str, position: tuple, scale: float=1.0):
     USE SPARINGLY, INEFFICIENT IMPLAMENTATION
     """
     
+    font_renderer = engine.scene.draw_handler.font_renderer
+
     # Render the text if it has not been cached
     if text not in font_renderer.text_renders:
         surf = font_renderer.render(text).convert_alpha()

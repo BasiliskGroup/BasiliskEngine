@@ -3,7 +3,7 @@ import numpy as np
 import glm
 from math import cos, sin, atan2
 from ..render.image import Image
-
+from .font_renderer import FontRenderer
 
 class DrawHandler():
     engine: ...
@@ -34,6 +34,8 @@ class DrawHandler():
         self.draw_data = []
         self.vbo = None
         self.vao = None
+
+        self.font_renderer = FontRenderer(self.engine.root)
 
     def render(self) -> None:
         """

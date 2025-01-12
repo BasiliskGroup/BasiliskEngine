@@ -2,7 +2,7 @@ import glm
 from .narrow.gjk import *
 from .collider import Collider
 from .broad.broad_bvh import BroadBVH
-from ..mesh.cube import cube
+from ..mesh.cube import Cube
 from ..generic.collisions import get_sat_axes
 from .narrow.gjk import collide_gjk
 from .narrow.epa import get_epa_from_gjk
@@ -17,6 +17,7 @@ class ColliderHandler():
     
     def __init__(self, scene) -> None:
         self.scene = scene
+        self.cube = self.scene.engine.cube
         self.colliders = []
         self.bvh = BroadBVH(self)
         
@@ -131,7 +132,7 @@ class ColliderHandler():
             node2: Node = collider2.node
             
             # get peneration data or quit early if no collision is found
-            if collider1.mesh == cube and collider2.mesh == cube: # obb-obb collision
+            if collider1.mesh == self.cube and collider2.mesh == self.cube: # obb-obb collision
                 
                 # run SAT for obb-obb (includes peneration)
                 data = self.collide_obb_obb(collider1, collider2)

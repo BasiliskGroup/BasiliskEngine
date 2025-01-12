@@ -38,7 +38,7 @@ class Frame:
         Renders the current frame to the screen
         """
 
-        #self.apply_postprocess('filter')
+        # self.apply_postprocess('filter')
         
         self.ctx.screen.use()
         self.program['screenTexture'] = 0
@@ -72,11 +72,11 @@ class Frame:
 
         # Release any existing memory
         if self.program: self.program.release()
-
+        
         # Read the shaders
-        with open('basilisk/shaders/frame.vert') as file:
+        with open(self.engine.root + '/shaders/frame.vert') as file:
             vertex_shader = file.read()
-        with open('basilisk/shaders/frame.frag') as file:
+        with open(self.engine.root + '/shaders/frame.frag') as file:
             fragment_shader = file.read()
 
         # Create the program
@@ -88,9 +88,9 @@ class Frame:
         """
 
         # Read the shaders
-        with open(f'basilisk/shaders/{vert}.vert') as file:
+        with open(self.engine.root + f'/shaders/{vert}.vert') as file:
             vertex_shader = file.read()
-        with open(f'basilisk/shaders/{frag}.frag') as file:
+        with open(self.engine.root + f'/shaders/{frag}.frag') as file:
             fragment_shader = file.read()
 
         # Create the program
