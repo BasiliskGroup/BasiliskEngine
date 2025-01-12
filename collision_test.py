@@ -30,47 +30,37 @@ nodes = [scene.add_node(
     mesh=random.choice(meshes), 
     material=materials[_ % 2],
     collisions=True
-) for _ in range(8)]
-
-# broad collision detection
+) for _ in range(2)]
 
 # print(len(possible))
 is_pressed = False
 
 while engine.running:
-    
-    # # reset object colors
-    for node in nodes:
-        node.material = blue
-    
-    possible = scene.collider_handler.resolve_broad_collisions()
-    print(len(possible))
-    collided = scene.collider_handler.resolve_narrow_collisions(possible)
-    
+
     # control one object, idk which one it is good luck
-    # keys = pg.key.get_pressed()
-    # if keys[pg.K_q] and not is_pressed: is_pressed = True
-    # if not keys[pg.K_q] and is_pressed: 
+    keys = pg.key.get_pressed()
+    if keys[pg.K_q] and not is_pressed: is_pressed = True
+    if not keys[pg.K_q] and is_pressed: 
         
-    #     
-    #     for collision in collided:
-    #         node1 = collision[0]
-    #         node2 = collision[1]
-    #         vec = collision[2]
+        possible = scene.collider_handler.resolve_broad_collisions()
+        print(len(possible))
+        collided = scene.collider_handler.resolve_narrow_collisions(possible)
+        print(len(collided))
+        print()
+        
+        for collision in collided:
+            node1 = collision[0]
+            node2 = collision[1]
+            vec = collision[2]
             
-    #         scene.add_node(
-    #             position=node1.position - vec, 
-    #             scale=[0.1, 0.1, 0.1],
-    #             mesh=random.choice(meshes), 
-    #             material=materials[5],
-    #             collisions=True
-    #         )
-            
-    #     is_pressed = False
-    
-    for node1, node2, vec in collided:
-        node1.material = red
-        node2.material = red
+            scene.add_node(
+                position=node1.position - vec, 
+                scale=[0.1, 0.1, 0.1],
+                mesh=random.choice(meshes), 
+                material=materials[5],
+            )
+
+        is_pressed = False
     
     # set color of colliding objects
     # for collision in possible:
