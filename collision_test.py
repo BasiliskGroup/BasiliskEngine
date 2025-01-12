@@ -7,7 +7,7 @@ scene = bsk.Scene()
 engine.scene = scene
 
 # meshes
-cube_mesh = bsk.cube
+cube_mesh = engine.cube
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 
 meshes = [sphere_mesh]
@@ -20,7 +20,6 @@ materials = [bsk.Material(color=(255 * (i & 4), 255 * (i & 2), 255 * (i & 1))) f
 red = bsk.Material(color=(255, 0, 0))
 blue = bsk.Material(color=(0, 0, 255))
 
-is_pressed = False
 radius = 0.5
 
 nodes = [scene.add_node(
@@ -28,48 +27,29 @@ nodes = [scene.add_node(
     scale=[random.uniform(0.5, 2) for _ in range(3)],
     rotation=[random.uniform(-radius, radius), random.uniform(-3, radius), random.uniform(-radius, radius)], 
     mesh=random.choice(meshes), 
-    material=materials[_ % 2],
+    material=blue,
     collisions=True
-) for _ in range(2)]
+) for _ in range(5)]
 
-# print(len(possible))
 is_pressed = False
 
-while engine.running:
-
-    # control one object, idk which one it is good luck
+while engine.running:    
     keys = pg.key.get_pressed()
-    if keys[pg.K_q] and not is_pressed: is_pressed = True
+    if keys[pg.K_q] and not is_pressed: 
+        is_pressed = True
+        
+    
     if not keys[pg.K_q] and is_pressed: 
-        
-        possible = scene.collider_handler.resolve_broad_collisions()
-        print(len(possible))
-        collided = scene.collider_handler.resolve_narrow_collisions(possible)
-        print(len(collided))
-        print()
-        
-        for collision in collided:
-            node1 = collision[0]
-            node2 = collision[1]
-            vec = collision[2]
-            
-            scene.add_node(
-                position=node1.position - vec, 
-                scale=[0.1, 0.1, 0.1],
-                mesh=random.choice(meshes), 
-                material=materials[5],
-            )
-
         is_pressed = False
-    
-    # set color of colliding objects
-    # for collision in possible:
-    #     collider1 = collision[0]
-    #     collider2 = collision[1]
+        possible = scene.collider_handler.resolve_broad_collisions()
         
-    #     if not scene.collider_handler.collide_obb_obb_decision(collider1, collider2): continue
+        for node in nodes: node.material = blue
+        for collision in possible:
+            node1 = collision[0].node
+            node2 = collision[1].node
+            node1.material = red
+            node2.material = red
         
-    #     collider1.node.material = red
-    #     collider2.node.material = red
-    
+        scene.collider_handler.resolve_narrow_collisions(possible)
+
     engine.update()

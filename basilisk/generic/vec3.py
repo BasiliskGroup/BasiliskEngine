@@ -101,7 +101,7 @@ class Vec3():
         thresh = 1e-6
         
         if self.callback and (abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh): 
-            self.prev_data = self._data            
+            self.prev_data = glm.vec3(self._data)
             self.callback()
 
     @x.setter

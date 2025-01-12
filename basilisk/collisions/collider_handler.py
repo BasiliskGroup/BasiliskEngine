@@ -44,7 +44,13 @@ class ColliderHandler():
         """
         # reset collision data
         for collider in self.colliders: collider.collisions = {}
-        # TODO update BVH
+        # update BVH
+        for collider in self.colliders:
+            if collider.needs_bvh:
+                self.bvh.remove(collider)
+                self.bvh.add(collider)
+        
+        # resolve collisions
         broad_collisions = self.resolve_broad_collisions()
         self.resolve_narrow_collisions(broad_collisions)
         
@@ -75,8 +81,6 @@ class ColliderHandler():
             if abs(overlap) > abs(small_overlap): continue
             small_overlap = overlap
             small_axis    = axis
-        
-
             
         return small_axis, small_overlap
     
@@ -123,8 +127,6 @@ class ColliderHandler():
         """
         Determines if two colliders are colliding, if so resolves their penetration and applies impulse
         """
-        collided = []
-        
         for collision in broad_collisions: # assumes that broad collisions are unique
             collider1 = collision[0]
             collider2 = collision[1]
@@ -147,19 +149,11 @@ class ColliderHandler():
                 face, polytope = get_epa_from_gjk(node1, node2, simplex)
                 vec, distance  = face[1], face[0]
                 
-                # distance *= -1
-                
             if glm.dot(vec, node2.position - node1.position) > 0:
                 vec *= -1
-                
-            print('\033[92m', vec, distance, '\033[0m')
             
             # resolve collision penetration
-            node2.position -= vec * distance
+            node1.position += 0.5 * vec * distance
+            node2.position -= 0.5 * vec * distance
             
-            collided.append((node1, node2, vec * distance))
-            
-            # TODO add penetration resolution
             # TODO add impulse
-            
-        return collided
