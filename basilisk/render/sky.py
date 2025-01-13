@@ -29,7 +29,7 @@ class Sky:
         self.program['skyboxTexture']  = 8
         self.texture_cube.use(location = 8)
 
-        batch_program = self.scene.shader_handler.programs['batch']
+        batch_program = self.scene.shader_handler.shaders['batch'].program
         batch_program['skyboxTexture'] = 8
         self.texture_cube.use(location = 8)
 
@@ -105,7 +105,7 @@ class Sky:
 
         # Create a renderable vao
         self.vbo     = self.ctx.buffer(vertex_data)
-        self.program = self.scene.shader_handler.programs['sky']
+        self.program = self.scene.shader_handler.shaders['sky'].program
         self.vao     = self.ctx.vertex_array(self.program, [(self.vbo, '3f', 'in_position')], skip_errors=True)
 
     def __del__(self):

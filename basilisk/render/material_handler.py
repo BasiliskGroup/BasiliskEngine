@@ -80,7 +80,7 @@ class MaterialHandler():
         Writes all material data to the given shader
         """
 
-        if shader_program == None: shader_program = self.scene.shader_handler.programs['batch']
+        if shader_program == None: shader_program = self.scene.shader_handler.shaders['batch'].program
 
         self.generate_material_texture()
 

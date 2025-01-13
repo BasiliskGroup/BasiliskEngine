@@ -43,8 +43,8 @@ class ImageHandler():
         if image in self.images: return
 
         self.images.append(image)
-        self.write(self.scene.shader_handler.programs['batch'])
-        self.write(self.scene.shader_handler.programs['draw'])
+        self.write(self.scene.shader_handler.shaders['batch'].program)
+        self.write(self.scene.shader_handler.shaders['draw'].program)
 
     def generate_texture_array(self) -> None:
         """

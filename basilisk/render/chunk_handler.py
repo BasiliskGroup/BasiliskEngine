@@ -28,7 +28,7 @@ class ChunkHandler():
         self.scene   = scene
         self.engine  = scene.engine
         self.ctx     = scene.engine.ctx
-        self.program = scene.shader_handler.programs['batch']
+        self.program = scene.shader_handler.shaders['batch'].program
 
         # List for the dynamic and static chunk dictionaries | [dyanmic: dict, static: dict]
         self.chunks         = [{}   , {}   ]
