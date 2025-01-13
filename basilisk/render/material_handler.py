@@ -75,16 +75,20 @@ class MaterialHandler():
         material_data = np.ravel(material_data)
         self.data_texture = self.ctx.texture((1, len(material_data)), components=1, dtype='f4', data=material_data)
 
-    def write(self, shader_program: mgl.Program=None) -> None:
+    def write(self, shader: mgl.Program=None) -> None:
         """
         Writes all material data to the given shader
         """
 
-        if shader_program == None: shader_program = self.scene.shader_handler.programs['batch']
+        if shader == None: shader = self.engine.shader
+
+        if 'materialsTexture' not in shader.uniforms: return
 
         self.generate_material_texture()
 
-        shader_program[f'materialsTexture'] = 9
+        print('mtl')
+
+        shader.program['materialsTexture'] = 9
         self.data_texture.use(location=9)
 
     def get(self, identifier: str | int) -> any:

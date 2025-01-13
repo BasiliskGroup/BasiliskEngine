@@ -58,7 +58,35 @@ class BroadBVH(BVH):
         if isinstance(self.root, BroadAABB): return self.root.get_all_aabbs(0)
         return [(self.root.top_right, self.root.bottom_left, 0)]
         
-    def remove(self, collider: Collider) -> None: ...
+    def remove(self, collider: Collider) -> None:
+        """
+        Removes a collider from the BVH, refitting the tree and adjusting relations
+        """
+        parent: BroadAABB | None = collider.parent
+        
+        # if collider is the root, remove the root
+        if not parent:
+            self.root = None
+            return
+        
+        # if collider has no grandparent, remove parent and set sibling as root
+        grand   = parent.parent
+        sibling = parent.b if collider == parent.a else parent.a
+        if not grand:
+            self.root = sibling
+            sibling.parent = None
+            return
+    
+        # if grandparent exists
+        if parent == grand.a: grand.a = sibling
+        else:                 grand.b = sibling
+        sibling.parent = grand
+        
+        # move up and refit tree
+        aabb = grand
+        while aabb:
+            aabb.update_points()
+            aabb = aabb.parent
     
     def rotate(self, aabb: BroadAABB) -> None:
         """
@@ -99,4 +127,5 @@ class BroadBVH(BVH):
         """
         Returns which objects may be colliding from the BVH
         """
-        return self.root.get_collided(collider)
+        if isinstance(self.root, BroadAABB): return self.root.get_collided(collider)
+        else: return []

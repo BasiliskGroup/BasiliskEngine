@@ -5,7 +5,8 @@ import moderngl as mgl
 from .config import Config
 from .input.mouse import Mouse
 from .mesh.cube import Cube
-import time
+from .render.shader import Shader
+
 
 class Engine():
     win_size: tuple
@@ -90,6 +91,9 @@ class Engine():
         # Scene being used by the engine
         self.scene = None
 
+        # Load a default shader
+        self.shader = Shader(self, self.root + '/shaders/batch.vert', self.root + '/shaders/batch.frag')
+
         # Set the scene to running
         self.running = True
 
@@ -167,8 +171,21 @@ class Engine():
 
     @property
     def scene(self): return self._scene
-    
+    @property
+    def shader(self): return self._shader
+
     @scene.setter
     def scene(self, value):
         self._scene = value
         if self._scene: self._scene.set_engine(self)
+
+    @shader.setter
+    def shader(self, value):
+        self._shader = value
+        if self.scene:
+            self.scene.shader_handler.add('default', value)
+            self.scene.light_handler.write()
+            self.scene.material_handler.image_handler.write(value)
+            self.scene.material_handler.write()
+            self.scene.sky.write()
+            self.scene.node_handler.chunk_handler.update_all()

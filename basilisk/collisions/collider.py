@@ -39,17 +39,18 @@ class Collider():
         self.collider_handler = collider_handler
         self.node = node
         self.mesh = self.collider_handler.cube if box_mesh else self.node.mesh
-        self.static_friction = static_friction
-        self.kinetic_friction = kinetic_friction
-        self.elasticity = elasticity
+        self.static_friction = static_friction if elasticity else 0.8
+        self.kinetic_friction = kinetic_friction if elasticity else 0.4
+        self.elasticity = elasticity if elasticity else 0.1
         self.collision_group = collision_group
         self.collision_velocity = 0
         self.collisions = {}
         self.parent = None
         
         # lazy update variables TODO change to distinguish between static and nonstatic objects
-        self.needs_obb = True
-        self.needs_half_dimensions = True
+        self.needs_obb = True # pos, scale, rot
+        self.needs_half_dimensions = True # scale, rot
+        self.needs_bvh = True # pos, scale, rot
         
     @property
     def has_collided(self): return bool(self.collisions)

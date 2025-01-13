@@ -16,9 +16,9 @@ class DrawHandler():
     """2D draw program"""
     draw_data: list[float]
     """Temporary buffer for user draw calls"""
-    vbo: mgl.Buffer
+    vbo: mgl.Buffer=None
     """Buffer for all 2D draws"""
-    vao: mgl.VertexArray
+    vao: mgl.VertexArray=None
     """VAO for rendering all 2D draw calls"""
     
     def __init__(self, scene) -> None:
@@ -28,7 +28,7 @@ class DrawHandler():
         self.ctx    = scene.engine.ctx
 
         # Get the program
-        self.program = self.scene.shader_handler.programs['draw']
+        self.program = self.scene.shader_handler.shaders['draw'].program
 
         # Initialize draw data as blank
         self.draw_data = []

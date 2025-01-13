@@ -15,7 +15,7 @@ class PhysicsEngine():
     
     def __init__(self, accelerations: list[glm.vec3] = None, rotational_accelerations: list[glm.vec3] = None, forces: list[glm.vec3] = None, torques: list[glm.vec3] = None) -> None:
         self.physics_bodies = []
-        self.accelerations = accelerations if accelerations else [glm.vec3(0, -1, 0)]
+        self.accelerations = accelerations if accelerations else [glm.vec3(0, -9.8, 0)]
         self.rotational_accelerations = rotational_accelerations if rotational_accelerations else []
         self.forces = forces if forces else []
         self.torques = torques if torques else []
