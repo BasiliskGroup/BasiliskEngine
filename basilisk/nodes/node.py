@@ -107,7 +107,7 @@ class Node():
         
         # collider
         if collisions: 
-            if not mesh: raise ValueError('Node: cannot collide if it doezsnt have a mesh')
+            if not self.mesh: raise ValueError('Node: cannot collide if it doezsnt have a mesh')
             self.collider: Collider = self.node_handler.scene.collider_handler.add(
                 node = self,
                 box_mesh = True if collider == 'box' else False,
@@ -126,7 +126,7 @@ class Node():
         # information and recursion
         self.name = name
         self.tags = tags if tags else []
-        self.static = static and not (self.physics_body or self.velocity or self.rotational_velocity)
+        self.static = static and not (self.physics_body or any(self.velocity) or any(self.rotational_velocity))
         self.data_index = 0
         self.children = []
         
@@ -339,6 +339,7 @@ class Node():
         # if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
         if self.needs_geometric_center: 
             self._geometric_center = self.model_matrix * self.mesh.geometric_center
+            print('geometric center:', self._geometric_center, self.position)
             self.needs_geometric_center = False
         return self._geometric_center
     @property

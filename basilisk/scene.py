@@ -44,7 +44,7 @@ class Scene():
         
         self.camera.update()
         self.node_handler.update()
-        # self.collider_handler.resolve_collisions()
+        self.collider_handler.resolve_collisions()
 
     def render(self) -> None:
         """

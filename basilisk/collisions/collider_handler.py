@@ -1,11 +1,12 @@
 import glm
-from .narrow.gjk import *
 from .collider import Collider
 from .broad.broad_bvh import BroadBVH
-from ..mesh.cube import Cube
-from ..generic.collisions import get_sat_axes
 from .narrow.gjk import collide_gjk
 from .narrow.epa import get_epa_from_gjk
+from .narrow.contact_manifold import get_contact_manifold
+from ..nodes.node import Node
+from ..generic.collisions import get_sat_axes
+from ..physics.impulse import calculate_collisions
 
 class ColliderHandler():
     scene: ...
@@ -142,6 +143,10 @@ class ColliderHandler():
                 
                 vec, distance = data
                 
+                # TODO replace with own contact algorithm
+                points1 = collider1.obb_points
+                points2 = collider2.obb_points
+                
             else: # use gjk to determine collisions between non-cuboid meshes
                 has_collided, simplex = collide_gjk(node1, node2)
                 if not has_collided: continue
@@ -149,11 +154,21 @@ class ColliderHandler():
                 face, polytope = get_epa_from_gjk(node1, node2, simplex)
                 vec, distance  = face[1], face[0]
                 
-            if glm.dot(vec, node2.position - node1.position) > 0:
-                vec *= -1
+                # TODO replace with own contact algorithm
+                points1 = [p[1] for p in polytope]
+                points2 = [p[2] for p in polytope]
+                
+            # ensure that objects will be moved away from each other
+            if glm.dot(vec, node2.position - node1.position) > 0: vec *= -1
             
             # resolve collision penetration
-            node1.position += 0.5 * vec * distance
-            node2.position -= 0.5 * vec * distance
+            multiplier = 0.5 if not (node1.static or node2.static) else 1
+            if not node1.static: node1.position += multiplier * vec * distance
+            if not node2.static: node2.position -= multiplier * vec * distance
             
-            # TODO add impulse
+            # resolve physics
+            if not (node1.physics_body or node2.physics_body): continue
+            
+            # generate contact manifold TODO give SAT a hard coded manifold and see if GJK/EPA can be generated with the polytope
+            manifold = get_contact_manifold(node1.position - vec, vec, points1, points2)
+            calculate_collisions(vec, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.geometric_center, node2.geometric_center)

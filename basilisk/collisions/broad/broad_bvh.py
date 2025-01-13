@@ -127,4 +127,5 @@ class BroadBVH(BVH):
         """
         Returns which objects may be colliding from the BVH
         """
-        return self.root.get_collided(collider)
+        if isinstance(self.root, BroadAABB): return self.root.get_collided(collider)
+        else: return []

@@ -21,3 +21,9 @@ def get_furthest_point(node: Node, dir_vec: glm.vec3) -> glm.vec3:
     
     # transform point to world space
     return glm.vec3(vertex)
+
+def is_ccw_turn(a:glm.vec2, b:glm.vec2, c:glm.vec2) -> bool:
+    """
+    Determines if the series of points results in a left hand turn
+    """
+    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0 # TODO check formula

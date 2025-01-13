@@ -10,7 +10,7 @@ engine.scene = scene
 cube_mesh = engine.cube
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 
-meshes = [sphere_mesh]
+meshes = [sphere_mesh, cube_mesh]
 
 # materials
 mud = bsk.Image("tests/mud.png")
@@ -29,7 +29,7 @@ nodes = [scene.add_node(
     mesh=random.choice(meshes), 
     material=blue,
     collisions=True
-) for _ in range(5)]
+) for _ in range(25)]
 
 is_pressed = False
 

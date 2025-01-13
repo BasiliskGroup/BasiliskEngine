@@ -39,9 +39,9 @@ class Collider():
         self.collider_handler = collider_handler
         self.node = node
         self.mesh = self.collider_handler.cube if box_mesh else self.node.mesh
-        self.static_friction = static_friction
-        self.kinetic_friction = kinetic_friction
-        self.elasticity = elasticity
+        self.static_friction = static_friction if elasticity else 0.8
+        self.kinetic_friction = kinetic_friction if elasticity else 0.4
+        self.elasticity = elasticity if elasticity else 0.1
         self.collision_group = collision_group
         self.collision_velocity = 0
         self.collisions = {}
