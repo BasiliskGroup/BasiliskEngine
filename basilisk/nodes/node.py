@@ -86,8 +86,8 @@ class Node():
         self.chunk = None
         
         # lazy update variables
-        self.needs_geometric_center = True
-        self.needs_model_matrix = True
+        self.needs_geometric_center = True # pos
+        self.needs_model_matrix = True # pos, scale, rot
 
         # node data
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
@@ -135,22 +135,36 @@ class Node():
         self.previous_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
         self.previous_rotation: Quat = Quat(rotation) if rotation else Quat(1, 0, 0, 0) # TODO Do these need to be the callback class or can they just be glm? 
         
-        self.position_updated = False
-        self.scale_updated    = False
-        self.rotation_updated  = False
-        
         # callback function to be added to the custom Vec3 and Quat classes
         def position_callback():
             self.chunk.node_update_callback(self)
-            self.position_updated = True
+            
+            # update variables
+            self.needs_geometric_center = True
+            self.needs_model_matrix = True
+            if self.collider:
+                self.collider.needs_bvh = True
+                self.collider.needs_obb = True
             
         def scale_callback():
             self.chunk.node_update_callback(self)
-            self.scale_updated = True
+            
+            # update variables
+            self.needs_model_matrix = True
+            if self.collider:
+                self.collider.needs_bvh = True
+                self.collider.needs_obb = True
+                self.collider.needs_half_dimensions = True
             
         def rotation_callback():
             self.chunk.node_update_callback(self)
-            self.rotation_updated = True
+            
+            # update variables
+            self.needs_model_matrix = True
+            if self.collider:
+                self.collider.needs_bvh = True
+                self.collider.needs_obb = True
+                self.collider.needs_half_dimensions = True
         
         self.internal_position.callback = position_callback
         self.internal_scale.callback    = scale_callback
@@ -160,14 +174,6 @@ class Node():
         """
         Updates the node's movement variables based on the delta time
         """
-        # update all hard-to-update variables
-
-        
-        # reset updates
-        self.position_updated = False
-        self.scale_updated    = False
-        self.rotation_updated = False
-        
         if any(self.velocity): self.position += dt * self.velocity
         if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation + 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity))
 

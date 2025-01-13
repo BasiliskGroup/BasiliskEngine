@@ -7,7 +7,7 @@ from...nodes.node import Node
 face_type     = list[tuple[float, glm.vec3, glm.vec3, int, int, int]] # distance, normal, center, index 1, index 2, index 3
 polytope_type = list[tuple[glm.vec3, glm.vec3, glm.vec3]] # polytope vertex, node1 vertex, node2 vertex
 
-def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon: float=1e-7) -> tuple: # TODO determine the return type of get_epa_from_gjk
+def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon: float=0) -> tuple: # TODO determine the return type of get_epa_from_gjk and if epsilon is good value
     """
     Determines the peneration vector from a collision using EPA. The returned face normal is normalized but the rest are not guarunteed to be. 
     """
@@ -18,11 +18,7 @@ def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon:
     # develope the polytope until the nearest real face has been found, within epsilon
     while True:
         new_point = get_support_point(node1, node2, faces[0][1])
-        if new_point in polytope or glm.length(new_point[0]) - faces[0][0] < epsilon: 
-            faces[0] = list(faces[0])
-            faces[0][0] = glm.sqrt(faces[0][0]) # square root distance squared to get real distance
-            faces[0][1] = glm.normalize(faces[0][1])
-            return faces[0], polytope
+        if new_point in polytope or glm.length(new_point[0]) - faces[0][0] < epsilon: return faces[0], polytope
         faces, polytope = insert_point(polytope, faces, new_point)
 
 def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, epsilon: float=1e-7) -> tuple[face_type, polytope_type]:
@@ -43,6 +39,9 @@ def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, eps
     for face in visible_faces:
         for p1, p2 in get_face_edges(face):
             if (p2, p1) in edges: edges.remove((p2, p1)) # edges can only be shared by two faces, running opposite to each other. 
+            elif (p1, p2) in edges: # TODO remove this
+                edges.remove((p1, p2))
+                print('not reversed')
             else: edges.append((p1, p2))
     
     # remove visible faces
@@ -59,8 +58,13 @@ def insert_face(polytope: polytope_type, faces: face_type, indices: tuple[int, i
     Inserts a face into the face priority queue based on the indices given in the polytope
     """
     center   = (polytope[indices[0]][0] + polytope[indices[1]][0] + polytope[indices[2]][0]) / 3
-    distance = glm.length2(center) # TODO face distance is length squared to reduce calculations
     normal   = glm.cross(polytope[indices[1]][0] - polytope[indices[0]][0], polytope[indices[2]][0] - polytope[indices[0]][0]) # closest face normal will be normalized once returned to avoid square roots and division
+    if glm.dot(center, normal) < 0: 
+        normal *= -1
+        indices = (indices[2], indices[1], indices[0])
+    assert glm.dot(center, normal) > 0, 'epa normal not facing outward'
+    normal = glm.normalize(normal)
+    distance = abs(glm.dot(polytope[indices[0]][0], normal))
     new_face = (distance, normal, center, *indices)
     
     # insert faces into priority queue based on distance from origin

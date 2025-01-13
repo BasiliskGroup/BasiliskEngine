@@ -14,13 +14,12 @@ def get_sat_axes(rotation1: glm.quat, rotation2: glm.quat) -> list[glm.vec3]:
     axes = []
     axes.extend(glm.transpose(glm.mat3_cast(rotation1)))
     axes.extend(glm.transpose(glm.mat3_cast(rotation2)))
-    # axes.extend(glm.mat3_cast(rotation1))
-    # axes.extend(glm.mat3_cast(rotation2))
     
     # crossed roots
     for i in range(0, 3):
         for j in range(3, 6):
             cross = glm.cross(axes[i], axes[j])
+            if glm.length2(cross) > 1e-6: continue
             axes.append(glm.normalize(cross))
             
     return axes

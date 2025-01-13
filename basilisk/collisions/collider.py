@@ -48,8 +48,9 @@ class Collider():
         self.parent = None
         
         # lazy update variables TODO change to distinguish between static and nonstatic objects
-        self.needs_obb = True
-        self.needs_half_dimensions = True
+        self.needs_obb = True # pos, scale, rot
+        self.needs_half_dimensions = True # scale, rot
+        self.needs_bvh = True # pos, scale, rot
         
     @property
     def has_collided(self): return bool(self.collisions)
