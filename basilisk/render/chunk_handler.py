@@ -28,7 +28,7 @@ class ChunkHandler():
         self.scene   = scene
         self.engine  = scene.engine
         self.ctx     = scene.engine.ctx
-        self.program = scene.shader_handler.shaders['batch'].program
+        self.program = scene.engine.shader.program
 
         # List for the dynamic and static chunk dictionaries | [dyanmic: dict, static: dict]
         self.chunks         = [{}   , {}   ]
@@ -58,6 +58,8 @@ class ChunkHandler():
         Updates all the chunks that have been updated since the last frame. 
         """ 
 
+        self.program = self.scene.engine.shader.program
+
         # Loop through the set of updated chunk keys and update the chunk
         removes = []
 
@@ -75,6 +77,13 @@ class ChunkHandler():
 
         # Clears the set of updated chunks so that they are not updated unless they are updated again
         self.updated_chunks = [set(), set()]
+
+    def update_all(self):
+        self.program = self.scene.engine.shader.program
+        for chunk in self.chunks[0].values():
+            self.updated_chunks[0].add(chunk)
+        for chunk in self.chunks[1].values():
+            self.updated_chunks[1].add(chunk)
 
     def add(self, node: Node) -> Node:
         """

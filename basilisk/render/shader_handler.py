@@ -29,15 +29,17 @@ class ShaderHandler:
         self.shaders = {}
 
         root = self.engine.root
-        self.add('batch', Shader(self.engine, root + '/shaders/batch.vert', root + '/shaders/batch.frag'))
-        self.add('draw',  Shader(self.engine, root + '/shaders/draw.vert' , root + '/shaders/draw.frag' ))
-        self.add('sky',   Shader(self.engine, root + '/shaders/sky.vert'  , root + '/shaders/sky.frag'  ))
+        self.add('default', self.engine.shader)
+        self.add('draw',    Shader(self.engine, root + '/shaders/draw.vert' , root + '/shaders/draw.frag' ))
+        self.add('sky',     Shader(self.engine, root + '/shaders/sky.vert'  , root + '/shaders/sky.frag'  ))
 
     def add(self, name: str, shader: Shader) -> None:
         """
         Creates a shader program from a file name.
         Parses through shaders to identify uniforms and save for writting
         """
+
+        if shader in self.shaders.values(): return
 
         self.shaders[name] = shader
 

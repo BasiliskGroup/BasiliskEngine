@@ -29,8 +29,9 @@ class Sky:
         self.program['skyboxTexture']  = 8
         self.texture_cube.use(location = 8)
 
-        batch_program = self.scene.shader_handler.shaders['batch'].program
-        batch_program['skyboxTexture'] = 8
+        shader = self.scene.engine.shader
+        if 'skyboxTexture' not in shader.uniforms: return
+        shader.program['skyboxTexture'] = 8
         self.texture_cube.use(location = 8)
 
 

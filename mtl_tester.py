@@ -69,6 +69,12 @@ class App():
             self.scene.sky = self.sunset_sky
         if self.engine.keys[pg.K_p]:
             self.scene.frame.save()
+        if self.engine.keys[pg.K_r]:
+            self.engine.shader = bsk.Shader(self.engine)
+        if self.engine.keys[pg.K_n]:
+            self.engine.shader = bsk.Shader(self.engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
+        if self.engine.keys[pg.K_g]:
+            self.engine.shader = bsk.Shader(self.engine, vert='basilisk/shaders/geometry.vert', frag='basilisk/shaders/geometry.frag')
 
         if self.engine.mouse.left_down:
             if 30 < self.engine.mouse.y < 60:
