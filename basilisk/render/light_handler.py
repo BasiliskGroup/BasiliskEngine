@@ -38,9 +38,9 @@ class LightHandler():
         Writes all the lights in a scene to the given shader program
         """
 
-        if not program: program = self.scene.shader_handler.programs['batch']
+        if not program: program = self.engine.shader.program
 
-        if directional and self.directional_lights:
+        if directional and self.directional_lights and 'numDirLights' in self.engine.shader.uniforms:
 
             program['numDirLights'].write(glm.int32(len(self.directional_lights)))
 

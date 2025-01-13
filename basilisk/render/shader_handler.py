@@ -1,8 +1,6 @@
 import moderngl as mgl
 import glm
-
-# Predefined uniforms that do not change each frame
-single_frame_uniforms = ['m_proj']
+from .shader import Shader
 
 
 class ShaderHandler:
@@ -12,10 +10,8 @@ class ShaderHandler:
     """Back reference to the parent scene"""
     ctx: mgl.Context
     """Back reference to the parent context"""
-    programs: dict = {}
+    shaders: list = []
     """Dictionary containing all the shaders"""
-    shader_uniforms: dict = {}
-    """Dictionary all the uniforms present in a shader"""
     uniform_values: dict = {}
     """Dictionary containing uniform values"""    
 
@@ -30,38 +26,22 @@ class ShaderHandler:
         self.ctx    = scene.engine.ctx
 
         # Initalize dictionaries
-        self.programs = {}
-        self.shader_uniforms = {}
+        self.shaders = {}
 
-        self.load('batch', self.engine.root + '/shaders/batch.vert', self.engine.root + '/shaders/batch.frag')
-        self.load('draw', self.engine.root + '/shaders/draw.vert', self.engine.root + '/shaders/draw.frag')
-        self.load('sky', self.engine.root + '/shaders/sky.vert', self.engine.root + '/shaders/sky.frag')
+        root = self.engine.root
+        self.add('default', self.engine.shader)
+        self.add('draw',    Shader(self.engine, root + '/shaders/draw.vert' , root + '/shaders/draw.frag' ))
+        self.add('sky',     Shader(self.engine, root + '/shaders/sky.vert'  , root + '/shaders/sky.frag'  ))
 
-    def load(self, name: str, vert_path: str, frag_path: str) -> None:
+    def add(self, name: str, shader: Shader) -> None:
         """
         Creates a shader program from a file name.
         Parses through shaders to identify uniforms and save for writting
         """
 
-        # Read the shaders
-        with open(vert_path) as file:
-            vertex_shader = file.read()
-        with open(frag_path) as file:
-            fragment_shader = file.read()
-            
-        # Create blank list for uniforms
-        self.shader_uniforms[name] = []
-        # Create a list of all lines in both shaders
-        lines = f'{vertex_shader}\n{fragment_shader}'.split('\n')
-        # Parse through shader to find uniform variables
-        for line in lines:
-            tokens = line.strip().split(' ')
-            if tokens[0] == 'uniform' and len(tokens) > 2:
-                self.shader_uniforms[name].append(tokens[2][:-1])
+        if shader in self.shaders.values(): return
 
-        # Create a program with shaders
-        program = self.ctx.program(vertex_shader=vertex_shader, fragment_shader=fragment_shader)
-        self.programs[name] = program
+        self.shaders[name] = shader
 
     def get_uniforms_values(self) -> None:
         """
@@ -83,13 +63,13 @@ class ShaderHandler:
 
         self.get_uniforms_values()
         for uniform in self.uniform_values:
-            for program in self.programs:
-                if not uniform in self.shader_uniforms[program]: continue  # Does not write uniforms not in the shader
-                self.programs[program][uniform].write(self.uniform_values[uniform])
+            for shader in self.shaders.values():
+                if not uniform in shader.uniforms: continue  # Does not write uniforms not in the shader
+                shader.write(uniform, self.uniform_values[uniform])
 
     def release(self) -> None:
         """
         Releases all shader programs in handler
         """
         
-        [program.release() for program in self.programs.values()]
+        [shader.__del__() for shader in self.shaders.values()]

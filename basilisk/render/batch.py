@@ -35,6 +35,8 @@ class Batch():
         Returns True if batch was successful.
         """
 
+        self.program = self.chunk.chunk_handler.program
+
         # Empty list to contain all vertex data of models in the chunk
         batch_data = []
 
