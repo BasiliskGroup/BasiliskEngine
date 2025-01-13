@@ -60,7 +60,7 @@ class App():
         if self.engine.keys[pg.K_c]:
             self.node.material = self.cloth_mtl
             self.mtl = self.cloth_mtl
-        if self.engine.keys[pg.K_f]:
+        if self.engine.keys[pg.K_g]:
             self.node.material = self.floor_mtl
             self.mtl = self.floor_mtl
         if self.engine.keys[pg.K_5]:
