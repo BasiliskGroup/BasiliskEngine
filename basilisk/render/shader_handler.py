@@ -42,6 +42,10 @@ class ShaderHandler:
         if shader in self.shaders.values(): return
 
         self.shaders[name] = shader
+        
+        if self.scene.material_handler:
+            self.scene.material_handler.write()
+            self.scene.material_handler.image_handler.write()
 
     def get_uniforms_values(self) -> None:
         """

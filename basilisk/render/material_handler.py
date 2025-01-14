@@ -50,7 +50,7 @@ class MaterialHandler():
         # Add the material
         self.materials.append(material)
         # Write materials
-        self.write()
+        self.write(regenerate=True)
 
     def generate_material_texture(self) -> None:
         """
@@ -75,21 +75,20 @@ class MaterialHandler():
         material_data = np.ravel(material_data)
         self.data_texture = self.ctx.texture((1, len(material_data)), components=1, dtype='f4', data=material_data)
 
-    def write(self, shader: mgl.Program=None) -> None:
+    def write(self, regenerate=False) -> None:
         """
-        Writes all material data to the given shader
+        Writes all material data to relavent shaders
         """
 
-        if shader == None: shader = self.engine.shader
+        if regenerate: self.generate_material_texture()
 
-        if 'materialsTexture' not in shader.uniforms: return
+        if not self.data_texture: return
 
-        self.generate_material_texture()
+        for shader in self.engine.scene.shader_handler.shaders.values():
+            if 'materialsTexture' not in shader.uniforms: continue
 
-        print('mtl')
-
-        shader.program['materialsTexture'] = 9
-        self.data_texture.use(location=9)
+            shader.program['materialsTexture'] = 9
+            self.data_texture.use(location=9)
 
     def get(self, identifier: str | int) -> any:
         """

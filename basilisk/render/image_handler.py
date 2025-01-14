@@ -43,8 +43,7 @@ class ImageHandler():
         if image in self.images: return
 
         self.images.append(image)
-        self.write(self.engine.shader)
-        self.write(self.scene.shader_handler.shaders['draw'])
+        self.write(regenerate=True)
 
     def generate_texture_array(self) -> None:
         """
@@ -77,22 +76,22 @@ class ImageHandler():
             self.texture_arrays[size].filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
             self.texture_arrays[size].anisotropy = 32.0
 
-    def write(self, shader) -> None:
+    def write(self, regenerate=False) -> None:
         """
-        Writes all texture arrays to the given shader program
-        Args:
-            shader: bsk.Shader:
-                Destination of the texture array write
+        Writes all texture arrays to shaders that use images 
         """
 
-        if 'textureArrays[5]' not in shader.uniforms: return
+        if regenerate: self.generate_texture_array()
 
-        self.generate_texture_array()
+        if not self.texture_arrays: return
 
-        for i, size in enumerate(texture_sizes):
-            if not size in self.texture_arrays: continue
-            shader.program[f'textureArrays[{i}].array'] = i + 3
-            self.texture_arrays[size].use(location=i+3)
+        for shader in self.engine.scene.shader_handler.shaders.values():
+            if 'textureArrays[5]' not in shader.uniforms: continue
+
+            for i, size in enumerate(texture_sizes):
+                if not size in self.texture_arrays: continue
+                shader.program[f'textureArrays[{i}].array'] = i + 3
+                self.texture_arrays[size].use(location=i+3)
 
     def get(self, identifier: str | int) -> any:
         """
