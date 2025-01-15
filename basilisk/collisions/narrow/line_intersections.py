@@ -52,3 +52,56 @@ def line_poly_intersect(line:list[glm.vec2], polygon:list[glm.vec2]) -> list[glm
             if len(points) > 1: break # exit if two intersections have been found
         else: return [] # fallback if 0 or one intersections found
         return points
+    
+def closest_two_lines(p1: glm.vec3, q1: glm.vec3, p2: glm.vec3, q2: glm.vec3, epsilon: float=1e-7) -> tuple[glm.vec3, glm.vec3]:
+    """
+    Determines the closest point on each line segment to the other line segment. 
+    """
+    # create direction vector
+    d1 = q1 - p1
+    d2 = q2 - p2
+    r = p1 - p2
+    
+    # get lengths of line segments
+    a = glm.dot(d1, d1)
+    e = glm.dot(d2, d2)
+    f = glm.dot(d2, r)
+    
+    # check if either or both line segment degenerate into points
+    if a <= epsilon and e <= epsilon:
+        # both segments degenerate
+        return p1, p2
+    
+    if a <= epsilon:
+        s = 0
+        t = glm.clamp(f / e, 0, 1)
+    else: 
+        c = glm.dot(d1, r)
+        if e <= epsilon:
+            # the second line degenerates to a point
+            t = 0
+            s = glm.clamp(-c / a, 0, 1)
+        else:
+            # if neither of them degenerate to a point
+            b = glm.dot(d1, d2)
+            denom = a * e - b ** 2 # this will always be non-negative
+            
+            # if segments are not parallel, compute closest point from l1 to l2
+            s = glm.clamp((b * f - c * e) / denom, 0, 1) if denom else 0
+            
+            # compute closest point from l2 on s1(s)
+            t = (b * s + f) / e
+            
+            # if t is not in [0, 1], clamp and recompute s
+            if t < 0:
+                t = 0
+                s = glm.clamp(-c / a, 0, 1)
+            elif t > 1:
+                t = 1
+                s = glm.clamp((b - c) / a, 0, 1)
+                
+    c1 = p1 + d1 * s
+    c2 = p2 + d2 * t
+    return c1, c2
+                
+        

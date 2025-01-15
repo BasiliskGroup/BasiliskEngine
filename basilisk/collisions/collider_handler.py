@@ -4,6 +4,7 @@ from .broad.broad_bvh import BroadBVH
 from .narrow.gjk import collide_gjk
 from .narrow.epa import get_epa_from_gjk
 from .narrow.contact_manifold import get_contact_manifold
+from .narrow.line_intersections import closest_two_lines
 from ..nodes.node import Node
 from ..generic.collisions import get_sat_axes
 from ..physics.impulse import calculate_collisions
@@ -85,6 +86,61 @@ class ColliderHandler():
             
         return small_axis, small_overlap
     
+    def sat_manifold(self, points1: list[glm.vec3], points2: list[glm.vec3], axis: glm.vec3, digit: int) -> list[glm.vec3]:
+        """
+        Returns the contact manifold from an SAT OBB OBB collision
+        """
+        def get_test_points(contact_plane_normal:glm.vec3, points:list[glm.vec3], count: int):
+            test_points = [(glm.dot(contact_plane_normal, p), p) for p in points]
+            test_points.sort(key=lambda p: p[0])
+            return [p[1] for p in test_points[:count]]
+        
+        def get_test_points_unknown(contact_plane_normal:glm.vec3, points:list[glm.vec3]):
+            test_points = [(glm.dot(contact_plane_normal, p), p) for p in points]
+            test_points.sort(key=lambda p: p[0])
+            if test_points[2] - test_points[0] > 1e-3: return [p[1] for p in test_points[:2]]
+            else:                                      return [p[1] for p in test_points[:4]]        
+        
+        if digit < 6: # there must be at least one face in the collision
+            reference, incident = get_test_points(-axis, points1, 4), get_test_points_unknown(axis, points2) if digit < 3 else get_test_points(axis, points2, 2), get_test_points_unknown(-axis, points1)
+            
+            # project vertices onto the 2d plane
+            # points1 = project_points(contact_plane_point, contact_plane_normal, points1)
+            # points2 = project_points(contact_plane_point, contact_plane_normal, points2)
+            
+            # # check if collsion was on a vertex
+            # if len(points1) == 1: return points1
+            # if len(points2) == 1: return points2
+            
+            # # convert points to 2d for intersection algorithms
+            # points1, u1, v1 = points_to_2d(contact_plane_point, contact_plane_normal, points1)
+            # points2, u2, v2 = points_to_2d(contact_plane_point, contact_plane_normal, points2) #TODO precalc orthogonal basis for 2d conversion
+            
+            # # convert arbitrary points to polygon
+            # if len(points1) > 2: points1 = graham_scan(points1)
+            # if len(points2) > 2: points2 = graham_scan(points2)
+            
+            # # run clipping algorithms
+            # manifold = []
+            # is_line1, is_line2 = len(points1) == 2, len(points2) == 2
+            # if is_line1 and is_line2: manifold = line_line_intersect(points1, points2)
+            # else: 
+            #     if is_line1:   manifold = line_poly_intersect(points1, points2)
+            #     elif is_line2: manifold = line_poly_intersect(points2, points1)
+            #     else:          manifold = sutherland_hodgman(points1, points2)
+                
+            # # fall back if manifold fails to develope
+            # if len(manifold) == 0: return []
+            # # convert inertsection algorithm output to 3d
+            # return points_to_3d(u1, v1, contact_plane_point, manifold)
+        
+        else: # there is an edge edge collision
+            
+            points1 = get_test_points(-axis, points1, 2)
+            points2 = get_test_points(axis, points2, 2)
+            
+            return closest_two_lines(*points1, *points2)
+    
     def collide_obb_obb_decision(self, collider1: Collider, collider2: Collider) -> bool:
         """
         Determines if two obbs are colliding Uses SAT. 
@@ -142,6 +198,7 @@ class ColliderHandler():
                 if not data: continue
                 
                 vec, distance = data
+                vec *= -1
                 
                 # TODO replace with own contact algorithm
                 points1 = collider1.obb_points
@@ -171,4 +228,8 @@ class ColliderHandler():
             
             # generate contact manifold TODO give SAT a hard coded manifold and see if GJK/EPA can be generated with the polytope
             manifold = get_contact_manifold(node1.position - vec, vec, points1, points2)
+            
+            # print(manifold)
+            # print(vec)
+            # print()
             calculate_collisions(vec, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.geometric_center, node2.geometric_center)

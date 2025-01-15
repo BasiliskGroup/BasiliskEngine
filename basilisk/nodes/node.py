@@ -175,7 +175,7 @@ class Node():
         Updates the node's movement variables based on the delta time
         """
         if any(self.velocity): self.position += dt * self.velocity
-        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation + 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity))
+        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation - 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity))
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
@@ -254,7 +254,7 @@ class Node():
                 
         # rotation
         rotation_matrix = glm.mat3_cast(self.rotation)
-        inertia_tensor = rotation_matrix * inertia_tensor * glm.transpose(rotation_matrix)
+        inertia_tensor  = rotation_matrix * inertia_tensor * glm.transpose(rotation_matrix)
         
         return glm.inverse(inertia_tensor)
 
@@ -339,7 +339,6 @@ class Node():
         # if not self.mesh: raise RuntimeError('Node: Cannot retrieve geometric center if node does not have mesh')
         if self.needs_geometric_center: 
             self._geometric_center = self.model_matrix * self.mesh.geometric_center
-            print('geometric center:', self._geometric_center, self.position)
             self.needs_geometric_center = False
         return self._geometric_center
     @property

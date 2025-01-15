@@ -13,6 +13,8 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     points1 = get_past_points(contact_plane_point, contact_plane_normal, points1)
     points2 = get_past_points(contact_plane_point, -contact_plane_normal, points2)
     
+    # print(len(points1), len(points2), contact_plane_point)
+    
     if len(points1) == 0 or len(points2) == 0: return []
     
     # project vertices onto the 2d plane
@@ -46,9 +48,17 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     return points_to_3d(u1, v1, contact_plane_point, manifold)
 
 # plane functions
-def get_past_points(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points:list[glm.vec3], epsilon:float = 1e-3) -> list[glm.vec3]:
+def get_past_points(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points:list[glm.vec3], epsilon:float = 1e-4) -> list[glm.vec3]:
     """returns the points on the wrong side of the contact plane"""
-    return list(filter(lambda point: glm.dot(contact_plane_normal, point - contact_plane_point) > -epsilon, points))
+    return list(filter(lambda point: glm.dot(contact_plane_normal, point - contact_plane_point) < epsilon, points))
+    # test_points = [(glm.dot(contact_plane_normal, p), p) for p in points]
+    # test_points.sort(key=lambda p: p[0])
+    # p_low = test_points[0][0]
+    # contact_points = []
+    # for point in test_points:
+    #     if point[0] > p_low + epsilon: break
+    #     contact_points.append(point[1])
+    # return contact_points
     
 def distance_to_plane(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, point:glm.vec3) -> float:
     """gets the smallest distance a point is from a plane"""

@@ -19,8 +19,8 @@ def calculate_collisions(normal:glm.vec3, node1: Node, node2: Node, contact_poin
     
     # gets coefficients
     elasticity = max(collider1.elasticity, collider2.elasticity)
-    kinetic = min(collider1.kinetic_friction, collider2.kinetic_friction)
-    static = min(collider1.static_friction, collider2.static_friction)
+    kinetic    = min(collider1.kinetic_friction, collider2.kinetic_friction)
+    static     = min(collider1.static_friction, collider2.static_friction)
     num_points = len(contact_points)
     
     # calculate impulses from contact points
@@ -103,19 +103,16 @@ def calculate_impulse2(node1: Node, node2: Node, inv_mass1, inv_mass2, omega1, o
     elif rel_tan_vel_len < 1e-2: friction_impulse = -static * glm.length(normal_impulse) * glm.normalize(rel_tan_vel)
     else: friction_impulse = -kinetic * glm.length(normal_impulse) * glm.normalize(rel_tan_vel)
     # return total impulse
-    return glm.vec3([round(v, 3) for v in normal_impulse + friction_impulse])
+    return normal_impulse + friction_impulse
 
 def apply_impulse(radius, impulse_signed, inv_inertia, inv_mass, node: Node) -> None:
     """
     Applies the given impulse to the physics body, changing translational and rotational velcoity. 
     """
+    # print('imp signed', impulse_signed)
+    
     # Update linear velocity
     node.velocity += impulse_signed * inv_mass
     
     # update rotational velcoity
-    delta_omega = inv_inertia * glm.cross(radius, impulse_signed)
-    angular_velocity_vector = node.rotational_velocity + delta_omega
-    if glm.length(angular_velocity_vector) < 1e-6: # checking if there is no rotation
-        node.rotational_velocity = glm.vec3(0, 0, 0)
-        return
-    node.rotational_velocity = angular_velocity_vector
+    node.rotational_velocity += inv_inertia * glm.cross(radius, impulse_signed)
