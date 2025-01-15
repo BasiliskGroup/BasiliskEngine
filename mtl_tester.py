@@ -38,6 +38,11 @@ class App():
         self.base_sky = bsk.Sky(self.engine, 'tests/skybox.png')
         self.sunset_sky = bsk.Sky(self.engine, 'tests/SkySkybox.png')
 
+        # Shaders
+        self.default_shader = self.engine.shader
+        self.normal_shader  = bsk.Shader(self.engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
+        self.geo_shader     = bsk.Shader(self.engine, vert='basilisk/shaders/geometry.vert', frag='basilisk/shaders/geometry.frag')
+
         self.cam_rot = 0
 
     def update(self):
@@ -60,7 +65,7 @@ class App():
         if self.engine.keys[pg.K_c]:
             self.node.material = self.cloth_mtl
             self.mtl = self.cloth_mtl
-        if self.engine.keys[pg.K_f]:
+        if self.engine.keys[pg.K_g]:
             self.node.material = self.floor_mtl
             self.mtl = self.floor_mtl
         if self.engine.keys[pg.K_5]:
@@ -70,11 +75,11 @@ class App():
         if self.engine.keys[pg.K_p]:
             self.scene.frame.save()
         if self.engine.keys[pg.K_r]:
-            self.engine.shader = bsk.Shader(self.engine)
+            self.engine.shader = self.default_shader
         if self.engine.keys[pg.K_n]:
-            self.engine.shader = bsk.Shader(self.engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
+            self.engine.shader = self.normal_shader
         if self.engine.keys[pg.K_g]:
-            self.engine.shader = bsk.Shader(self.engine, vert='basilisk/shaders/geometry.vert', frag='basilisk/shaders/geometry.frag')
+            self.engine.shader = self.geo_shader
 
         if self.engine.mouse.left_down:
             if 30 < self.engine.mouse.y < 60:

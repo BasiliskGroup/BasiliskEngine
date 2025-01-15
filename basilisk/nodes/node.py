@@ -8,6 +8,7 @@ from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
 from ..collisions.collider import Collider
 from ..render.chunk import Chunk
+from ..render.shader import Shader
 
 
 class Node():
@@ -53,6 +54,8 @@ class Node():
     """""" # TODO Jonah description
     children: list
     """List of nodes that this node is a parent of"""
+    shader: Shader
+    """Shader that is used to render the node. If none is given, engine default will be used"""
 
     def __init__(self, node_handler,
             position:            glm.vec3=None, 
@@ -73,7 +76,8 @@ class Node():
             collision_group :    float=None, 
             name:                str='', 
             tags:                list[str]=None,
-            static:              bool=True
+            static:              bool=None,
+            shader:              Shader=None
         ) -> None:
         """
         Basilisk node object. 
@@ -126,9 +130,14 @@ class Node():
         # information and recursion
         self.name = name
         self.tags = tags if tags else []
-        self.static = static and not (self.physics_body or any(self.velocity) or any(self.rotational_velocity))
+        if static == None:
+            self.static = bool(self.physics_body or any(self.velocity) or any(self.rotational_velocity))
+        else: self.static = static
         self.data_index = 0
         self.children = []
+
+        # Shader given by user or none for default
+        self.shader = shader
         
         # default callback functions for node transform
         self.previous_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)

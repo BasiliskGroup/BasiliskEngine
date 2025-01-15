@@ -85,6 +85,17 @@ class Shader:
         # Create a program with shaders
         self.program = self.ctx.program(vertex_shader=self.vertex_shader, fragment_shader=self.fragment_shader)
 
+    def use(self):
+        """
+        Selects a shader for use
+        """
+        
+        self.engine.scene.shader_handler.add('default', self)
+        self.engine.scene.light_handler.write()
+        self.engine.scene.material_handler.write()
+        self.engine.scene.sky.write()
+        self.engine.scene.node_handler.chunk_handler.update_all()
+
     def write(self, name: str, value) -> None:
         """
         Writes a uniform to the shader program

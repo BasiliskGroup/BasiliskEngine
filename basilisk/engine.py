@@ -177,15 +177,11 @@ class Engine():
     @scene.setter
     def scene(self, value):
         self._scene = value
-        if self._scene: self._scene.set_engine(self)
+        if self._scene: 
+            self._scene.set_engine(self)
+            self.shader.use()
 
     @shader.setter
     def shader(self, value):
         self._shader = value
-        if self.scene:
-            self.scene.shader_handler.add('default', value)
-            self.scene.light_handler.write()
-            self.scene.material_handler.image_handler.write(value)
-            self.scene.material_handler.write()
-            self.scene.sky.write()
-            self.scene.node_handler.chunk_handler.update_all()
+        if self.scene: value.use()

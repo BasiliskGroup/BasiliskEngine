@@ -133,64 +133,64 @@ class Material():
     @color.setter
     def color(self, value: tuple | list | glm.vec3 | np.ndarray):
         self._color = validate_glm_vec3("Material", "color", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
         
     @texture.setter
     def texture(self, value: Image | None):
         self._texture = validate_image("Material", "texture", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
         
     @normal.setter
     def normal(self, value: Image | None):
         self._normal = validate_image("Material", "normal map", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @roughness.setter
     def roughness(self, value: float | int | glm.float32):
         self._roughness = validate_float("Material", "roughness", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @subsurface.setter
     def subsurface(self, value: float | int | glm.float32):
         self._subsurface = validate_float("Material", "subsurface", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @sheen.setter
     def sheen(self, value: float | int | glm.float32):
         self._sheen = validate_float("Material", "sheen", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @sheen_tint.setter
     def sheen_tint(self, value: float | int | glm.float32):
         self._sheen_tint = validate_float("Material", "sheen tint", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @anisotropic.setter
     def anisotropic(self, value: float | int | glm.float32):
         self._anisotropic = validate_float("Material", "anisotropic", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @specular.setter
     def specular(self, value: float | int | glm.float32):
         self._specular = validate_float("Material", "specular", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @metallicness.setter
     def metallicness(self, value: float | int | glm.float32):
         self._metallicness = validate_float("Material", "metallicness", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @specular_tint.setter
     def specular_tint(self, value: float | int | glm.float32):
         self._specular_tint = validate_float("Material", "specular tint", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
     
     @clearcoat.setter
     def clearcoat(self, value: float | int | glm.float32):
         self._clearcoat = validate_float("Material", "clearcoat", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
 
     @clearcoat_gloss.setter
     def clearcoat_gloss(self, value: float | int | glm.float32):
         self._clearcoat_gloss = validate_float("Material", "clearcoat gloss", value)
-        if self.material_handler: self.material_handler.write()
+        if self.material_handler: self.material_handler.write(regenerate=True)
