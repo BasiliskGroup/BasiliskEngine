@@ -25,7 +25,9 @@ class NodeHandler():
         """
         Updates the nodes and chunks in the scene
         """
-        for node in self.nodes: node.update(self.scene.engine.delta_time)
+        for node in self.nodes: 
+            if node.static: continue
+            node.update(self.scene.engine.delta_time)
         self.chunk_handler.update()
 
     def render(self):

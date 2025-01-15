@@ -116,6 +116,7 @@ class MaterialHandler():
         
         self.base = Material('Base')
         self.materials.append(self.base)
+        self.generate_material_texture()
         self.write()
 
     def __del__(self) -> None:

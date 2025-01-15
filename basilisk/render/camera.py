@@ -145,7 +145,7 @@ class FreeCamera(Camera):
         """
         Checks for button presses and updates vectors accordingly. 
         """
-        velocity = SPEED * self.engine.delta_time
+        velocity = (SPEED + self.engine.keys[pg.K_CAPSLOCK] * 10) * self.engine.delta_time
         keys = self.engine.keys
         if keys[pg.K_w]:
             self.position += glm.normalize(glm.vec3(self.forward.x, 0, self.forward.z)) * velocity

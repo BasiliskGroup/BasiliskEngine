@@ -177,7 +177,9 @@ class Engine():
     @scene.setter
     def scene(self, value):
         self._scene = value
-        if self._scene: self._scene.set_engine(self)
+        if self._scene: 
+            self._scene.set_engine(self)
+            self.shader.use()
 
     @shader.setter
     def shader(self, value):

@@ -90,6 +90,7 @@ class ImageHandler():
 
             for i, size in enumerate(texture_sizes):
                 if not size in self.texture_arrays: continue
+                if not self.texture_arrays[size]: continue
                 shader.program[f'textureArrays[{i}].array'] = i + 3
                 self.texture_arrays[size].use(location=i+3)
 
