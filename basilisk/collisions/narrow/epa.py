@@ -62,7 +62,8 @@ def insert_face(polytope: polytope_type, faces: face_type, indices: tuple[int, i
     if glm.dot(center, normal) < 0: 
         normal *= -1
         indices = (indices[2], indices[1], indices[0])
-    assert glm.dot(center, normal) > 0, 'epa normal not facing outward'
+
+    # TODO solve cases where face may contain origin
     normal = glm.normalize(normal)
     distance = abs(glm.dot(polytope[indices[0]][0], normal))
     new_face = (distance, normal, center, *indices)

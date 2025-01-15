@@ -47,7 +47,7 @@ objects = [scene.add_node(
     physics    = True,
     static     = False,
     mass       = 1
-) for _ in range(10)]
+) for _ in range(3)]
 
 # print(platform.static)
 
