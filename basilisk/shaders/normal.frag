@@ -41,7 +41,7 @@ vec3 getNormal(Material mtl, mat3 TBN){
     // Isolate the normal vector from the TBN basis
     vec3 normal = TBN[2];
     // Apply normal map if the material has one
-    if (bool(round(mtl.hasNormalMap))) {
+    if (bool(mtl.hasNormalMap)) {
         normal = texture(textureArrays[int(round(mtl.normalMap.x))].array, vec3(uv, round(mtl.normalMap.y))).rgb * 2.0 - 1.0;
         normal = normalize(TBN * normal); 
     }
