@@ -6,18 +6,20 @@ engine.scene = scene
 
 wood_texture = bsk.Image('tests/floor_albedo.png')
 wood_normal = bsk.Image('tests/floor_normal.png')
-brick_texture = bsk.Image('tests/brick.png')
-brick_normal = bsk.Image('tests/brick_normal.png')
+# brick_texture = bsk.Image('tests/foil_albedo.png')
+brick_normal = bsk.Image('tests/foil_normal.png')
+
 
 wood = bsk.Material(texture=wood_texture, normal=wood_normal,
                     roughness=.4, subsurface=0.0, sheen=.9, metallicness=.15, anisotropic=0.15, specular=1.0, clearcoat=.8, clearcoat_gloss=.75)
-brick = bsk.Material(texture=brick_texture, normal=brick_normal, roughness=1.0, clearcoat=1.0, specular=1.5, specular_tint=.25)
+foil = bsk.Material(normal=brick_normal, 
+                    roughness=0.55, metallicness=1.0, anisotropic=.8, clearcoat=1.0, clearcoat_gloss=1.0)
 bullet = bsk.Material(color=(255, 100, 100))
 
 
 floor = scene.add_node(position=(0, -3, 0), scale=(10, 1, 10), collisions=True, material=wood)
 player = scene.add_node(position=(0, 0, 0), scale=(.5, 1, .5))
-box = scene.add_node(position=(3, 0, 3), scale=(1, 1, 1), collisions=True, physics=True, mass=30, material=brick)
+box = scene.add_node(position=(-3, 0, -3), scale=(1, 1, 1), collisions=True, physics=True, mass=30, material=foil)
 
 camera = bsk.FollowCamera(player)
 # camera = bsk.OrbitCamera(player, distance=7)
