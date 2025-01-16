@@ -25,18 +25,6 @@ platform = scene.add_node(
 
 radius = 4
 
-# for _ in range(5):
-#     scene.add_node(
-#         position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
-#         scale      = [random.uniform(5, 20) for _ in range(3)],
-#         rotation   = [random.uniform(-radius, radius), random.uniform(-3, radius), random.uniform(-radius, radius)], 
-#         mesh       = bunny_mesh, 
-#         material   = blue,
-#         collisions = True,
-#         physics    = True,
-#         static     = False
-#     )
-
 objects = [scene.add_node(
     position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
     scale      = [random.uniform(1, 3) for _ in range(3)],
@@ -48,9 +36,6 @@ objects = [scene.add_node(
     static     = False,
     mass       = 1
 ) for _ in range(10)]
-
-
-# print(platform.static)
 
 while engine.running:
     

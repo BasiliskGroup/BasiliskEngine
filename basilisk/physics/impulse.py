@@ -23,6 +23,8 @@ def calculate_collisions(normal:glm.vec3, node1: Node, node2: Node, contact_poin
     static     = min(collider1.static_friction, collider2.static_friction)
     num_points = len(contact_points)
     
+    total_impulse = glm.vec3(0, 0, 0)
+    
     # calculate impulses from contact points
     if has_physics1 and has_physics2:
         for contact_point in contact_points:
@@ -30,29 +32,29 @@ def calculate_collisions(normal:glm.vec3, node1: Node, node2: Node, contact_poin
             # apply impulse based reduced by total points
             radius1, radius2 = contact_point - center1, contact_point - center2
             impulse = calculate_impulse2(node1, node2, inv_mass1, inv_mass2, node1.rotational_velocity, node2.rotational_velocity, radius1, radius2, inv_inertia1, inv_inertia2, elasticity, kinetic, static, normal)
-            impulse /= num_points
+            total_impulse += impulse / num_points
             
-            # apply impulses
-            apply_impulse(radius1, impulse, inv_inertia1, inv_mass1, node1)
-            apply_impulse(radius2, -impulse, inv_inertia2, inv_mass2, node2)
+        # apply impulses
+        apply_impulse(radius1, total_impulse, inv_inertia1, inv_mass1, node1)
+        apply_impulse(radius2, -total_impulse, inv_inertia2, inv_mass2, node2)
             
     elif has_physics1:
         for contact_point in contact_points:
             radius = contact_point - center1
             impulse = calculate_impluse1(node1, inv_mass1, node1.rotational_velocity, radius, inv_inertia1, elasticity, kinetic, static, normal)
-            impulse /= num_points
+            total_impulse += impulse / num_points
             
-            # apply impulses
-            apply_impulse(radius, impulse, inv_inertia1, inv_mass1, node1)
+        # apply impulses
+        apply_impulse(radius, total_impulse, inv_inertia1, inv_mass1, node1)
             
     else: # only physics body 2
         for contact_point in contact_points:
             radius = contact_point - center2
             impulse = calculate_impluse1(node2, inv_mass2, node2.rotational_velocity, radius, inv_inertia2, elasticity, kinetic, static, normal)
-            impulse /= num_points
+            total_impulse += impulse / num_points
             
-            # apply impulse
-            apply_impulse(radius, impulse, inv_inertia2, inv_mass2, node2)
+        # apply impulse
+        apply_impulse(radius, total_impulse, inv_inertia2, inv_mass2, node2)
     
 def calculate_impluse1(node: Node, inv_mass, omega, radius, inv_inertia, elasticity, kinetic, static, normal) -> glm.vec3:
     """
@@ -81,7 +83,7 @@ def calculate_impluse1(node: Node, inv_mass, omega, radius, inv_inertia, elastic
     else:                        friction_impulse = -kinetic * glm.length(normal_impulse) * glm.normalize(rel_tan_vel)  # kinetic friction
     
     # return total impulse
-    return glm.vec3([round(v, 3) for v in normal_impulse + friction_impulse])
+    return normal_impulse + friction_impulse
     
 def calculate_impulse2(node1: Node, node2: Node, inv_mass1, inv_mass2, omega1, omega2, radius1, radius2, inv_inertia1, inv_inertia2, elasticity, kinetic, static, normal) -> glm.vec3:
     """
@@ -109,7 +111,7 @@ def apply_impulse(radius, impulse_signed, inv_inertia, inv_mass, node: Node) -> 
     """
     Applies the given impulse to the physics body, changing translational and rotational velcoity. 
     """
-    # print('imp signed', impulse_signed)
+    print('imp signed', impulse_signed)
     
     # Update linear velocity
     node.velocity += impulse_signed * inv_mass

@@ -34,7 +34,7 @@ struct Material {
     int   hasNormalMap;
     vec2  normalMap;
 };
-flat out Material mtl{};
+flat out Material mtl;
 
 // Uniforms
 uniform mat4 projectionMatrix;
