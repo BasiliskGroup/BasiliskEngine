@@ -21,7 +21,7 @@ def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon:
         if new_point in polytope or glm.length(new_point[0]) - faces[0][0] < epsilon: return faces[0], polytope
         faces, polytope = insert_point(polytope, faces, new_point)
 
-def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, epsilon: float=1e-7) -> tuple[face_type, polytope_type]:
+def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, epsilon: float=0) -> tuple[face_type, polytope_type]:
     """
     Inserts a point into the polytope sorting by distance from the origin
     """ 
@@ -41,7 +41,7 @@ def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, eps
             if (p2, p1) in edges: edges.remove((p2, p1)) # edges can only be shared by two faces, running opposite to each other. 
             elif (p1, p2) in edges: # TODO remove this
                 edges.remove((p1, p2))
-                print('not reversed')
+                # print('not reversed')
             else: edges.append((p1, p2))
     
     # remove visible faces

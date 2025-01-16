@@ -1,3 +1,4 @@
+import pygame as pg
 from .engine import Engine
 from .scene import Scene
 from .nodes.node import Node
