@@ -111,7 +111,6 @@ def apply_impulse(radius, impulse_signed, inv_inertia, inv_mass, node: Node) -> 
     """
     Applies the given impulse to the physics body, changing translational and rotational velcoity. 
     """
-    print('imp signed', impulse_signed)
     
     # Update linear velocity
     node.velocity += impulse_signed * inv_mass

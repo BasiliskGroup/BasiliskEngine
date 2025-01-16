@@ -20,9 +20,7 @@ player = scene.add_node(position=(0, 0, 0), scale=(.5, 1, .5))
 box = scene.add_node(position=(3, 0, 3), scale=(1, 1, 1), collisions=True, physics=True, mass=30, material=brick)
 
 camera = bsk.FollowCamera(player)
-# camera = bsk.OrbitCamera(player, distance=7)
 scene.camera = camera
-
 
 def move_player():
     look_vector = camera.forward.xz
