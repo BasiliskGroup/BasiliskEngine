@@ -27,7 +27,6 @@ struct Material {
 };
 
 in vec2 uv;
-in vec3 position;
 in mat3 TBN;
 
 // Material attributes

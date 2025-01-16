@@ -13,7 +13,6 @@ layout (location = 8) in float obj_material;
 
 // Variables passed on to the fragment shader
 out vec2 uv;
-out vec3 position;
 out mat3 TBN;
 
 // Material struct sent to fragment shader
@@ -78,7 +77,6 @@ void main() {
     mat4 modelMatrix = getModelMatrix(obj_position, obj_rotation, obj_scale);
 
     // Set out variables
-    position = (modelMatrix * vec4(in_position, 1.0)).xyz;
     TBN      = getTBN(modelMatrix, in_normal, in_tangent, in_bitangent);
     uv       = in_uv;
     
