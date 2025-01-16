@@ -89,8 +89,6 @@ class ColliderHandler():
             small_axis    = axis
             small_index   = i
             
-        if small_overlap < 0: print(small_overlap)
-            
         return small_axis, small_overlap, small_index
     
     def sat_manifold(self, points1: list[glm.vec3], points2: list[glm.vec3], axis: glm.vec3, plane_point: glm.vec3, digit: int) -> list[glm.vec3]:
@@ -203,8 +201,6 @@ class ColliderHandler():
                 points1 = collider1.obb_points
                 points2 = collider2.obb_points
                 
-                # manifold = self.sat_manifold(points1, points2, vec, node1.position - vec, index)
-                
             else: # use gjk to determine collisions between non-cuboid meshes
                 has_collided, simplex = collide_gjk(node1, node2)
                 if not has_collided: continue
@@ -218,19 +214,14 @@ class ColliderHandler():
                 
             if glm.dot(vec, node2.position - node1.position) > 0: vec *= -1
             
+            if node1.physics_body or node2.physics_body:
+                manifold = get_contact_manifold(node1.position - vec, vec, points1, points2)
+                if len(manifold) == 0: 
+                    print('manifold failed to generate')
+                    continue
+                calculate_collisions(vec, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
+            
             # resolve collision penetration
             multiplier = 0.5 if not (node1.static or node2.static) else 1
             if not node1.static: node1.position += multiplier * vec * distance
             if not node2.static: node2.position -= multiplier * vec * distance
-            
-            # resolve physics
-            if not (node1.physics_body or node2.physics_body): continue
-            
-            manifold = get_contact_manifold(node1.position - vec, vec, points1, points2)
-            
-            if len(manifold) == 0: continue
-            
-            # print(manifold)
-            # print(vec)
-            # print()
-            calculate_collisions(vec, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.geometric_center, node2.geometric_center)

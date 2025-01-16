@@ -9,9 +9,8 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     """
     computes the contact manifold for a collision between two nearby polyhedra
     """
-    # gets near points to be considered for clipping
-    points1 = get_past_points(contact_plane_point, contact_plane_normal, points1)
-    points2 = get_past_points(contact_plane_point, -contact_plane_normal, points2)
+    # determine the contact points from the collision
+    points1, points2 = separate_polytope(points1, points2, contact_plane_normal)
     
     if len(points1) == 0 or len(points2) == 0: return []
     
@@ -25,7 +24,7 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     
     # convert points to 2d for intersection algorithms
     points1, u1, v1 = points_to_2d(contact_plane_point, contact_plane_normal, points1)
-    points2, u2, v2 = points_to_2d(contact_plane_point, contact_plane_normal, points2) #TODO precalc orthogonal basis for 2d conversion
+    points2, u2, v2 = points_to_2d(contact_plane_point, contact_plane_normal, points2, u1, v1) #TODO precalc orthogonal basis for 2d conversion
     
     # convert arbitrary points to polygon
     if len(points1) > 2: points1 = graham_scan(points1)
@@ -45,10 +44,21 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     # convert inertsection algorithm output to 3d
     return points_to_3d(u1, v1, contact_plane_point, manifold)
 
-# plane functions
-def get_past_points(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points:list[glm.vec3], epsilon:float = 1e-2) -> list[glm.vec3]:
-    """returns the points on the wrong side of the contact plane"""
-    return list(filter(lambda point: glm.dot(contact_plane_normal, point - contact_plane_point) < epsilon, points))
+def separate_polytope(points1: list[glm.vec3], points2: list[glm.vec3], contact_plane_normal) -> list[glm.vec3]:
+    """
+    Determines the potential contact manifold points of each shape based on their position along the penetrating axis
+    """
+    proj1 = [(glm.dot(point, contact_plane_normal), point) for point in points1]
+    proj2 = [(glm.dot(point, contact_plane_normal), point) for point in points2]
+    
+    # min1 and max2 should be past the collising points of node2 and node1 respectively
+    min1 = min(proj1, key=lambda point: point[0])
+    max2 = max(proj2, key=lambda point: point[0])
+    
+    proj1 = filter(lambda proj: proj < max2, proj1)
+    proj2 = filter(lambda proj: proj > min1, proj2)
+    
+    return [point[1] for point in proj1], [point[1] for point in proj2]
     
 def distance_to_plane(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, point:glm.vec3) -> float:
     """gets the smallest distance a point is from a plane"""
