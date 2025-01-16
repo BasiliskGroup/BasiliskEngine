@@ -1,5 +1,4 @@
 import basilisk as bsk
-import pygame as pg
 from math import cos, sin, pi
 import glm
 import time
@@ -9,7 +8,7 @@ engine = bsk.Engine()
 scene = bsk.Scene()
 engine.scene = scene
 
-cube_mesh = bsk.cube
+cube_mesh = engine.cube
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 
 mud = bsk.Image("tests/mud.png")
@@ -23,9 +22,9 @@ is_pressed = False
 radius = 50
 
 while engine.running:
-    keys = pg.key.get_pressed()
-    if keys[pg.K_k] and not is_pressed: is_pressed = True
-    if not keys[pg.K_k] and is_pressed: 
+    keys = bsk.pg.key.get_pressed()
+    if keys[bsk.pg.K_k] and not is_pressed: is_pressed = True
+    if not keys[bsk.pg.K_k] and is_pressed: 
         is_pressed = False
         
         for i in range(5):

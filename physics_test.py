@@ -38,24 +38,27 @@ radius = 4
 #     )
 
 objects = [scene.add_node(
-    position   = [random.uniform(0, radius), 0, 0], 
-    scale      = [random.uniform(0.5, 2) for _ in range(3)],
-    rotation   = [random.uniform(0.5, 2) for _ in range(3)], 
+    position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
+    scale      = [random.uniform(1, 3) for _ in range(3)],
+    rotation   = [random.uniform(1, 3) for _ in range(3)],
     mesh       = random.choice(meshes), 
     material   = red,
     collisions = True,
     physics    = True,
     static     = False,
     mass       = 1
-) for _ in range(3)]
+) for _ in range(10)]
+
 
 # print(platform.static)
 
 while engine.running:
     
     for object in objects:
+        # print(object.position)
         if object.y < -50: 
+        
             object.position = (0, 5, 0)
             object.velocity = (0, 0, 0)
-    
+
     engine.update()

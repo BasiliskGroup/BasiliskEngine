@@ -13,8 +13,6 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     points1 = get_past_points(contact_plane_point, contact_plane_normal, points1)
     points2 = get_past_points(contact_plane_point, -contact_plane_normal, points2)
     
-    print(points1, points2)
-    
     if len(points1) == 0 or len(points2) == 0: return []
     
     # project vertices onto the 2d plane
@@ -60,12 +58,12 @@ def project_points(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, 
     """gets the projected positions of the given points onto the given plane"""
     return [point - glm.dot(point - contact_plane_point, contact_plane_normal) * contact_plane_normal for point in points]
 
-def points_to_2d(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points:list[glm.vec3]) -> tuple[list[glm.vec2], glm.vec3, glm.vec3]:
+def points_to_2d(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points:list[glm.vec3], u = None, v = None) -> tuple[list[glm.vec2], glm.vec3, glm.vec3]:
     """converts a list of points on a plane to their 2d representation"""
     # generate a new basis
     k = get_noncolinear_vector(contact_plane_normal)
-    u = glm.normalize(glm.cross(contact_plane_normal, k))
-    v = glm.cross(contact_plane_normal, u)
+    u = u if u else glm.normalize(glm.cross(contact_plane_normal, k))
+    v = v if v else glm.cross(contact_plane_normal, u)
     
     # convert points to new basis
     return [glm.vec2(glm.dot(vec := point - contact_plane_point, u), glm.dot(vec, v)) for point in points], u, v

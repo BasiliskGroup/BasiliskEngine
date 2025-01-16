@@ -19,7 +19,7 @@ def get_sat_axes(rotation1: glm.quat, rotation2: glm.quat) -> list[glm.vec3]:
     for i in range(0, 3):
         for j in range(3, 6):
             cross = glm.cross(axes[i], axes[j])
-            if glm.length2(cross) > 1e-6: continue
+            if glm.length2(cross) < 1e-6: continue
             axes.append(glm.normalize(cross))
             
     return axes
