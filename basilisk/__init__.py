@@ -7,5 +7,5 @@ from .render.material import Material
 from .render.shader import Shader
 from .render.shader_handler import ShaderHandler
 from .draw import draw
-from .render.camera import FreeCamera, StaticCamera
+from .render.camera import FreeCamera, StaticCamera, FollowCamera, OrbitCamera
 from .render.sky import Sky

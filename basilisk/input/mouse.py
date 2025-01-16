@@ -34,11 +34,11 @@ class Mouse():
         pg.mouse.set_pos(x, y)
 
     @property
-    def click(self): return self.previous_buttons[0] and not self.buttons[0]
+    def click(self): return self.buttons[0] and not self.previous_buttons[0]
     @property
-    def middle_click(self): return self.previous_buttons[1] and not self.buttons[1]
+    def middle_click(self): return self.buttons[1] and not self.previous_buttons[1]
     @property
-    def right_click(self): return self.previous_buttons[2] and not self.buttons[2]
+    def right_click(self): return self.buttons[2] and not self.previous_buttons[2]
     @property
     def left_down(self): return self.buttons[0]
     @property

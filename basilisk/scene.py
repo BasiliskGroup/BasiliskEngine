@@ -42,8 +42,8 @@ class Scene():
         Updates the physics and in the scene
         """
         
-        self.camera.update()
         self.node_handler.update()
+        self.camera.update()
         self.collider_handler.resolve_collisions()
 
     def render(self) -> None:
@@ -79,7 +79,7 @@ class Scene():
             collision_group :    float=None, 
             name:                str='', 
             tags:                list[str]=None,
-            static:              bool=True):
+            static:              bool=None):
         
         if material: self.material_handler.add(material)
         else: material = self.material_handler.base

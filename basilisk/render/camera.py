@@ -161,6 +161,35 @@ class FreeCamera(Camera):
             self.position -= self.UP * velocity
 
 
+class FollowCamera(FreeCamera):
+    def __init__(self, parent, position=(0, 0, 20), yaw=-90, pitch=0, offset=(0, 0, 0)):
+        super().__init__(position, yaw, pitch)
+        self.parent = parent
+        self.offest = glm.vec3(offset)
+    
+    def move(self) -> None:
+        """
+        Moves the camera to the parent node
+        """
+
+        self.position = self.parent.position + self.offest
+        
+class OrbitCamera(FreeCamera):
+    def __init__(self, parent, position=(0, 0, 20), yaw=-90, pitch=0, distance=5):
+        self.parent = parent
+        self.distance = distance
+        super().__init__(position, yaw, pitch)
+
+    def get_view_matrix(self) -> glm.mat4x4:
+        return glm.lookAt(self.position, self.parent.position, self.up)
+
+    def move(self) -> None:
+        """
+        Moves the camera to the parent node
+        """
+
+        self.position = self.parent.position - glm.normalize(self.forward) * self.distance
+
 class StaticCamera(Camera):
     def __init__(self, position=(0, 0, 20), yaw=-90, pitch=0):
         super().__init__(position, yaw, pitch)

@@ -131,7 +131,7 @@ class Node():
         self.name = name
         self.tags = tags if tags else []
         if static == None:
-            self.static = bool(self.physics_body or any(self.velocity) or any(self.rotational_velocity))
+            self.static = not(physics or any(self.velocity) or any(self.rotational_velocity))
         else: self.static = static
         self.data_index = 0
         self.children = []
