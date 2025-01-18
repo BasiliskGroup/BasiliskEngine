@@ -1,33 +1,39 @@
 import numpy as np
+from .model import Model
 
 
-def from_data(data: np.ndarray) -> np.ndarray:
+def from_data(data: np.ndarray) -> Model:
     """
     Converts data given to a format compatable with basilisk models
     """
+
+    model = Model()
 
     shape = data.shape
 
     if shape[1] == 3:  # Just given position
         pos_norm_data = get_normals(data)
-        print(pos_norm_data.shape)
         data = np.zeros(shape=(len(data), 14))
         data[:,:6] = pos_norm_data
-        return data
 
     elif shape[1] == 6:  # Given position and normals, but no UV
         pos_norm_data = data
         data = np.zeros(shape=(len(data), 14))
         data[:][:6] = pos_norm_data
-        return data
 
     elif shape[1] == 8:  # Given position, normals and UV
         ...
 
     elif shape[1] == 14:  #Given position, normals, UV, bitangents, and tangents, no change needed
-        return data
+        ...
 
-    raise ValueError(f"Could not find valid format for the given model data of shape {shape}")
+    else:
+        raise ValueError(f"Could not find valid format for the given model data of shape {shape}")
+
+    # Save the model's combined vertices
+    model.vertex_data  = data
+
+    return model
 
 
 def get_normals(positions: np.ndarray) -> np.ndarray:
