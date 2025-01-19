@@ -33,6 +33,8 @@ def from_data(data: np.ndarray) -> Model:
     # Save the model's combined vertices
     model.vertex_data  = data
 
+    model.vertex_points = np.array(set(map(tuple, data[:,:3])))
+
     return model
 
 
