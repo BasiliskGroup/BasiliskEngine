@@ -41,7 +41,7 @@ class Material():
     clearcoat_gloss: float
     """The glossiness of the clearcoat layer. 0 For a satin appearance, 1 for a gloss appearance"""
 
-    def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, 
+    def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness_map: Image=None, ao_map: Image=None, 
                  roughness: float=0.7, subsurface: float=0.2, sheen: float=0.5, sheen_tint: float=0.5,
                  anisotropic: float=0.0, specular: float=1.0, metallicness: float=0.0, specular_tint: float=0.0,
                  clearcoat: float=0.5, clearcoat_gloss: float=0.25) -> None:
@@ -67,6 +67,8 @@ class Material():
         self.color           = color
         self.texture         = texture
         self.normal          = normal
+        self.roughness_map   = roughness_map
+        self.ao_map          = ao_map
         self.roughness       = roughness
         self.subsurface      = subsurface
         self.sheen           = sheen
@@ -96,6 +98,14 @@ class Material():
         if self.normal: data.extend([1, self.normal.index.x, self.normal.index.y])
         else: data.extend([0, 0, 0])
 
+        # Add roughness data
+        if self.roughness_map: data.extend([1, self.roughness_map.index.x, self.roughness_map.index.y])
+        else: data.extend([0, 0, 0])
+
+        # Add ao data
+        if self.ao_map: data.extend([1, self.ao_map.index.x, self.ao_map.index.y])
+        else: data.extend([0, 0, 0])
+
         return data
 
     def __repr__(self) -> str:
@@ -108,6 +118,10 @@ class Material():
     def texture(self):         return self._texture
     @property
     def normal(self):          return self._normal
+    @property
+    def roughness_map(self):   return self._roughness_map
+    @property
+    def ao_map(self):          return self._ao_map
     @property
     def roughness(self):       return self._roughness
     @property
@@ -143,6 +157,16 @@ class Material():
     @normal.setter
     def normal(self, value: Image | None):
         self._normal = validate_image("Material", "normal map", value)
+        if self.material_handler: self.material_handler.write(regenerate=True)
+
+    @roughness_map.setter
+    def roughness_map(self, value: Image | None):
+        self._roughness_map = validate_image("Material", "roughness_map", value)
+        if self.material_handler: self.material_handler.write(regenerate=True)
+        
+    @ao_map.setter
+    def ao_map(self, value: Image | None):
+        self._ao_map = validate_image("Material", "ao_map map", value)
         if self.material_handler: self.material_handler.write(regenerate=True)
 
     @roughness.setter

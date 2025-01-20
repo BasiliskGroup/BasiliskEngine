@@ -40,27 +40,29 @@ class Mesh():
         # Verify the path type
         if isinstance(data, str) or isinstance(data, os.PathLike):  # Load the model from file
             model = load_model(data, calculate_tangents=True)
+
+             # Get the vertex data
+            if len(model.vertex_data[0]) == 8:
+                self.data = model.vertex_data.copy()
+            else:
+                self.data = np.zeros(shape=(len(model.vertex_data), 8))
+                self.data[:,:3] = model.vertex_data[:,:3]
+                self.data[:,5:] = model.vertex_data[:,3:]
+            
+            # Get tangent data
+            if len(model.tangent_data[0]) == 6:
+                self.data = np.hstack([self.data, model.tangent_data])
+            else:
+                tangents = np.zeros(shape=(len(self.data), 6))
+                tangents[:,:] += [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+                self.data = np.hstack([self.data, tangents])
+
         elif isinstance(data, np.ndarray):                          # Load the model from array of data
             model = from_data(data)
+            self.data = model.vertex_data
         else:                                                       # Invalid data type
             raise TypeError(f'Invalid path type: {type(data)}. Expected a string or os.path')
-
-        # Get the vertex data
-        if len(model.vertex_data[0]) == 8:
-            self.data = model.vertex_data.copy()
-        else:
-            self.data = np.zeros(shape=(len(model.vertex_data), 8))
-            self.data[:,:3] = model.vertex_data[:,:3]
-            self.data[:,5:] = model.vertex_data[:,3:]
         
-        # Get tangent data
-        if len(model.tangent_data[0]) == 6:
-            self.data = np.hstack([self.data, model.tangent_data])
-        else:
-            tangents = np.zeros(shape=(len(self.data), 6))
-            tangents[:,:] += [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
-            self.data = np.hstack([self.data, tangents])
-
         # Mesh points and triangles used for physics/collisions
         self.points = model.vertex_points.copy()
         self.indices = model.point_indices.copy()

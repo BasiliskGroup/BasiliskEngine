@@ -31,6 +31,10 @@ struct Material {
     vec2  albedoMap;
     int   hasNormalMap;
     vec2  normalMap;
+    int   hasRoughnessMap;
+    vec2  roughnessMap;
+    int   hasAoMap;
+    vec2  aoMap;
 };
 
 struct LightResult {
@@ -92,7 +96,7 @@ float AnisotropicSmithGGX(float ndots, float sdotx, float sdoty, float ax, float
 
 // Diffuse model as outlined by Burley: https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // Much help from Acerola's video on the topic: https://www.youtube.com/watch?v=KkOkx0FiHDA&t=570s
-LightResult PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, vec3 N, vec3 V, vec3 X, vec3 Y) {
+LightResult PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo, float roughness, vec3 N, vec3 V, vec3 X, vec3 Y) {
 
     LightResult result;
 
@@ -123,7 +127,7 @@ LightResult PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo,
     // Diffuse
     float FL = SchlickFresnel(cos_theta_l);
     float FV = SchlickFresnel(cos_theta_V);
-    float Fss90 = cos_theta_D * cos_theta_D * mtl.roughness;
+    float Fss90 = cos_theta_D * cos_theta_D * roughness;
     float Fd90 = 0.5 + 2.0 * Fss90;
 
     float Fd = mix(1.0, Fd90, FL) * mix(1.0, Fd90, FV);
@@ -133,7 +137,7 @@ LightResult PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo,
     float ss = 1.25 * (Fss * ((1 / (cos_theta_l + cos_theta_V)) - 0.5) + 0.5);
 
     // Specular
-    float alpha = mtl.roughness * mtl.roughness;
+    float alpha = roughness * roughness;
     float aspect = sqrt(1.0 - 0.9 * mtl.anisotropic);
     float alpha_x = max(0.001, alpha / aspect);
     float alpha_y = max(0.001, alpha * aspect);
@@ -143,7 +147,7 @@ LightResult PrincipledDiffuse(DirectionalLight light, Material mtl, vec3 albedo,
     float Ds = AnisotropicGTR2(ndoth, hdotx, hdoty, alpha_x, alpha_y);
 
     // Geometric Attenuation
-    float GalphaSquared = pow(0.5 + mtl.roughness * 0.5, 2);
+    float GalphaSquared = pow(0.5 + roughness * 0.5, 2);
     float GalphaX = max(0.001, GalphaSquared / aspect);
     float GalphaY = max(0.001, GalphaSquared * aspect);
     float G = AnisotropicSmithGGX(cos_theta_l, ldotx, ldoty, GalphaX, GalphaY);
@@ -192,15 +196,39 @@ vec3 getNormal(Material mtl, mat3 TBN){
     return normal;
 }
 
+float getAo(Material mtl, vec2 uv) {
+    float ao;
+    if (bool(mtl.hasAoMap)){
+        ao = texture(textureArrays[int(round(mtl.aoMap.x))].array, vec3(uv, round(mtl.aoMap.y))).a;
+    }
+    else {
+        ao = 1.0;
+    }
+    return ao;
+}
+
+float getRoughness(Material mtl, vec2 uv) {
+    float roughness;
+    if (bool(mtl.hasRoughnessMap)){
+        roughness = texture(textureArrays[int(round(mtl.roughnessMap.x))].array, vec3(uv, round(mtl.roughnessMap.y))).a;
+    }
+    else {
+        roughness = mtl.roughness;
+    }
+    return roughness;
+}
+
 void main() {
     float gamma = 2.2;
     vec3 viewDir = vec3(normalize(cameraPosition - position));
 
     // Get lighting vectors
-    vec3 albedo    = getAlbedo(mtl, uv, gamma);
-    vec3 normal    = getNormal(mtl, TBN);
-    vec3 tangent   = TBN[0];
-    vec3 bitangent = TBN[1];
+    vec3 albedo     = getAlbedo(mtl, uv, gamma);
+    vec3 normal     = getNormal(mtl, TBN);
+    float ao        = getAo(mtl, uv);
+    float roughness = getRoughness(mtl, uv);
+    vec3 tangent    = TBN[0];
+    vec3 bitangent  = TBN[1];
 
     // Orthogonalize the tangent and bitangent according to the mapped normal vector
     tangent = tangent - dot(normal, tangent) * normal;
@@ -224,17 +252,18 @@ void main() {
     // Add result from each directional light in the scene
     for (int i = 0; i < numDirLights; i++) {
         // Caculate the light for the directional light
-        LightResult dirLightResult = PrincipledDiffuse(dirLights[i], mtl, albedo, N, V, X, Y);
+        LightResult dirLightResult = PrincipledDiffuse(dirLights[i], mtl, albedo, roughness, N, V, X, Y);
         vec3 lightFactor = dirLights[i].intensity * dirLights[i].color;
         // Add each lobe
-        lightResult.diffuse   += dirLightResult.diffuse * lightFactor;
-        lightResult.specular  += dirLightResult.specular * lightFactor;
+        lightResult.diffuse   += dirLightResult.diffuse   * lightFactor;
+        lightResult.specular  += dirLightResult.specular  * lightFactor;
         lightResult.clearcoat += dirLightResult.clearcoat * lightFactor;
     }
 
     lightResult.specular =  min(vec3(1.0), lightResult.specular);
     lightResult.specular *= mix(vec3(1.0), reflect_sky, mtl.metallicness) * luminance(reflect_sky);
     lightResult.diffuse  *= mix(vec3(1.0), ambient_sky, 0.25);
+    lightResult.diffuse  *= ao;
 
     vec3 finalColor = albedo * 0.3 * mix(vec3(1.0), reflect_sky, mtl.metallicness);
     finalColor += (lightResult.diffuse + lightResult.specular + lightResult.clearcoat);
