@@ -64,6 +64,14 @@ class Mesh():
         # Mesh points and triangles used for physics/collisions
         self.points = model.vertex_points.copy()
         self.indices = model.point_indices.copy()
+        
+        # generate edges from faces
+        edges = [set() for _ in range(len(self.points))]
+        for face in self.indices:
+            
+            # add points to the dictionary since each point on a face is adjacent to the others
+            for i in range(3): edges[face[i]].update([int(face[(i + 1) % 3]), int(face[(i + 2) % 3])])
+        self.edges = [tuple(adjacent) for adjacent in edges]
 
         # Model will no longer be used
         del model
@@ -193,13 +201,35 @@ class Mesh():
         index = max(self.indices[triangle], key=lambda t: glm.dot(glm.normalize(self.points[t]), vec))
         return glm.vec3(self.points[index])
     
-    def get_best_dot_old(self, vec):
+    def get_best_dot_brute(self, vec):
         best_dot = -1e10
         best = None
         for point in self.points:
             dot = glm.dot(glm.normalize(point), vec)
             if dot > best_dot: best_dot, best = dot, glm.vec3(point)
         return best
+    
+    def get_best_dot_hill_climbing(self, vec: glm.vec3) -> glm.vec3:
+        """
+        Gets the point with the highest dot product to the given vector using a hill climbing algorithm. This function is only effective for convex models.
+        """
+        best_index = 0
+        best_dot = glm.dot(self.points[best_index], vec)
+        
+        while True:
+            
+            best_changed = False
+            for index in self.edges[best_index]:
+                
+                dot = glm.dot(self.points[index], vec)
+                if dot > best_dot:
+                    best_dot = dot
+                    best_changed = True
+                    best_index = index
+                    
+            if not best_changed: break
+        
+        return self.points[best_index]
 
     def __repr__(self) -> str:
         size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024

@@ -77,7 +77,7 @@ def insert_face(polytope: polytope_type, faces: face_type, indices: tuple[int, i
     
     return faces
 
-def orient_face(polytope: polytope_type, indices: tuple[int, int, int]) -> tuple[int, int, int]: # TODO finish this
+def orient_face(polytope: polytope_type, indices: tuple[int, int, int]) -> tuple[int, int, int]:
     """
     Orients the face indices to have a counter clockwise normal
     """

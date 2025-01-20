@@ -12,6 +12,7 @@ from .collisions.collider_handler import ColliderHandler
 from .draw.draw_handler import DrawHandler
 from .render.sky import Sky
 from .render.frame import Frame
+from .render.shader import Shader
 
 
 class Scene():
@@ -61,30 +62,35 @@ class Scene():
         self.frame.render()
     
     def add_node(self, 
-            position:            glm.vec3=None, 
-            scale:               glm.vec3=None, 
-            rotation:            glm.quat=None, 
-            forward:             glm.vec3=None, 
-            mesh:                Mesh=None, 
-            material:            Material=None, 
-            velocity:            glm.vec3=None, 
-            rotational_velocity: glm.quat=None, 
-            physics:             bool=False, 
-            mass:                float=None, 
-            collisions:          bool=False, 
-            collider:            str=None, 
-            static_friction:     float=None, 
-            kinetic_friction:    float=None, 
-            elasticity:          float=None, 
-            collision_group :    float=None, 
-            name:                str='', 
-            tags:                list[str]=None,
-            static:              bool=None):
+        position:            glm.vec3=None, 
+        scale:               glm.vec3=None, 
+        rotation:            glm.quat=None, 
+        relative_position:   bool=True,
+        relative_scale:      bool=True,
+        relative_rotation:   bool=True,
+        forward:             glm.vec3=None, 
+        mesh:                Mesh=None, 
+        material:            Material=None, 
+        velocity:            glm.vec3=None, 
+        rotational_velocity: glm.quat=None, 
+        physics:             bool=False, 
+        mass:                float=None, 
+        collisions:          bool=False, 
+        collider:            str=None, 
+        static_friction:     float=None, 
+        kinetic_friction:    float=None, 
+        elasticity:          float=None, 
+        collision_group :    float=None, 
+        name:                str='', 
+        tags:                list[str]=None,
+        static:              bool=None,
+        shader:              Shader=None
+    ):
         
         if material: self.material_handler.add(material)
         else: material = self.material_handler.base
 
-        return self.node_handler.add(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
+        return self.node_handler.add(position, scale, rotation, relative_position, relative_scale, relative_rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static, shader)
 
 
     def set_engine(self, engine: any) -> None:

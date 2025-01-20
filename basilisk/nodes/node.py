@@ -18,6 +18,12 @@ class Node():
     """The scale of the node in meters in each direction"""
     rotation: Quat
     """The rotation of the node"""
+    position_relative: bool
+    """The position of this node relative to the parent node"""
+    scale_relative: bool
+    """The scale of this node relative to the parent node"""
+    rotation_relative: bool
+    """The rotation of this node relative to the parent node"""
     forward: glm.vec3
     """The forward facing vector of the node"""
     mesh: Mesh
@@ -61,6 +67,9 @@ class Node():
             position:            glm.vec3=None, 
             scale:               glm.vec3=None, 
             rotation:            glm.quat=None, 
+            relative_position:   bool=True,
+            relative_scale:      bool=True,
+            relative_rotation:   bool=True,
             forward:             glm.vec3=None, 
             mesh:                Mesh=None, 
             material:            Material=None, 
@@ -97,6 +106,11 @@ class Node():
         self.internal_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
         self.internal_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
         self.internal_rotation: Quat = Quat(rotation) if rotation else Quat(1, 0, 0, 0)
+        
+        # relative transformations
+        self.relative_position = glm.vec3(0, 0, 0)    if relative_position else None
+        self.relative_scale    = glm.vec3(0, 0, 0)    if relative_scale    else None
+        self.relative_rotation = glm.quat(1, 0, 0, 0) if relative_rotation else None
         
         self.forward  = forward  if forward  else glm.vec3(1, 0, 0)
         self.mesh     = mesh     if mesh     else self.node_handler.scene.engine.cube
@@ -184,14 +198,18 @@ class Node():
         Updates the node's movement variables based on the delta time
         """
         if any(self.velocity): self.position += dt * self.velocity
-        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation - 0.5 * dt * self.rotation * glm.quat(0, *self.rotational_velocity))
+        if any(self.rotational_velocity): 
+            dq = 0.5 * self.rotation * glm.quat(0, *self.rotational_velocity)
+            self.rotation = glm.normalize(self.rotation - dt * dq)
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
             self.rotational_velocity += self.physics_body.get_delta_rotational_velocity(dt)
         
-    def sync_data(self, dt: float) -> None: # TODO only needed for child nodes now
-        ...
+    def sync_data(self, dt: float, parent_position: glm.vec3, parent_scale: glm.vec3, parent_rotation: glm.vec3) -> None: # TODO only needed for child nodes now
+        """
+        Syncronizes this node with the parent node based on its relative positioning
+        """
         
     def get_nodes(self, 
             require_mesh: bool=False, 
@@ -219,11 +237,54 @@ class Node():
         for node in self.children: nodes.extend(node.get_nodes(require_mesh, require_collider, require_physics_body, filter_material, filter_tags))
         return node 
         
-    def adopt_child(self, node) -> None: # TODO determine the best way for the user to do this through the scene
-        ...
+    # tree functions for managing children 
+    def adopt_child(self, child: ..., relative_position: bool=None, relative_scale: bool=None, relative_rotation: glm.vec3=None) -> None:
+        """
+        Adopts a node as a child. Relative transforms can be changed, if left bank they will not be chnaged from the current child nodes settings.
+        """
+        # compute relative transformations
+        if relative_position or (relative_position is None and child.relative_position): child.relative_position = child.position - self.position
+        if relative_scale    or (relative_scale    is None and child.relative_scale):    child.relative_scale    = child.scale / self.scale
+        if relative_rotation or (relative_rotation is None and child.relative_rotation): child.relative_rotation = child.rotation * glm.inverse(self.rotation)
         
-    def add_child(self) -> None: # TODO add node constructor
-        ... 
+        # add as a child to by synchronized
+        self.children.append(child)
+        
+    def create_child(self, 
+        position:            glm.vec3=None, 
+        scale:               glm.vec3=None, 
+        rotation:            glm.quat=None, 
+        relative_position:   bool=True,
+        relative_scale:      bool=True,
+        relative_rotation:   bool=True,
+        forward:             glm.vec3=None, 
+        mesh:                Mesh=None, 
+        material:            Material=None, 
+        velocity:            glm.vec3=None, 
+        rotational_velocity: glm.vec3=None, 
+        physics:             bool=False, 
+        mass:                float=None, 
+        collisions:          bool=False, 
+        collider:            str=None, 
+        static_friction:     float=None, 
+        kinetic_friction:    float=None, 
+        elasticity:          float=None, 
+        collision_group :    float=None, 
+        name:                str='', 
+        tags:                list[str]=None,
+        static:              bool=None,
+        shader:              Shader=None
+    ) -> None: # TODO add node constructor
+        """
+        Creates a child node and automatically generates its relative transforms. Adds the child node to the internal node handler and this node's child node list. 
+        """
+        
+        
+    def remove_child(self, child: ...) -> None:
+        """
+        Removes a child node from this nodes chlid list.
+        """
+        if child in self.children: self.children.remove(child)
         
     def apply_force(self, force: glm.vec3, dt: float) -> None:
         """

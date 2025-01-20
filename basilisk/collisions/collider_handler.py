@@ -24,6 +24,8 @@ class ColliderHandler():
         self.scene = scene
         self.cube = self.scene.engine.cube
         self.colliders = []
+        self.polytope_data = {}
+        self.contact_manifolds = {}
         self.bvh = BroadBVH(self)
         
     def add(self, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None) -> Collider:
@@ -115,7 +117,7 @@ class ColliderHandler():
             
             # convert points to 2d for intersection algorithms
             reference, u1, v1 = points_to_2d(plane_point, axis, reference)
-            incident,  u2, v2 = points_to_2d(plane_point, axis, incident, u1, v1) #TODO precalc orthogonal basis for 2d conversion
+            incident,  u2, v2 = points_to_2d(plane_point, axis, incident, u1, v1)
             
             # convert arbitrary points to polygon
             reference = graham_scan(reference)
@@ -168,13 +170,12 @@ class ColliderHandler():
             # traverse bvh to find aabb aabb collisions
             colliding = self.bvh.get_collided(collider1)
             for collider2 in colliding:
-                if collider1 == collider2: continue
-                if (collider1, collider2) in collisions or (collider2, collider1) in collisions: continue # TODO find a secure way for ordering colliders
+                if collider1 is collider2: continue
+                if ((collider1, collider2) if id(collider1) < id(collider2) else (collider2, collider1)) in collisions: continue
                 
                 # run broad collision for specified mesh types
                 if max(len(collider1.mesh.points), len(collider2.mesh.points)) > 250 and not self.collide_obb_obb_decision(collider1, collider2): continue # contains at least one "large" mesh TODO write heuristic algorithm for determining large meshes
-                
-                collisions.add((collider1, collider2)) # TODO find a secure way for ordering colliders
+                collisions.add((collider1, collider2) if id(collider1) < id(collider2) else (collider2, collider1))
                 
         return collisions
     
