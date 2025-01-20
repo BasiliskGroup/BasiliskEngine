@@ -13,10 +13,11 @@ def from_data(data: np.ndarray) -> Model:
     shape = data.shape
 
     if shape[1] == 3:  # Just given position
-        pos_norm_data = get_normals(data)
-        print(pos_norm_data)
-        data = np.zeros(shape=(len(data), 14))
-        data[:,:6] = pos_norm_data
+        norms = get_normals(data)
+        all_data = np.zeros(shape=(len(data), 14))
+        all_data[:,:3] = data
+        all_data[:,5:8] = norms
+        data = all_data
 
     elif shape[1] == 6:  # Given position and normals, but no UV
         pos_norm_data = data
@@ -51,9 +52,11 @@ def get_normals(positions: np.ndarray) -> np.ndarray:
 
     # Loop through each triangle and calculate the normal of the surface
     for tri in range(positions.shape[0] // 3):
-        normal = glm.normalize(np.cross(positions[tri * 3] - positions[tri * 3 + 1], positions[tri * 3] - positions[tri * 3 + 2]))
-        normals[tri * 3    ] = normal
-        normals[tri * 3 + 1] = normal
-        normals[tri * 3 + 2] = normal
+        v1 = glm.vec3(positions[tri * 3]) - glm.vec3(positions[tri * 3 + 1])
+        v2 = glm.vec3(positions[tri * 3]) - glm.vec3(positions[tri * 3 + 2])
+        normal = glm.normalize(glm.cross(v1, v2))
+        normals[tri * 3    ] = list(normal.xyz)
+        normals[tri * 3 + 1] = list(normal.xyz)
+        normals[tri * 3 + 2] = list(normal.xyz)
 
-    return np.hstack([positions, normals])
+    return normals
