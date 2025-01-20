@@ -1,5 +1,6 @@
 import numpy as np
 from .model import Model
+import glm
 
 
 def from_data(data: np.ndarray) -> Model:
@@ -13,6 +14,7 @@ def from_data(data: np.ndarray) -> Model:
 
     if shape[1] == 3:  # Just given position
         pos_norm_data = get_normals(data)
+        print(pos_norm_data)
         data = np.zeros(shape=(len(data), 14))
         data[:,:6] = pos_norm_data
 
@@ -49,9 +51,9 @@ def get_normals(positions: np.ndarray) -> np.ndarray:
 
     # Loop through each triangle and calculate the normal of the surface
     for tri in range(positions.shape[0] // 3):
-        normal = np.cross(positions[tri] - positions[tri + 1], positions[tri] - positions[tri + 2])
-        normals[tri    ] = normal
-        normals[tri + 1] = normal
-        normals[tri + 2] = normal
+        normal = glm.normalize(np.cross(positions[tri * 3] - positions[tri * 3 + 1], positions[tri * 3] - positions[tri * 3 + 2]))
+        normals[tri * 3    ] = normal
+        normals[tri * 3 + 1] = normal
+        normals[tri * 3 + 2] = normal
 
     return np.hstack([positions, normals])
