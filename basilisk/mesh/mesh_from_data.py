@@ -26,7 +26,11 @@ def from_data(data: np.ndarray) -> Model:
         data = all_data
 
     elif shape[1] == 8:  # Given position, normals and UV
-        ...
+        all_data = np.zeros(shape=(len(data), 14))
+        all_data[:,:8] = data[:,:8]
+        all_data[:,8] = 1.0
+        all_data[:,13] = 1.0
+        data = all_data
 
     elif shape[1] == 14:  #Given position, normals, UV, bitangents, and tangents, no change needed
         ...

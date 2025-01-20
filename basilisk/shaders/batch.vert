@@ -34,6 +34,10 @@ struct Material {
     vec2  albedoMap;
     int   hasNormalMap;
     vec2  normalMap;
+    int   hasRoughnessMap;
+    vec2  roughnessMap;
+    int   hasAoMap;
+    vec2  aoMap;
 };
 flat out Material mtl;
 
@@ -83,7 +87,7 @@ void main() {
     uv       = in_uv;
     
     // Get the material
-    int mtl_size = 19;
+    int mtl_size = 25;
     int materialID     = int(obj_material);
     mtl.color          = vec3(texelFetch(materialsTexture, ivec2(0, 0 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * mtl_size), 0).r);
     
@@ -99,10 +103,14 @@ void main() {
     mtl.clearcoat      = texelFetch(materialsTexture, ivec2(0, 11 + materialID * mtl_size), 0).r;
     mtl.clearcoatGloss = texelFetch(materialsTexture, ivec2(0, 12 + materialID * mtl_size), 0).r;
     
-    mtl.hasAlbedoMap   = int(texelFetch(materialsTexture,  ivec2(0, 13  + materialID * mtl_size), 0).r);
-    mtl.albedoMap      = vec2(texelFetch(materialsTexture, ivec2(0, 14  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 15  + materialID * mtl_size), 0).r);
-    mtl.hasNormalMap   = int(texelFetch(materialsTexture,  ivec2(0, 16  + materialID * mtl_size), 0).r);
-    mtl.normalMap      = vec2(texelFetch(materialsTexture, ivec2(0, 17  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 18 + materialID * mtl_size), 0).r);    
+    mtl.hasAlbedoMap    = int(texelFetch(materialsTexture,  ivec2(0, 13  + materialID * mtl_size), 0).r);
+    mtl.albedoMap       = vec2(texelFetch(materialsTexture, ivec2(0, 14  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 15  + materialID * mtl_size), 0).r);
+    mtl.hasNormalMap    = int(texelFetch(materialsTexture,  ivec2(0, 16  + materialID * mtl_size), 0).r);
+    mtl.normalMap       = vec2(texelFetch(materialsTexture, ivec2(0, 17  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 18 + materialID * mtl_size), 0).r);    
+    mtl.hasRoughnessMap = int(texelFetch(materialsTexture,  ivec2(0, 19  + materialID * mtl_size), 0).r);
+    mtl.roughnessMap    = vec2(texelFetch(materialsTexture, ivec2(0, 20  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 21 + materialID * mtl_size), 0).r);    
+    mtl.hasAoMap        = int(texelFetch(materialsTexture,  ivec2(0, 22  + materialID * mtl_size), 0).r);
+    mtl.aoMap           = vec2(texelFetch(materialsTexture, ivec2(0, 23  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 24 + materialID * mtl_size), 0).r);    
 
     // Set the fragment position
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(in_position, 1.0);
