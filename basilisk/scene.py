@@ -92,6 +92,12 @@ class Scene():
 
         return self.node_handler.add(position, scale, rotation, relative_position, relative_scale, relative_rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static, shader)
 
+    def remove_node(self, node):
+        """
+        Removes the given node from the scene
+        """
+
+        self.node_handler.remove(node)
 
     def set_engine(self, engine: any) -> None:
         """

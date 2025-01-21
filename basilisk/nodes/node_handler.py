@@ -123,5 +123,6 @@ class NodeHandler():
         if node in self.nodes:
             if node.physics_body: self.scene.physics_engine.remove(node.physics_body)
             if node.collider: self.scene.collider_handler.remove(node.collider)
-            node.node_handler = None
+            self.chunk_handler.remove(node)
             self.nodes.remove(node)
+            node.node_handler = None
