@@ -107,6 +107,9 @@ class Engine():
         self.time += self.delta_time
         pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
 
+        # Update the previous input lists for the next frame
+        self.previous_keys = self.keys
+        
         # Get inputs and events
         self.events = pg.event.get()
         self.keys = pg.key.get_pressed()
@@ -130,8 +133,6 @@ class Engine():
         # Render after the scene and engine has been updated
         self.render()
 
-        # Update the previous input lists for the next frame
-        self.previous_keys = self.keys
 
     def render(self) -> None:
         """

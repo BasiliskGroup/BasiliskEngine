@@ -117,7 +117,7 @@ class ChunkHandler():
         node.chunk = None
 
         # Update the chunk
-        self.updated_chunks.add(chunk)
+        self.updated_chunks[node.static].add(chunk)
 
     def get_render_range(self) -> tuple:
         """

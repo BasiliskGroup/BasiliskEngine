@@ -71,6 +71,7 @@ class Chunk():
         """
 
         self.nodes.remove(node)
+        self.batch.vbo.clear()
 
         return node
 

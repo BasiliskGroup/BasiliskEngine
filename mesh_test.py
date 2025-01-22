@@ -53,8 +53,8 @@ def get_data(size=30, offset=(0, 0)):
             n4 = normal_array[x + 1][y + 1]
 
             texture_scale = 25
-            tx_1, ty_1 = (x % texture_scale) / (texture_scale - 1), (y % texture_scale) / (texture_scale - 1)
-            tx_2, ty_2 = ((x + 1) % texture_scale) / (texture_scale - 1), ((y + 1) % texture_scale) / (texture_scale - 1)
+            tx_1, ty_1 = x / texture_scale, y / texture_scale
+            tx_2, ty_2 = (x + 1) / texture_scale, (y + 1) / texture_scale
 
             p1 = [x    , height_array[x    ][y    ], y    , tx_1, ty_1, *n1]
             p2 = [x + 1, height_array[x + 1][y    ], y    , tx_2, ty_1, *n2]
@@ -67,7 +67,7 @@ def get_data(size=30, offset=(0, 0)):
 
 
 mesh = bsk.Mesh(get_data(size=100))
-scene.add_node(mesh=mesh, material=mtl)
+scene.add_node(position=(0, -10, 0), mesh=mesh, material=mtl)
 
 while engine.running:
     engine.update()
