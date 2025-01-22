@@ -39,16 +39,19 @@ class MaterialHandler():
         Adds the given material to the handler if it is not already present
         """
         
-        # Check that the material is not already in the scene
-        if material in self.materials: return None
-        # Update the material's handler
-        material.material_handler = self
-        # Add images
-        if material.texture: self.image_handler.add(material.texture)
-        if material.normal:  self.image_handler.add(material.normal)
+        if isinstance(material, Material): material = [material]
 
-        # Add the material
-        self.materials.append(material)
+        for mtl in material:
+            # Check that the material is not already in the scene
+            if mtl in self.materials: return None
+            # Update the material's handler
+            mtl.material_handler = self
+            # Add images
+            if mtl.texture: self.image_handler.add(mtl.texture)
+            if mtl.normal:  self.image_handler.add(mtl.normal)
+
+            # Add the material
+            self.materials.append(mtl)
         # Write materials
         self.write(regenerate=True)
 
