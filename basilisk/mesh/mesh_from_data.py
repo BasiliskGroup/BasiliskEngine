@@ -19,6 +19,13 @@ def from_data(data: np.ndarray) -> Model:
         all_data[:,5:8] = norms
         data = all_data
 
+    elif shape[1] == 5:  # Given position and uv, but no normals
+        norms = get_normals(data[:,:3])
+        all_data = np.zeros(shape=(len(data), 14))
+        all_data[:,:5] = data[:,:5]
+        all_data[:,5:8] = norms
+        data = all_data
+
     elif shape[1] == 6:  # Given position and normals, but no UV
         all_data = np.zeros(shape=(len(data), 14))
         all_data[:,:3] = data[:,:3]

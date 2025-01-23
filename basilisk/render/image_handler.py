@@ -3,7 +3,7 @@ import glm
 import numpy as np
 
 
-texture_sizes = (128, 256, 512, 1024, 2048)
+texture_sizes = (8, 256, 512, 1024, 2048)
 
 
 class ImageHandler():
@@ -73,7 +73,8 @@ class ImageHandler():
             self.texture_arrays[size] = self.ctx.texture_array(size=dim, components=4, data=array_data)
             # Texture OpenGl settings
             self.texture_arrays[size].build_mipmaps()
-            self.texture_arrays[size].filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+            if size > 32: self.texture_arrays[size].filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+            else: self.texture_arrays[size].filter = (mgl.NEAREST, mgl.NEAREST)
             self.texture_arrays[size].anisotropy = 32.0
 
     def write(self, regenerate=False) -> None:

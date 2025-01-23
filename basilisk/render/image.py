@@ -7,7 +7,7 @@ import pygame as pg
 from PIL import Image as PIL_Image
 
 
-texture_sizes = (128, 256, 512, 1024, 2048)
+texture_sizes = (8, 256, 512, 1024, 2048)
 
 
 class Image():
