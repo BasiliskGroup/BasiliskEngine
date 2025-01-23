@@ -331,14 +331,23 @@ class Node():
         Gets the node batch data for chunk batching
         """
         
+        
         # Get data from the mesh node
         mesh_data = self.mesh.data
-        node_data = np.array([*self.position, *self.rotation, *self.scale, self.material.index])
+        node_data = np.array([*self.position, *self.rotation, *self.scale, 0])
+
+        per_vertex_mtl = isinstance(self.material, list)
+
+        if not per_vertex_mtl: node_data[-1] = self.material.index
 
         # Create an array to hold the node's data
         data = np.zeros(shape=(mesh_data.shape[0], 25), dtype='f4')
+
+
         data[:,:14] = mesh_data
         data[:,14:] = node_data
+
+        if per_vertex_mtl: data[:,24] = self.material
 
         return data
 
@@ -455,12 +464,18 @@ class Node():
     
     @material.setter
     def material(self, value: Material):
-        if isinstance(value, Material): 
+        if isinstance(value, list):
+            mtl_index_list = []
+            for mtl in value:
+                self.node_handler.scene.material_handler.add(mtl)
+                mtl_index_list.append(mtl.index)
+            self._material = mtl_index_list
+        elif isinstance(value, Material): 
             self._material = value
             self.node_handler.scene.material_handler.add(value)
-            if not self.chunk: return
-            self.chunk.node_update_callback(self)
         else: raise TypeError(f'Node: Invalid material value type {type(value)}')
+        if not self.chunk: return
+        self.chunk.node_update_callback(self)
     
     @velocity.setter
     def velocity(self, value: tuple | list | glm.vec3 | np.ndarray):
