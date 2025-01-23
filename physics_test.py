@@ -1,9 +1,11 @@
 import basilisk as bsk
 import random
+import glm
 
 engine = bsk.Engine()
 scene  = bsk.Scene()
 engine.scene = scene
+# scene.physics_engine.accelerations = []
 
 # materials and meshes
 red = bsk.Material(color=(255, 0, 0))
@@ -30,8 +32,9 @@ radius = 4
 
 objects = [scene.add_node(
     position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
-    scale      = [random.uniform(2, 4) for _ in range(3)],
-    rotation   = [random.uniform(1, 3) for _ in range(3)],
+    scale      = [1, 2, 3],
+    # rotation   = [random.uniform(0.1, 0.2) for _ in range(3)],
+    rotational_velocity = (3.14159, 0, 0),
     mesh       = random.choice(meshes), 
     material   = red,
     collisions = True,
@@ -39,6 +42,8 @@ objects = [scene.add_node(
     static     = False,
     mass       = 1
 ) for _ in range(1)]
+
+print(glm.inverse(objects[0].get_inverse_inertia()))
 
 while engine.running:
     
