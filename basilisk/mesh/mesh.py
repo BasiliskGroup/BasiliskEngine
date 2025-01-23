@@ -7,6 +7,7 @@ from .narrow_bvh import NarrowBVH
 from ..generic.matrices import compute_inertia_moment, compute_inertia_product
 from ..generic.meshes import get_extreme_points_np, moller_trumbore
 from .mesh_from_data import from_data
+import time
 
 
 class Mesh():
@@ -57,9 +58,15 @@ class Mesh():
                 tangents[:,:] += [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
                 self.data = np.hstack([self.data, tangents])
 
-        elif isinstance(data, np.ndarray):                          # Load the model from array of data
+        elif isinstance(data, np.ndarray):      
+            t1 = time.time()                    # Load the model from array of data
             model = from_data(data)
+            t2 = time.time()
+
+            print(f'Modeling from data time: {t2 - t1}')
+
             self.data = model.vertex_data
+            
         else:                                                       # Invalid data type
             raise TypeError(f'Invalid path type: {type(data)}. Expected a string or os.path')
         

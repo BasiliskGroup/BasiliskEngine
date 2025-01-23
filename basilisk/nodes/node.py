@@ -471,6 +471,8 @@ class Node():
             for mtl in value:
                 self.node_handler.scene.material_handler.add(mtl)
                 mtl_index_list.append(mtl.index)
+                mtl_index_list.append(mtl.index)
+                mtl_index_list.append(mtl.index)
             self._material = mtl_index_list
         elif isinstance(value, Material): 
             self._material = value
