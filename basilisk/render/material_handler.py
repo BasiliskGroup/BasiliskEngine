@@ -39,11 +39,13 @@ class MaterialHandler():
         Adds the given material to the handler if it is not already present
         """
         
+        write = False
+
         if isinstance(material, Material): material = [material]
 
         for mtl in material:
             # Check that the material is not already in the scene
-            if mtl in self.materials: return None
+            if mtl in self.materials: continue
             # Update the material's handler
             mtl.material_handler = self
             # Add images
@@ -52,8 +54,12 @@ class MaterialHandler():
 
             # Add the material
             self.materials.append(mtl)
+
+            write = True
+
+        
         # Write materials
-        self.write(regenerate=True)
+        if write: self.write(regenerate=True)
 
     def generate_material_texture(self) -> None:
         """

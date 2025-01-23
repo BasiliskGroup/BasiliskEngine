@@ -345,10 +345,11 @@ class Node():
         # Create an array to hold the node's data
         data = np.zeros(shape=(mesh_data.shape[0], 25), dtype='f4')
 
-        if per_vertex_mtl: ...
 
         data[:,:14] = mesh_data
         data[:,14:] = node_data
+
+        if per_vertex_mtl: data[:,24] = self.material
 
         return data
 
