@@ -9,11 +9,6 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     """
     computes the contact manifold for a collision between two nearby polyhedra
     """
-    # determine the contact points from the collision
-    points1, points2 = separate_polytope(points1, points2, contact_plane_normal)
-    
-    # if len(points1) >= 3 and len(points2) >= 3: print(len(points1), len(points2), points1, points2)
-    
     if len(points1) == 0 or len(points2) == 0: return []
     
     # project vertices onto the 2d plane
@@ -51,8 +46,8 @@ def separate_polytope(points1: list[glm.vec3], points2: list[glm.vec3], contact_
     """
     Determines the potential contact manifold points of each shape based on their position along the penetrating axis
     """
-    proj1 = [(glm.dot(point, contact_plane_normal), point) for point in points1]
-    proj2 = [(glm.dot(point, contact_plane_normal), point) for point in points2]
+    proj1 = [(glm.dot(point[1], contact_plane_normal), point) for point in points1]
+    proj2 = [(glm.dot(point[1], contact_plane_normal), point) for point in points2]
     
     # min1 and max2 should be past the collising points of node2 and node1 respectively
     min1 = min(proj1, key=lambda point: point[0])[0]

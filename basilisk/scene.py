@@ -109,10 +109,10 @@ class Scene():
 
         self.camera           = FreeCamera()
         self.shader_handler   = ShaderHandler(self)
+        self.material_handler = MaterialHandler(self)
         self.physics_engine   = PhysicsEngine()
         self.node_handler     = NodeHandler(self)
         self.collider_handler = ColliderHandler(self)
-        self.material_handler = MaterialHandler(self)
         self.light_handler    = LightHandler(self)
         self.draw_handler     = DrawHandler(self)
         self.frame            = Frame(self)

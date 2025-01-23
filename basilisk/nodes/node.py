@@ -198,9 +198,7 @@ class Node():
         Updates the node's movement variables based on the delta time
         """
         if any(self.velocity): self.position += dt * self.velocity
-        if any(self.rotational_velocity): 
-            dq = 0.5 * self.rotation * glm.quat(0, *self.rotational_velocity)
-            self.rotation = glm.normalize(self.rotation - dt * dq)
+        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation - dt / 2 * self.rotation * glm.quat(0, *self.rotational_velocity))
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
@@ -317,7 +315,7 @@ class Node():
         Transforms the mesh inertia tensor and inverts it
         """
         if not (self.mesh and self.physics_body): return None 
-        inertia_tensor = self.mesh.get_inertia_tensor(self.scale)
+        inertia_tensor = self.mesh.get_inertia_tensor(self.scale) / 2
     
         # mass
         if self.physics_body: inertia_tensor *= self.physics_body.mass

@@ -137,6 +137,12 @@ class Mesh():
             -icp, -iap, ic
         )
         
+        # return glm.mat3x3(
+        #     ic, -iap, -icp,
+        #     -iap, ib, -ibp,
+        #     -ibp, -iap, ia
+        # )
+        
     def get_best_triangle(self, point: glm.vec3, vec: glm.vec3) -> int:
         """
         Gets the triangle with the closest intersection, -1 if no intersection is found
@@ -165,53 +171,17 @@ class Mesh():
                 best_index = triangle
                 
         return best_index
-    
-    def get_best_triangle_brute(self, point: glm.vec3, vec: glm.vec3) -> int:
-        """
-        Gets the triangle with the closest intersection, -1 if no intersection is found. Uses a brute force method
-        """
-        best_distance = -1
-        best_index = -1
         
-        point = glm.vec3(point)
-        vec = glm.vec3(vec)
-        
-        for index, triangle in enumerate(self.indices):
-            
-            # check if triangle intersects
-            intersection = moller_trumbore(point, vec, [self.points[t] for t in triangle])
-            if not intersection: continue
-            
-            # check if triangle is on correct side of line
-            difference = intersection - self.geometric_center
-            if glm.dot(difference, vec) < 0: continue
-            
-            # determine best distance
-            distance = glm.length(difference)
-            if best_distance < 0 or distance < best_distance: 
-                best_distance = distance
-                best_index = index
-                
-        return best_index
-        
-    def get_best_dot(self, vec: glm.vec3) -> glm.vec3:
+    def get_best_dot(self, vec: glm.vec3) -> int:
         """
         Gets the point with the highest normalized dot product to the given vector
         """
         triangle = self.bvh.get_best_dot(vec)
         if triangle == -1: return None
         index = max(self.indices[triangle], key=lambda t: glm.dot(glm.normalize(self.points[t]), vec))
-        return glm.vec3(self.points[index])
+        return index
     
-    def get_best_dot_brute(self, vec):
-        best_dot = -1e10
-        best = None
-        for point in self.points:
-            dot = glm.dot(glm.normalize(point), vec)
-            if dot > best_dot: best_dot, best = dot, glm.vec3(point)
-        return best
-    
-    def get_best_dot_hill_climbing(self, vec: glm.vec3) -> glm.vec3:
+    def get_best_dot_hill_climbing(self, vec: glm.vec3) -> int:
         """
         Gets the point with the highest dot product to the given vector using a hill climbing algorithm. This function is only effective for convex models.
         """
@@ -231,7 +201,7 @@ class Mesh():
                     
             if not best_changed: break
         
-        return self.points[best_index]
+        return best_index
 
     def __repr__(self) -> str:
         size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024
