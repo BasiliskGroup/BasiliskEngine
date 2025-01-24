@@ -86,7 +86,7 @@ class ImageHandler():
 
         if not self.texture_arrays: return
 
-        for shader in self.engine.scene.shader_handler.shaders.values():
+        for shader in self.engine.scene.shader_handler.shaders:
             if 'textureArrays[5]' not in shader.uniforms: continue
 
             for i, size in enumerate(texture_sizes):

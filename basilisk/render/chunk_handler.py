@@ -15,8 +15,8 @@ class ChunkHandler():
     """Reference to the shader program used by batches"""
     chunks: list[dict]
     """List containing two dictionaries for dynamic and static chunks repsectivly"""
-    updated_chunks: list[set]
-    """List containing two dictionaries for recently updated dynamic and static chunks repsectivly"""
+    updated_chunks: set
+    """Set containing recently updated chunks"""
     
     def __init__(self, scene) -> None:
         # Reference to the scene hadlers and variables
@@ -31,8 +31,9 @@ class ChunkHandler():
         self.program = scene.engine.shader.program
 
         # List for the dynamic and static chunk dictionaries | [dyanmic: dict, static: dict]
-        self.chunks         = [{}   , {}   ]
-        self.updated_chunks = [set(), set()]
+        self.shader_groups = {None : ({}, {})}
+        # self.chunks         = [{}, {}]
+        self.updated_chunks = set()
 
 
     def render(self) -> None:
@@ -47,10 +48,12 @@ class ChunkHandler():
         chunk_keys = [(x, y, z) for x in range(*render_range_x) for y in range(*render_range_y) for z in range(*render_range_z)]
 
         # Loop through all chunks in view and render
-        for chunk in chunk_keys:
-            # Render the chunk if it exists
-            if chunk in self.chunks[0]: self.chunks[0][chunk].render()
-            if chunk in self.chunks[1]: self.chunks[1][chunk].render()
+        for shader, group in self.shader_groups.items():
+            if shader == None: shader = self.engine.shader            
+            for chunk in chunk_keys:
+                # Render the chunk if it exists
+                if chunk in group[0]: group[0][chunk].render()
+                if chunk in group[1]: group[1][chunk].render()
 
 
     def update(self) -> None:           
@@ -63,27 +66,24 @@ class ChunkHandler():
         # Loop through the set of updated chunk keys and update the chunk
         removes = []
 
-        for chunk in self.updated_chunks[0]: 
+        for chunk in self.updated_chunks: 
             if chunk.update(): continue
-            removes.append((0, chunk))
-        for chunk in self.updated_chunks[1]: 
-            if chunk.update(): continue
-            removes.append((1, chunk))
+            removes.append(chunk)
 
         # Remove any empty chunks
-        for chunk_tuple in removes:
-            if chunk_tuple[1] not in self.chunks[chunk_tuple[0]]: continue
-            del self.chunks[chunk_tuple[0]][chunk_tuple[1]]
+        for chunk in removes:
+            del self.shader_groups[chunk.shader][chunk.static][chunk.position]
 
         # Clears the set of updated chunks so that they are not updated unless they are updated again
-        self.updated_chunks = [set(), set()]
+        self.updated_chunks.clear()
 
     def update_all(self):
         self.program = self.scene.engine.shader.program
-        for chunk in self.chunks[0].values():
-            self.updated_chunks[0].add(chunk)
-        for chunk in self.chunks[1].values():
-            self.updated_chunks[1].add(chunk)
+        for shader in self.shader_groups.values():
+            for chunk in shader[0].values():
+                self.updated_chunks.add(chunk)
+            for chunk in shader[1].values():
+                self.updated_chunks.add(chunk)
 
     def add(self, node: Node) -> Node:
         """
@@ -93,16 +93,21 @@ class ChunkHandler():
         # The key of the chunk the node will be added to
         chunk_size = self.engine.config.chunk_size
         chunk_key = (int(node.x // chunk_size), int(node.y // chunk_size), int(node.z // chunk_size))
+        shader = node.shader
+
+        if shader not in self.shader_groups:
+            self.shader_groups[shader] = ({}, {})
 
         # Ensure that the chunk exists
-        if chunk_key not in self.chunks[node.static]:
-            self.chunks[node.static][chunk_key] = Chunk(self, chunk_key, node.static)
+        if chunk_key not in self.shader_groups[shader][node.static]:
+            chunk = Chunk(self, chunk_key, node.static, shader)
+            self.shader_groups[shader][node.static][chunk_key] = chunk
 
         # Add the node to the chunk
-        self.chunks[node.static][chunk_key].add(node)
+        self.shader_groups[shader][node.static][chunk_key].add(node)
 
         # Update the chunk
-        self.updated_chunks[node.static].add(self.chunks[node.static][chunk_key])
+        self.updated_chunks.add(self.shader_groups[shader][node.static][chunk_key])
 
         return Node
 
@@ -117,7 +122,7 @@ class ChunkHandler():
         node.chunk = None
 
         # Update the chunk
-        self.updated_chunks[node.static].add(chunk)
+        self.updated_chunks.add(chunk)
 
     def get_render_range(self) -> tuple:
         """

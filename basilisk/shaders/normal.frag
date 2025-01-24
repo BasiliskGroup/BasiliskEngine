@@ -33,7 +33,7 @@ in mat3 TBN;
 flat in Material mtl;
 
 // Uniforms
-uniform      textArray textureArrays[5];
+uniform textArray textureArrays[5];
 
 
 vec3 getNormal(Material mtl, mat3 TBN){
@@ -51,9 +51,6 @@ vec3 getNormal(Material mtl, mat3 TBN){
 void main() {
     // Get lighting vectors
     vec3 normal    = getNormal(mtl, TBN);
-
-    // Lighting variables
-    vec3 N = normalize(normal);
 
     // Output fragment color
     fragColor = vec4(normal, 1.0);

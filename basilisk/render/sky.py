@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image as PIL_Image
+from .shader import Shader
 
 class Sky:
     texture_cube=None
@@ -26,7 +27,7 @@ class Sky:
 
     def write(self):
         # Write the texture cube to the sky shader
-        self.program['skyboxTexture']  = 8
+        self.shader.program['skyboxTexture']  = 8
         self.texture_cube.use(location = 8)
 
         shader = self.scene.engine.shader
@@ -106,8 +107,9 @@ class Sky:
 
         # Create a renderable vao
         self.vbo     = self.ctx.buffer(vertex_data)
-        self.program = self.scene.shader_handler.shaders['sky'].program
-        self.vao     = self.ctx.vertex_array(self.program, [(self.vbo, '3f', 'in_position')], skip_errors=True)
+        root = self.scene.engine.root
+        self.shader = self.scene.shader_handler.add(Shader(self.scene.engine, root + '/shaders/sky.vert', root + '/shaders/sky.frag'))
+        self.vao     = self.ctx.vertex_array(self.shader.program, [(self.vbo, '3f', 'in_position')], skip_errors=True)
 
     def __del__(self):
         """

@@ -23,7 +23,7 @@ class Batch():
         # Back references
         self.chunk = chunk
         self.ctx = chunk.chunk_handler.engine.ctx
-        self.program = chunk.chunk_handler.program
+        self.program = self.chunk.get_program()
 
         # Set intial values
         self.vbo = None
@@ -35,7 +35,7 @@ class Batch():
         Returns True if batch was successful.
         """
 
-        self.program = self.chunk.chunk_handler.program
+        self.program = self.chunk.get_program()
 
         # Empty list to contain all vertex data of models in the chunk
         batch_data = []

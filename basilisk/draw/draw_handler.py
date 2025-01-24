@@ -4,6 +4,7 @@ import glm
 from math import cos, sin, atan2
 from ..render.image import Image
 from .font_renderer import FontRenderer
+from ..render.shader import Shader
 
 class DrawHandler():
     engine: ...
@@ -27,8 +28,9 @@ class DrawHandler():
         self.engine = scene.engine
         self.ctx    = scene.engine.ctx
 
-        # Get the program
-        self.program = self.scene.shader_handler.shaders['draw'].program
+        # Get the shader
+        root = self.engine.root
+        self.shader = self.scene.shader_handler.add(Shader(self.engine, root + '/shaders/draw.vert', root + '/shaders/draw.frag'))
 
         # Initialize draw data as blank
         self.draw_data = []
@@ -52,7 +54,7 @@ class DrawHandler():
 
         # Create buffer and VAO
         self.vbo = self.ctx.buffer(data)
-        self.vao = self.ctx.vertex_array(self.program, [(self.vbo, '2f 4f 1i', *['in_position', 'in_color', 'in_uses_image'])], skip_errors=True)
+        self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '2f 4f 1i', *['in_position', 'in_color', 'in_uses_image'])], skip_errors=True)
 
         # Render the VAO
         self.ctx.enable(mgl.BLEND)

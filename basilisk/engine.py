@@ -180,9 +180,8 @@ class Engine():
         self._scene = value
         if self._scene: 
             self._scene.set_engine(self)
-            self.shader.use()
 
     @shader.setter
     def shader(self, value):
         self._shader = value
-        if self.scene: value.use()
+        if self.scene: value.set_main()

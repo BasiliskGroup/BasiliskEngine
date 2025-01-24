@@ -10,7 +10,7 @@ class ShaderHandler:
     """Back reference to the parent scene"""
     ctx: mgl.Context
     """Back reference to the parent context"""
-    shaders: list = []
+    shaders: set
     """Dictionary containing all the shaders"""
     uniform_values: dict = {}
     """Dictionary containing uniform values"""    
@@ -26,26 +26,29 @@ class ShaderHandler:
         self.ctx    = scene.engine.ctx
 
         # Initalize dictionaries
-        self.shaders = {}
+        self.shaders = set()
 
         root = self.engine.root
-        self.add('default', self.engine.shader)
-        self.add('draw',    Shader(self.engine, root + '/shaders/draw.vert' , root + '/shaders/draw.frag' ))
-        self.add('sky',     Shader(self.engine, root + '/shaders/sky.vert'  , root + '/shaders/sky.frag'  ))
+        self.add(self.engine.shader)
 
-    def add(self, name: str, shader: Shader) -> None:
+    def add(self, shader: Shader) -> None:
         """
         Creates a shader program from a file name.
         Parses through shaders to identify uniforms and save for writting
         """
 
-        if shader in self.shaders.values(): return
 
-        self.shaders[name] = shader
+        if not shader: return None
+        if shader in self.shaders: return shader
+
+        self.shaders.add(shader)
         
         if self.scene.material_handler:
+            self.scene.light_handler.write()
             self.scene.material_handler.write()
             self.scene.material_handler.image_handler.write()
+
+        return shader
 
     def get_uniforms_values(self) -> None:
         """
@@ -67,7 +70,7 @@ class ShaderHandler:
 
         self.get_uniforms_values()
         for uniform in self.uniform_values:
-            for shader in self.shaders.values():
+            for shader in self.shaders:
                 if not uniform in shader.uniforms: continue  # Does not write uniforms not in the shader
                 shader.write(uniform, self.uniform_values[uniform])
 
@@ -76,4 +79,4 @@ class ShaderHandler:
         Releases all shader programs in handler
         """
         
-        [shader.__del__() for shader in self.shaders.values()]
+        [shader.__del__() for shader in self.shaders]

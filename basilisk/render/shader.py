@@ -1,5 +1,5 @@
 import moderngl as mgl
-
+import random
 
 attribute_mappings = {
     'in_position'  : [0, 1, 2],
@@ -60,7 +60,7 @@ class Shader:
             self.fragment_shader = file.read()
         
         # Hash value for references
-        self.hash = hash((self.vertex_shader, self.fragment_shader))
+        self.hash = hash((self.vertex_shader, self.fragment_shader, random.randrange(-10000, 100000)))
 
         # Create a string of all lines in both shaders
         lines = f'{self.vertex_shader}\n{self.fragment_shader}'.split('\n')
@@ -85,15 +85,12 @@ class Shader:
         # Create a program with shaders
         self.program = self.ctx.program(vertex_shader=self.vertex_shader, fragment_shader=self.fragment_shader)
 
-    def use(self):
+    def set_main(self):
         """
         Selects a shader for use
         """
         
-        self.engine.scene.shader_handler.add('default', self)
-        self.engine.scene.light_handler.write()
-        self.engine.scene.material_handler.write()
-        self.engine.scene.sky.write()
+        self.engine.scene.shader_handler.add(self)
         self.engine.scene.node_handler.chunk_handler.update_all()
 
     def write(self, name: str, value) -> None:
