@@ -3,7 +3,7 @@ import glm
 import numpy as np
 
 
-texture_sizes = (8, 256, 512, 1024, 2048)
+texture_sizes = (8, 64, 512, 1024, 2048)
 
 
 class ImageHandler():

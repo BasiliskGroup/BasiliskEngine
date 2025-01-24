@@ -68,7 +68,7 @@ def get_data(size=30, offset=(0, 0)):
 
 
 t1 = time.time()
-mesh = bsk.Mesh(get_data(size=32))
+mesh = bsk.Mesh(get_data(size=64))
 t2 = time.time()
 
 print(f'Mesh time: {t2 - t1}')
