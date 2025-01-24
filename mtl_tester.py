@@ -35,40 +35,29 @@ class App():
        
         self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
 
-        self.base_sky = bsk.Sky(self.engine, 'tests/skybox.png')
-        self.sunset_sky = bsk.Sky(self.engine, 'tests/SkySkybox.png')
-
-        self.engine.shader = self.normal_shader
-
         self.cam_rot = 0
 
     def update(self):
-        if self.engine.keys[pg.K_1]:
+        if self.engine.keys[pg.K_e]:
             self.scene.camera = bsk.StaticCamera(position=(0, 0, 4))
             self.engine.mouse.grab = False
             self.show_menu = True
-        if self.engine.keys[pg.K_2]:
+        if self.engine.keys[pg.K_q]:
             self.scene.camera = bsk.FreeCamera(position=(0, 0, 4))
             self.engine.mouse.grab = True
             self.show_menu = False
-        if self.engine.keys[pg.K_3]:
-            self.engine.mouse.set_pos(400, 400)
-        if self.engine.keys[pg.K_m]:
+        if self.engine.keys[pg.K_1]:
             self.node.material = self.mud_mtl
             self.mtl = self.mud_mtl
-        if self.engine.keys[pg.K_f]:
+        if self.engine.keys[pg.K_2]:
             self.node.material = self.foil_mtl
             self.mtl = self.foil_mtl
-        if self.engine.keys[pg.K_c]:
+        if self.engine.keys[pg.K_3]:
             self.node.material = self.cloth_mtl
             self.mtl = self.cloth_mtl
-        if self.engine.keys[pg.K_g]:
+        if self.engine.keys[pg.K_4]:
             self.node.material = self.floor_mtl
             self.mtl = self.floor_mtl
-        if self.engine.keys[pg.K_5]:
-            self.scene.sky = self.base_sky
-        if self.engine.keys[pg.K_6]:
-            self.scene.sky = self.sunset_sky
         if self.engine.keys[pg.K_p]:
             self.scene.frame.save()
 

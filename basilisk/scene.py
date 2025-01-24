@@ -54,7 +54,7 @@ class Scene():
 
         self.frame.use()
         self.shader_handler.write()
-        self.sky.render()
+        if self.sky: self.sky.render()
         self.node_handler.render()
         self.draw_handler.render()
 
@@ -135,9 +135,8 @@ class Scene():
 
     @sky.setter
     def sky(self, value: Sky):
-        if not value: return
-        if not isinstance(value, Sky):
-            raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky')
+        if not isinstance(value, Sky) and not isinstance(value, type(None)):
+            raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky or None')
         self._sky = value
-        self._sky.write()
+        if value: self._sky.write()
 
