@@ -139,4 +139,3 @@ class Scene():
             raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky or None')
         self._sky = value
         if value: self._sky.write()
-
