@@ -38,17 +38,22 @@ class LightHandler():
         Writes all the lights in a scene to the given shader program
         """
 
-        if not program: program = self.engine.shader.program
+        # if not program: program = self.engine.shader.program
 
-        if directional and self.directional_lights and 'numDirLights' in self.engine.shader.uniforms:
+        for shader in self.scene.shader_handler.shaders:
+            if 'numDirLights' not in shader.uniforms: continue
+            
+            program = shader.program
 
-            program['numDirLights'].write(glm.int32(len(self.directional_lights)))
+            if directional and self.directional_lights and 'numDirLights' in self.engine.shader.uniforms:
 
-            for i, light in enumerate(self.directional_lights):
-                program[f'dirLights[{i}].direction'].write(light.direction)
-                program[f'dirLights[{i}].intensity'].write(glm.float32(light.intensity))
-                program[f'dirLights[{i}].color'    ].write(light.color / 255.0)
-                program[f'dirLights[{i}].ambient'  ].write(glm.float32(light.ambient))
-        
-        if point:
-            ...
+                program['numDirLights'].write(glm.int32(len(self.directional_lights)))
+
+                for i, light in enumerate(self.directional_lights):
+                    program[f'dirLights[{i}].direction'].write(light.direction)
+                    program[f'dirLights[{i}].intensity'].write(glm.float32(light.intensity))
+                    program[f'dirLights[{i}].color'    ].write(light.color / 255.0)
+                    program[f'dirLights[{i}].ambient'  ].write(glm.float32(light.ambient))
+            
+            if point:
+                ...

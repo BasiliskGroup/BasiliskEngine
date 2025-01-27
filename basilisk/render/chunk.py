@@ -4,7 +4,7 @@ from .batch import Batch
 class Chunk():
     chunk_handler: ...
     """Back refrence to the parent chunk handler"""
-    chunk_key: tuple
+    position: tuple
     """The position of the chunk. Used as a key in the chunk handler"""
     batch: Batch
     """Batched mesh of the chunk"""
@@ -13,7 +13,7 @@ class Chunk():
     static: bool
     """Type of node that the chunk recognizes"""
 
-    def __init__(self, chunk_handler, chunk_key: tuple, static: bool) -> None:
+    def __init__(self, chunk_handler, position: tuple, static: bool, shader=None) -> None:
         """
         Basilisk chunk object. 
         Contains references to all nodes in the chunk.
@@ -22,9 +22,11 @@ class Chunk():
 
         # Back references
         self.chunk_handler = chunk_handler
-        self.chunk_key = chunk_key
 
+        # Chunk Attrbiutes
+        self.position = position
         self.static = static
+        self.shader = shader
 
         # Create empty batch
         self.batch = Batch(self)
@@ -75,8 +77,18 @@ class Chunk():
 
         return node
 
+    def get_program(self):
+        """
+        Gets the program of the chunks nodes' shader
+        """
+
+        shader = self.shader
+
+        if shader: return shader.program
+        return self.chunk_handler.engine.shader.program
+
     def __repr__(self) -> str:
-        return f'<Basilisk Chunk | {self.chunk_key}, {len(self.nodes)} nodes, {'static' if self.static else 'dynamic'}>'
+        return f'<Basilisk Chunk | {self.position}, {len(self.nodes)} nodes, {'static' if self.static else 'dynamic'}>'
 
     def __del__(self) -> None:
         """

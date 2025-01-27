@@ -68,10 +68,12 @@ def get_data(size=30, offset=(0, 0)):
 
 
 t1 = time.time()
-mesh = bsk.Mesh(get_data(size=64))
+mesh = bsk.Mesh(get_data(size=16))
 t2 = time.time()
 
 print(f'Mesh time: {t2 - t1}')
+
+engine.shader = bsk.Shader(engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
 
 scene.add_node(position=(0, -10, 0), mesh=mesh, material=mtl)
 

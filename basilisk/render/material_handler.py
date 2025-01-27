@@ -93,7 +93,7 @@ class MaterialHandler():
 
         if not self.data_texture: return
 
-        for shader in self.engine.scene.shader_handler.shaders.values():
+        for shader in self.engine.scene.shader_handler.shaders:
             if 'materialsTexture' not in shader.uniforms: continue
 
             shader.program['materialsTexture'] = 9

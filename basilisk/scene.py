@@ -55,7 +55,7 @@ class Scene():
 
         self.frame.use()
         self.shader_handler.write()
-        self.sky.render()
+        if self.sky: self.sky.render()
         self.node_handler.render()
         self.draw_handler.render()
 
@@ -88,6 +88,8 @@ class Scene():
         shader:              Shader=None
     ):
         
+        self.shader_handler.add(shader)
+
         if material: self.material_handler.add(material)
         else: material = self.material_handler.base
 
@@ -111,10 +113,10 @@ class Scene():
         self.camera           = FreeCamera()
         self.shader_handler   = ShaderHandler(self)
         self.material_handler = MaterialHandler(self)
+        self.light_handler    = LightHandler(self)
         self.physics_engine   = PhysicsEngine()
         self.node_handler     = NodeHandler(self)
         self.collider_handler = ColliderHandler(self)
-        self.light_handler    = LightHandler(self)
         self.draw_handler     = DrawHandler(self)
         self.frame            = Frame(self)
         self.sky              = Sky(self.engine)
@@ -198,9 +200,7 @@ class Scene():
 
     @sky.setter
     def sky(self, value: Sky):
-        if not value: return
-        if not isinstance(value, Sky):
-            raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky')
+        if not isinstance(value, Sky) and not isinstance(value, type(None)):
+            raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky or None')
         self._sky = value
-        self._sky.write()
-
+        if value: self._sky.write()

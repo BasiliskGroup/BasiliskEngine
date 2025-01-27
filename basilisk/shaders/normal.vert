@@ -81,11 +81,11 @@ void main() {
     uv       = in_uv;
     
     // Get the material
-    int mtl_size = 19;
+    int mtl_size = 25;
     int materialID     = int(obj_material);
     
-    mtl.hasNormalMap   = int(texelFetch(materialsTexture,  ivec2(0, 16  + materialID * mtl_size), 0).r);
-    mtl.normalMap      = vec2(texelFetch(materialsTexture, ivec2(0, 17  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 18 + materialID * mtl_size), 0).r);    
+    mtl.hasNormalMap = int(texelFetch(materialsTexture,  ivec2(0, 16  + materialID * mtl_size), 0).r);
+    mtl.normalMap    = vec2(texelFetch(materialsTexture, ivec2(0, 17  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 18 + materialID * mtl_size), 0).r);    
 
     // Set the fragment position
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(in_position, 1.0);

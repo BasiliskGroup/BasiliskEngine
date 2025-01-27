@@ -85,6 +85,11 @@ class Camera:
     def get_params(self) -> tuple:
         return self.engine, self.position, self.yaw, self.pitch
     
+    def look_at(self, other) -> None:
+        forward = glm.normalize(other.position - self.position)
+        self.yaw = np.degrees(np.arctan2(forward.z, forward.x))
+        self.pitch = np.degrees(np.arctan2(forward.y, np.sqrt(forward.x ** 2 + forward.z ** 2)))
+
     def __repr__(self):
         return f'<Basilisk Camera | Position: {self.position}, Direction: {self.forward}>'
 

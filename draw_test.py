@@ -5,6 +5,9 @@ engine = bsk.Engine(grab_mouse=False)
 scene = bsk.Scene()
 engine.scene = scene
 
+scene.camera = bsk.StaticCamera()
+scene.sky = None
+
 brick = bsk.Image('tests/brick.png')
 
 # Create an image from pygame surface
