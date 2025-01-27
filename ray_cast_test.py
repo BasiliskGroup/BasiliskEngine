@@ -23,7 +23,7 @@ while engine.running:
     if engine.mouse.left_down: left_pressed = True
     elif left_pressed: 
         
-        node, intersection = engine.scene.ray_cast(has_collisions=True)
+        node, intersection = engine.scene.raycast_mouse((engine.mouse.x, engine.mouse.y), has_collisions=True)
         left_pressed = False
         
         if not node: continue

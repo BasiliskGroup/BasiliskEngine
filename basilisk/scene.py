@@ -121,7 +121,7 @@ class Scene():
         self.frame            = Frame(self)
         self.sky              = Sky(self.engine)
         
-    def ray_cast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
+    def raycast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
         """
         Ray cast from any posiiton and forward vector and returns the nearest node. If no position or forward is given, uses the scene camera's current position and forward
         """
@@ -165,7 +165,7 @@ class Scene():
                     
         return best_node, best_point
     
-    def ray_cast_mouse(self, position: tuple[int, int] | glm.vec2, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
+    def raycast_mouse(self, position: tuple[int, int] | glm.vec2, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
         """
         Ray casts from the mouse position with respect to the camera. Returns the nearest node that was clicked, if none was clicked, returns None. 
         """
@@ -177,7 +177,7 @@ class Scene():
         point /= point.w
         forward = glm.normalize(glm.vec3(inv_view * glm.vec4(point.x, point.y, point.z, 0)))
         
-        return self.ray_cast(
+        return self.raycast(
             position=self.camera.position,
             forward=forward,
             max_distance=max_distance,
