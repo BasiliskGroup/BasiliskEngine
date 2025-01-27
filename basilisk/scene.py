@@ -121,7 +121,7 @@ class Scene():
         self.frame            = Frame(self)
         self.sky              = Sky(self.engine)
         
-    def ray_cast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
+    def ray_cast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
         """
         Ray cast from any posiiton and forward vector and returns the nearest node. If no position or forward is given, uses the scene camera's current position and forward
         """
@@ -134,7 +134,7 @@ class Scene():
             colliders = self.collider_handler.bvh.get_line_collided(position, forward)
             nodes = [collider.node for collider in colliders]
             
-            def is_valid(node: Node, has_collisions: bool, has_physics: bool, tags: list[str]) -> bool:
+            def is_valid(node: Node) -> bool:
                 return all([
                     has_collisions is None or bool(node.collider) == has_collisions,
                     has_physics is None or bool(node.physics_body) == has_physics,
@@ -144,19 +144,20 @@ class Scene():
             nodes: list[Node] = list(filter(lambda node: is_valid(node), nodes))
             
         # if we are not filtering for collisions, filter nodes and 
-        else: nodes = self.node_handler.get_all(collisions=has_collisions, physics=has_pshyics, tags=tags)
-            
+        else: nodes = self.node_handler.get_all(collisions=has_collisions, physics=has_physics, tags=tags)
+
         # determine closest node
         best_distance, best_point, best_node = max_distance, None, None
         for node in nodes:
             
-            relative_position = glm.inverse(node.model_matrix) * position
-            relative_forward = node.rotation * forward
+            relative_position = position # glm.inverse(node.model_matrix) * position
+            relative_forward = forward # node.rotation * forward
             
             for triangle in node.mesh.indices:
-                intersection = moller_trumbore(relative_position, relative_forward, [node.mesh.points[i] for i in triangle])
+                intersection = moller_trumbore(relative_position, relative_forward, [node.get_vertex(i) for i in triangle])
                 if not intersection: continue
-                distance = glm.length(node.model_matrix * intersection - position)
+                # intersection = node.model_matrix * intersection
+                distance = glm.length(intersection - position)
                 if distance < best_distance:
                     best_distance = distance
                     best_point    = intersection
@@ -181,7 +182,7 @@ class Scene():
             forward=forward,
             max_distance=max_distance,
             has_collisions=has_collisions,
-            has_pshyics=has_pshyics,
+            has_physics=has_pshyics,
             tags=tags
         )
 

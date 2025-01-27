@@ -135,4 +135,4 @@ class BroadBVH(BVH):
         Returns the colliders that may intersect with the given line
         """
         if isinstance(self.root, BroadAABB): return self.root.get_line_collided(position, forward)
-        return self.root
+        return [self.root]
