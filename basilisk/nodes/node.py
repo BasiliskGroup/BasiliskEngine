@@ -325,12 +325,17 @@ class Node():
         inertia_tensor  = rotation_matrix * inertia_tensor * glm.transpose(rotation_matrix)
         
         return glm.inverse(inertia_tensor)
+    
+    def get_vertex(self, index) -> glm.vec3:
+        """
+        Gets the world space position of a vertex indicated by the index in the mesh
+        """
+        return glm.vec3(self.model_matrix * glm.vec4(*self.mesh.points[index], 1))
 
     def get_data(self) -> np.ndarray:
         """
         Gets the node batch data for chunk batching
         """
-        
         
         # Get data from the mesh node
         mesh_data = self.mesh.data

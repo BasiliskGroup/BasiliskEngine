@@ -1,14 +1,14 @@
 import glm
 from ...nodes.node import Node
+from .dataclasses import SupportPoint
 
-
-def get_support_point(node1: Node, node2: Node, dir_vec: glm.vec3) -> tuple[glm.vec3, glm.vec3, glm.vec3]:
+def get_support_point(node1: Node, node2: Node, dir_vec: glm.vec3) -> SupportPoint:
     """
     Outputs the best support point to be added to the polytop based on the direction vector.
     """
     vertex1, index1 = get_furthest_point(node1, dir_vec)
     vertex2, index2 = get_furthest_point(node2, -dir_vec)
-    return (vertex1 - vertex2, index1, index2)
+    return SupportPoint(vertex1 - vertex2, index1, vertex1, index2, vertex2)
     
 def get_furthest_point(node: Node, dir_vec: glm.vec3) -> glm.vec3:
     """

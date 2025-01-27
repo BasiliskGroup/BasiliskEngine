@@ -128,4 +128,11 @@ class BroadBVH(BVH):
         Returns which objects may be colliding from the BVH
         """
         if isinstance(self.root, BroadAABB): return self.root.get_collided(collider)
-        else: return []
+        else: return [] # if there is only one collider in the scene then there is nothing to collide with
+        
+    def get_line_collided(self, position: glm.vec3, forward: glm.vec3) -> list[Collider]:
+        """
+        Returns the colliders that may intersect with the given line
+        """
+        if isinstance(self.root, BroadAABB): return self.root.get_line_collided(position, forward)
+        return self.root

@@ -43,8 +43,6 @@ objects = [scene.add_node(
     mass       = 1
 ) for _ in range(1)]
 
-print(glm.inverse(objects[0].get_inverse_inertia()))
-
 while engine.running:
     
     for object in objects:

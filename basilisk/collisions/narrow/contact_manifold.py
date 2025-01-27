@@ -3,6 +3,7 @@ from random import randint
 from .line_intersections import line_line_intersect, line_poly_intersect
 from .graham_scan import graham_scan
 from .sutherland_hodgman import sutherland_hodgman
+from .dataclasses import ContactPoint
 
 # sutherland hodgman clipping algorithm
 def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points1:list[glm.vec3], points2:list[glm.vec3]) -> list[glm.vec3]:
@@ -42,16 +43,16 @@ def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.
     # convert inertsection algorithm output to 3d
     return points_to_3d(u1, v1, contact_plane_point, manifold)
 
-def separate_polytope(points1: list[glm.vec3], points2: list[glm.vec3], contact_plane_normal, epsilon: float=1e-5) -> list[glm.vec3]:
+def separate_polytope(points1: list[ContactPoint], points2: list[ContactPoint], contact_plane_normal, epsilon: float=1e-5) -> tuple[list[ContactPoint], list[ContactPoint]]:
     """
     Determines the potential contact manifold points of each shape based on their position along the penetrating axis
     """
-    proj1 = [(glm.dot(point[1], contact_plane_normal), point) for point in points1]
-    proj2 = [(glm.dot(point[1], contact_plane_normal), point) for point in points2]
+    proj1 = [(glm.dot(point.vertex, contact_plane_normal), point) for point in points1]
+    proj2 = [(glm.dot(point.vertex, contact_plane_normal), point) for point in points2]
     
     # min1 and max2 should be past the collising points of node2 and node1 respectively
-    min1 = min(proj1, key=lambda point: point[0])[0]
-    max2 = max(proj2, key=lambda point: point[0])[0]
+    min1 = min(proj1, key=lambda proj: proj[0])[0]
+    max2 = max(proj2, key=lambda proj: proj[0])[0]
     
     proj1 = filter(lambda proj: proj[0] <= max2 + epsilon, proj1)
     proj2 = filter(lambda proj: proj[0] + epsilon >= min1, proj2)

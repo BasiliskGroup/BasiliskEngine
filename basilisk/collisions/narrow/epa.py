@@ -1,13 +1,14 @@
 import glm
 from .helper import get_support_point
+from .dataclasses import SupportPoint
 from...nodes.node import Node
 
 
 # TODO change these to structs when converting to C++
 face_type     = list[tuple[float, glm.vec3, glm.vec3, int, int, int]] # distance, normal, center, index 1, index 2, index 3
-polytope_type = list[tuple[glm.vec3, glm.vec3, glm.vec3]] # polytope vertex, node1 vertex, node2 vertex
+polytope_type = list[SupportPoint] # polytope vertex, node1 vertex, node2 vertex
 
-def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon: float=0) -> tuple: # TODO determine the return type of get_epa_from_gjk and if epsilon is good value
+def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon: float=0) -> tuple[face_type, polytope_type]: # TODO determine the return type of get_epa_from_gjk and if epsilon is good value
     """
     Determines the peneration vector from a collision using EPA. The returned face normal is normalized but the rest are not guarunteed to be. 
     """
@@ -18,7 +19,7 @@ def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon:
     # develope the polytope until the nearest real face has been found, within epsilon
     while True:
         new_point = get_support_point(node1, node2, faces[0][1])
-        if new_point in polytope or glm.length(new_point[0]) - faces[0][0] < epsilon: return faces[0], polytope
+        if new_point in polytope or glm.length(new_point.support_point) - faces[0][0] < epsilon: return faces[0], polytope
         faces, polytope = insert_point(polytope, faces, new_point)
 
 def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, epsilon: float=0) -> tuple[face_type, polytope_type]:
@@ -30,8 +31,8 @@ def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, eps
     support_index = len(polytope) - 1
     visible_faces = [
         face for face in faces
-        if glm.dot(face[1], polytope[support_index][0]) >= epsilon and # if the normal of a face is pointing towards the added point
-           glm.dot(face[1], polytope[support_index][0] - face[2]) >= epsilon # TODO check if this ever occurs
+        if glm.dot(face[1], polytope[support_index].support_point) >= epsilon and # if the normal of a face is pointing towards the added point
+           glm.dot(face[1], polytope[support_index].support_point - face[2]) >= epsilon # TODO check if this ever occurs
     ]
     
     # generate new edges
@@ -57,15 +58,15 @@ def insert_face(polytope: polytope_type, faces: face_type, indices: tuple[int, i
     """
     Inserts a face into the face priority queue based on the indices given in the polytope
     """
-    center   = (polytope[indices[0]][0] + polytope[indices[1]][0] + polytope[indices[2]][0]) / 3
-    normal   = glm.cross(polytope[indices[1]][0] - polytope[indices[0]][0], polytope[indices[2]][0] - polytope[indices[0]][0]) # closest face normal will be normalized once returned to avoid square roots and division
+    center   = (polytope[indices[0]].support_point + polytope[indices[1]].support_point + polytope[indices[2]].support_point) / 3
+    normal   = glm.cross(polytope[indices[1]].support_point - polytope[indices[0]].support_point, polytope[indices[2]].support_point - polytope[indices[0]][0]) # closest face normal will be normalized once returned to avoid square roots and division
     if glm.dot(center, normal) < 0: 
         normal *= -1
         indices = (indices[2], indices[1], indices[0])
 
     # TODO solve cases where face may contain origin
     normal = glm.normalize(normal)
-    distance = abs(glm.dot(polytope[indices[0]][0], normal))
+    distance = abs(glm.dot(polytope[indices[0]].support_point, normal))
     new_face = (distance, normal, center, *indices)
     
     # insert faces into priority queue based on distance from origin
@@ -81,7 +82,7 @@ def orient_face(polytope: polytope_type, indices: tuple[int, int, int]) -> tuple
     """
     Orients the face indices to have a counter clockwise normal
     """
-    if glm.dot(glm.cross(polytope[indices[1]][0], polytope[indices[2]][0]), polytope[indices[0]][0]) < 0: return (indices[2], indices[1], indices[0])
+    if glm.dot(glm.cross(polytope[indices[1]].support_point, polytope[indices[2]].support_point), polytope[indices[0]].support_point) < 0: return (indices[2], indices[1], indices[0])
     return indices
     
 def get_face_edges(face: tuple[float, glm.vec3, glm.vec3, int, int, int]) -> list[tuple[int, int]]:

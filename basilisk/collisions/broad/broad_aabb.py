@@ -1,6 +1,6 @@
 import glm
 from ...generic.abstract_bvh import AbstractAABB as AABB
-from ...generic.collisions import collide_aabb_aabb
+from ...generic.collisions import collide_aabb_aabb, collide_aabb_line
 from ...generic.meshes import get_aabb_surface_area
 from ..collider import Collider
 
@@ -79,6 +79,13 @@ class BroadAABB(AABB):
         if isinstance(self.b, BroadAABB): possible.extend(self.b.get_collided(collider))
         elif collide_aabb_aabb(self.b.top_right, self.b.bottom_left, collider.top_right, collider.bottom_left): possible.append(self.b)
         return possible
+    
+    def get_line_collided(self, position: glm.vec3, forward: glm.vec3) -> list[Collider]:
+        """
+        Returns the colliders that may intersect with the given line
+        """
+        if not collide_aabb_line(self.top_right, self.bottom_left, position, forward): return []
+        return (self.a.get_line_collided(position, forward) if isinstance(self.a, BroadAABB) else [self.a]) + (self.b.get_line_collided(position, forward) if isinstance(self.b, BroadAABB) else [self.b])
         
     def get_all_aabbs(self, layer: int) -> list[tuple[glm.vec3, glm.vec3, int]]: # TODO test function
         """

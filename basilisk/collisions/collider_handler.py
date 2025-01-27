@@ -1,13 +1,11 @@
 import glm
 
-from basilisk.collisions.narrow.graham_scan import graham_scan
-from basilisk.collisions.narrow.sutherland_hodgman import sutherland_hodgman
 from .collider import Collider
 from .broad.broad_bvh import BroadBVH
 from .narrow.gjk import collide_gjk
 from .narrow.epa import get_epa_from_gjk
-from .narrow.contact_manifold import get_contact_manifold, points_to_2d, points_to_3d, project_points, separate_polytope
-from .narrow.line_intersections import closest_two_lines, line_poly_intersect
+from .narrow.contact_manifold import get_contact_manifold, separate_polytope
+from .narrow.dataclasses import SupportPoint, ContactPoint, ContactManifold
 from ..nodes.node import Node
 from ..generic.collisions import get_sat_axes
 from ..physics.impulse import calculate_collisions
@@ -25,9 +23,8 @@ class ColliderHandler():
         self.cube = self.scene.engine.cube
         self.colliders = []
         self.polytope_data = {}
-        self.contact_manifolds = {} # {(collider1, collider2) : (collision vector, [(has_collided1, contact_point_index1)], [(has_collided2, contact_point_index2)])}
+        self.contact_manifolds: dict[tuple[Collider, Collider] : ContactManifold] = {}
         self.bvh = BroadBVH(self)
-
         
     def add(self, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None) -> Collider:
         """
@@ -96,54 +93,6 @@ class ColliderHandler():
             
         return small_axis, small_overlap, small_index
     
-    # def sat_manifold(self, points1: list[glm.vec3], points2: list[glm.vec3], axis: glm.vec3, plane_point: glm.vec3, digit: int) -> list[glm.vec3]:
-    #     """
-    #     Returns the contact manifold from an SAT OBB OBB collision
-    #     """
-    #     def get_test_points(contact_plane_normal:glm.vec3, points:list[glm.vec3], count: int):
-    #         test_points = [(glm.dot(contact_plane_normal, p), p) for p in points]
-    #         test_points.sort(key=lambda p: p[0])
-    #         return [p[1] for p in test_points[:count]]
-        
-    #     def get_test_points_unknown(contact_plane_normal:glm.vec3, points:list[glm.vec3]):
-    #         test_points = [(glm.dot(contact_plane_normal, p), p) for p in points]
-    #         test_points.sort(key=lambda p: p[0])
-    #         if test_points[2][0] - test_points[0][0] > 1e-3: return [p[1] for p in test_points[:2]]
-    #         else:                                            return [p[1] for p in test_points[:4]]        
-        
-    #     if digit < 6: # there must be at least one face in the collision
-    #         reference, incident = (get_test_points(-axis, points1, 4), get_test_points_unknown(axis, points2)) if digit < 3 else (get_test_points(axis, points2, 4), get_test_points_unknown(-axis, points1))
-            
-    #         # project vertices onto the 2d plane
-    #         reference = project_points(plane_point, axis, reference)
-    #         incident  = project_points(plane_point, axis, incident)
-            
-    #         # convert points to 2d for intersection algorithms
-    #         reference, u1, v1 = points_to_2d(plane_point, axis, reference)
-    #         incident,  u2, v2 = points_to_2d(plane_point, axis, incident, u1, v1)
-            
-    #         # convert arbitrary points to polygon
-    #         reference = graham_scan(reference)
-    #         if len(incident) == 4:  incident =  graham_scan(incident)
-            
-    #         # run clipping algorithms
-    #         manifold = []
-    #         if len(incident) == 2: manifold = line_poly_intersect(incident, reference)
-    #         else:                  manifold = sutherland_hodgman(reference, incident)
-                
-    #         # # fall back if manifold fails to develope
-    #         assert len(manifold), 'sat did not generate points'
-            
-    #         # # convert inertsection algorithm output to 3d
-    #         return points_to_3d(u1, v1, plane_point, manifold)
-        
-    #     else: # there is an edge edge collision
-            
-    #         points1 = get_test_points(-axis, points1, 2)
-    #         points2 = get_test_points(axis, points2, 2)
-            
-    #         return closest_two_lines(*points1, *points2)
-    
     def collide_obb_obb_decision(self, collider1: Collider, collider2: Collider) -> bool:
         """
         Determines if two obbs are colliding Uses SAT. 
@@ -183,6 +132,37 @@ class ColliderHandler():
                 
         return collisions
     
+    def merge_contact_points(self, vec: glm.vec3, collider1: Collider, collider2: Collider, points1: list[ContactPoint], points2: list[ContactPoint]) -> None:
+        """
+        
+        """
+        def merge_points(node: Node, existing: dict[int, glm.vec3], incoming: list[ContactPoint]) -> dict[int, glm.vec3]:
+            incoming_indices = set()
+            
+            # add incoming points
+            for point in incoming:
+                incoming_indices.add(point.index)
+                if point.index not in existing or glm.length2(point.vertex - existing[point.index]) > 1e-5: existing[point.index] = glm.vec3(point.vertex)
+                if glm.length2(point.vertex - existing[point.index]) != 0: print(point.vertex - existing[point.index])
+                    
+            # remove changed stored points
+            remove_indices = []
+            for index, vertex in existing.items():
+                if index in incoming_indices: continue
+                if glm.length2(node.get_vertex(index) - vertex) > 1e-5: remove_indices.append(index) # check to see if point has moved
+            
+            # remove unused and moved points
+            for index in remove_indices: del existing[index]
+            return existing
+        
+        # check if collision is logged, if not create a new one
+        collider_tuple = (collider1, collider2)
+        if collider_tuple not in self.contact_manifolds or glm.length2(self.contact_manifolds[collider_tuple].normal - vec) > 1e-7: self.contact_manifolds[collider_tuple] = ContactManifold(vec, dict(), dict())
+        
+        # add contact point from current collision and check overlap
+        self.contact_manifolds[collider_tuple].contact_points1 = merge_points(collider1.node, self.contact_manifolds[collider_tuple].contact_points1, points1)
+        self.contact_manifolds[collider_tuple].contact_points2 = merge_points(collider2.node, self.contact_manifolds[collider_tuple].contact_points2, points2)
+    
     def resolve_narrow_collisions(self, broad_collisions: list[tuple[Collider, Collider]]) -> None:
         """
         Determines if two colliders are colliding, if so resolves their penetration and applies impulse
@@ -203,8 +183,8 @@ class ColliderHandler():
                 vec, distance, index = data
                 
                 # TODO replace with own contact algorithm
-                points1 = [tup for tup in enumerate(collider1.obb_points)]
-                points2 = [tup for tup in enumerate(collider2.obb_points)]
+                points1 = [ContactPoint(index, vertex) for index, vertex in enumerate(collider1.obb_points)]
+                points2 = [ContactPoint(index, vertex) for index, vertex in enumerate(collider2.obb_points)]
                 
             else: # use gjk to determine collisions between non-cuboid meshes
                 has_collided, simplex = collide_gjk(node1, node2)
@@ -214,8 +194,8 @@ class ColliderHandler():
                 vec, distance  = face[1], face[0]
                 
                 # TODO replace with own contact algorithm
-                points1 = [(p[1], node1.mesh.points[p[1]]) for p in polytope]
-                points2 = [(p[2], node2.mesh.points[p[2]]) for p in polytope]
+                points1 = [ContactPoint(p.index1, p.vertex1) for p in polytope]
+                points2 = [ContactPoint(p.index2, p.vertex2) for p in polytope]
                 
             if glm.dot(vec, node2.position - node1.position) > 0: vec *= -1
             
@@ -224,22 +204,24 @@ class ColliderHandler():
                 
                 # determine the contact points from the collision
                 points1, points2 = separate_polytope(points1, points2, vec)
-                indices1, points1 = zip(*points1)
-                indices2, points2 = zip(*points2)
+                self.merge_contact_points(vec, collider1, collider2, points1, points2)
+                
+                # for manifold in self.contact_manifolds.values(): print(list(manifold.contact_points1.values()) + list(manifold.contact_points2.values()))
                 
                 collider_tuple = (collider1, collider2)
+                # print(self.contact_manifolds[collider_tuple])
+                manifold = get_contact_manifold(
+                    node1.position - vec, 
+                    vec, 
+                    self.contact_manifolds[collider_tuple].contact_points1.values(), 
+                    self.contact_manifolds[collider_tuple].contact_points2.values()
+                )
                 
-                # collect points from previous frames
-                if collider_tuple not in self.contact_manifolds or glm.length2(self.contact_manifolds[collider_tuple][0] - vec) > 1e-7: self.contact_manifolds[collider_tuple] = [vec, set(), set()]
-                self.contact_manifolds[collider_tuple][1] = set(filter(lambda index: index, self.contact_manifolds[collider_tuple][1]))
+                # print(manifold, '\n')
                 
-                # manage persistent contact points between frames
-                # for indices in (indices1, indices2)
-                
-                manifold = get_contact_manifold(node1.position - vec, vec, points1, points2)
-                if len(manifold) == 0: # TODO find better solution to poor manifold generation
-                    print('manifold failed to generate')
-                    continue
+                # if len(manifold) == 0: # TODO find better solution to poor manifold generation
+                #     print('manifold failed to generate')
+                #     continue
                 calculate_collisions(vec, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
 
                 for i, point in enumerate(manifold):
