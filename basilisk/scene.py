@@ -163,21 +163,23 @@ class Scene():
                 ])
                 
             nodes: list[Node] = list(filter(lambda node: is_valid(node), nodes))
-            
+        
         # if we are not filtering for collisions, filter nodes and 
         else: nodes = self.node_handler.get_all(collisions=has_collisions, physics=has_physics, tags=tags)
 
         # determine closest node
         best_distance, best_point, best_node = max_distance, None, None
+        position_two = position + forward
         for node in nodes:
             
-            relative_position = position # glm.inverse(node.model_matrix) * position
-            relative_forward = forward # node.rotation * forward
+            inv_mat = glm.inverse(node.model_matrix)
+            relative_position = inv_mat * position
+            relative_forward = glm.normalize(inv_mat * position_two - relative_position)
             
             for triangle in node.mesh.indices:
-                intersection = moller_trumbore(relative_position, relative_forward, [node.get_vertex(i) for i in triangle])
+                intersection = moller_trumbore(relative_position, relative_forward, [node.mesh.points[i] for i in triangle])
                 if not intersection: continue
-                # intersection = node.model_matrix * intersection
+                intersection = node.model_matrix * intersection
                 distance = glm.length(intersection - position)
                 if distance < best_distance:
                     best_distance = distance

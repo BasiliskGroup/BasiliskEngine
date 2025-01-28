@@ -8,7 +8,7 @@ engine.scene = scene
 red = bsk.Material(color=(255, 0, 0))
 
 scene.add_node(
-    position=(1, 1, 1),
+    position=(4, 1, 1),
     scale=(2, 3, 4),
     rotation=(0.5, 2, 3),
     collisions=True
@@ -23,7 +23,7 @@ while engine.running:
     if engine.mouse.left_down: left_pressed = True
     elif left_pressed: 
         
-        node, intersection = engine.scene.raycast_mouse((engine.mouse.x, engine.mouse.y), has_collisions=True)
+        node, intersection = engine.scene.raycast_mouse((engine.mouse.x, engine.mouse.y), has_collisions=True) #  a
         left_pressed = False
         
         if not node: continue
