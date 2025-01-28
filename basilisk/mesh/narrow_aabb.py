@@ -1,4 +1,6 @@
 import glm
+
+from basilisk.generic.collisions import collide_aabb_line
 from .narrow_primative import NarrowPrimative
 from ..generic.abstract_bvh import AbstractAABB as AABB
 from ..generic.meshes import get_aabb_line_collision
@@ -79,3 +81,10 @@ class NarrowAABB(AABB):
         else: aabbs.append((self.b.top_right, self.b.bottom_left, layer + 1))
         
         return aabbs
+    
+    def get_line_collided(self, position: glm.vec3, forward: glm.vec3) -> list[int]:
+        """
+        Returns the colliders that may intersect with the given line
+        """
+        if not collide_aabb_line(self.top_right, self.bottom_left, position, forward): return []
+        return (self.a.get_line_collided(position, forward) if isinstance(self.a, NarrowAABB) else [self.a.index]) + (self.b.get_line_collided(position, forward) if isinstance(self.b, NarrowAABB) else [self.b.index])

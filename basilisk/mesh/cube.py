@@ -14,3 +14,9 @@ class Cube(Mesh):
         Gets the best dot point of a cube
         """
         return glm.vec3([-1 if v < 0 else 1 for v in vec])
+    
+    def get_line_collided(self, position: glm.vec3, forward: glm.vec3) -> list[int]:
+        """
+        Returns all the faces on the cube since the AABB degenerates on the cube mesh
+        """
+        return [i for i in range(12)]

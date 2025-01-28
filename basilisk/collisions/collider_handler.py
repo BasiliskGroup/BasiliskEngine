@@ -55,6 +55,7 @@ class ColliderHandler():
             if collider.needs_bvh:
                 self.bvh.remove(collider)
                 self.bvh.add(collider)
+                collider.needs_bvh = False
         
         # resolve collisions
         broad_collisions = self.resolve_broad_collisions()
@@ -118,7 +119,6 @@ class ColliderHandler():
         collisions = set()
         for collider1 in self.colliders:
             if collider1.node.static: continue
-            
             # traverse bvh to find aabb aabb collisions
             colliding = self.bvh.get_collided(collider1)
             for collider2 in colliding:
@@ -142,7 +142,7 @@ class ColliderHandler():
             for point in incoming:
                 incoming_indices.add(point.index)
                 if point.index not in existing or glm.length2(point.vertex - existing[point.index]) > 1e-5: existing[point.index] = glm.vec3(point.vertex)
-                if glm.length2(point.vertex - existing[point.index]) != 0: print(point.vertex - existing[point.index])
+                # if glm.length2(point.vertex - existing[point.index]) != 0: print(point.vertex - existing[point.index])
                     
             # remove changed stored points
             remove_indices = []

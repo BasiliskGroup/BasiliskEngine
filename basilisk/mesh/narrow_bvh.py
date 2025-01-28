@@ -82,3 +82,11 @@ class NarrowBVH(BVH):
         """
         if isinstance(self.root, NarrowAABB): return self.root.get_all_aabbs(0)
         return [(self.root.top_right, self.root.bottom_left, 0)]
+    
+    def get_line_collided(self, position: glm.vec3, forward: glm.vec3) -> list[tuple[int, int, int]]:
+        """
+        Determines which triangles are intersecting with the given line segment. Returns the indices of the triangle contained in the mesh points list
+        """
+        if isinstance(self.root, NarrowAABB): return self.root.get_line_collided(position, forward)
+        return self.root.index
+        

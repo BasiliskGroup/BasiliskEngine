@@ -1,18 +1,27 @@
 import basilisk as bsk
+from random import uniform
 import glm
 
 engine = bsk.Engine()
 scene  = bsk.Scene()
 engine.scene = scene
 
-red = bsk.Material(color=(255, 0, 0))
+print(len(engine.cube.indices))
 
-scene.add(bsk.Node(
-    position=(4, 1, 1),
-    scale=(2, 3, 4),
-    rotation=(0.5, 2, 3),
-    collisions=True
-))
+sphere = bsk.Mesh('tests/sphere.obj')
+red = bsk.Material(color=(255, 0, 0))
+blue = bsk.Material(color=(0, 0, 255))
+
+for _ in range(1000):
+    scene.add_node(
+        position=[uniform(-100, 100) for _ in range(3)],
+        scale=[uniform(0.5, 2) for _ in range(3)],
+        rotation=[uniform(0, glm.pi()) for _ in range(3)],
+        collisions=True,
+        material=blue,
+        mesh=sphere,
+        static=True
+    )
 
 scene.add(bsk.Node())
 
@@ -23,7 +32,7 @@ while engine.running:
     if engine.mouse.left_down: left_pressed = True
     elif left_pressed: 
         
-        node, intersection = engine.scene.raycast_mouse((engine.mouse.x, engine.mouse.y), has_collisions=True) #  a
+        node, intersection = engine.scene.raycast_mouse((engine.mouse.x, engine.mouse.y), has_collisions=True)
         left_pressed = False
         
         if not node: continue
