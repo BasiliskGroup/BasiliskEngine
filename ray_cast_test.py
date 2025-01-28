@@ -7,14 +7,14 @@ engine.scene = scene
 
 red = bsk.Material(color=(255, 0, 0))
 
-scene.add_node(
+scene.add(bsk.Node(
     position=(4, 1, 1),
     scale=(2, 3, 4),
     rotation=(0.5, 2, 3),
     collisions=True
-)
+))
 
-scene.add_node()
+scene.add(bsk.Node())
 
 left_pressed = False
 

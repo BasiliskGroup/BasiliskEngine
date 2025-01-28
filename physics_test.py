@@ -20,17 +20,17 @@ sphere_mesh = bsk.Mesh('tests/sphere.obj')
 meshes = [cube_mesh]
 
 # creating nodes
-platform = scene.add_node(
+platform = scene.add(bsk.Node(
     position=(0, -5, 0),
     scale=(10, 1, 10),
     # rotation=(-0.3, 0, 0),
     material=blue,
     collisions=True,
-)
+))
 
 radius = 4
 
-objects = [scene.add_node(
+objects = [scene.add(bsk.Node(
     position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
     scale      = [1, 2, 3],
     # rotation   = [random.uniform(0.1, 0.2) for _ in range(3)],
@@ -41,7 +41,7 @@ objects = [scene.add_node(
     physics    = True,
     static     = False,
     mass       = 1
-) for _ in range(1)]
+)) for _ in range(1)]
 
 while engine.running:
     

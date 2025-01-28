@@ -26,11 +26,10 @@ class ColliderHandler():
         self.contact_manifolds: dict[tuple[Collider, Collider] : ContactManifold] = {}
         self.bvh = BroadBVH(self)
         
-    def add(self, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None) -> Collider:
+    def add(self, collider: Collider) -> Collider:
         """
         Creates a collider and adds it to the collider list
         """
-        collider = Collider(self, node, box_mesh, static_friction, kinetic_friction, elasticity, collision_group)
         self.colliders.append(collider)
         self.bvh.add(collider)
         return collider
@@ -225,7 +224,7 @@ class ColliderHandler():
                 calculate_collisions(vec, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
 
                 for i, point in enumerate(manifold):
-                    self.scene.add_node(position = point, scale = (0.1, 0.1, 0.1))
+                    self.scene.add(Node(position = point, scale = (0.1, 0.1, 0.1)))
             
             # resolve collision penetration
             multiplier = 0.5 if not (node1.static or node2.static) else 1

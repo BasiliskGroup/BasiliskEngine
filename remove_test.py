@@ -9,7 +9,7 @@ nodes = []
 for x in range(-1, 2):
     for y in range(-1, 2):
         for z in range(-1, 2):
-            nodes.append(scene.add_node(position=(x * 3, y * 3, z * 3)))
+            nodes.append(scene.add(bsk.Node(position=(x * 3, y * 3, z * 3))))
 
 while engine.running:
     engine.update()

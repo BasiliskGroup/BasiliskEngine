@@ -73,9 +73,7 @@ t2 = time.time()
 
 print(f'Mesh time: {t2 - t1}')
 
-engine.shader = bsk.Shader(engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
-
-scene.add_node(position=(0, -10, 0), mesh=mesh, material=mtl)
+scene.add(bsk.Node(position=(0, -10, 0), mesh=mesh, material=mtl))
 
 while engine.running:
     engine.update()

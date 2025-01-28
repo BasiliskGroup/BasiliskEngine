@@ -50,9 +50,11 @@ def quad_uv_normal() -> bsk.Mesh:
     return mesh
 
 def test_physics() -> None:
-    scene.add_node(position=(5, 5, 5), collisions=True, physics=True)
+    cube = bsk.Node(position=(5, 5, 5), collisions=True, physics=True)
+    scene.add(cube)
 
-scene.add_node(mesh=quad_uv_normal(), material=floor_mtl, collisions=True)
+node = bsk.Node(mesh=quad_uv_normal(), material=floor_mtl, collisions=True)
+scene.add(node)
 # test_physics()
 
 while engine.running:
