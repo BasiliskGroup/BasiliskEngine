@@ -62,6 +62,27 @@ class Scene():
         if self.engine.headless: return
         self.frame.render()
     
+    def add(self, bsk_object: Node):
+        """
+        Adds an object to the scene. Can pass in any scene objects:
+        Argument overloads:
+            object: Node - Adds the given node to the scene.
+        """
+        
+        if isinstance(bsk_object, Node):
+            # Add a node to the scene
+            ...
+        
+        # Light
+
+        # Mesh
+
+        # Sky
+
+        # Scene
+            
+
+
     def add_node(self, 
         position:            glm.vec3=None, 
         scale:               glm.vec3=None, 
