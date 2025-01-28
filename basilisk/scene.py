@@ -155,7 +155,9 @@ class Scene():
             relative_position = inv_mat * position
             relative_forward = glm.normalize(inv_mat * position_two - relative_position)
             
-            for triangle in node.mesh.indices:
+            triangles = [node.mesh.indices[i] for i in node.mesh.get_line_collided(relative_position, relative_forward)]
+            
+            for triangle in triangles:
                 intersection = moller_trumbore(relative_position, relative_forward, [node.mesh.points[i] for i in triangle])
                 if not intersection: continue
                 intersection = node.model_matrix * intersection

@@ -7,21 +7,25 @@ def collide_aabb_aabb(top_right1: glm.vec3, bottom_left1: glm.vec3, top_right2: 
     """
     return all(bottom_left1[i] <= top_right2[i] + epsilon and epsilon + top_right1[i] >= bottom_left2[i] for i in range(3))
 
-def collide_aabb_line(top_right: glm.vec3, bottom_left: glm.vec3, position: glm.vec3, forward: glm.vec3) -> bool:
+def collide_aabb_line(top_right: glm.vec3, bottom_left: glm.vec3, position: glm.vec3, forward: glm.vec3) -> bool: # TODO check algorithm
     """
     Determines if an infinite line intersects with an AABB
     """
     tmin, tmax = -1e10, 1e10
     for i in range(3):
-        if forward[i] != 0:
-            tlow   = (bottom_left[i] - position[i]) / position[i]
-            thigh  = (top_right[i]   - position[i]) / position[i]
-            tentry = min(tlow, thigh)
-            texit  = max(tlow, thigh)
-            tmin   = max(tmin, tentry)
-            tmax   = min(tmax, texit)
-        elif position[i] < bottom_left[i] or position[i] > top_right: return False
-    return tmin <= tmax and tmax >= 0 and tmin <= 1
+        if forward[i]: # if forward[i] is not 0 to avoid division errors
+            
+            deno = 1 / forward[i]
+            tlow   = (bottom_left[i] - position[i]) * deno
+            thigh  = (top_right[i]   - position[i]) * deno
+            if deno < 0: tlow, thigh = thigh, tlow
+            tmin   = max(tmin, tlow)
+            tmax   = min(tmax, thigh)
+            if tmax <= tmin: return False
+            
+        elif position[i] + 1e-7 < bottom_left[i] or position[i] > top_right[i] + 1e-7: return False
+
+    return True
 
 def moller_trumbore(point:glm.vec3, vec:glm.vec3, triangle:list[glm.vec3], epsilon:float=1e-7) -> glm.vec3:
     """

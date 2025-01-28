@@ -13,7 +13,7 @@ cube_mesh = bsk.Mesh('tests/cube.obj')
 # cube = time.time()
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 # sphere = time.time()
-lucy_mesh = bsk.cube# bsk.Mesh('tests/cube.obj')
+lucy_mesh = engine.cube# bsk.Mesh('tests/cube.obj')
 # lucy = time.time()
 # for m in ['closet_001', 'cylinder', 'cube', 'sphere', 'fridge_001', 'monkey']:
 #     mesh = bsk.Mesh(f'tests/{m}.obj')
@@ -39,53 +39,51 @@ scene.add_node(
     # mass=1
 )
 
-old_time = 0
-new_time = 0
-trials = 10000
+# old_time = 0
+# new_time = 0
+# trials = 10000
 
-for i in range(trials):
-    vec = glm.vec3([random.uniform(-10, 10) for _ in range(3)])
-    start = time.time()
-    old_vec = lucy_mesh.get_best_dot_old(vec)
-    old = time.time()
-    bvh_vec = lucy_mesh.get_best_dot(vec)
-    new = time.time()
+# for i in range(trials):
+#     vec = glm.vec3([random.uniform(-10, 10) for _ in range(3)])
+#     old = time.time()
+#     bvh_vec = lucy_mesh.get_best_dot(vec)
+#     new = time.time()
     
-    old_time += old - start
-    new_time += new - old
+#     old_time += old - start
+#     new_time += new - old
     
-    if old_vec != bvh_vec: print(old_vec, bvh_vec, vec)
+#     if old_vec != bvh_vec: print(old_vec, bvh_vec, vec)
     
-print('old', old_time / trials)
-print('new', new_time / trials)
+# print('old', old_time / trials)
+# print('new', new_time / trials)
 
-scene.add_node(
-    mesh=cube_mesh,
-    material=materials[2], # green
-    scale=(0.03, 0.03, 0.03),
-    position=old_vec
-)
+# scene.add_node(
+#     mesh=cube_mesh,
+#     material=materials[2], # green
+#     scale=(0.03, 0.03, 0.03),
+#     position=old_vec
+# )
 
-scene.add_node(
-    mesh=cube_mesh,
-    material=materials[4], # pink
-    scale=(0.03, 0.03, 0.03),
-    position=bvh_vec
-)
+# scene.add_node(
+#     mesh=cube_mesh,
+#     material=materials[4], # pink
+#     scale=(0.03, 0.03, 0.03),
+#     position=bvh_vec
+# )
     
-for i in range(10):
-    scene.add_node(
-        mesh=cube_mesh,
-        material=materials[5], # yellow
-        scale=(0.01, 0.01, 0.01),
-        position=vec / 8 * (i + 1)
-    )
+# for i in range(10):
+#     scene.add_node(
+#         mesh=cube_mesh,
+#         material=materials[5], # yellow
+#         scale=(0.01, 0.01, 0.01),
+#         position=vec / 8 * (i + 1)
+#     )
 
 aabbs = lucy_mesh.bvh.get_all_aabbs()
 print('aabbs: ', len(aabbs))
 for aabb in aabbs:
     
-    if aabb[2] != 3: continue
+    if aabb[2] != 5: continue
     
     x1, y1, z1 = aabb[1]
     x2, y2, z2 = aabb[0]
@@ -118,5 +116,5 @@ for aabb in aabbs:
             mesh=cube_mesh
         )
 
-# while engine.running:
-#     engine.update()
+while engine.running:
+    engine.update()

@@ -209,6 +209,12 @@ class Mesh():
             if not best_changed: break
         
         return best_index
+    
+    def get_line_collided(self, position: glm.vec3, forward: glm.vec3) -> list[tuple[int, int, int]]:
+        """
+        Determines which triangles are intersecting with the given line segment. Returns the indices of the triangle contained in the mesh points list
+        """
+        return self.bvh.get_line_collided(position, forward)
 
     def __repr__(self) -> str:
         size = (self.data.nbytes + self.points.nbytes + self.indices.nbytes) / 1024 / 1024
