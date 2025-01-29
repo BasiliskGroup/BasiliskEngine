@@ -16,8 +16,6 @@ class Cube(Mesh):
             if point[1] > 0: index += 2
             if point[2] > 0: index += 1
             self.dot_indices[index] = i
-            
-        print('points', self.points, 'dots', self.dot_indices, sep='\n')
 
     def get_best_dot(self, vec: glm.vec3) -> int:
         """

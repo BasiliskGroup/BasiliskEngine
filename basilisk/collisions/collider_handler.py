@@ -220,8 +220,8 @@ class ColliderHandler():
                 collision_normal = vec if glm.length2(collision_normal) < 1e-12 else glm.normalize(collision_normal)
                 calculate_collisions(collision_normal, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
 
-                for i, point in enumerate(manifold):
-                    self.scene.add(Node(position = point, scale = (0.1, 0.1, 0.1)))
+                # for i, point in enumerate(manifold):
+                #     self.scene.add(Node(position = point, scale = (0.1, 0.1, 0.1)))
             
             # resolve collision penetration
             multiplier = 0.5 if not (node1.static or node2.static) else 1
