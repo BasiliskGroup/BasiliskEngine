@@ -6,8 +6,8 @@ class PhysicsBody():
     mass: float
     """The mass of the physics body in kg"""
 
-    def __init__(self, physics_engine, mass:float=1.0) -> None:
-        self.physics_engine = physics_engine
+    def __init__(self, mass:float=1.0) -> None:
+        self.physics_engine = None
         self.mass = mass 
         
     def get_delta_velocity(self, dt: float) -> glm.vec3:
@@ -32,5 +32,13 @@ class PhysicsBody():
         # TODO add torques
         return dw
     
+    @property
+    def physics_engine(self): return self._physics_engine
+
+    @physics_engine.setter
+    def physics_engine(self, value): 
+        self._physics_engine = value
+        if value: value.add(self)
+
     def __repr__(self) -> str:
         return f'<Physics Body| {self.mass}>'

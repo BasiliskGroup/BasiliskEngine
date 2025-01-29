@@ -35,11 +35,11 @@ class Collider():
     mesh: Mesh
     """Reference to the colliding mesh"""
 
-    def __init__(self, collider_handler, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None):
-        self.collider_handler = collider_handler
+    def __init__(self, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None):
+        self.collider_handler = None
         self.node = node
-        self.mesh = self.collider_handler.cube if box_mesh else self.node.mesh
         self.static_friction = static_friction if elasticity else 0.8
+        self.box_mesh = box_mesh
         self.kinetic_friction = kinetic_friction if elasticity else 0.4
         self.elasticity = elasticity if elasticity else 0.1
         self.collision_group = collision_group
@@ -51,7 +51,9 @@ class Collider():
         self.needs_obb = True # pos, scale, rot
         self.needs_half_dimensions = True # scale, rot
         self.needs_bvh = True # pos, scale, rot
-        
+    
+    @property
+    def collider_handler(self): return self._collider_handler
     @property
     def has_collided(self): return bool(self.collisions)
     @property
@@ -73,3 +75,10 @@ class Collider():
             self._obb_points = transform_points(self.mesh.aabb_points, self.node.model_matrix)
             self.needs_obb = False
         return self._obb_points
+    
+    @collider_handler.setter
+    def collider_handler(self, value):
+        self._collider_handler = value
+        if not value: return
+        self.mesh = value.cube if self.box_mesh else self.node.mesh
+        value.add(self)

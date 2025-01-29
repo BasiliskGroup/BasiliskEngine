@@ -21,7 +21,8 @@ class App():
         ao = bsk.Image('tests/grass_ao.jpg')
         self.mtl = bsk.Material(texture=texture, normal=normal, roughness_map=roughness, ao_map=ao)
        
-        self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
+        self.node = bsk.Node(mesh=self.sphere_mesh, material=self.mtl)
+        self.node = self.scene.add(self.node)
 
         self.cam_rot = 0
 

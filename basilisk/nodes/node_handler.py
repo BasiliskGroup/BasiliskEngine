@@ -37,37 +37,20 @@ class NodeHandler():
         
         self.chunk_handler.render()
 
-    def add(self, 
-            position:            glm.vec3 =None, 
-            scale:               glm.vec3=None, 
-            rotation:            glm.quat=None, 
-            relative_position:   bool=True,
-            relative_scale:      bool=True,
-            relative_rotation:   bool=True,
-            forward:             glm.vec3=None, 
-            mesh:                Mesh=None, 
-            material:            Material=None, 
-            velocity:            glm.vec3=None, 
-            rotational_velocity: glm.vec3=None, 
-            physics:             bool=False, 
-            mass:                float=None, 
-            collisions:          bool=False, 
-            collider:            str=None, 
-            static_friction:     float=None, 
-            kinetic_friction:    float=None, 
-            elasticity:          float=None, 
-            collision_group :    float=None, 
-            name:                str='', 
-            tags:                list[str]=None,
-            static:              bool=None,
-            shader:              ...=None
-        ) -> Node:
+    def add(self, node: Node) -> Node:
         """
         Adds a new node to the node handler
         """
         
-        node = Node(self, position, scale, rotation, relative_position, relative_scale, relative_rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, collider, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static, shader)
+        # Update scene Handlers
+        self.scene.shader_handler.add(node.shader)
+        if not node.material: node.material = self.scene.material_handler.base
+        self.scene.material_handler.add(node.material)
 
+        # Update the node attributes
+        node.init_scene(self.scene)
+
+        # Add the node to internal data
         self.nodes.append(node)
         self.chunk_handler.add(node)
 

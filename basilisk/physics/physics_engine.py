@@ -20,11 +20,10 @@ class PhysicsEngine():
         self.forces = forces if forces else []
         self.torques = torques if torques else []
         
-    def add(self, mass: float) -> PhysicsBody:
+    def add(self, physics_body: PhysicsBody) -> PhysicsBody:
         """
         Adds a physics body to the physics engine and returns it
         """
-        physics_body = PhysicsBody(self, mass)
         self.physics_bodies.append(physics_body)
         return physics_body
     
