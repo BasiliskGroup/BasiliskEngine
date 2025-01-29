@@ -33,15 +33,15 @@ radius = 4
 objects = [scene.add(bsk.Node(
     position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
     scale      = [random.uniform(0.5, 3) for _ in range(3)],
-    # rotation   = [random.uniform(0.1, 0.2) for _ in range(3)],
+    rotation   = [random.uniform(0.1, 0.2) for _ in range(3)],
     rotational_velocity = (3.14159, 0, 0),
     mesh       = random.choice(meshes), 
     material   = red,
     collisions = True,
     physics    = True,
     static     = False,
-    mass       = 1
-)) for _ in range(1)]
+    mass       = 10
+)) for _ in range(10)]
 
 while engine.running:
     
