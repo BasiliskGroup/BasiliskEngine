@@ -217,12 +217,9 @@ class ColliderHandler():
                     self.contact_manifolds[collider_tuple].contact_points2.values()
                 )
                 
-                # print(manifold, '\n')
-                
-                # if len(manifold) == 0: # TODO find better solution to poor manifold generation
-                #     print('manifold failed to generate')
-                #     continue
-                calculate_collisions(vec, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
+                collision_normal = node1.velocity - node2.velocity
+                collision_normal = vec if glm.length2(collision_normal) < 1e-12 else glm.normalize(collision_normal)
+                calculate_collisions(collision_normal, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
 
                 for i, point in enumerate(manifold):
                     self.scene.add_node(position = point, scale = (0.1, 0.1, 0.1))

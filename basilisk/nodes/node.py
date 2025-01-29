@@ -315,7 +315,7 @@ class Node():
         Transforms the mesh inertia tensor and inverts it
         """
         if not (self.mesh and self.physics_body): return None 
-        inertia_tensor = self.mesh.get_inertia_tensor(self.scale) / 2
+        inertia_tensor = self.mesh.get_inertia_tensor(self.scale) # / 2
     
         # mass
         if self.physics_body: inertia_tensor *= self.physics_body.mass

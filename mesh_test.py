@@ -53,7 +53,7 @@ def test_physics() -> None:
     scene.add_node(position=(5, 5, 5), collisions=True, physics=True)
 
 scene.add_node(mesh=quad_uv_normal(), material=floor_mtl, collisions=True)
-# test_physics()
+test_physics()
 
 while engine.running:
     engine.update()

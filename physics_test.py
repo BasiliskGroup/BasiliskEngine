@@ -32,7 +32,7 @@ radius = 4
 
 objects = [scene.add_node(
     position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
-    scale      = [1, 2, 3],
+    scale      = [random.uniform(0.5, 3) for _ in range(3)],
     # rotation   = [random.uniform(0.1, 0.2) for _ in range(3)],
     rotational_velocity = (3.14159, 0, 0),
     mesh       = random.choice(meshes), 
@@ -41,7 +41,7 @@ objects = [scene.add_node(
     physics    = True,
     static     = False,
     mass       = 1
-) for _ in range(1)]
+) for _ in range(2)]
 
 while engine.running:
     
