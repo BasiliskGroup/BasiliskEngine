@@ -17,7 +17,7 @@ cube_mesh = engine.cube
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 # monkey_mesh = bsk.Mesh('tests/monkey.obj')
 # bunny_mesh = bsk.Mesh('tests/bunny.obj')
-meshes = [cube_mesh]
+meshes = [cube_mesh, sphere_mesh]
 
 # creating nodes
 platform = scene.add(bsk.Node(
@@ -41,7 +41,7 @@ objects = [scene.add(bsk.Node(
     physics    = True,
     static     = False,
     mass       = 10
-)) for _ in range(10)]
+)) for _ in range(5)]
 
 while engine.running:
     

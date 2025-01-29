@@ -59,7 +59,7 @@ def insert_face(polytope: polytope_type, faces: face_type, indices: tuple[int, i
     Inserts a face into the face priority queue based on the indices given in the polytope
     """
     center   = (polytope[indices[0]].support_point + polytope[indices[1]].support_point + polytope[indices[2]].support_point) / 3
-    normal   = glm.cross(polytope[indices[1]].support_point - polytope[indices[0]].support_point, polytope[indices[2]].support_point - polytope[indices[0]][0]) # closest face normal will be normalized once returned to avoid square roots and division
+    normal   = glm.cross(polytope[indices[1]].support_point - polytope[indices[0]].support_point, polytope[indices[2]].support_point - polytope[indices[0]].support_point) # closest face normal will be normalized once returned to avoid square roots and division
     if glm.dot(center, normal) < 0: 
         normal *= -1
         indices = (indices[2], indices[1], indices[0])
