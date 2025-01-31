@@ -33,7 +33,7 @@ class App():
        
         self.show_menu = True
        
-        self.node = self.scene.add_node(mesh=self.sphere_mesh, material=self.mtl)
+        self.node = self.scene.add(bsk.Node(mesh=self.sphere_mesh, material=self.mtl))
 
         self.cam_rot = 0
 
