@@ -1,4 +1,5 @@
 import os
+from sys import platform
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as pg
 import moderngl as mgl
@@ -36,7 +37,7 @@ class Engine():
     root: str
     """Path to the root directory containing internal data"""
 
-    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=False, grab_mouse=True, headless=False) -> None:
+    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, grab_mouse=True, headless=False) -> None:
         """
         Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with Basilisk
         Args:
@@ -49,6 +50,11 @@ class Engine():
             headless: bool
                 Flag for headless rendering
         """
+
+        if platform == 'win32' : self.platform = 'windows'
+        elif  platform == 'darwin': self.platform = 'mac' 
+        else: self.platform = 'linux'
+
         # Save the window size
         self.win_size = win_size
 
@@ -58,6 +64,7 @@ class Engine():
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # Pygame display init
+        if vsync == None: vsync = True if platform == 'linux' else False
         if headless:
             pg.display.set_mode((300, 50), vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
             pg.display.iconify()
