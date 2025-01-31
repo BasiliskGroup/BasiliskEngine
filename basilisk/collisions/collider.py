@@ -35,10 +35,10 @@ class Collider():
     mesh: Mesh
     """Reference to the colliding mesh"""
 
-    def __init__(self, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.1, collision_group: str=None):
+    def __init__(self, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.2, collision_group: str=None):
         self.collider_handler = None
         self.node = node
-        self.static_friction = static_friction if elasticity else 0.8
+        self.static_friction = static_friction if elasticity else 0.8 # added checks to prevent floats being set to None. Also done for kinetic and elasticity
         self.box_mesh = box_mesh
         self.kinetic_friction = kinetic_friction if elasticity else 0.4
         self.elasticity = elasticity if elasticity else 0.1
