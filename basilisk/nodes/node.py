@@ -97,6 +97,7 @@ class Node():
         # parents
         self.node_handler = None
         self.chunk = None
+        self.parent = None
         
         # lazy update variables
         self.needs_geometric_center = True # pos
@@ -206,30 +207,37 @@ class Node():
         if self.physics_body: self.physics_body.physics_engine = scene.physics_engine
         if self.collider: self.collider.collider_handler = scene.collider_handler
 
-
-
     def update(self, dt: float) -> None:
         """
         Updates the node's movement variables based on the delta time
         """
+        # update based on physical properties
         if any(self.velocity): self.position += dt * self.velocity
         if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation - dt / 2 * self.rotation * glm.quat(0, *self.rotational_velocity))
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
             self.rotational_velocity += self.physics_body.get_delta_rotational_velocity(dt)
+            
+        # update children transforms
+        for child in self.children: child.sync_data()
         
-    def sync_data(self, dt: float, parent_position: glm.vec3, parent_scale: glm.vec3, parent_rotation: glm.vec3) -> None: # TODO only needed for child nodes now
+    def sync_data(self) -> None:
         """
         Syncronizes this node with the parent node based on its relative positioning
         """
         # calculate transform matrix with the given input
         transform = glm.mat4x4()
-        if self.relative_position: transform  = glm.translate(transform, parent_position)
-        if self.relative_rotation: transform *= glm.mat4_cast(parent_rotation)
-        if self.relative_scale:    transform  = glm.scale(transform, parent_scale)
+        if self.relative_position: transform  = glm.translate(transform, self.parent.position)
+        if self.relative_rotation: transform *= glm.transpose(glm.mat4_cast(self.parent.rotation))
+        if self.relative_scale:    transform  = glm.scale(transform, self.parent.scale)
         
+        # set this node's transforms based on the parent
+        self.position = transform * self.relative_position
+        self.scale = self.relative_scale * self.parent.scale
+        self.rotation = self.relative_rotation * self.parent.rotation
         
+        for child in self.children: child.sync_data()
         
     def get_nodes(self, 
             require_mesh: bool=False, 
@@ -255,26 +263,33 @@ class Node():
         
         # adds children to nodes list if they match the criteria
         for node in self.children: nodes.extend(node.get_nodes(require_mesh, require_collider, require_physics_body, filter_material, filter_tags))
-        return node 
+        return nodes 
         
     # tree functions for managing children 
     def add(self, child: ..., relative_position: bool=None, relative_scale: bool=None, relative_rotation: glm.vec3=None) -> None:
         """
         Adopts a node as a child. Relative transforms can be changed, if left bank they will not be chnaged from the current child nodes settings.
         """
+        if child in self.children: return
+        
         # compute relative transformations
         if relative_position or (relative_position is None and child.relative_position): child.relative_position = child.position - self.position
         if relative_scale    or (relative_scale    is None and child.relative_scale):    child.relative_scale    = child.scale / self.scale
         if relative_rotation or (relative_rotation is None and child.relative_rotation): child.relative_rotation = child.rotation * glm.inverse(self.rotation)
         
-        # add as a child to by synchronized
+        # add as a child to by synchronized and controlled
+        if self.node_handler: self.node_handler.add(child)
+        child.parent = self
         self.children.append(child)
         
     def remove(self, child: ...) -> None:
         """
         Removes a child node from this nodes chlid list.
         """
-        if child in self.children: self.children.remove(child)
+        if child in self.children: 
+            if self.node_handler: self.node_handler.remove(child)
+            child.parent = None
+            self.children.remove(child)
         
     def apply_force(self, force: glm.vec3, dt: float) -> None:
         """
@@ -431,6 +446,9 @@ class Node():
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for position. Expected 3, got {len(value)}')
             self.internal_position.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid position value type {type(value)}')
+        
+        # # compute relative position if all cases passed
+        # if self.parent and self.relative_position: self.relative_position = self.internal_position.data - self.parent.position
     
     @scale.setter
     def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
@@ -439,6 +457,9 @@ class Node():
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for scale. Expected 3, got {len(value)}')
             self.internal_scale.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid scale value type {type(value)}')
+        
+        # # compute relative scale
+        # if self.parent and self.relative_scale: self.relative_scale = self.internal_scale.data / self.parent.scale
 
     @rotation.setter
     def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
@@ -448,6 +469,9 @@ class Node():
             elif len(value) == 4: self.internal_rotation.data = glm.quat(*value)
             else: raise ValueError(f'Node: Invalid number of values for rotation. Expected 3 or 4, got {len(value)}')
         else: raise TypeError(f'Node: Invalid rotation value type {type(value)}')
+        
+        # # compute relative rotation
+        # if self.parent and self.relative_rotation: self.relative_rotation = self.rotation * glm.inverse(self.parent.rotation)
 
     @forward.setter
     def forward(self, value: tuple | list | glm.vec3 | np.ndarray):

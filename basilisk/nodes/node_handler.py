@@ -41,18 +41,21 @@ class NodeHandler():
         """
         Adds a new node to the node handler
         """
+        if node in self.nodes: return
         
-        # Update scene Handlers
-        self.scene.shader_handler.add(node.shader)
-        if not node.material: node.material = self.scene.material_handler.base
-        self.scene.material_handler.add(node.material)
-
-        # Update the node attributes
-        node.init_scene(self.scene)
-
-        # Add the node to internal data
-        self.nodes.append(node)
-        self.chunk_handler.add(node)
+        for n in node.get_nodes(): # gets all nodes including the node to be added
+            
+            # Update scene Handlers
+            self.scene.shader_handler.add(n.shader)
+            if not n.material: n.material = self.scene.material_handler.base
+            self.scene.material_handler.add(n.material)
+            
+            # Update the node attributes
+            n.init_scene(self.scene)
+            
+            # Add the node to internal data
+            self.nodes.append(n)
+            self.chunk_handler.add(n)
 
         return node
     
@@ -102,10 +105,11 @@ class NodeHandler():
         """
         Removes a node and all of its children from their handlers
         """
-        # TODO add support for recursive nodes
         if node in self.nodes:
             if node.physics_body: self.scene.physics_engine.remove(node.physics_body)
             if node.collider: self.scene.collider_handler.remove(node.collider)
             self.chunk_handler.remove(node)
             self.nodes.remove(node)
             node.node_handler = None
+            
+        for child in node.children: self.remove(child)

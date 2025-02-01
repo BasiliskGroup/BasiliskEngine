@@ -1,7 +1,7 @@
 import basilisk as bsk
 import cudart
 
-engine = bsk.Engine(vsync=True)
+engine = bsk.Engine()
 scene = bsk.Scene()
 engine.scene = scene
 
