@@ -101,6 +101,7 @@ class Engine():
 
         # Load a default shader
         self.shader = Shader(self, self.root + '/shaders/batch.vert', self.root + '/shaders/batch.frag')
+        self.shader.hash = hash((self.shader.hash, 'engine_shader'))
 
         # Set the scene to running
         self.running = True

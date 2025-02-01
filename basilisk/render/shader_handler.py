@@ -27,8 +27,6 @@ class ShaderHandler:
 
         # Initalize dictionaries
         self.shaders = set()
-
-        root = self.engine.root
         self.add(self.engine.shader)
 
     def add(self, shader: Shader) -> None:
