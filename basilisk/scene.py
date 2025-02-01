@@ -12,7 +12,7 @@ from .collisions.collider_handler import ColliderHandler
 from .draw.draw_handler import DrawHandler
 from .render.sky import Sky
 from .render.frame import Frame
-from .render.shader import Shader
+from .particles.particle_handler import ParticleHandler
 from .nodes.node import Node
 from .generic.collisions import moller_trumbore
 
@@ -45,6 +45,7 @@ class Scene():
         """
         
         self.node_handler.update()
+        self.particle.update()
         self.camera.update()
         self.collider_handler.resolve_collisions()
 
@@ -57,6 +58,7 @@ class Scene():
         self.shader_handler.write()
         if self.sky: self.sky.render()
         self.node_handler.render()
+        self.particle.render()
         self.draw_handler.render()
 
         if self.engine.headless: return
@@ -79,7 +81,6 @@ class Scene():
 
         # Mesh
 
-        # Sky
         else:
             raise ValueError(f'scene.add: Incompatable object add type {type(bsk_object)}')
 
@@ -114,6 +115,7 @@ class Scene():
         self.light_handler    = LightHandler(self)
         self.physics_engine   = PhysicsEngine()
         self.node_handler     = NodeHandler(self)
+        self.particle         = ParticleHandler(self)
         self.collider_handler = ColliderHandler(self)
         self.draw_handler     = DrawHandler(self)
         self.frame            = Frame(self)
