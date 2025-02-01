@@ -33,6 +33,10 @@ struct Material {
     vec2  albedoMap;
     int   hasNormalMap;
     vec2  normalMap;
+    int   hasRoughnessMap;
+    vec2  roughnessMap;
+    int   hasAoMap;
+    vec2  aoMap;
 };
 flat out Material mtl;
 
