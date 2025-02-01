@@ -96,6 +96,7 @@ class Node():
         
         # parents
         self.node_handler = None
+        self.scene = None
         self.chunk = None
         
         # lazy update variables
@@ -114,7 +115,8 @@ class Node():
         
         self.forward  = forward  if forward  else glm.vec3(1, 0, 0)
         self.mesh     = mesh
-        self.material = material if material else None # TODO add default base material
+        self._mtl_list = material if isinstance(material, list) else [material]
+        self.material = material if material else None
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
@@ -198,6 +200,9 @@ class Node():
         """
         self.scene = scene
         self.node_handler = scene.node_handler
+
+        # Update materials
+        self.write_materials()
 
         # Update the mesh
         self.mesh = self.mesh if self.mesh else self.scene.engine.cube
@@ -371,6 +376,24 @@ class Node():
 
         return data
 
+    def write_materials(self):
+        """
+        Internal function to write the material list to the material handler and get the material ids
+        """
+
+        if isinstance(self.material, list):
+            mtl_index_list = []
+            for mtl in self._mtl_list:
+                self.node_handler.scene.material_handler.add(mtl)
+                mtl_index_list.append(mtl.index)
+                mtl_index_list.append(mtl.index)
+                mtl_index_list.append(mtl.index)
+            self._material = mtl_index_list
+
+        if isinstance(self.material, type(None)):
+            self.material = self.scene.material_handler.base
+        
+
     def __repr__(self) -> str:
         """
         Returns a string representation of the node
@@ -485,18 +508,24 @@ class Node():
     @material.setter
     def material(self, value: Material):
         if isinstance(value, list):
-            mtl_index_list = []
-            for mtl in value:
-                self.node_handler.scene.material_handler.add(mtl)
-                mtl_index_list.append(mtl.index)
-                mtl_index_list.append(mtl.index)
-                mtl_index_list.append(mtl.index)
-            self._material = mtl_index_list
+            self._mtl_list = value
+            if not self.node_handler: 
+                self._material = value
+            else:
+                mtl_index_list = []
+                for mtl in self._mtl_list:
+                    self.node_handler.scene.material_handler.add(mtl)
+                    mtl_index_list.append(mtl.index)
+                    mtl_index_list.append(mtl.index)
+                    mtl_index_list.append(mtl.index)
+                self._material = mtl_index_list
         elif isinstance(value, Material): 
             self._material = value
             if self.node_handler: self.node_handler.scene.material_handler.add(value)
         elif isinstance(value, type(None)):
-            self._material = value
+            if self.scene: self._material = self.scene.material_handler.base
+            else: self._material = None
+
         else: raise TypeError(f'Node: Invalid material value type {type(value)}')
         if not self.chunk: return
         self.chunk.node_update_callback(self)
