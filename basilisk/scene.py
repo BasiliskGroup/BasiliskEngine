@@ -62,14 +62,17 @@ class Scene():
         if self.engine.headless: return
         self.frame.render()
     
-    def add(self, bsk_object: Node):
+    def add(self, bsk_object: ...) -> ...:
         """
         Adds an object to the scene. Can pass in any scene objects:
         Argument overloads:
             object: Node - Adds the given node to the scene.
         """
         
-        if isinstance(bsk_object, Node):
+        if isinstance(bsk_object, type(None)):
+            # Considered well defined behavior
+            return
+        elif isinstance(bsk_object, Node):
             # Add a node to the scene
             return self.node_handler.add(bsk_object)
         # Light
@@ -77,15 +80,25 @@ class Scene():
         # Mesh
 
         # Sky
+        else:
+            raise ValueError(f'scene.add: Incompatable object add type {type(bsk_object)}')
 
-        # Scene
+        return None
 
-    def remove_node(self, node):
+    def remove(self, bsk_object):
         """
-        Removes the given node from the scene
+        Removes the given baskilsk object from the scene
         """
 
-        self.node_handler.remove(node)
+        if isinstance(bsk_object, type(None)):
+            # Considered well defined behavior
+            return
+        elif isinstance(bsk_object, Node):
+            self.node_handler.remove(bsk_object)
+        else:
+            raise ValueError(f'scene.remove: Incompatable object remove type {type(bsk_object)}')
+
+        return None
 
     def set_engine(self, engine: any) -> None:
         """

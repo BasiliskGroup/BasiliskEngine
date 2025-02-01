@@ -72,8 +72,10 @@ class Chunk():
         Removes a node from the chunk
         """
 
+        if node == None: return
+
         self.nodes.remove(node)
-        self.batch.vbo.clear()
+        if self.batch and self.batch.vbo: self.batch.vbo.clear()
 
         return node
 

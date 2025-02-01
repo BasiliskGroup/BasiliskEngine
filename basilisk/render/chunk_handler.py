@@ -111,10 +111,12 @@ class ChunkHandler():
 
         return Node
 
-    def remove(self, node) -> None:
+    def remove(self, node: Node) -> None:
         """
         Removes a node from the its chunk
         """
+
+        if node == None: return
 
         # Remove the node
         chunk = node.chunk

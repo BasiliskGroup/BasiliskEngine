@@ -102,6 +102,9 @@ class NodeHandler():
         """
         Removes a node and all of its children from their handlers
         """
+
+        if node == None: return
+
         # TODO add support for recursive nodes
         if node in self.nodes:
             if node.physics_body: self.scene.physics_engine.remove(node.physics_body)

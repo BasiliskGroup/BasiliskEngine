@@ -386,7 +386,8 @@ class Node():
     def rotation(self): return self.internal_rotation.data
     @property
     def forward(self):  return self._forward
-    # TODO add property for Mesh
+    @property
+    def mesh(self):     return self._mesh
     @property
     def material(self): return self._material
     @property
@@ -480,7 +481,17 @@ class Node():
             self._forward = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid forward value type {type(value)}')
         
-    # TODO add setter for Mesh
+    @mesh.setter
+    def mesh(self, value: Mesh | None):
+        if isinstance(value, Mesh):
+            self._mesh = value
+            if self.chunk: self.chunk.update()
+        elif isinstance(value, type(None)):
+            self._mesh = None
+            if not self.chunk: return
+            self.chunk.remove(self)
+            self.chunk.update()
+        else: raise TypeError(f'Node: Invalid mesh value type {type(value)}')
     
     @material.setter
     def material(self, value: Material):

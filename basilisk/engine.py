@@ -63,8 +63,9 @@ class Engine():
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
-        # Pygame display init
+        # Check vsync against platform defaults
         if vsync == None: vsync = True if platform == 'linux' else False
+        # Pygame display init
         if headless:
             pg.display.set_mode((300, 50), vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
             pg.display.iconify()
