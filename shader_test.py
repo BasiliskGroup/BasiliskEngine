@@ -8,10 +8,10 @@ default_shader = bsk.Shader(engine)
 normal_shader  = bsk.Shader(engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
 geom_shader  = bsk.Shader(engine, vert='basilisk/shaders/geometry.vert', frag='basilisk/shaders/geometry.frag')
 
-scene.add_node(position=(-4, 0, 0), shader=normal_shader)
-scene.add_node(shader=default_shader)
-scene.add_node(position=(4, 0, 0), shader=geom_shader)
-scene.add_node(position=(0, 4, 0))
+scene.add(bsk.Node(position=(-4, 0, 0), shader=normal_shader))
+scene.add(bsk.Node(shader=default_shader))
+scene.add(bsk.Node(position=(4, 0, 0), shader=geom_shader))
+scene.add(bsk.Node(position=(0, 4, 0)))
 
 while engine.running:
 
