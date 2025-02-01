@@ -1,5 +1,6 @@
 from .particle_renderer import ParticleRenderer 
 from ..mesh.mesh import Mesh
+from ..render.material import Material
 
 
 class ParticleHandler:
@@ -13,7 +14,7 @@ class ParticleHandler:
         self.particle_renderers = {self.cube : ParticleRenderer(scene, self.cube)}
 
 
-    def add(self, mesh: Mesh=None, life=1.0, position=(0, 0, 0), color=(255, 255, 255), scale=1.0, velocity=(0, 3, 0), acceleration=(0, -10, 0)) -> bool:
+    def add(self, mesh: Mesh=None, life=1.0, position=(0, 0, 0), material: Material=None, scale=1.0, velocity=(0, 3, 0), acceleration=(0, -10, 0)) -> bool:
         """
         Add a new particle to the scene
         Args:
@@ -37,8 +38,16 @@ class ParticleHandler:
         if mesh == None: mesh = self.cube
         elif not isinstance(mesh, Mesh): raise ValueError(f'particle_handler.add: invlaid mesh type for particle: {type(mesh)}')
         if mesh not in self.particle_renderers: self.particle_renderers[mesh] = ParticleRenderer(self.scene, mesh)
+
+        # Get material ID
+        if material == None: material_index = 0
+        elif isinstance(material, Material): 
+            self.scene.material_handler.add(material)
+            material_index = material.index
+        else: raise ValueError(f'particle_handler.add: Invalid particle material type: {type(material)}')
+
         # Add the particle to the renderer
-        self.particle_renderers[mesh].add(life, position, color, scale, velocity, acceleration)
+        self.particle_renderers[mesh].add(life, position, material_index, scale, velocity, acceleration)
 
     def render(self) -> None:
         for renderer in self.particle_renderers.values(): renderer.render()

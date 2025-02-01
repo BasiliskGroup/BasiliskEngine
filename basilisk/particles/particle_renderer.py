@@ -1,22 +1,23 @@
 import numpy as np
 from ..render.shader import Shader
 from ..mesh.mesh import Mesh
+from ..render.material import Material
 from numba import njit
 
 
 @njit
 def update_particle_matrix(particle_instances, dt):
-    particle_instances[:,8:11] += particle_instances[:,11:14] * dt
-    particle_instances[:,:3] += particle_instances[:,8:11] * dt
-    particle_instances[:,7] -= dt/3
+    particle_instances[:,6:9] += particle_instances[:,9:12] * dt
+    particle_instances[:,:3] += particle_instances[:,6:9] * dt
+    particle_instances[:,5] -= dt/3
     return particle_instances
 
 @njit
 def get_alive(particles):
-    return particles[particles[:, 7] >= 0]
+    return particles[particles[:, 5] >= 0]
 
-update_particle_matrix(np.zeros(shape=(2, 14), dtype='f4'), 1)
-get_alive(np.zeros(shape=(2, 14), dtype='f4'))
+update_particle_matrix(np.zeros(shape=(2, 12), dtype='f4'), 1)
+get_alive(np.zeros(shape=(2, 12), dtype='f4'))
 
 
 class ParticleRenderer:
@@ -33,12 +34,12 @@ class ParticleRenderer:
 
         self.particle_cube_size = 25
 
-        self.particle_instances = np.zeros(shape=(1, 14), dtype='f4')
-        self.instance_buffer = self.ctx.buffer(reserve=(14 * 3) * (self.particle_cube_size ** 3))
+        self.particle_instances = np.zeros(shape=(1, 12), dtype='f4')
+        self.instance_buffer = self.ctx.buffer(reserve=(12 * 3) * (self.particle_cube_size ** 3))
         
         self.vao = self.ctx.vertex_array( self.shader.program, 
                                         [(self.ctx.buffer(mesh.data), '3f 2f 3f 3f 3f', *['in_position', 'in_uv', 'in_normal', 'in_tangent', 'in_bitangent']), 
-                                         (self.instance_buffer, '3f 3f 1f 1f /i', 'in_instance_pos', 'in_instance_color', 'scale', 'life')], 
+                                         (self.instance_buffer, '3f 1f 1f 1f /i', 'in_instance_pos', 'in_instance_mtl', 'scale', 'life')], 
                                           skip_errors=True)
 
     def render(self) -> None:
@@ -51,7 +52,7 @@ class ParticleRenderer:
         n = len(alive_particles)
 
         # Write and render
-        self.instance_buffer.write(np.array(alive_particles[:,:8], order='C'))
+        self.instance_buffer.write(np.array(alive_particles[:,:6], order='C'))
         self.vao.render(instances=n)
 
     def update(self) -> None:
@@ -62,7 +63,7 @@ class ParticleRenderer:
         self.particle_instances = get_alive(self.particle_instances)
         self.particle_instances = update_particle_matrix(self.particle_instances, self.scene.engine.delta_time)
 
-    def add(self, life=1.0, position=(0, 0, 0), color=(255, 255, 255), scale=1.0, velocity=(0, 3, 0), acceleration=(0, -10, 0)) -> bool:
+    def add(self, life=1.0, position=(0, 0, 0), material: int=0, scale=1.0, velocity=(0, 3, 0), acceleration=(0, -10, 0)) -> bool:
         """
         Add a new particle to the scene
         Args:
@@ -82,5 +83,5 @@ class ParticleRenderer:
         # Check if there is already the max number of particles
         if len(self.particle_instances) >= (self.particle_cube_size ** 3): return False
         # Create and add the particle to the scene
-        new_particle = np.array([*position, *map(lambda x: x / 255, color), scale, life, *velocity, *acceleration])
+        new_particle = np.array([*position, material, scale, life, *velocity, *acceleration])
         self.particle_instances = np.vstack([new_particle, self.particle_instances], dtype='f4')
