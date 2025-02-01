@@ -13,7 +13,6 @@ in float scale;
 in float life;
 
 out vec2 uv;
-out vec3 position;
 out mat3 TBN;
 
 uniform mat4 projectionMatrix;
@@ -68,13 +67,13 @@ void main() {
     mat4 modelMatrix = getModelMatrix(in_instance_pos, scale * life);
 
     // Set out variables
-    position = (modelMatrix * vec4(in_position, 1.0)).xyz;
     TBN      = getTBN(modelMatrix, in_normal, in_tangent, in_bitangent);
     uv       = in_uv;
 
     // Material Data
     int mtl_size = 25;
     int materialID      = int(in_instance_mtl);
+    mtl = Material(vec3(0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, vec2(0), 0, vec2(0), 0, vec2(0), 0, vec2(0));
     mtl.color           = vec3(texelFetch(materialsTexture, ivec2(0, 0 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * mtl_size), 0).r);
     mtl.hasAlbedoMap    = int(texelFetch(materialsTexture,  ivec2(0, 13  + materialID * mtl_size), 0).r);
     mtl.albedoMap       = vec2(texelFetch(materialsTexture, ivec2(0, 14  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 15  + materialID * mtl_size), 0).r);
