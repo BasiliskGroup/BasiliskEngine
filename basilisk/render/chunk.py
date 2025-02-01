@@ -88,7 +88,7 @@ class Chunk():
         return self.chunk_handler.engine.shader.program
 
     def __repr__(self) -> str:
-        return f'<Basilisk Chunk | {self.position}, {len(self.nodes)} nodes, {'static' if self.static else 'dynamic'}>'
+        return f'<Basilisk Chunk | {self.position}, {len(self.nodes)} nodes, {"static" if self.static else "dynamic"}>'
 
     def __del__(self) -> None:
         """
