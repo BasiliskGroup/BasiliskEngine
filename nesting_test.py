@@ -18,7 +18,6 @@ grandchild = bsk.Node(
     scale = (2, 0.2, 0.2)
 )
 
-
 child.add(grandchild)
 
 scene.add(parent)
