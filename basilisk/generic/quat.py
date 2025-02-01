@@ -1,8 +1,9 @@
 import glm
 import numpy as np
+from .abstract_custom import Custom
 
 
-class Quat():
+class Quat(Custom):
     def __init__(self, *args, callback=None):
         self.callback = callback
         self.prev_data = glm.quat(1, 0, 0, 0)
@@ -38,7 +39,7 @@ class Quat():
             assert 2 < len(other) < 5, f'Quat: Expected 3 or 4 values from incoming vector, got {len(other)}'
             quat = func(quat, other)
             
-        elif isinstance(other, Quat):
+        elif isinstance(other, Custom):
             quat = func(quat, other.data)
             
         else: 
