@@ -228,6 +228,13 @@ class Node():
         """
         Syncronizes this node with the parent node based on its relative positioning
         """
+        # calculate transform matrix with the given input
+        transform = glm.mat4x4()
+        if self.relative_position: transform  = glm.translate(transform, parent_position)
+        if self.relative_rotation: transform *= glm.mat4_cast(parent_rotation)
+        if self.relative_scale:    transform  = glm.scale(transform, parent_scale)
+        
+        
         
     def get_nodes(self, 
             require_mesh: bool=False, 
@@ -256,7 +263,7 @@ class Node():
         return node 
         
     # tree functions for managing children 
-    def adopt_child(self, child: ..., relative_position: bool=None, relative_scale: bool=None, relative_rotation: glm.vec3=None) -> None:
+    def add(self, child: ..., relative_position: bool=None, relative_scale: bool=None, relative_rotation: glm.vec3=None) -> None:
         """
         Adopts a node as a child. Relative transforms can be changed, if left bank they will not be chnaged from the current child nodes settings.
         """
@@ -268,37 +275,7 @@ class Node():
         # add as a child to by synchronized
         self.children.append(child)
         
-    def create_child(self, 
-        position:            glm.vec3=None, 
-        scale:               glm.vec3=None, 
-        rotation:            glm.quat=None, 
-        relative_position:   bool=True,
-        relative_scale:      bool=True,
-        relative_rotation:   bool=True,
-        forward:             glm.vec3=None, 
-        mesh:                Mesh=None, 
-        material:            Material=None, 
-        velocity:            glm.vec3=None, 
-        rotational_velocity: glm.vec3=None, 
-        physics:             bool=False, 
-        mass:                float=None, 
-        collisions:          bool=False, 
-        collider:            str=None, 
-        static_friction:     float=None, 
-        kinetic_friction:    float=None, 
-        elasticity:          float=None, 
-        collision_group :    float=None, 
-        name:                str='', 
-        tags:                list[str]=None,
-        static:              bool=None,
-        shader:              Shader=None
-    ) -> None: # TODO add node constructor
-        """
-        Creates a child node and automatically generates its relative transforms. Adds the child node to the internal node handler and this node's child node list. 
-        """
-        
-        
-    def remove_child(self, child: ...) -> None:
+    def remove(self, child: ...) -> None:
         """
         Removes a child node from this nodes chlid list.
         """

@@ -13,11 +13,11 @@ blue = bsk.Material(color=(0, 0, 255))
 materials = [bsk.Material(color=(255 * (i & 4), 255 * (i & 2), 255 * (i & 1))) for i in range(1, 8)]
 
 cube_mesh = engine.cube
-# cylinder_mesh = bsk.Mesh('tests/cylinder.obj')
+cylinder_mesh = bsk.Mesh('tests/cylinder.obj')
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 # monkey_mesh = bsk.Mesh('tests/monkey.obj')
 # bunny_mesh = bsk.Mesh('tests/bunny.obj')
-meshes = [cube_mesh, sphere_mesh]
+meshes = [cube_mesh]
 
 # creating nodes
 platform = scene.add(bsk.Node(
@@ -41,7 +41,7 @@ objects = [scene.add(bsk.Node(
     physics    = True,
     static     = False,
     mass       = 10
-)) for _ in range(5)]
+)) for _ in range(1)]
 
 while engine.running:
     
