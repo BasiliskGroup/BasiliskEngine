@@ -65,9 +65,15 @@ class ImageHandler():
 
 
         for size in self.texture_arrays:
+            # Check that there are textures in the bucket
+            if not len(self.texture_arrays[size]): continue
             # Get the rray data and attributes
             array_data = np.array(self.texture_arrays[size])
+            array_data = self.ctx.buffer(array_data).read()
             dim = (size, size, len(self.texture_arrays[size]))
+
+            # print("\n\nArray data", array_data)
+            # print("Dims", dim, '\n\n')
 
             # Make the array
             self.texture_arrays[size] = self.ctx.texture_array(size=dim, components=4, data=array_data)
