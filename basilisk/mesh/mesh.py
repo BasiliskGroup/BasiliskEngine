@@ -58,7 +58,8 @@ class Mesh():
                 tangents[:,:] += [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
                 self.data = np.hstack([self.data, tangents])
 
-        elif isinstance(data, np.ndarray):      
+        elif isinstance(data, np.ndarray):
+            model = from_data(data)      
             self.data = model.vertex_data
             
         else:                                                       # Invalid data type
