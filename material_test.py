@@ -11,7 +11,7 @@ red = bsk.Material(color=(255, 0, 0))
 green = bsk.Material(color=(0, 255, 0))
 blue = bsk.Material(color=(0, 0, 255))
 wood = bsk.Material(texture=wood_img)
-
+swap = bsk.Material()
 
 quad = np.array([[0, 0, 0, 0, 0], [5, 0, 5, 1, 1], [5, 0, 0, 1, 0], 
                  [0, 0, 5, 0, 1], [5, 0, 5, 1, 1], [0, 0, 0, 0, 0]])
@@ -37,3 +37,9 @@ while engine.running:
         node.material = [blue, red]
     elif engine.keys[bsk.pg.K_6]:
         node.material = [green, wood]
+    elif engine.keys[bsk.pg.K_7]:
+        node.material = swap
+    elif engine.keys[bsk.pg.K_8]:
+        swap.color = (0, 0, 255)
+    elif engine.keys[bsk.pg.K_9]:
+        swap.texture = wood_img
