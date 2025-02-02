@@ -1,8 +1,6 @@
 import moderngl as mgl
 import glm
 from .render.shader_handler import ShaderHandler
-from .mesh.mesh import Mesh
-from .render.material import Material
 from .render.material_handler import MaterialHandler
 from .render.light_handler import LightHandler
 from .render.camera import Camera, FreeCamera
@@ -15,6 +13,7 @@ from .render.frame import Frame
 from .particles.particle_handler import ParticleHandler
 from .nodes.node import Node
 from .generic.collisions import moller_trumbore
+from .generic.raycast_result import RaycastResult
 
 class Scene():
     engine: any
@@ -142,9 +141,10 @@ class Scene():
         self.frame            = Frame(self)
         self.sky              = Sky(self.engine)
         
-    def raycast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
+    def raycast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> RaycastResult:
         """
-        Ray cast from any posiiton and forward vector and returns the nearest node. If no position or forward is given, uses the scene camera's current position and forward
+        Ray cast from any posiiton and forward vector and returns a RaycastResult eith the nearest node. 
+        If no position or forward is given, uses the scene camera's current position and forward
         """
         if not position: position = self.camera.position
         if not forward: forward = self.camera.forward
@@ -188,9 +188,9 @@ class Scene():
                     best_point    = intersection
                     best_node     = node
                     
-        return best_node, best_point
+        return RaycastResult(best_node, best_point)
     
-    def raycast_mouse(self, position: tuple[int, int] | glm.vec2, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
+    def raycast_mouse(self, position: tuple[int, int] | glm.vec2, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> RaycastResult:
         """
         Ray casts from the mouse position with respect to the camera. Returns the nearest node that was clicked, if none was clicked, returns None. 
         """
