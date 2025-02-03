@@ -162,7 +162,8 @@ class Node():
 
         # callback function to be added to the custom Vec3 and Quat classes
         def position_callback():
-            self.chunk.node_update_callback(self)
+            if self.chunk:
+                self.chunk.node_update_callback(self)
             
             # update variables
             self.needs_geometric_center = True
@@ -172,7 +173,8 @@ class Node():
                 self.collider.needs_obb = True
             
         def scale_callback():
-            self.chunk.node_update_callback(self)
+            if self.chunk:
+                self.chunk.node_update_callback(self)
             
             # update variables
             self.needs_model_matrix = True
@@ -182,7 +184,8 @@ class Node():
                 self.collider.needs_half_dimensions = True
             
         def rotation_callback():
-            self.chunk.node_update_callback(self)
+            if self.chunk:
+                self.chunk.node_update_callback(self)
             
             # update variables
             self.needs_model_matrix = True
@@ -308,7 +311,7 @@ class Node():
         """
         # translation
         assert self.physics_body, 'Node: Cannot apply a force to a node that doesn\'t have a physics body'
-        self.velocity = force / self.mass * dt
+        self.velocity += force / self.mass * dt
         
         # rotation
         torque = glm.cross(offset, force)
