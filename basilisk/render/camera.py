@@ -180,9 +180,10 @@ class FollowCamera(FreeCamera):
         self.position = self.parent.position + self.offest
         
 class OrbitCamera(FreeCamera):
-    def __init__(self, parent, position=(0, 0, 20), yaw=-90, pitch=0, distance=5):
+    def __init__(self, parent, position=(0, 0, 20), yaw=-90, pitch=0, distance=5, offset=(0, 0)):
         self.parent = parent
         self.distance = distance
+        self.offset = glm.vec2(offset)
         super().__init__(position, yaw, pitch)
 
     def get_view_matrix(self) -> glm.mat4x4:

@@ -5,6 +5,7 @@ from math import cos, sin, atan2
 from ..render.image import Image
 from .font_renderer import FontRenderer
 from ..render.shader import Shader
+from ..generic.input_validation import validate_color, validate_rect, validate_point
 
 class DrawHandler():
     engine: ...
@@ -73,7 +74,7 @@ class DrawHandler():
         Draws a rect to the screen
         """
 
-        color = validate_color(color)
+        color = validate_color('draw', 'color', color)
         rect  = validate_rect(rect)
 
         p1 = (rect[0]          , rect[1]          )
@@ -106,8 +107,8 @@ class DrawHandler():
         """
 
         if not outer_color: outer_color = color
-        color  = validate_color(color)
-        outer_color  = validate_color(outer_color)
+        color  = validate_color('draw', 'color', color)
+        outer_color  = validate_color('draw', 'color', outer_color)
         p1 = validate_point(center)
 
         v1 = (*p1, *color, 0)
@@ -134,7 +135,7 @@ class DrawHandler():
                     Size of the line on either side. pixels
         """
         
-        color = validate_color(color)
+        color = validate_color('draw', 'color', color)
 
         p1 = glm.vec2(validate_point(p1))
         p2 = glm.vec2(validate_point(p2))
@@ -177,34 +178,3 @@ class DrawHandler():
         
         if self.vbo: self.vbo.release()
         if self.vao: self.vao.release()
-
-
-def validate_color(color):
-    if not (isinstance(color, tuple) or isinstance(color, list) or isinstance(color, np.ndarray)):
-        raise TypeError(f'Invalid color type: {type(color)}. Expected a tuple, list, or numpy array')
-    if len(color) == 4:
-        color = (color[0] / 255.0, color[1] / 255.0, color[2] / 255.0, color[3] / 255.0)
-    elif len(color) == 3:
-        color = (color[0] / 255.0, color[1] / 255.0, color[2] / 255.0, 1.0)
-    else:
-        raise TypeError(f'Invalid number of color values. Expected 3 or 4 values, got {len(color)}')
-    return color
-
-def validate_rect(rect):
-    if not (isinstance(rect, tuple) or isinstance(rect, list) or isinstance(rect, np.ndarray)):
-        raise TypeError(f'Invalid rect type: {type(rect)}. Expected a tuple, list, or numpy array')
-    if len(rect) != 4:
-        raise TypeError(f'Invalid number of rect values. Expected 4 values, got {len(rect)}')
-    return list(rect)
-
-def validate_point(point):
-    if not (isinstance(point, tuple) or isinstance(point, list) or isinstance(point, np.ndarray)):
-        raise TypeError(f'Invalid rect type: {type(point)}. Expected a tuple, list, or numpy array')
-    if len(point) != 2:
-        raise TypeError(f'Invalid number of rect values. Expected 2 values, got {len(point)}')
-    return list(point)
-
-def validate_image(image):
-    if not (isinstance(image, Image)):
-        raise TypeError(f'Invalid imgae type: {type(image)}. Expected a bask.Image.')
-    return image

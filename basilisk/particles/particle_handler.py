@@ -1,7 +1,7 @@
 from .particle_renderer import ParticleRenderer 
 from ..mesh.mesh import Mesh
 from ..render.material import Material
-
+from ..generic.input_validation import validate_tuple3, validate_float
 
 class ParticleHandler:
     def __init__(self, scene):
@@ -14,7 +14,7 @@ class ParticleHandler:
         self.particle_renderers = {self.cube : ParticleRenderer(scene, self.cube)}
 
 
-    def add(self, mesh: Mesh=None, life=1.0, position=(0, 0, 0), material: Material=None, scale=1.0, velocity=(0, 3, 0), acceleration=(0, -10, 0)) -> bool:
+    def add(self, mesh: Mesh=None, life: float=1.0, position: tuple|float=0, material: Material=None, scale: float=1.0, velocity: tuple|float=0, acceleration: tuple|float=0) -> bool:
         """
         Add a new particle to the scene
         Args:
@@ -45,6 +45,15 @@ class ParticleHandler:
             self.scene.material_handler.add(material)
             material_index = material.index
         else: raise ValueError(f'particle_handler.add: Invalid particle material type: {type(material)}')
+
+        # Validate the 3-component vectors
+        position     = validate_tuple3('particle', 'add', position)
+        velocity     = validate_tuple3('particle', 'add', velocity)
+        acceleration = validate_tuple3('particle', 'add', acceleration)
+
+        # Validate float inputs
+        life = validate_float('particle', 'add', life)
+        scale = validate_float('particle', 'add', scale)
 
         # Add the particle to the renderer
         self.particle_renderers[mesh].add(life, position, material_index, scale, velocity, acceleration)

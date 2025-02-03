@@ -1,8 +1,6 @@
 import moderngl as mgl
 import glm
 from .render.shader_handler import ShaderHandler
-from .mesh.mesh import Mesh
-from .render.material import Material
 from .render.material_handler import MaterialHandler
 from .render.light_handler import LightHandler
 from .render.camera import Camera, FreeCamera
@@ -15,6 +13,7 @@ from .render.frame import Frame
 from .particles.particle_handler import ParticleHandler
 from .nodes.node import Node
 from .generic.collisions import moller_trumbore
+from .generic.raycast_result import RaycastResult
 
 class Scene():
     engine: any
@@ -64,42 +63,63 @@ class Scene():
         if self.engine.headless: return
         self.frame.render()
     
-    def add(self, bsk_object: ...) -> ...:
+    def add(self, *objects: Node | None) -> None | Node | list:
         """
-        Adds an object to the scene. Can pass in any scene objects:
+        Adds the given object(s) to the scene. Can pass in any scene objects:
         Argument overloads:
             object: Node - Adds the given node to the scene.
         """
         
-        if isinstance(bsk_object, type(None)):
-            # Considered well defined behavior
-            return
-        elif isinstance(bsk_object, Node):
+        # List of all return values for the added objects
+        returns = []
+
+        # Loop through all objects passed in
+        for bsk_object in objects:
+
+            # Considered well defined behavior to add None
+            if isinstance(bsk_object, type(None)):
+                continue
+
             # Add a node to the scene
-            return self.node_handler.add(bsk_object)
-        # Light
+            elif isinstance(bsk_object, Node):
+                returns.append(self.node_handler.add(bsk_object)); continue
+            
+            # Recived incompatable type
+            else:
+                raise ValueError(f'scene.add: Incompatable object add type {type(bsk_object)}')
 
-        # Mesh
+        # Return based on what the user passed in
+        if not returns: return None
+        if len(returns) == 1: return returns[0]
+        return returns
 
-        else:
-            raise ValueError(f'scene.add: Incompatable object add type {type(bsk_object)}')
-
-        return None
-
-    def remove(self, bsk_object):
+    def remove(self, *objects: Node | None) -> None | Node | list:
         """
         Removes the given baskilsk object from the scene
         """
 
-        if isinstance(bsk_object, type(None)):
-            # Considered well defined behavior
-            return
-        elif isinstance(bsk_object, Node):
-            self.node_handler.remove(bsk_object)
-        else:
-            raise ValueError(f'scene.remove: Incompatable object remove type {type(bsk_object)}')
+        # List of all return values for the added objects
+        returns = []
 
-        return None
+        # Loop through all objects passed in
+        for bsk_object in objects:
+
+            # Considered well defined behavior to remove None
+            if isinstance(bsk_object, type(None)):
+                continue
+
+            # Remove a node from the scene
+            elif isinstance(bsk_object, Node):
+                returns.append(self.node_handler.remove(bsk_object)); continue
+
+            # Recived incompatable type
+            else:
+                raise ValueError(f'scene.remove: Incompatable object remove type {type(bsk_object)}')
+
+        # Return based on what the user passed in
+        if not returns: return None
+        if len(returns) == 1: return returns[0]
+        return returns
 
     def set_engine(self, engine: any) -> None:
         """
@@ -121,9 +141,10 @@ class Scene():
         self.frame            = Frame(self)
         self.sky              = Sky(self.engine)
         
-    def raycast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
+    def raycast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> RaycastResult:
         """
-        Ray cast from any posiiton and forward vector and returns the nearest node. If no position or forward is given, uses the scene camera's current position and forward
+        Ray cast from any posiiton and forward vector and returns a RaycastResult eith the nearest node. 
+        If no position or forward is given, uses the scene camera's current position and forward
         """
         if not position: position = self.camera.position
         if not forward: forward = self.camera.forward
@@ -167,9 +188,9 @@ class Scene():
                     best_point    = intersection
                     best_node     = node
                     
-        return best_node, best_point
+        return RaycastResult(best_node, best_point)
     
-    def raycast_mouse(self, position: tuple[int, int] | glm.vec2, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> tuple[Node, glm.vec3]:
+    def raycast_mouse(self, position: tuple[int, int] | glm.vec2, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> RaycastResult:
         """
         Ray casts from the mouse position with respect to the camera. Returns the nearest node that was clicked, if none was clicked, returns None. 
         """
