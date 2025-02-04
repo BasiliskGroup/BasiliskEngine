@@ -38,9 +38,9 @@ class Node():
     """Allows the node's movement to be affected by the physics engine and collisions"""
     mass: float
     """The mass of the node in kg"""
-    collisions: bool
+    collision: bool
     """Gives the node collision with other nodes in the scene""" 
-    collider: str
+    collider_mesh: str
     """The collider type of the node. Can be either 'box' or 'mesh'"""
     static_friction: float
     """Determines the friction of the node when still: recommended value 0.0 - 1.0"""
@@ -77,12 +77,12 @@ class Node():
             rotational_velocity: glm.vec3=None, 
             physics:             bool=False, 
             mass:                float=None, 
-            collisions:          bool=False, 
-            collider:            str=None, 
+            collision:           bool=False, 
+            collider_mesh:       str|Mesh=None, 
             static_friction:     float=None, 
             kinetic_friction:    float=None, 
             elasticity:          float=None, 
-            collision_group :    float=None, 
+            collision_group:     float=None, 
             name:                str='', 
             tags:                list[str]=None,
             static:              bool=None,
@@ -129,16 +129,16 @@ class Node():
         else: self.physics_body = None
         
         # collider
-        if collisions: 
+        if collision: 
             self.collider = Collider(
                 node = self,
-                box_mesh = True if collider == 'box' else False,
+                collider_mesh = collider_mesh,
                 static_friction = static_friction,
                 kinetic_friction = kinetic_friction,
                 elasticity = elasticity,
                 collision_group = collision_group
             )
-        elif collider:         raise ValueError('Node: cannot have collider mesh if it does not allow collisions')
+        elif collider_mesh:         raise ValueError('Node: cannot have collider mesh if it does not allow collisions')
         elif static_friction:  raise ValueError('Node: cannot have static friction if it does not allow collisions')
         elif kinetic_friction: raise ValueError('Node: cannot have kinetic friction if it does not allow collisions')
         elif elasticity:       raise ValueError('Node: cannot have elasticity if it does not allow collisions')
@@ -154,11 +154,6 @@ class Node():
 
         # Shader given by user or none for default
         self.shader = shader
-        
-        # default callback functions for node transform
-        self.previous_position: Vec3 = Vec3(position) if position else Vec3(0, 0, 0)
-        self.previous_scale   : Vec3 = Vec3(scale)    if scale    else Vec3(1, 1, 1)
-        self.previous_rotation: Quat = Quat(rotation) if rotation else Quat(1, 0, 0, 0) # TODO Do these need to be the callback class or can they just be glm? 
 
         # callback function to be added to the custom Vec3 and Quat classes
         def position_callback():
@@ -247,6 +242,38 @@ class Node():
         
         for child in self.children: child.sync_data()
         
+    def deep_copy(self) -> ...:
+        """
+        Creates a deep copy of this node and returns it. The new node is not added to the scene.
+        """
+        
+        copy = Node(
+            position = self.position,
+            scale = self.scale,
+            rotation = self.rotation,
+            relative_position = bool(self.relative_position),
+            relative_scale = bool(self.relative_scale),
+            relative_rotation = bool(self.relative_rotation),
+            forward = glm.vec3(self.forward),
+            mesh = self.mesh,
+            material = self.material,
+            velocity = glm.vec3(self.velocity),
+            rotational_velocity = glm.vec3(self.rotational_velocity),
+            physics = bool(self.physics_body),
+            mass = self.mass if self.physics_body else None,
+            collision = bool(self.collider),
+            static_friction = self.static_friction if self.collider else None,
+            kinetic_friction = self.kinetic_friction if self.collider else None,
+            elasticity = self.elasticity if self.collider else None,
+            collision_group = self.collision_group if self.collider else None,
+            name = self.name,
+            tags = [tag for tag in self.tags], # deep copy tags list
+            static = self.static,
+            shader = self.shader
+        )
+        
+        return copy
+        
     def get_nodes(self, 
             require_mesh: bool=False, 
             require_collider: bool=False, 
@@ -329,8 +356,9 @@ class Node():
         """
         Transforms the mesh inertia tensor and inverts it
         """
-        if not (self.mesh and self.physics_body): return None 
-        inertia_tensor = self.mesh.get_inertia_tensor(self.scale) / 2
+        if not ((self.mesh or (self.collider and self.collider.mesh)) and self.physics_body): return None 
+        mesh = self.collider.mesh if self.collider else self.mesh
+        inertia_tensor = mesh.get_inertia_tensor(self.scale) / 2
     
         # mass
         if self.physics_body: inertia_tensor *= self.physics_body.mass
@@ -465,6 +493,13 @@ class Node():
     def volume(self):
         if not self.mesh: raise RuntimeError('Node: Cannot retrieve volume if node does not have mesh')
         return self.mesh.volume * self.scale.x * self.scale.y * self.scale.z
+    
+    @property
+    def physics(self):
+        return bool(self.physics_body)
+    @property
+    def collision(self):
+        return bool(self.collider)
     
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
@@ -618,3 +653,36 @@ class Node():
     def z(self, value: int | float):
         if isinstance(value, int) or isinstance(value, float): self.internal_position.z = value
         else: raise TypeError(f'Node: Invalid positional z value type {type(value)}')
+        
+    @physics.setter
+    def physics(self, value: bool | PhysicsBody):
+        if not value and self.physics: # remove physics body from self and scene
+            if self.node_handler: self.node_handler.scene.physics_engine.remove(self.physics_body)
+            self.physics_body = None
+        elif isinstance(value, PhysicsBody): # deep copy physics body
+            if self.physics: 
+                self.mass = value.mass
+            else: 
+                self.physics_body = PhysicsBody(value.mass)
+                if self.node_handler: self.physics_body.physics_engine = self.node_handler.scene.physics_engine
+        elif not self.physics:
+            self.physics_body = PhysicsBody(mass = 1)
+            if self.node_handler: self.physics_body.physics_engine = self.node_handler.scene.physics_engine
+            
+    @collision.setter
+    def collision(self, value: bool | PhysicsBody):
+        if not value and self.collision:
+            if self.node_handler: self.node_handler.scene.collider_handler.remove(self.collider)
+            self.collider = None
+        elif isinstance(value, Collider):
+            if self.collision:
+                self.kinetic_friction = value.kinetic_friction
+                self.elasticity = value.elasticity
+                self.static_friction = value.static_friction
+            else:
+                self.collider = Collider(self, value.mesh, value.static_friction, value.kinetic_friction, value.elasticity, value.collision_group)
+                if self.node_handler: self.collider.collider_handler = self.node_handler.scene.collider_handler
+        elif not self.collider:
+            self.collider = Collider(self)
+            if self.node_handler: self.collider.collider_handler = self.node_handler.scene.collider_handler
+                

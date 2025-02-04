@@ -25,7 +25,7 @@ platform = scene.add(bsk.Node(
     scale=(10, 1, 10),
     # rotation=(-0.3, 0, 0),
     material=blue,
-    collisions=True,
+    collision=True,
 ))
 
 radius = 4
@@ -34,16 +34,19 @@ objects = [scene.add(bsk.Node(
     position   = [random.uniform(-radius, radius), 0, random.uniform(-radius, radius)], 
     scale      = [random.uniform(0.5, 3) for _ in range(3)],
     rotation   = [random.uniform(0.1, 0.2) for _ in range(3)],
-    rotational_velocity = (3.14159, 0, 0),
-    mesh       = random.choice(meshes), 
+    rotational_velocity = (30.14159, 0, 0),
+    mesh       = sphere_mesh, 
     material   = red,
-    collisions = True,
+    collision = True,
+    collider_mesh = cube_mesh,
     physics    = True,
     static     = False,
     mass       = 10
 )) for _ in range(1)]
 
 while engine.running:
+    
+    print(len(scene.collider_handler.colliders), len(scene.physics_engine.physics_bodies))
     
     for object in objects:
         if object.y < -50: 

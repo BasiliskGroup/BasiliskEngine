@@ -22,10 +22,17 @@ child.add(grandchild)
 
 scene.add(parent)
 
-print(len(scene.node_handler.nodes))
+copy = parent.deep_copy()
+
+copy.velocity = (0, 0, 0)
+
+scene.add(copy)
 
 did = False
 while engine.running:
+    
+    
+    
     if not did:
         parent.add(child)
         did = True

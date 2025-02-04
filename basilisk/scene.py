@@ -42,11 +42,13 @@ class Scene():
         """
         Updates the physics and in the scene
         """
-        
-        self.node_handler.update()
         self.particle.update()
         self.camera.update()
-        self.collider_handler.resolve_collisions()
+        
+        
+        self.node_handler.update()
+        if self.engine.delta_time < 0.5: # TODO this will cause physics to slow down when on low frame rate, this is probabl;y acceptable
+            self.collider_handler.resolve_collisions()
 
     def render(self) -> None:
         """

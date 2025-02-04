@@ -148,7 +148,7 @@ class ColliderHandler():
             remove_indices = []
             for index, vertex in existing.items():
                 if index in incoming_indices: continue
-                if glm.length2(node.get_vertex(index) - vertex) > 1e-5: remove_indices.append(index) # check to see if point has moved
+                if glm.length2(node.collider.get_vertex(index) - vertex) > 1e-5: remove_indices.append(index) # check to see if point has moved
             
             # remove unused and moved points
             for index in remove_indices: del existing[index]

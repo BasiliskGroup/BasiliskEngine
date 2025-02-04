@@ -106,6 +106,7 @@ class Camera:
         self._scene = value
         self.engine = self._scene.engine
         self.use()
+        
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self._position = glm.vec3(value)
@@ -113,6 +114,7 @@ class Camera:
             if len(value) != 3: raise ValueError(f'Camera: Invalid number of values for position. Expected 3, got {len(value)}')
             self._position = glm.vec3(value)
         else: raise TypeError(f'Camera: Invalid position value type {type(value)}')
+        
     @direction.setter
     def direction(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self.direction = glm.normalize(glm.vec3(value))
