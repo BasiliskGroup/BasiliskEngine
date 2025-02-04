@@ -121,7 +121,7 @@ class Node():
         self.velocity = velocity if velocity else glm.vec3(0, 0, 0)
         self.rotational_velocity = rotational_velocity if rotational_velocity else glm.vec3(0, 0, 0)
         
-        self.static = static if static != None else not(physics or any(self.velocity) or any(self.rotational_velocity))
+        self._static = static
 
         # Physics updates
         if physics: self.physics_body = PhysicsBody(mass = mass if mass else 1.0)
@@ -465,6 +465,9 @@ class Node():
     @property
     def tags(self): return self._tags
     @property
+    def static(self):
+        return self._static if self._static is not None else not(self.physics or any(self.velocity) or any(self.rotational_velocity))
+    @property
     def x(self): return self.internal_position.data.x
     @property
     def y(self): return self.internal_position.data.y
@@ -643,6 +646,10 @@ class Node():
                 if not isinstance(tag, str): raise TypeError(f'Node: Invalid tag value in tags list of type {type(tag)}')
             self._tags = value
         else: raise TypeError(f'Node: Invalid tags value type {type(value)}')
+        
+    @static.setter
+    def static(self, value: bool):
+        self._static = value
 
     @x.setter
     def x(self, value: int | float):
@@ -673,6 +680,7 @@ class Node():
         elif not self.physics:
             self.physics_body = PhysicsBody(mass = 1)
             if self.node_handler: self.physics_body.physics_engine = self.node_handler.scene.physics_engine
+
             
     @collision.setter
     def collision(self, value: bool | PhysicsBody):
