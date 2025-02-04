@@ -2,6 +2,7 @@ import glm
 from ..generic.abstract_bvh import AbstractAABB as AABB
 from ..generic.meshes import transform_points, get_aabb_surface_area
 from ..mesh.mesh import Mesh
+from .narrow.dataclasses import Collision
 
 class Collider():
     node: ...
@@ -44,7 +45,7 @@ class Collider():
         self.elasticity = elasticity if elasticity else 0.1
         self.collision_group = collision_group
         self.collision_velocity = 0
-        self.collisions = {}
+        self.collisions: list[Collision] = []
         self.parent = None
         
         # lazy update variables TODO change to distinguish between static and nonstatic objects

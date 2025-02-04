@@ -45,8 +45,7 @@ objects = [scene.add(bsk.Node(
 )) for _ in range(1)]
 
 while engine.running:
-    
-    print(len(scene.collider_handler.colliders), len(scene.physics_engine.physics_bodies))
+
     
     for object in objects:
         if object.y < -50: 

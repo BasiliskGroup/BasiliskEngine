@@ -5,7 +5,7 @@ from .broad.broad_bvh import BroadBVH
 from .narrow.gjk import collide_gjk
 from .narrow.epa import get_epa_from_gjk
 from .narrow.contact_manifold import get_contact_manifold, separate_polytope
-from .narrow.dataclasses import SupportPoint, ContactPoint, ContactManifold
+from .narrow.dataclasses import ContactPoint, ContactManifold, Collision
 from ..nodes.node import Node
 from ..generic.collisions import get_sat_axes
 from ..physics.impulse import calculate_collisions
@@ -47,8 +47,7 @@ class ColliderHandler():
         Resets collider collision values and resolves all collisions in the scene
         """
         # reset collision data
-        for collider in self.colliders: collider.collisions = {}
-        
+        for collider in self.colliders: collider.collisions = []
         
         # update BVH
         for collider in self.colliders:
@@ -198,6 +197,10 @@ class ColliderHandler():
                 
             if glm.dot(vec, node2.position - node1.position) > 0: vec *= -1
             
+            # add collision data to colliders
+            collider1.collisions.append(Collision(node2, vec))
+            collider2.collisions.append(Collision(node1, -vec))
+            
             # apply impulse if a collider has a physic body
             if node1.physics_body or node2.physics_body:
                 
@@ -205,10 +208,7 @@ class ColliderHandler():
                 points1, points2 = separate_polytope(points1, points2, vec)
                 self.merge_contact_points(vec, collider1, collider2, points1, points2)
                 
-                # for manifold in self.contact_manifolds.values(): print(list(manifold.contact_points1.values()) + list(manifold.contact_points2.values()))
-                
                 collider_tuple = (collider1, collider2)
-                # print(self.contact_manifolds[collider_tuple])
                 manifold = get_contact_manifold(
                     node1.position - vec, 
                     vec, 
@@ -219,9 +219,6 @@ class ColliderHandler():
                 collision_normal = node1.velocity - node2.velocity
                 collision_normal = vec if glm.length2(collision_normal) < 1e-12 else glm.normalize(collision_normal)
                 calculate_collisions(collision_normal, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
-
-                # for i, point in enumerate(manifold):
-                #     self.scene.add(Node(position = point, scale = (0.1, 0.1, 0.1)))
             
             # resolve collision penetration
             multiplier = 0.5 if not (node1.static or node2.static) else 1

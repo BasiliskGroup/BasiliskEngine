@@ -501,6 +501,11 @@ class Node():
     def collision(self):
         return bool(self.collider)
     
+    @property
+    def collisions(self):
+        assert self.collision, 'Node: Cannot access collision data without collisions enabled on Node'
+        return self.collider.collisions
+    
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self.internal_position.data = value

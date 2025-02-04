@@ -1,5 +1,6 @@
 import glm
 from dataclasses import dataclass
+# from ...nodes.node import Node
 
 # frozen because data does not need to be mutable
 # used in creating polytopes for GJK/EPA
@@ -25,3 +26,8 @@ class ContactManifold():
     normal: glm.vec3
     contact_points1: dict[int : glm.vec3] # contact point index : collision position
     contact_points2: dict[int : glm.vec3]
+    
+@dataclass
+class Collision():
+    node: ...
+    normal: glm.vec3
