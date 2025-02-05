@@ -99,6 +99,8 @@ class Camera:
     def position(self): return self._position
     @property
     def direction(self): return self.forward
+    @property
+    def horizontal(self): return glm.normalize(self.forward.xz)
 
     @scene.setter
     def scene(self, value):
