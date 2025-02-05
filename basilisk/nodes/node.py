@@ -1,5 +1,6 @@
 import glm
 import numpy as np
+from .helper import node_is
 from ..generic.vec3 import Vec3
 from ..generic.quat import Quat
 from ..generic.matrices import get_model_matrix
@@ -273,32 +274,11 @@ class Node():
         )
         
         return copy
-        
-    def get_nodes(self, 
-            require_mesh: bool=False, 
-            require_collider: bool=False, 
-            require_physics_body: bool=False, 
-            filter_material: Material=None, 
-            filter_tags: list[str]=None
-        ) -> list: 
-        """
-        Returns the nodes matching the required filters from this branch of the nodes
-        """
-        # adds self to nodes list if it matches the criteria
-        nodes = []
     
-        if all([
-            (not require_mesh or self.mesh),
-            (not require_collider or self.collider),
-            (not require_physics_body or self.physics_body),
-            (not filter_material or self.material == filter_material),
-            (not filter_tags or all([tag in self.tags for tag in filter_tags]))
-        ]): 
-            nodes.append(self)
-        
-        # adds children to nodes list if they match the criteria
-        for node in self.children: nodes.extend(node.get_nodes(require_mesh, require_collider, require_physics_body, filter_material, filter_tags))
-        return nodes 
+    def get_all(self, position: glm.vec3=None, scale: glm.vec3=None, rotation: glm.quat=None, forward: glm.vec3=None, mesh: Mesh=None, material: Material=None, velocity: glm.vec3=None, rotational_velocity: glm.quat=None, physics: bool=None, mass: float=None, collisions: bool=None, static_friction: float=None, kinetic_friction: float=None, elasticity: float=None, collision_group: float=None, name: str=None, tags: list[str]=None,static: bool=None) -> list:
+        nodes = [self] if node_is(self, position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static) else []
+        for node in self.children: nodes += node.get_all(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
+        return nodes
         
     # tree functions for managing children 
     def add(self, child: ..., relative_position: bool=None, relative_scale: bool=None, relative_rotation: glm.vec3=None) -> None:

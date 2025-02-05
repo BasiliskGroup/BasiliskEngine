@@ -1,5 +1,8 @@
 import moderngl as mgl
 import glm
+
+from .mesh.mesh import Mesh
+from .render.material import Material
 from .render.shader_handler import ShaderHandler
 from .render.material_handler import MaterialHandler
 from .render.light_handler import LightHandler
@@ -212,11 +215,25 @@ class Scene():
             has_physics=has_pshyics,
             tags=tags
         )
+        
+    def get(self, position: glm.vec3=None, scale: glm.vec3=None, rotation: glm.quat=None, forward: glm.vec3=None, mesh: Mesh=None, material: Material=None, velocity: glm.vec3=None, rotational_velocity: glm.quat=None, physics: bool=None, mass: float=None, collisions: bool=None, static_friction: float=None, kinetic_friction: float=None, elasticity: float=None, collision_group: float=None, name: str=None, tags: list[str]=None,static: bool=None) -> Node:
+        """
+        Returns the first node with the given traits
+        """
+        self.node_handler.get(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
+    
+    def get_all(self, position: glm.vec3=None, scale: glm.vec3=None, rotation: glm.quat=None, forward: glm.vec3=None, mesh: Mesh=None, material: Material=None, velocity: glm.vec3=None, rotational_velocity: glm.quat=None, physics: bool=None, mass: float=None, collisions: bool=None, static_friction: float=None, kinetic_friction: float=None, elasticity: float=None, collision_group: float=None, name: str=None, tags: list[str]=None,static: bool=None) -> list[Node]:
+        """
+        Returns all nodes with the given traits
+        """
+        self.node_handler.get_all(position, scale, rotation, forward, mesh, material, velocity, rotational_velocity, physics, mass, collisions, static_friction, kinetic_friction, elasticity, collision_group, name, tags, static)
 
     @property
     def camera(self): return self._camera
     @property
     def sky(self): return self._sky
+    @property
+    def nodes(self): return self.node_handler.nodes
 
     @camera.setter
     def camera(self, value: Camera):

@@ -5,9 +5,7 @@ engine = bsk.Engine()
 scene = bsk.Scene()
 engine.scene = scene
 
-node = bsk.Node(
-    
-)
+node = bsk.Node()
 
 platform = bsk.Node(
     position = (0, -5, 0),

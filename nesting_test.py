@@ -28,10 +28,15 @@ copy.velocity = (0, 0, 0)
 
 scene.add(copy)
 
+def actions():
+    
+    if engine.keys[bsk.pg.K_p] and not engine.previous_keys[bsk.pg.K_p]:
+        print(len(scene.node_handler.get_all()))
+
 did = False
 while engine.running:
     
-    
+    actions()
     
     if not did:
         parent.add(child)
