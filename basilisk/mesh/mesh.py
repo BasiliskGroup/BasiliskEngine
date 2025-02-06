@@ -58,13 +58,8 @@ class Mesh():
                 tangents[:,:] += [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
                 self.data = np.hstack([self.data, tangents])
 
-        elif isinstance(data, np.ndarray):      
-            t1 = time.time()                    # Load the model from array of data
-            model = from_data(data)
-            t2 = time.time()
-
-            print(f'Modeling from data time: {t2 - t1}')
-
+        elif isinstance(data, np.ndarray):
+            model = from_data(data)      
             self.data = model.vertex_data
             
         else:                                                       # Invalid data type
@@ -73,7 +68,9 @@ class Mesh():
         # Mesh points and triangles used for physics/collisions
         self.points = model.vertex_points.copy()
         self.indices = model.point_indices.copy()
-        
+
+        self.hash = hash(str(self.data))
+
         # generate edges from faces
         edges = [set() for _ in range(len(self.points))]
         for face in self.indices:
@@ -229,3 +226,6 @@ class Mesh():
         x1, y1, z1 = self.top_right
         x2, y2, z2 = self.bottom_left
         return [glm.vec3(x, y, z) for z in (z1, z2) for y in (y1, y2) for x in (x1, x2)]
+
+    def __hash__(self):
+        return self.hash

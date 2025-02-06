@@ -16,8 +16,8 @@ def get_furthest_point(node: Node, dir_vec: glm.vec3) -> glm.vec3:
     """
     # determine furthest point by using untransformed mesh
     node_dir_vec = node.rotation * dir_vec # rotate the world space vector to node space
-    index = node.mesh.get_best_dot(node_dir_vec)
-    vertex = node.mesh.points[index]
+    index = node.collider.mesh.get_best_dot(node_dir_vec)
+    vertex = node.collider.mesh.points[index]
     vertex = node.model_matrix * glm.vec4(vertex, 1.0)
     
     # transform point to world space

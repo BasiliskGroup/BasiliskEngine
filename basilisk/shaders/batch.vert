@@ -89,9 +89,8 @@ void main() {
     // Get the material
     int mtl_size = 25;
     int materialID     = int(obj_material);
+
     mtl.color          = vec3(texelFetch(materialsTexture, ivec2(0, 0 + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 1  + materialID * mtl_size), 0).r, texelFetch(materialsTexture, ivec2(0, 2  + materialID * mtl_size), 0).r);
-    
-    
     mtl.roughness      = texelFetch(materialsTexture, ivec2(0, 3 + materialID * mtl_size), 0).r;
     mtl.subsurface     = texelFetch(materialsTexture, ivec2(0, 4 + materialID * mtl_size), 0).r;
     mtl.sheen          = texelFetch(materialsTexture, ivec2(0, 5 + materialID * mtl_size), 0).r;

@@ -99,6 +99,8 @@ class Camera:
     def position(self): return self._position
     @property
     def direction(self): return self.forward
+    @property
+    def horizontal(self): return glm.normalize(self.forward.xz)
 
     @scene.setter
     def scene(self, value):
@@ -106,6 +108,7 @@ class Camera:
         self._scene = value
         self.engine = self._scene.engine
         self.use()
+        
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self._position = glm.vec3(value)
@@ -113,6 +116,7 @@ class Camera:
             if len(value) != 3: raise ValueError(f'Camera: Invalid number of values for position. Expected 3, got {len(value)}')
             self._position = glm.vec3(value)
         else: raise TypeError(f'Camera: Invalid position value type {type(value)}')
+        
     @direction.setter
     def direction(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self.direction = glm.normalize(glm.vec3(value))
@@ -180,9 +184,10 @@ class FollowCamera(FreeCamera):
         self.position = self.parent.position + self.offest
         
 class OrbitCamera(FreeCamera):
-    def __init__(self, parent, position=(0, 0, 20), yaw=-90, pitch=0, distance=5):
+    def __init__(self, parent, position=(0, 0, 20), yaw=-90, pitch=0, distance=5, offset=(0, 0)):
         self.parent = parent
         self.distance = distance
+        self.offset = glm.vec2(offset)
         super().__init__(position, yaw, pitch)
 
     def get_view_matrix(self) -> glm.mat4x4:

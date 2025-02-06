@@ -1,82 +1,86 @@
 import glm
 import numpy as np
+from .abstract_custom import Custom
 
 
-class Quat():
+class Quat(Custom):
     def __init__(self, *args, callback=None):
         self.callback = callback
         self.prev_data = glm.quat(1, 0, 0, 0)
-        self.set_data(*args)
-       
-    def normalize(self):
-        """
-        Inplace normalizes the vector
-        """
-        self.data = glm.normalize(self.data)
         
-    def set_data(self, *args):
-        """
-        Sets the internal vector inplace
-        """
-        # overload constructor TODO nvernest this, definitely possible
         if len(args) == 1:
+            
             if isinstance(args[0], Quat):
                 self.data = glm.quat(args[0].data)
+                self.prev_data = glm.quat(args[0].prev_data)
                 self.callback = args[0].callback
-            elif isinstance(args[0], glm.quat): self.data = glm.quat(args[0])
+                
+            elif isinstance(args[0], glm.quat): 
+                self.data = args[0]
+                
             elif isinstance(args[0], tuple) or isinstance(args[0], list) or isinstance(args[0], np.ndarray): 
-                if len(args[0]) != 4 and len(args[0]) != 3: raise ValueError(f'Quat: Expected 3 or 4 values from incoming vector, got {len(args[0])}')
+                assert 2 < len(args[0]) < 5, f'Quat: Expected 3 or 4 values from incoming vector, got {len(args[0])}'
                 self.data = glm.quat(args[0])
-            else: raise ValueError(f'Quat: Unexpected incoming vector type {args[0]}')
-        elif len(args) == 4: self.data = glm.quat(*args)
-        else: raise ValueError(f'Quat: Expected either 1 vector or 4 numbers, got {len(args)} values')
+                
+            else: 
+                try: self.data = glm.quat(args[0])
+                except: raise ValueError(f'Quat: Unexpected incoming quaternion type {args[0]}')
+            
+        elif 2 < len(args) < 5: self.data = glm.quat(*args)
+        else: raise ValueError(f'Quat: Expected either a vector, quaternion, or 3 or 4 numbers, got {len(args)} values')
+        
+    def apply_function(self, other, func, func_name):
+        quat = glm.quat(self.data)
+        
+        if isinstance(other, (glm.vec3, glm.quat)):
+            quat = func(quat, other)
+            
+        elif isinstance(other, (tuple, list, np.ndarray)):
+            assert 2 < len(other) < 5, f'Quat: Expected 3 or 4 values from incoming vector, got {len(other)}'
+            quat = func(quat, other)
+            
+        elif isinstance(other, Custom):
+            quat = func(quat, other.data)
+            
+        else: 
+            try: quat = func(quat, other)
+            except: raise ValueError(f'Quat: Not an accepted type for {func_name}, got {type(other)}')
+        return Quat(quat)
 
-    # override _= operators
-    def __iadd__(self, other):
-        if isinstance(other, glm.quat): self.data += other
-        elif isinstance(other, tuple) or isinstance(other, list) or isinstance(other, np.ndarray):
-            if len(other) != 4 and len(other) != 3: raise ValueError(f'Quat: Number of added values must be 3 or 4, got {len(other)}')
-            self.data += other
-        elif isinstance(other, Quat): self.data += other.data
-        else: raise ValueError(f'Quat: Not an accepted type for addition, got {type(other)}')
-        return self
+    # unary operators
+    def __neg__(self):
+        return Quat(-self.data, callback=self.callback)
     
-    def __isub__(self, other):
-        if isinstance(other, glm.quat): self.data -= other
-        elif isinstance(other, tuple) or isinstance(other, list) or isinstance(other, np.ndarray):
-            if len(other) != 4 and len(other) != 3: raise ValueError(f'Quat: Number of added values must be 3 or 4, got {len(other)}')
-            self.data -= other
-        elif isinstance(other, Quat): self.data -= other.data
-        else: raise ValueError(f'Quat: Not an accepted type for addition, got {type(other)}')
-        return self
+    def __abs__(self):
+        return Quat(abs(self.data), callback=self.callback)
     
-    def __imul__(self, other):
-        # TODO add checks for number types
-        self.data *= other
-        return self
-    
-    def __idiv__(self, other): 
-        # TODO add checks for number types
-        self.data /= other
-        return self
-    
-    def __ifloordiv__(self, other): 
-        # TODO add checks for number types
-        self.data //= other
-        return self
-    
-    # override [_] accessor
+    # accessor functions
     def __getitem__(self, index): 
-        if int(index) != index: raise IndexError(f'Quat: index must be an int, got {type(index)}') # check if index is a float
-        if index < 0 or index > 3: raise IndexError(f'Quat: index out of bounds, got {index}')
+        assert int(index) == index, f'Quat: index must be an int, got {type(index)}' # check if index is a float
+        assert 0 <= index <= 3, f'Quat: index out of bounds, got {index}'
         return self.data[index]
     
     def __setitem__(self, index, value): 
-        if int(index) != index: raise IndexError(f'Quat: index must be an int, got {type(index)}') # check if index is a float
-        if index < 0 or index > 3: raise IndexError(f'Quat: index out of bounds, got {index}')
+        assert int(index) == index, f'Quat: index must be an int, got {type(index)}' # check if index is a float
+        assert 0 <= index <= 3, f'Quat: index out of bounds, got {index}'
         try: self.data[index] = value
         except: raise ValueError(f'Quat: Invalid element type, got {type(value)}')
         
+    def __delitem__(self, index): # cannot delete an index from a quaternion, so we set the value to zero instead
+        assert int(index) == index, f'Quat: index must be an int, got {type(index)}' # check if index is a float
+        assert 0 <= index <= 3, f'Quat: index out of bounds, got {index}'
+        self.data[index] = 0
+        
+    def __len__(self):
+        return 4
+    
+    def __iter__(self):
+        return iter(self.data)
+    
+    def __contains__(self, item):
+        return item in self.data
+
+    # override str operators
     def __repr__(self):
         return str(self.data)
 
@@ -95,33 +99,40 @@ class Quat():
     def z(self): return self.data.z
     
     @data.setter
-    def data(self, value: glm.vec3):
-        self._data = value
-        
+    def data(self, value: glm.vec3 | glm.quat):
+        self._data = glm.quat(value)
         cur = self._data
         prev = self.prev_data
         thresh = 1e-6
         
         if self.callback and (abs(cur.w - prev.w) > thresh or abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh): 
-            self.prev_data = self._data            
+            self.prev_data = glm.quat(self._data)            
             self.callback()
         
     @w.setter
     def w(self, value):
         self.data.w = value
-        if self.callback: self.callback()
+        if self.callback and abs(value - self.prev_data.w) > 1e-6: 
+            self.prev_data.w = value
+            self.callback()
 
     @x.setter
     def x(self, value):
-        self.data.x = value
-        if self.callback: self.callback()
+        self._data.x = value
+        if self.callback and abs(value - self.prev_data.x) > 1e-6: 
+            self.prev_data.x = value
+            self.callback()
         
     @y.setter
     def y(self, value):
-        self.data.y = value
-        if self.callback: self.callback()
+        self._data.y = value
+        if self.callback and abs(value - self.prev_data.y) > 1e-6: 
+            self.prev_data.y = value
+            self.callback()
         
     @z.setter
     def z(self, value):
-        self.data.z = value
-        if self.callback: self.callback()
+        self._data.z = value
+        if self.callback and abs(value - self.prev_data.z) > 1e-6: 
+            self.prev_data.z = value
+            self.callback()

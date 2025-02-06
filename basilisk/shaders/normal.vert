@@ -33,6 +33,10 @@ struct Material {
     vec2  albedoMap;
     int   hasNormalMap;
     vec2  normalMap;
+    int   hasRoughnessMap;
+    vec2  roughnessMap;
+    int   hasAoMap;
+    vec2  aoMap;
 };
 flat out Material mtl;
 
@@ -82,6 +86,7 @@ void main() {
     
     // Get the material
     int mtl_size = 25;
+    mtl = Material(vec3(0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, vec2(0), 0, vec2(0), 0, vec2(0), 0, vec2(0));
     int materialID     = int(obj_material);
     
     mtl.hasNormalMap = int(texelFetch(materialsTexture,  ivec2(0, 16  + materialID * mtl_size), 0).r);

@@ -60,7 +60,10 @@ class Shader:
             self.fragment_shader = file.read()
         
         # Hash value for references
-        self.hash = hash((self.vertex_shader, self.fragment_shader, random.randrange(-10000, 100000)))
+        if vert == None and frag == None:
+            self.hash = hash((self.vertex_shader, self.fragment_shader, 'default'))
+        else:
+            self.hash = hash((self.vertex_shader, self.fragment_shader))
 
         # Create a string of all lines in both shaders
         lines = f'{self.vertex_shader}\n{self.fragment_shader}'.split('\n')

@@ -2,6 +2,7 @@ import glm
 from ..generic.abstract_bvh import AbstractAABB as AABB
 from ..generic.meshes import transform_points, get_aabb_surface_area
 from ..mesh.mesh import Mesh
+from .narrow.dataclasses import Collision
 
 class Collider():
     node: ...
@@ -35,22 +36,28 @@ class Collider():
     mesh: Mesh
     """Reference to the colliding mesh"""
 
-    def __init__(self, node, box_mesh: bool=False, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.2, collision_group: str=None):
+    def __init__(self, node, collider_mesh: str|Mesh=None, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.2, collision_group: str=None):
         self.collider_handler = None
         self.node = node
         self.static_friction = static_friction if elasticity else 0.8 # added checks to prevent floats being set to None. Also done for kinetic and elasticity
-        self.box_mesh = box_mesh
+        self.mesh = collider_mesh
         self.kinetic_friction = kinetic_friction if elasticity else 0.4
         self.elasticity = elasticity if elasticity else 0.1
         self.collision_group = collision_group
         self.collision_velocity = 0
-        self.collisions = {}
+        self.collisions: list[Collision] = []
         self.parent = None
         
         # lazy update variables TODO change to distinguish between static and nonstatic objects
         self.needs_obb = True # pos, scale, rot
         self.needs_half_dimensions = True # scale, rot
         self.needs_bvh = True # pos, scale, rot
+        
+    def get_vertex(self, index: int) -> glm.vec3:
+        """
+        Gets the world space position of a vertex indicated by the index in the mesh
+        """
+        return glm.vec3(self.node.model_matrix * glm.vec4(*self.mesh.points[index], 1))
     
     @property
     def collider_handler(self): return self._collider_handler
@@ -80,5 +87,10 @@ class Collider():
     def collider_handler(self, value):
         self._collider_handler = value
         if not value: return
-        self.mesh = value.cube if self.box_mesh else self.node.mesh
+        if self.mesh is None: self.mesh = self.node.mesh
+        elif isinstance(self.mesh, Mesh): ...
+        elif isinstance(self.mesh, str):
+            if self.mesh =='box': self.mesh = value.cube
+            else: raise ValueError(f'Incorrect built-in mesh type {self.mesh}')
+        else: raise ValueError(f'Unkown type for mesh, got {type(self.mesh)}')
         value.add(self)

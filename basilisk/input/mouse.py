@@ -36,6 +36,8 @@ class Mouse():
     @property
     def click(self): return self.buttons[0] and not self.previous_buttons[0]
     @property
+    def left_click(self): return self.buttons[0] and not self.previous_buttons[0]
+    @property
     def middle_click(self): return self.buttons[1] and not self.previous_buttons[1]
     @property
     def right_click(self): return self.buttons[2] and not self.previous_buttons[2]
