@@ -135,7 +135,7 @@ class Engine():
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()
-                self.scene.frame.set_textures()
+                self.scene.frame.resize()
 
 
         # Update the scene if possible
