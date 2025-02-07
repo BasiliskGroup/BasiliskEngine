@@ -1,5 +1,6 @@
 import os
 from sys import platform
+from .input.path import get_root
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as pg
 import moderngl as mgl
@@ -80,7 +81,7 @@ class Engine():
         # Global attributes referenced by the handlers
         self.headless = headless
         self.set_configurations()
-        self.root = os.path.dirname(__file__)
+        self.root = get_root()
         self.cube = Cube(self)
 
         # Update the icon
@@ -134,7 +135,7 @@ class Engine():
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()
-                self.scene.frame.set_textures()
+                self.scene.frame.resize()
 
 
         # Update the scene if possible

@@ -58,7 +58,7 @@ class Node():
     static: bool
     """Objects that don't move should be marked as static"""
     chunk: Chunk
-    """""" # TODO Jonah description
+    """The parent chunk of the node. Used for callbacks to update chunk meshes"""
     children: list
     """List of nodes that this node is a parent of"""
     shader: Shader

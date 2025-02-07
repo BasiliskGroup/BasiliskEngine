@@ -20,7 +20,7 @@ class Image():
     size: int
     """The width and height in pixels of the image"""
 
-    def __init__(self, path: str | os.PathLike | pg.Surface) -> None:
+    def __init__(self, path: str | os.PathLike | pg.Surface | mgl.Texture) -> None:
         """
         A basilisk image object that contains a moderngl texture
         Args:
@@ -29,18 +29,24 @@ class Image():
         """
         
         # Check if the user is loading a pygame surface
-        if isinstance(path, pg.Surface):
-            self.from_pg_surface(path)
-            return
+        if isinstance(path, str) or isinstance(path, os.PathLike):
+            return self._from_path(path)
+        elif isinstance(path, pg.Surface):
+            return self._from_surfaces(path)
+        elif isinstance(path, mgl.Texture):
+            return self._from_texture(path)
+        
+        raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.PathLike')
 
-        # Verify the path type
-        if not isinstance(path, str) and not isinstance(path, os.PathLike):
-            raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.PathLike')
-
+    def _from_path(self, path: str | os.PathLike) -> None:
+        """
+        Loads a basilisk image from a pygame surface
+        Args:
+        """
+        
         # Get name from path
         self.name = path.split('/')[-1].split('\\')[-1].split('.')[0]
 
-        # Set the texture
         # Load image
         img = PIL_Image.open(path).convert('RGBA')
         # Set the size in one of the size buckets
@@ -53,7 +59,7 @@ class Image():
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
 
-    def from_pg_surface(self, surf: pg.Surface) -> None:
+    def _from_surface(self, surf: pg.Surface) -> None:
         """
         Loads a basilisk image from a pygame surface
         Args:
@@ -68,6 +74,12 @@ class Image():
 
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
+
+    def _from_texture(self, texture: mgl.Texture):
+        """
+        
+        """
+        ...
 
     def __repr__(self) -> str:
         """

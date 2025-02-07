@@ -63,8 +63,6 @@ def from_data(data: np.ndarray) -> Model:
     model.vertex_data[:,8:14] = tangents
     model.vertex_points, model.point_indices = get_points_and_indices(positions)
 
-    print(model.vertex_points, model.point_indices)
-
     return model
 
 
