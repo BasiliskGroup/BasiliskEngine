@@ -121,7 +121,7 @@ class ColliderHandler():
             # traverse bvh to find aabb aabb collisions
             colliding = self.bvh.get_collided(collider1)
             for collider2 in colliding:
-                if collider1 is collider2: continue
+                if collider1 is collider2 or (collider1.collision_group is not None and collider1.collision_group == collider2.collision_group): continue
                 if ((collider1, collider2) if id(collider1) < id(collider2) else (collider2, collider1)) in collisions: continue
                 
                 # run broad collision for specified mesh types
