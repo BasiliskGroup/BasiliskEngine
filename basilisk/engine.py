@@ -1,5 +1,7 @@
 import os
 from sys import platform
+import sys
+import glcontext
 from .input.path import get_root
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as pg
@@ -81,7 +83,8 @@ class Engine():
         # Global attributes referenced by the handlers
         self.headless = headless
         self.set_configurations()
-        self.root = get_root()
+        # self.root = get_root()
+        self.root = getattr(sys, '_MEIPASS', os.getcwd()) + '/basilisk'
         self.cube = Cube(self)
 
         # Update the icon
