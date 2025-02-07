@@ -10,7 +10,8 @@ node = bsk.Node()
 platform = bsk.Node(
     position = (0, -5, 0),
     scale = (10, 1, 10),
-    collision = True
+    collision = True,
+    collision_group='group1'
 )
 
 scene.add(node, platform)
@@ -28,6 +29,9 @@ def actions():
             case None: node.static = True
             case True: node.static = False
             case False: node.static = None
+            
+    if engine.keys[bsk.pg.K_g] and not engine.previous_keys[bsk.pg.K_g]:
+        node.collision_group = None if node.collision_group else 'group1'
             
     if engine.keys[bsk.pg.K_l] and not engine.previous_keys[bsk.pg.K_l]:
         print('physics:', node.physics)

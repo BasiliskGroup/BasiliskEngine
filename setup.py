@@ -7,7 +7,7 @@ with open(path.join(working_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name = 'basilisk-engine',  # Name of folder containing scripts and __init__
-    version = '0.1.1',
+    version = '0.1.3',
     url = 'https://basilisk-website.vercel.app/',
     author = 'Name',
     author_email = 'basiliskengine@gmail.com',

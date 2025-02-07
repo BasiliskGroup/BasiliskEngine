@@ -611,7 +611,7 @@ class Node():
     @collision_group.setter
     def collision_group(self, value: str):
         if not self.collider: raise RuntimeError('Node: Cannot set the collision gruop of a node that has no physics body')
-        if isinstance(value, str): self.collider.collision_group = value
+        if isinstance(value, (str, type(None))): self.collider.collision_group = value
         else: raise TypeError(f'Node: Invalid collision group value type {type(value)}')
         
     @name.setter
