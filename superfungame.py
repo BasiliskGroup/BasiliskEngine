@@ -20,8 +20,8 @@ brick = bsk.Material(
 )
 
 bullet = bsk.Material(color=(255, 100, 100))
-scene.add(bsk.Node(position=(0, -3, 0), scale=(10, 1, 10), collisions=True, material=wood))
-box = scene.add(bsk.Node(position=(3, 2, 3), scale=(1, 1, 1), collisions=True, physics=True, mass=30, material=brick))
+scene.add(bsk.Node(position=(0, -3, 0), scale=(10, 1, 10), collision=True, material=wood))
+box = scene.add(bsk.Node(position=(3, 2, 3), scale=(1, 1, 1), collision=True, physics=True, mass=30, material=brick))
 
 player = scene.add(bsk.Node(position=(0, 0, 0), scale=(.5, 1, .5)))
 camera = bsk.FollowCamera(player)
@@ -44,7 +44,7 @@ def shoot():
     pos = player.position + camera.right / 4
     hit_pos = player.position + camera.forward * 25
     vel = (hit_pos - pos) * 2
-    scene.add(bsk.Node(pos, scale=(.1, .1, .1), physics=True, collisions=True, velocity=vel, material=bullet))
+    scene.add(bsk.Node(pos, scale=(.1, .1, .1), physics=True, collision=True, velocity=vel, material=bullet))
     
 while engine.running:
     move_player()
