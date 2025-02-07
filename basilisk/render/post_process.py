@@ -60,7 +60,6 @@ class PostProcess:
         elif isinstance(source, Image):       return self._apply_to_image(source, destination)
         
         raise ValueError(f'PostProces.apply: Invalid postprocess source type {type(source)}')
-        
 
     def _render_post_process(self, source: mgl.Texture):
         # Clear and use the fbo as a render target
