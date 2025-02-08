@@ -82,10 +82,10 @@ class Quat(Custom):
 
     # override str operators
     def __repr__(self):
-        return str(self.data)
-
-    def __iter__(self):
-        return iter((self.x, self.y, self.z))
+        return 'bsk' + str(self.data)
+    
+    def __str__(self):
+        return 'bsk ' + str(self.data)
     
     @property
     def data(self): return self._data
@@ -108,6 +108,7 @@ class Quat(Custom):
         if self.callback and (abs(cur.w - prev.w) > thresh or abs(cur.x - prev.x) > thresh or abs(cur.y - prev.y) > thresh or abs(cur.z - prev.z) > thresh): 
             self.prev_data = glm.quat(self._data)            
             self.callback()
+        self.normalize()
         
     @w.setter
     def w(self, value):
@@ -115,6 +116,7 @@ class Quat(Custom):
         if self.callback and abs(value - self.prev_data.w) > 1e-6: 
             self.prev_data.w = value
             self.callback()
+        self.normalize()
 
     @x.setter
     def x(self, value):
@@ -122,6 +124,7 @@ class Quat(Custom):
         if self.callback and abs(value - self.prev_data.x) > 1e-6: 
             self.prev_data.x = value
             self.callback()
+        self.normalize()
         
     @y.setter
     def y(self, value):
@@ -129,6 +132,7 @@ class Quat(Custom):
         if self.callback and abs(value - self.prev_data.y) > 1e-6: 
             self.prev_data.y = value
             self.callback()
+        self.normalize()
         
     @z.setter
     def z(self, value):
@@ -136,3 +140,4 @@ class Quat(Custom):
         if self.callback and abs(value - self.prev_data.z) > 1e-6: 
             self.prev_data.z = value
             self.callback()
+        self.normalize()

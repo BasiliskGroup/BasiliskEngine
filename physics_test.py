@@ -35,15 +35,15 @@ objects = [scene.add(bsk.Node(
     scale      = [random.uniform(0.5, 3) for _ in range(3)],
     rotation   = [random.uniform(0.1, 0.2) for _ in range(3)],
     rotational_velocity = (3.14159, 0, 0),
-    mesh       = cube_mesh, 
+    mesh       = sphere_mesh, 
     material   = red,
-    static     = False
+    static     = False,
+    physics    = True,
+    collision  = True
 )) for _ in range(1)]
 
 while engine.running:
 
-    
-    
     for object in objects:
         if object.y < -50: 
             object.rotational_velocity = (0, 0, 0)
