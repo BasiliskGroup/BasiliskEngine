@@ -11,7 +11,7 @@ class Frame:
     vao: mgl.VertexArray=None
     framebuffer: mgl.Framebuffer=None
 
-    def __init__(self, scene, resolution=1, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
+    def __init__(self, scene, resolution=.1, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
         """
         Basilisk render destination. 
         Can be used to render to the screen or for headless rendering
@@ -25,6 +25,7 @@ class Frame:
         self.resolution = resolution
         self.filter = filter
         size = tuple(map(lambda x: int(x * self.resolution), self.engine.win_size))
+        print(size)
         self.framebuffer = Framebuffer(self.engine, size=size, filter=self.filter)
         self.ping_pong_buffer = Framebuffer(self.engine, size=size, filter=self.filter)
 

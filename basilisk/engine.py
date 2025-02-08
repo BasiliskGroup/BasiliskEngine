@@ -11,7 +11,7 @@ from .input.mouse import Mouse
 from .mesh.cube import Cube
 from .render.shader import Shader
 import glcontext
-
+import openal
 
 class Engine():
     win_size: tuple
@@ -131,6 +131,7 @@ class Engine():
         # Loop through all pygame events
         for event in self.events:
             if event.type == pg.QUIT: # Quit the engine
+                openal.oalQuit()
                 self.quit()
                 return
             if event.type == pg.VIDEORESIZE:
