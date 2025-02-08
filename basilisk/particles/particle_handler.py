@@ -4,14 +4,15 @@ from ..render.material import Material
 from ..generic.input_validation import validate_tuple3, validate_float
 
 class ParticleHandler:
-    def __init__(self, scene):
+    def __init__(self, scene, shader=None):
         """
         A handler for all particles in a scene
         """
         
         self.scene = scene
+        self.shader = shader
         self.cube = Mesh(scene.engine.root + '/bsk_assets/cube.obj')
-        self.particle_renderers = {self.cube : ParticleRenderer(scene, self.cube)}
+        self.particle_renderers = {self.cube : ParticleRenderer(scene, self.cube, self.shader)}
 
 
     def add(self, mesh: Mesh=None, life: float=1.0, position: tuple|float=0, material: Material=None, scale: float=1.0, velocity: tuple|float=0, acceleration: tuple|float=0) -> bool:
@@ -37,7 +38,7 @@ class ParticleHandler:
         # Get the mesh and make a new particle renderer if the mesh is new
         if mesh == None: mesh = self.cube
         elif not isinstance(mesh, Mesh): raise ValueError(f'particle_handler.add: invlaid mesh type for particle: {type(mesh)}')
-        if mesh not in self.particle_renderers: self.particle_renderers[mesh] = ParticleRenderer(self.scene, mesh)
+        if mesh not in self.particle_renderers: self.particle_renderers[mesh] = ParticleRenderer(self.scene, mesh, self.shader)
 
         # Get material ID
         if material == None: material_index = 0

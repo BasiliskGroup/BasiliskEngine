@@ -59,6 +59,7 @@ class ShaderHandler:
             'projectionMatrix' : self.scene.camera.m_proj,
             'viewMatrix' : self.scene.camera.m_view,
             'cameraPosition' : self.scene.camera.position,
+            'viewportDimensions' : glm.vec2(self.engine.win_size),
         }
 
     def write(self) -> None:

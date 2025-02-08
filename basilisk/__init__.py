@@ -11,5 +11,6 @@ from .draw import draw
 from .render.camera import FreeCamera, StaticCamera, FollowCamera, OrbitCamera
 from .render.sky import Sky
 from .render.post_process import PostProcess
+from .particles.particle_handler import ParticleHandler
 from .render.framebuffer import Framebuffer
 from .audio.sound import Sound

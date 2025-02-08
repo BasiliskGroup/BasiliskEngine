@@ -21,7 +21,7 @@ get_alive(np.zeros(shape=(2, 12), dtype='f4'))
 
 
 class ParticleRenderer:
-    def __init__(self, scene: ..., mesh: Mesh) -> None:
+    def __init__(self, scene: ..., mesh: Mesh, shader: Shader=None) -> None:
         """
         Handels and renders the particles of a single mesh type
         """
@@ -29,7 +29,8 @@ class ParticleRenderer:
         self.scene = scene
         self.ctx = scene.ctx
         root = scene.engine.root
-        self.shader = Shader(scene.engine, vert=root + '/shaders/particle.vert', frag=root + '/shaders/particle.frag')
+        if shader: self.shader = shader
+        else: self.shader = Shader(scene.engine, vert=root + '/shaders/particle.vert', frag=root + '/shaders/particle.frag')
         scene.shader_handler.add(self.shader)
 
         self.particle_cube_size = 25
@@ -85,3 +86,8 @@ class ParticleRenderer:
         # Create and add the particle to the scene
         new_particle = np.array([*position, material, scale, life, *velocity, *acceleration])
         self.particle_instances = np.vstack([new_particle, self.particle_instances], dtype='f4')
+
+
+    def __del__(self):
+        self.instance_buffer.release()
+        self.vao.release()
