@@ -16,5 +16,5 @@ setup(
     long_description_content_type = 'text/markdown',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['numpy', 'pillow', 'pygame-ce', 'moderngl', 'PyGLM', 'numba'],  # Include all used packages
+    install_requires=['numpy', 'pillow', 'pygame-ce', 'moderngl', 'PyGLM', 'numba', 'PyOpenAL'],  # Include all used packages
 )
