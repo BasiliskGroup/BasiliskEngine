@@ -214,7 +214,7 @@ class Scene():
                     best_node     = node
                     best_triangle = triangle
         
-        if not node: return RaycastResult(best_node, best_point, None)
+        if not best_node: return RaycastResult(best_node, best_point, None)
         
         points = [best_node.model_matrix * best_node.mesh.points[t] for t in best_triangle]
         normal = glm.normalize(glm.cross(points[1] - points[0], points[2] - points[0]))
