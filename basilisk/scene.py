@@ -17,6 +17,7 @@ from .particles.particle_handler import ParticleHandler
 from .nodes.node import Node
 from .generic.collisions import moller_trumbore
 from .generic.raycast_result import RaycastResult
+from .render.post_process import PostProcess
 
 class Scene():
     engine: any
@@ -88,6 +89,11 @@ class Scene():
             # Add a node to the scene
             elif isinstance(bsk_object, Node):
                 returns.append(self.node_handler.add(bsk_object)); continue
+            
+            # Add a node to the scene
+            elif isinstance(bsk_object, PostProcess):
+                returns.append(self.frame.add_post_process(bsk_object)); continue
+            
             
             # Recived incompatable type
             else:

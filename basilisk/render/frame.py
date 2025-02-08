@@ -66,6 +66,14 @@ class Frame:
         self.framebuffer.use()
         self.framebuffer.clear()
 
+    def add_post_process(self, post_process: PostProcess) -> PostProcess:
+        """
+        Add a post process to the frames post process stack
+        """
+
+        self.post_processes.append(post_process)
+        return post_process
+
     def save(self, destination: str=None) -> None:
         """
         Saves the frame as an image to the given file destination

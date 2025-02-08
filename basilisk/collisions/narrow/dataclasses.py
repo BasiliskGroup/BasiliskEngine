@@ -1,5 +1,7 @@
 import glm
 from dataclasses import dataclass
+
+from basilisk.generic.vec3 import Vec3
 # from ...nodes.node import Node
 
 # frozen because data does not need to be mutable
@@ -18,7 +20,7 @@ class SupportPoint():
 @dataclass(frozen=True)
 class ContactPoint():
     index: int
-    vertex: glm.vec3
+    vertex: Vec3
     
 # contact manifold object used in the contact handler list
 @dataclass

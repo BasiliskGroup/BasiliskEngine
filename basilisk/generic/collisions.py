@@ -1,4 +1,6 @@
 import glm
+from ..generic.vec3 import Vec3
+from ..generic.quat import Quat
 
 
 def collide_aabb_aabb(top_right1: glm.vec3, bottom_left1: glm.vec3, top_right2: glm.vec3, bottom_left2: glm.vec3, epsilon:float=1e-7) -> bool:
@@ -53,13 +55,13 @@ def moller_trumbore(point:glm.vec3, vec:glm.vec3, triangle:list[glm.vec3], epsil
     if t > epsilon: return point + vec * t
     return None
 
-def get_sat_axes(rotation1: glm.quat, rotation2: glm.quat) -> list[glm.vec3]:
+def get_sat_axes(rotation1: Quat, rotation2: Quat) -> list[glm.vec3]:
     """
     Gets the axes for SAT from obb rotation matrices
     """
     axes = []
-    axes.extend(glm.transpose(glm.mat3_cast(rotation1)))
-    axes.extend(glm.transpose(glm.mat3_cast(rotation2)))
+    axes.extend(glm.transpose(glm.mat3_cast(rotation1.data)))
+    axes.extend(glm.transpose(glm.mat3_cast(rotation2.data)))
     
     # crossed roots
     for i in range(0, 3):

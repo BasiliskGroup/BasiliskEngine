@@ -101,6 +101,8 @@ class Camera:
     def direction(self): return self.forward
     @property
     def horizontal(self): return glm.normalize(self.forward.xz)
+    @property
+    def rotation(self): return glm.conjugate(glm.quatLookAt(self.forward, self.UP))
 
     @scene.setter
     def scene(self, value):
