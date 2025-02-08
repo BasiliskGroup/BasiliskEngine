@@ -1,6 +1,9 @@
 import pygame as pg
 import glm
 import numpy as np
+from ..generic.vec3 import Vec3
+from ..generic.quat import Quat
+
 
 # Camera view constants
 FOV = 50  # Degrees
@@ -112,16 +115,18 @@ class Camera:
         self.use()
         
     @position.setter
-    def position(self, value: tuple | list | glm.vec3 | np.ndarray):
+    def position(self, value: tuple | list | glm.vec3 | np.ndarray | Vec3):
         if isinstance(value, glm.vec3): self._position = glm.vec3(value)
+        elif isinstance(value, Vec3): self._position = glm.vec3(value.data)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Camera: Invalid number of values for position. Expected 3, got {len(value)}')
             self._position = glm.vec3(value)
         else: raise TypeError(f'Camera: Invalid position value type {type(value)}')
         
     @direction.setter
-    def direction(self, value: tuple | list | glm.vec3 | np.ndarray):
-        if isinstance(value, glm.vec3): self.direction = glm.normalize(glm.vec3(value))
+    def direction(self, value: tuple | list | glm.vec3 | np.ndarray | Vec3):
+        if isinstance(value, glm.vec3): self.forward = glm.normalize(glm.vec3(value))
+        elif isinstance(value, Vec3): self.forward = glm.normalize(value.data)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Camera: Invalid number of values for direction. Expected 3, got {len(value)}')
             self.forward = glm.normalize(glm.vec3(value))

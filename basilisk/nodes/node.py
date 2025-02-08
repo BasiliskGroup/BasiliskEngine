@@ -572,16 +572,18 @@ class Node():
         self.chunk.node_update_callback(self)
     
     @velocity.setter
-    def velocity(self, value: tuple | list | glm.vec3 | np.ndarray):
+    def velocity(self, value: tuple | list | glm.vec3 | np.ndarray | Vec3):
         if isinstance(value, glm.vec3): self._velocity = glm.vec3(value)
+        elif isinstance(value, Vec3): self._velocity = glm.vec3(value.data)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for velocity. Expected 3, got {len(value)}')
             self._velocity = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid velocity value type {type(value)}')
         
     @rotational_velocity.setter
-    def rotational_velocity(self, value: tuple | list | glm.vec3 | np.ndarray):
+    def rotational_velocity(self, value: tuple | list | glm.vec3 | np.ndarray | Vec3):
         if isinstance(value, glm.vec3): self._rotational_velocity = glm.vec3(value)
+        elif isinstance(value, Vec3): self._rotational_velocity = glm.vec3(value.data)
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for rotational velocity. Expected 3, got {len(value)}')
             self._rotational_velocity = glm.vec3(value)
