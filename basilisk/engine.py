@@ -83,8 +83,7 @@ class Engine():
         # Global attributes referenced by the handlers
         self.headless = headless
         self.set_configurations()
-        # self.root = get_root()
-        self.root = getattr(sys, '_MEIPASS', os.getcwd()) + '/basilisk'
+        self.root = os.path.dirname(__file__)
         self.cube = Cube(self)
 
         # Update the icon
