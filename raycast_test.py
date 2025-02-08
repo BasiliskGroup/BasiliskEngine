@@ -29,5 +29,6 @@ while engine.running:
         else: res = engine.scene.raycast_mouse((engine.mouse.x, engine.mouse.y))
         if res: 
             scene.particle.add(position=res.position, life=.2, scale=3, mesh=res.node.mesh, material=red)
+            print(res)
 
     engine.update()

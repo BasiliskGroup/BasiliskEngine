@@ -193,7 +193,7 @@ class Scene():
         else: nodes = self.node_handler.get_all(collisions=has_collisions, physics=has_physics, tags=tags)
 
         # determine closest node
-        best_distance, best_point, best_node = max_distance, None, None
+        best_distance, best_point, best_node, best_triangle = max_distance, None, None, None
         position_two = position + forward
         for node in nodes:
             
@@ -212,8 +212,14 @@ class Scene():
                     best_distance = distance
                     best_point    = intersection
                     best_node     = node
+                    best_triangle = triangle
+        
+        if not node: return RaycastResult(best_node, best_point, None)
+        
+        points = [best_node.model_matrix * best_node.mesh.points[t] for t in best_triangle]
+        normal = glm.normalize(glm.cross(points[1] - points[0], points[2] - points[0]))
                     
-        return RaycastResult(best_node, best_point)
+        return RaycastResult(best_node, best_point, normal)
     
     def raycast_mouse(self, position: tuple[int, int] | glm.vec2, max_distance: float=1e5, has_collisions: bool=None, has_pshyics: bool=None, tags: list[str]=[]) -> RaycastResult:
         """
