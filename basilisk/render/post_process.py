@@ -80,7 +80,7 @@ class PostProcess:
         """
 
         # Create a blank framebuffer
-        if not detination:
+        if not detination or detination.size != self.size:
             fbo = Framebuffer(self.engine, self.size, self.components)
             old_filter = None
             fbo.texture.filter = self.filter

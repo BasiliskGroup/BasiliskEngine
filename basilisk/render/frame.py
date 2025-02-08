@@ -11,7 +11,7 @@ class Frame:
     vao: mgl.VertexArray=None
     framebuffer: mgl.Framebuffer=None
 
-    def __init__(self, scene, resolution=.1, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
+    def __init__(self, scene, resolution=1, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
         """
         Basilisk render destination. 
         Can be used to render to the screen or for headless rendering
@@ -25,7 +25,6 @@ class Frame:
         self.resolution = resolution
         self.filter = filter
         size = tuple(map(lambda x: int(x * self.resolution), self.engine.win_size))
-        print(size)
         self.framebuffer = Framebuffer(self.engine, size=size, filter=self.filter)
         self.ping_pong_buffer = Framebuffer(self.engine, size=size, filter=self.filter)
 
@@ -47,7 +46,7 @@ class Frame:
         """
 
         for process in self.post_processes:
-            process.apply(self.framebuffer, self.ping_pong_buffer)
+            self.ping_pong_buffer = process.apply(self.framebuffer, self.ping_pong_buffer)
             
             temp = self.framebuffer
             self.framebuffer = self.ping_pong_buffer
@@ -65,7 +64,7 @@ class Frame:
         """
         
         self.framebuffer.use()
-        self.framebuffer.clear()
+        self.clear()
 
     def add_post_process(self, post_process: PostProcess) -> PostProcess:
         """
@@ -82,6 +81,9 @@ class Frame:
 
         self.framebuffer.save(destination)
     
+    def clear(self):
+        self.framebuffer.clear()
+
     def resize(self, size: tuple[int]=None) -> None:
         """
         Resize the frame to the given size. None for window size

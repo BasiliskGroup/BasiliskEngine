@@ -1,6 +1,7 @@
+import numpy as np
 import moderngl as mgl
 from PIL import Image
-
+from ..render.shader import Shader
 
 
 class Framebuffer:
@@ -15,7 +16,7 @@ class Framebuffer:
     size: tuple[int]
     """The dimensions of the framebuffer (x, y)"""
 
-    def __init__(self, engine, size: tuple[int]=None, components: int=4, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
+    def __init__(self, engine, size: tuple[int]=None, resolution_scale: float=1.0, components: int=4, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
         """
         Abstraction to the mgl framebuffer
         Args:
@@ -28,17 +29,37 @@ class Framebuffer:
         # Set attributes
         self.engine = engine
         self.ctx = engine.ctx
-        self.size = size if size else engine.win_size
         self.components = components
 
+        # Set the size
+        self.resolution_scale = resolution_scale
+        self._size = size
+        self.size = self._size if self._size else self.engine.win_size
+        self.size = (int(self.size[0] * resolution_scale), int(self.size[1] * resolution_scale))
+        
         # Create the fbo
         self.texture = self.ctx.texture(self.size, components=self.components)
         self.depth = self.ctx.depth_texture(self.size)
         self.fbo   = self.ctx.framebuffer([self.texture], self.depth)
 
-        print()
+        # Load Shaders
+        self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/frame.frag')
+        self.engine.scene.shader_handler.add(self.shader)
 
+        # Load VAO
+        self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
+        self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '3f 2f', 'in_position', 'in_uv')], skip_errors=True)
+
+        # Save the filter
         self.filter = filter
+
+        # Add to the engine for updates
+        self.engine.fbos.append(self)
+
+    def render(self) -> None:
+        self.shader.program['screenTexture'] = 0
+        self.texture.use(location=0)
+        self.vao.render()
 
     def use(self) -> None:
         """
@@ -74,7 +95,11 @@ class Framebuffer:
         self.__del__()
 
         # Set/get size attribute
-        self.size = size if size else self.engine.win_size
+        if size:
+            self.size = size
+        else:
+            self.size = self._size if self._size else self.engine.win_size
+        self.size = (int(self.size[0] * self.resolution_scale), int(self.size[1] * self.resolution_scale))
 
         # Create the fbo
         self.texture = self.ctx.texture(self.size, components=self.components)

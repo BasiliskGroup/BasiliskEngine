@@ -18,6 +18,7 @@ from .nodes.node import Node
 from .generic.collisions import moller_trumbore
 from .generic.raycast_result import RaycastResult
 from .render.post_process import PostProcess
+from .render.framebuffer import Framebuffer
 
 class Scene():
     engine: any
@@ -54,19 +55,26 @@ class Scene():
         if self.engine.delta_time < 0.5: # TODO this will cause physics to slow down when on low frame rate, this is probabl;y acceptable
             self.collider_handler.resolve_collisions()
 
-    def render(self) -> None:
+    def render(self, render_target: Framebuffer|Frame=None) -> None:
         """
         Renders all the nodes with meshes in the scene
         """
 
-        self.frame.use()
+        if render_target:
+            show = False
+        else:
+            render_target = self.frame
+            show = True
+
+        render_target.use()
+        render_target.clear()
         self.shader_handler.write()
         if self.sky: self.sky.render()
         self.node_handler.render()
         self.particle.render()
         self.draw_handler.render()
 
-        if self.engine.headless: return
+        if self.engine.headless or not show: return
         self.frame.render()
     
     def add(self, *objects: Node | None) -> None | Node | list:

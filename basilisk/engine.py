@@ -86,6 +86,7 @@ class Engine():
         self.set_configurations()
         self.root = os.path.dirname(__file__)
         self.cube = Cube(self)
+        self.fbos = []
 
         # Update the icon
         pg.display.set_icon(pg.image.load(self.root + '/bsk_assets/basilisk.png'))
@@ -110,7 +111,7 @@ class Engine():
         # Set the scene to running
         self.running = True
 
-    def update(self) -> None:
+    def update(self, render=True) -> None:
         """
         Updates all input, physics, and time variables. Renders the current scene.
         """
@@ -140,12 +141,13 @@ class Engine():
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()
                 self.scene.frame.resize()
+                for fbo in self.fbos: fbo.resize()
 
 
         # Update the scene if possible
         if self.scene: self.scene.update()
         # Render after the scene and engine has been updated
-        self.render()
+        if render: self.render()
 
 
     def render(self) -> None:
