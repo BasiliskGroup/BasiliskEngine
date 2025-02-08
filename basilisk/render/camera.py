@@ -33,7 +33,7 @@ class Camera:
         self.scene  = None
         self.engine = None
         # fov
-        self.fov = 100
+        self.fov = 50
         # The initial aspect ratio of the screen
         self.aspect_ratio = 1.0
         # Position
