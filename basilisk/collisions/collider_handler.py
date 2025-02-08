@@ -141,7 +141,6 @@ class ColliderHandler():
             for point in incoming:
                 incoming_indices.add(point.index)
                 if point.index not in existing or glm.length2(point.vertex - existing[point.index]) > 1e-5: existing[point.index] = glm.vec3(point.vertex)
-                # if glm.length2(point.vertex - existing[point.index]) != 0: print(point.vertex - existing[point.index])
                     
             # remove changed stored points
             remove_indices = []
@@ -195,7 +194,7 @@ class ColliderHandler():
                 points1 = [ContactPoint(p.index1, p.vertex1) for p in polytope]
                 points2 = [ContactPoint(p.index2, p.vertex2) for p in polytope]
                 
-            if glm.dot(vec, node2.position - node1.position) > 0: vec *= -1
+            if glm.dot(vec, node2.position.data - node1.position.data) > 0: vec *= -1
             
             # add collision data to colliders
             collider1.collisions.append(Collision(node2, vec))
@@ -210,7 +209,7 @@ class ColliderHandler():
                 
                 collider_tuple = (collider1, collider2)
                 manifold = get_contact_manifold(
-                    node1.position - vec, 
+                    node1.position.data - vec, 
                     vec, 
                     self.contact_manifolds[collider_tuple].contact_points1.values(), 
                     self.contact_manifolds[collider_tuple].contact_points2.values()

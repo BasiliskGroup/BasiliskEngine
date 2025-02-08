@@ -10,7 +10,7 @@ def collide_gjk(node1: Node, node2: Node, iterations: int=20) -> tuple: # TODO f
     Determines if two convex polyhedra collide, returns the polytope if there is a collision.
     """
     # generate starting values
-    dir_vec = node1.position - node2.position
+    dir_vec = node1.position.data - node2.position.data
     simplex = [get_support_point(node1, node2, dir_vec)]
     dir_vec = -simplex[0].support_point # set direction to point away from starting simplex point
     

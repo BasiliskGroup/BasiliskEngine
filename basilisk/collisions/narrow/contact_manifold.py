@@ -4,6 +4,10 @@ from .line_intersections import line_line_intersect, line_poly_intersect
 from .graham_scan import graham_scan
 from .sutherland_hodgman import sutherland_hodgman
 from .dataclasses import ContactPoint
+from ...generic.vec3 import Vec3
+from ...generic.quat import Quat
+
+
 
 # sutherland hodgman clipping algorithm
 def get_contact_manifold(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points1:list[glm.vec3], points2:list[glm.vec3]) -> list[glm.vec3]:
@@ -47,6 +51,7 @@ def separate_polytope(points1: list[ContactPoint], points2: list[ContactPoint], 
     """
     Determines the potential contact manifold points of each shape based on their position along the penetrating axis
     """
+    
     proj1 = [(glm.dot(point.vertex, contact_plane_normal), point) for point in points1]
     proj2 = [(glm.dot(point.vertex, contact_plane_normal), point) for point in points2]
     
@@ -63,7 +68,7 @@ def distance_to_plane(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec
     """gets the smallest distance a point is from a plane"""
     return glm.dot(point - contact_plane_point, contact_plane_normal) #TODO check this formula
 
-def project_points(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points:list[glm.vec3]) -> list[glm.vec3]:
+def project_points(contact_plane_point:glm.vec3, contact_plane_normal:glm.vec3, points:list[Vec3]) -> list[glm.vec3]:
     """gets the projected positions of the given points onto the given plane"""
     return [point - glm.dot(point - contact_plane_point, contact_plane_normal) * contact_plane_normal for point in points]
 

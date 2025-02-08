@@ -8,7 +8,7 @@ class Custom():
         """
         Inplace normalizes the vector
         """
-        self.data = glm.normalize(self.data)
+        self._data = glm.normalize(self._data)
         return self
     
     def apply_function(): ... # will be overridden by child custom classes

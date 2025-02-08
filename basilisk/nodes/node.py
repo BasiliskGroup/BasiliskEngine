@@ -217,7 +217,7 @@ class Node():
         """
         # update based on physical properties
         if any(self.velocity): self.position += dt * self.velocity
-        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation - dt / 2 * self.rotation * glm.quat(0, *self.rotational_velocity))
+        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation.data - dt / 2 * self.rotation.data * glm.quat(0, *self.rotational_velocity))
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
@@ -344,7 +344,7 @@ class Node():
         if self.physics_body: inertia_tensor *= self.physics_body.mass
                 
         # rotation
-        rotation_matrix = glm.mat3_cast(self.rotation)
+        rotation_matrix = glm.mat3_cast(self.rotation.data)
         inertia_tensor  = rotation_matrix * inertia_tensor * glm.transpose(rotation_matrix)
         
         return glm.inverse(inertia_tensor)
@@ -405,11 +405,11 @@ class Node():
         return f'<Bailisk Node | {self.name}, {self.mesh}, ({self.position})>'
     
     @property
-    def position(self): return self.internal_position.data
+    def position(self): return self.internal_position
     @property
-    def scale(self):    return self.internal_scale.data
+    def scale(self):    return self.internal_scale
     @property
-    def rotation(self): return self.internal_rotation.data
+    def rotation(self): return self.internal_rotation
     @property
     def forward(self):  return self._forward
     @property
@@ -492,6 +492,7 @@ class Node():
     @position.setter
     def position(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self.internal_position.data = value
+        elif isinstance(value, Vec3): self.internal_position.data = value.data
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for position. Expected 3, got {len(value)}')
             self.internal_position.data = glm.vec3(value)
@@ -503,6 +504,7 @@ class Node():
     @scale.setter
     def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
         if isinstance(value, glm.vec3): self.internal_scale.data = value
+        elif isinstance(value, Vec3): self.internal_scale.data = value.data
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) != 3: raise ValueError(f'Node: Invalid number of values for scale. Expected 3, got {len(value)}')
             self.internal_scale.data = glm.vec3(value)
@@ -514,6 +516,7 @@ class Node():
     @rotation.setter
     def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
         if isinstance(value, glm.quat) or isinstance(value, glm.vec4) or isinstance(value, glm.vec3): self.internal_rotation.data = glm.quat(value)
+        elif isinstance(value, Quat): self.internal_rotation.data = value.data
         elif isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
             if len(value) == 3: self.internal_rotation.data = glm.quat(glm.vec3(*value))
             elif len(value) == 4: self.internal_rotation.data = glm.quat(*value)
@@ -678,4 +681,3 @@ class Node():
         elif not self.collider:
             self.collider = Collider(self)
             if self.node_handler: self.collider.collider_handler = self.node_handler.scene.collider_handler
-                
