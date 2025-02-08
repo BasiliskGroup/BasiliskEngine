@@ -89,6 +89,13 @@ class Chunk():
         if shader: return shader.program
         return self.chunk_handler.engine.shader.program
 
+    def swap_shader(self, shader):
+        """
+        Swaps the batches shader to the given shader
+        """
+        
+        self.batch.swap_shader(shader)
+
     def __repr__(self) -> str:
         return f'<Basilisk Chunk | {self.position}, {len(self.nodes)} nodes, {"static" if self.static else "dynamic"}>'
 
