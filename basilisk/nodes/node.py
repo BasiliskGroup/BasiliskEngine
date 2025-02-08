@@ -232,14 +232,14 @@ class Node():
         """
         # calculate transform matrix with the given input
         transform = glm.mat4x4()
-        if self.relative_position: transform  = glm.translate(transform, self.parent.position)
-        if self.relative_rotation: transform *= glm.transpose(glm.mat4_cast(self.parent.rotation))
-        if self.relative_scale:    transform  = glm.scale(transform, self.parent.scale)
+        if self.relative_position: transform  = glm.translate(transform, self.parent.position.data)
+        if self.relative_rotation: transform *= glm.transpose(glm.mat4_cast(self.parent.rotation.data))
+        if self.relative_scale:    transform  = glm.scale(transform, self.parent.scale.data)
         
         # set this node's transforms based on the parent
         self.position = transform * self.relative_position
-        self.scale = self.relative_scale * self.parent.scale
-        self.rotation = self.relative_rotation * self.parent.rotation
+        self.scale = self.relative_scale * self.parent.scale.data
+        self.rotation = self.relative_rotation * self.parent.rotation.data
         
         for child in self.children: child.sync_data()
         
@@ -288,9 +288,9 @@ class Node():
         if child in self.children: return
         
         # compute relative transformations
-        if relative_position or (relative_position is None and child.relative_position): child.relative_position = child.position - self.position
-        if relative_scale    or (relative_scale    is None and child.relative_scale):    child.relative_scale    = child.scale / self.scale
-        if relative_rotation or (relative_rotation is None and child.relative_rotation): child.relative_rotation = child.rotation * glm.inverse(self.rotation)
+        if relative_position or (relative_position is None and child.relative_position): child.relative_position = child.position.data - self.position.data
+        if relative_scale    or (relative_scale    is None and child.relative_scale):    child.relative_scale    = child.scale.data / self.scale.data
+        if relative_rotation or (relative_rotation is None and child.relative_rotation): child.relative_rotation = child.rotation.data * glm.inverse(self.rotation.data)
         
         # add as a child to by synchronized and controlled
         if self.node_handler: self.node_handler.add(child)
@@ -446,7 +446,7 @@ class Node():
     def tags(self): return self._tags
     @property
     def static(self):
-        return self._static if self._static is not None else not(self.physics or any(self.velocity) or any(self.rotational_velocity))
+        return self._static if self._static is not None else not(self.physics or any(self.velocity) or any(self.rotational_velocity) or (self.parent and not self.parent.static))
     @property
     def x(self): return self.internal_position.data.x
     @property

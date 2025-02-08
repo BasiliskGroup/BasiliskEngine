@@ -29,7 +29,8 @@ class NodeHandler():
         dt = self.scene.engine.delta_time
         if dt < 0.5:
             for node in self.nodes: 
-                if not node.static: node.update(dt)
+                # if not node.static: TODO determine better solution to this line
+                    node.update(dt)
         self.chunk_handler.update()
 
     def render(self):
