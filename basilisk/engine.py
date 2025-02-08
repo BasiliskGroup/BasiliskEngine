@@ -11,7 +11,6 @@ from .input.mouse import Mouse
 from .mesh.cube import Cube
 from .render.shader import Shader
 import glcontext
-import openal
 
 class Engine():
     win_size: tuple
@@ -76,6 +75,12 @@ class Engine():
         else:
             pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
         pg.display.set_caption(title)
+        
+        # Init sound
+        pg.mixer.pre_init(44100, -16, 2, 512)
+        pg.mixer.init()
+        pg.mixer.set_num_channels(64)
+        pg.mixer.music.set_volume(100/100)
 
         # MGL context setup
         self.ctx = mgl.create_context()
@@ -132,7 +137,6 @@ class Engine():
         # Loop through all pygame events
         for event in self.events:
             if event.type == pg.QUIT: # Quit the engine
-                openal.oalQuit()
                 self.quit()
                 return
             if event.type == pg.VIDEORESIZE:
