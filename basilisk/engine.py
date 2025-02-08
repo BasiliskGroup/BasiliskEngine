@@ -8,6 +8,7 @@ from .config import Config
 from .input.mouse import Mouse
 from .mesh.cube import Cube
 from .render.shader import Shader
+import glcontext
 
 
 class Engine():
