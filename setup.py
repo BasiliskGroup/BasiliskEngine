@@ -7,7 +7,7 @@ with open(path.join(working_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name = 'basilisk-engine',  # Name of folder containing scripts and __init__
-    version = '0.1.8',
+    version = '0.1.10',
     url = 'https://basilisk-website.vercel.app/',
     author = 'Name',
     author_email = 'basiliskengine@gmail.com',
@@ -16,5 +16,5 @@ setup(
     long_description_content_type = 'text/markdown',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['numpy', 'pillow', 'pygame-ce', 'moderngl', 'PyGLM', 'numba', 'PyOpenAL'],  # Include all used packages
+    install_requires=['numpy', 'pillow', 'pygame-ce', 'moderngl', 'PyGLM', 'numba'],  # Include all used packages
 )
