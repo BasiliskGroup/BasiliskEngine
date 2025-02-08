@@ -37,6 +37,9 @@ def actions():
         print('physics:', node.physics)
         print('collision:', node.collision)
         print('static:', node.static)
+        
+    if engine.keys[bsk.pg.K_f] and not engine.previous_keys[bsk.pg.K_f]:
+        scene.camera.fov += 10
             
 def death_plane():
     

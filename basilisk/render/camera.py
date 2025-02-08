@@ -28,9 +28,12 @@ class Camera:
         """
         Camera object to get view and projection matricies. Movement built in
         """
+        
         # Back references
         self.scene  = None
         self.engine = None
+        # fov
+        self.fov = 100
         # The initial aspect ratio of the screen
         self.aspect_ratio = 1.0
         # Position
@@ -83,7 +86,7 @@ class Camera:
         return glm.lookAt(self.position, self.position + self.forward, self.up)
 
     def get_projection_matrix(self) -> glm.mat4x4:
-        return glm.perspective(glm.radians(FOV), self.aspect_ratio, NEAR, FAR)
+        return glm.perspective(glm.radians(self.fov), self.aspect_ratio, NEAR, FAR)
     
     def get_params(self) -> tuple:
         return self.engine, self.position, self.yaw, self.pitch
@@ -106,6 +109,8 @@ class Camera:
     def horizontal(self): return glm.normalize(self.forward.xz)
     @property
     def rotation(self): return glm.conjugate(glm.quatLookAt(self.forward, self.UP))
+    @property
+    def fov(self): return self._fov
 
     @scene.setter
     def scene(self, value):
@@ -131,6 +136,11 @@ class Camera:
             if len(value) != 3: raise ValueError(f'Camera: Invalid number of values for direction. Expected 3, got {len(value)}')
             self.forward = glm.normalize(glm.vec3(value))
         else: raise TypeError(f'Camera: Invalid direction value type {type(value)}')
+        
+    @fov.setter
+    def fov(self, value):
+        self._fov = value
+        if self.engine: self.use()
 
 
 class FreeCamera(Camera):

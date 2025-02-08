@@ -6,7 +6,7 @@ scene  = bsk.Scene()
 engine.scene = scene
 
 parent = bsk.Node(
-    scale = (1, 1, 3)
+    scale = (1, 1, 3),
 )
 child  = bsk.Node(
     position = (1, 0, 0),
@@ -24,8 +24,9 @@ parent.add(child)
 
 while engine.running:
         
-    # parent.rotation = scene.camera.rotation
+    parent.rotation = scene.camera.rotation
     parent.position += (0.003, 0, 0)
+    print(parent.children[0].scale)
     
     engine.update()
     
