@@ -94,7 +94,8 @@ class Shader:
         """
         
         self.engine.scene.shader_handler.add(self)
-        self.engine.scene.node_handler.chunk_handler.update_all()
+        # self.engine.scene.node_handler.chunk_handler.update_all()
+        self.engine.scene.node_handler.chunk_handler.swap_default(self)
 
     def write(self, name: str, value) -> None:
         """

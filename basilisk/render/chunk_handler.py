@@ -153,3 +153,14 @@ class ChunkHandler():
         render_range_z[0] += render_distance * (90 - fov < self.scene.camera.yaw < 90 + fov) - 1
 
         return (render_range_x, render_range_y, render_range_z)
+    
+    def swap_default(self, shader):
+        """
+        Swaps the shader of the default chunks
+        """
+        
+        group = self.shader_groups[None]
+        for chunk in group[0].values():
+            chunk.swap_shader(shader)
+        for chunk in group[1].values():
+            chunk.swap_shader(shader)

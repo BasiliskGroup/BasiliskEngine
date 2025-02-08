@@ -75,6 +75,25 @@ class Batch():
         
         return True
 
+    def swap_shader(self, shader):
+        """
+        Swap the shader without rebatching
+        """
+        
+        # Check there is actually something to swap
+        if not self.vao: return
+        
+        # Release old data
+        self.vao.release()
+
+        # Make new vao with old data
+        self.program = shader.program
+        self.vao = self.ctx.vertex_array(self.program, [(self.vbo, 
+                                                         '3f 2f 3f 3f 3f 3f 4f 3f 1f', 
+                                                         *['in_position', 'in_uv', 'in_normal', 'in_tangent', 'in_bitangent', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_material'])], 
+                                                         skip_errors=True)
+
+
     def __repr__(self) -> str:
         return f'<Basilisk Batch | {self.chunk.chunk_key}, {self.vbo.size / 1024  / 1024} mb>'
 

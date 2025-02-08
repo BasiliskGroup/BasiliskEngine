@@ -20,10 +20,10 @@ for x in range(-n, n):
             scene.add(bsk.Node(position=(x * d, y * d, z * d), shader=shaders[random.randint(0, 3)]))
 
 while engine.running:
-    if engine.keys[bsk.pg.K_1] and not engine.previous_keys[bsk.pg.K_1]:
+    if engine.keys[bsk.pg.K_1]:
         engine.shader = default_shader
-    if engine.keys[bsk.pg.K_2] and not engine.previous_keys[bsk.pg.K_2]:
+    if engine.keys[bsk.pg.K_2]:
         engine.shader = normal_shader
-    if engine.keys[bsk.pg.K_3] and not engine.previous_keys[bsk.pg.K_3]:
+    if engine.keys[bsk.pg.K_3]:
         engine.shader = geom_shader
     engine.update()
