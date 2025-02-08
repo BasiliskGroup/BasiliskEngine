@@ -140,14 +140,7 @@ class Scene():
         if len(returns) == 1: return returns[0]
         return returns
 
-    def set_engine(self, engine: any) -> None:
-        """
-        Sets the back references to the engine and creates handlers with the context
-        """
-
-        self.engine = engine
-        self.ctx    = engine.ctx
-
+    def init_handlers(self) -> None:
         self.camera           = FreeCamera()
         self.shader_handler   = ShaderHandler(self)
         self.material_handler = MaterialHandler(self)
@@ -159,6 +152,19 @@ class Scene():
         self.draw_handler     = DrawHandler(self)
         self.frame            = Frame(self)
         self.sky              = Sky(self.engine)
+
+    def set_engine(self, engine: any) -> None:
+        """
+        Sets the back references to the engine and creates handlers with the context
+        """
+
+        if not self.engine: 
+            self.engine = engine
+            self.ctx    = engine.ctx
+            self.init_handlers()
+        else:
+            self.engine = engine
+            self.ctx    = engine.ctx
         
     def raycast(self, position: glm.vec3=None, forward: glm.vec3=None, max_distance: float=1e5, has_collisions: bool=None, has_physics: bool=None, tags: list[str]=[]) -> RaycastResult:
         """
