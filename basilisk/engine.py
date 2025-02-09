@@ -42,7 +42,7 @@ class Engine():
     event_resize: bool
     """Bool for if a resize event has occured this frame"""
 
-    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, grab_mouse=True, headless=False, resizable=True) -> None:
+    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, max_fps=None, grab_mouse=True, headless=False, resizable=True) -> None:
         """
         Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with Basilisk
         Args:
@@ -71,6 +71,7 @@ class Engine():
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         # Check vsync against platform defaults
         if vsync == None: vsync = True if platform == 'linux' else False
+        self.max_fps = max_fps
         # Pygame display init
         if headless:
             pg.display.set_mode((300, 50), vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
@@ -78,7 +79,9 @@ class Engine():
         else:
             if resizable: pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
             else: pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
-        pg.display.set_caption(title)
+        
+        self.caption = title
+        if title: pg.display.set_caption(title)
         
         # Init sound
         pg.mixer.pre_init(44100, -16, 2, 512)
@@ -126,9 +129,10 @@ class Engine():
         """
 
         # Tick the clock and get delta time
-        self.delta_time = self.clock.tick() / 1000
+        if self.max_fps: self.delta_time = self.clock.tick(self.max_fps) / 1000
+        else: self.delta_time = self.clock.tick() / 1000
         self.time += self.delta_time
-        pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
+        if not self.caption: pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
         self.event_resize = False
 
         # Update the previous input lists for the next frame
