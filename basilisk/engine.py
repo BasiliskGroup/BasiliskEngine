@@ -40,7 +40,7 @@ class Engine():
     root: str
     """Path to the root directory containing internal data"""
 
-    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, grab_mouse=True, headless=False) -> None:
+    def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, grab_mouse=True, headless=False, resizable=True) -> None:
         """
         Basilisk Engine Class. Sets up the engine enviornment and allows the user to interact with Basilisk
         Args:
@@ -73,7 +73,8 @@ class Engine():
             pg.display.set_mode((300, 50), vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
             pg.display.iconify()
         else:
-            pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+            if resizable: pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+            else: pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
         pg.display.set_caption(title)
         
         # Init sound

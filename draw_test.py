@@ -1,7 +1,7 @@
 import basilisk as bsk
 import pygame as pg
 
-engine = bsk.Engine(grab_mouse=False)
+engine = bsk.Engine(grab_mouse=False, resizable=False)
 scene = bsk.Scene()
 engine.scene = scene
 
