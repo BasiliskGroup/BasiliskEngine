@@ -63,7 +63,7 @@ def line(engine: Engine, color: tuple, p1: tuple, p2: tuple, thickness: int=1) -
     # Draw the line
     draw_handler.draw_line(color, p1, p2, thickness)
 
-def blit(engine: Engine, image: Image, rect: tuple):
+def blit(engine: Engine, image: Image, rect: tuple, alpha: float=1.0):
     """
     Blits a basilisk image to the engine screen.
     Args:
@@ -80,7 +80,7 @@ def blit(engine: Engine, image: Image, rect: tuple):
     engine.scene.material_handler.image_handler.add(image)
 
     # Blit the image
-    draw_handler.blit(image, rect)
+    draw_handler.blit(image, rect, alpha)
 
 def text(engine: Engine, text: str, position: tuple, scale: float=1.0):
     """

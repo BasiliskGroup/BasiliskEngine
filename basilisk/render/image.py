@@ -32,7 +32,7 @@ class Image():
         if isinstance(path, str) or isinstance(path, os.PathLike):
             return self._from_path(path)
         elif isinstance(path, pg.Surface):
-            return self._from_surfaces(path)
+            return self._from_surface(path)
         elif isinstance(path, mgl.Texture):
             return self._from_texture(path)
         
