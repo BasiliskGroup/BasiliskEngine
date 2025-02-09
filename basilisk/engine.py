@@ -39,6 +39,8 @@ class Engine():
     """Object containing information about the user's mouse"""
     root: str
     """Path to the root directory containing internal data"""
+    event_resize: bool
+    """Bool for if a resize event has occured this frame"""
 
     def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, grab_mouse=True, headless=False, resizable=True) -> None:
         """
@@ -60,6 +62,7 @@ class Engine():
 
         # Save the window size
         self.win_size = win_size
+        self.event_resize = None
 
         pg.init()  
         # Initialize pygame and OpenGL attributes
@@ -126,6 +129,7 @@ class Engine():
         self.delta_time = self.clock.tick() / 1000
         self.time += self.delta_time
         pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
+        self.event_resize = False
 
         # Update the previous input lists for the next frame
         self.previous_keys = self.keys
@@ -142,6 +146,7 @@ class Engine():
                 return
             if event.type == pg.VIDEORESIZE:
                 # Updates the viewport
+                self.event_resize = True
                 self.win_size = (event.w, event.h)
                 self.ctx.viewport = (0, 0, event.w, event.h)
                 self.scene.camera.use()

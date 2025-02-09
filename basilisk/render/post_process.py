@@ -61,6 +61,13 @@ class PostProcess:
         
         raise ValueError(f'PostProces.apply: Invalid postprocess source type {type(source)}')
 
+    def resize(self, size: tuple=None):
+        """
+        Resize the post process
+        """
+        
+        self.size = size if size else self.engine.win_size
+
     def _render_post_process(self, source: mgl.Texture):
         # Clear and use the fbo as a render target
         self.fbo.use()

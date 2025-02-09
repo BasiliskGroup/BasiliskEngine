@@ -1,7 +1,7 @@
 import basilisk as bsk
 import pygame as pg
 
-engine = bsk.Engine(grab_mouse=False, resizable=False)
+engine = bsk.Engine(grab_mouse=False)
 scene = bsk.Scene()
 engine.scene = scene
 
@@ -17,6 +17,8 @@ pg.draw.rect(surf, (255, 0, 0), (10, 10, 60, 60))
 pg_img = bsk.Image(surf)
 
 while engine.running:
+
+    if engine.event_resize: print('ree')
 
     bsk.draw.rect(engine, (0, 0, 255), (400, 550, 200, 200))
     bsk.draw.rect(engine, 100, (0, 0, 50, 50))
