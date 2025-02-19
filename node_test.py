@@ -1,8 +1,7 @@
 import basilisk as bsk
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 scene.camera = bsk.StaticCamera()
 
@@ -16,7 +15,8 @@ monkey = bsk.Mesh('tests/monkey.obj')
 
 while engine.running:
 
-    dt = engine.delta_time
+    scene.update()
+    dt = engine.dt
 
     if engine.keys[bsk.pg.K_1] and not node:
         node = scene.add(bsk.Node())

@@ -2,8 +2,7 @@ import basilisk as bsk
 import random
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 default_shader = bsk.Shader(engine)
 normal_shader  = bsk.Shader(engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
@@ -20,6 +19,7 @@ for x in range(-n, n):
             scene.add(bsk.Node(position=(x * d, y * d, z * d), shader=shaders[random.randint(0, 3)]))
 
 while engine.running:
+    scene.update()
     if engine.keys[bsk.pg.K_1]:
         engine.shader = default_shader
     if engine.keys[bsk.pg.K_2]:

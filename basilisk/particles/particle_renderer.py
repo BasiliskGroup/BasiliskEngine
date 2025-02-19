@@ -31,7 +31,7 @@ class ParticleRenderer:
         root = scene.engine.root
         if shader: self.shader = shader
         else: self.shader = Shader(scene.engine, vert=root + '/shaders/particle.vert', frag=root + '/shaders/particle.frag')
-        scene.shader_handler.add(self.shader)
+        scene.engine.shader_handler.add(self.shader)
 
         self.particle_cube_size = 25
 

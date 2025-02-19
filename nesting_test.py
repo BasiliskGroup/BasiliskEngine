@@ -2,8 +2,7 @@ import basilisk as bsk
 import random
 
 engine = bsk.Engine()
-scene  = bsk.Scene()
-engine.scene = scene
+scene  = bsk.Scene(engine)
 
 parent = bsk.Node(
     scale = (1, 1, 3),
@@ -28,5 +27,6 @@ while engine.running:
     parent.position += (0.003, 0, 0)
     print(parent.children[0].scale)
     
+    scene.update()
     engine.update()
     

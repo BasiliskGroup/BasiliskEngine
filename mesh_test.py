@@ -2,8 +2,7 @@ import basilisk as bsk
 import numpy as np
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 scene.camera.position = (5, 3, 20)
 
@@ -50,12 +49,13 @@ def quad_uv_normal() -> bsk.Mesh:
     return mesh
 
 def test_physics() -> None:
-    cube = bsk.Node(position=(5, 5, 5), collisions=True, physics=True)
+    cube = bsk.Node(position=(5, 5, 5), collision=True, physics=True)
     scene.add(cube)
 
-node = bsk.Node(mesh=quad_uv_normal(), material=floor_mtl, collisions=True)
+node = bsk.Node(mesh=quad_uv_normal(), material=floor_mtl, collision=True)
 scene.add(node)
 # test_physics()
 
 while engine.running:
+    scene.update()
     engine.update()

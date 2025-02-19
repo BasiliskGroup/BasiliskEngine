@@ -40,7 +40,7 @@ class LightHandler():
 
         # if not program: program = self.engine.shader.program
 
-        for shader in self.scene.shader_handler.shaders:
+        for shader in self.engine.shader_handler.shaders:
             if 'numDirLights' not in shader.uniforms: continue
             
             program = shader.program

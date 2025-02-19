@@ -93,8 +93,7 @@ class Shader:
         Selects a shader for use
         """
         
-        self.engine.scene.shader_handler.add(self)
-        # self.engine.scene.node_handler.chunk_handler.update_all()
+        self.engine.shader_handler.add(self)
         self.engine.scene.node_handler.chunk_handler.swap_default(self)
 
     def write(self, name: str, value) -> None:

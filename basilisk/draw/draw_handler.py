@@ -9,9 +9,6 @@ from ..generic.input_validation import validate_color, validate_rect, validate_p
 
 class DrawHandler():
     engine: ...
-    """Back reference to the parent engine"""
-    scene: ...
-    """Back reference to the parent scene"""
     ctx: mgl.Context
     """Back reference to the parent context"""
     program: mgl.Program
@@ -23,15 +20,14 @@ class DrawHandler():
     vao: mgl.VertexArray=None
     """VAO for rendering all 2D draw calls"""
     
-    def __init__(self, scene) -> None:
+    def __init__(self, engine) -> None:
         # Back references
-        self.scene  = scene
-        self.engine = scene.engine
-        self.ctx    = scene.engine.ctx
+        self.engine = engine
+        self.ctx    = engine.ctx
 
         # Get the shader
         root = self.engine.root
-        self.shader = self.scene.shader_handler.add(Shader(self.engine, root + '/shaders/draw.vert', root + '/shaders/draw.frag'))
+        self.shader = self.engine.shader_handler.add(Shader(self.engine, root + '/shaders/draw.vert', root + '/shaders/draw.frag'))
 
         # Initialize draw data as blank
         self.draw_data = []

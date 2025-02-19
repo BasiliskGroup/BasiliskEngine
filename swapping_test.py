@@ -2,8 +2,7 @@ import basilisk as bsk
 import glm
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 node = bsk.Node()
 
@@ -50,6 +49,8 @@ def death_plane():
 
 while engine.running:
     
+    scene.update()
+
     actions()
     death_plane()
     

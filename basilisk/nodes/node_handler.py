@@ -19,6 +19,7 @@ class NodeHandler():
         """
         
         self.scene = scene
+        self.engine = scene.engine
         self.nodes = []
         self.chunk_handler = ChunkHandler(scene)
 
@@ -49,9 +50,9 @@ class NodeHandler():
         for n in node.get_all(): # gets all nodes including the node to be added
             
             # Update scene Handlers
-            self.scene.shader_handler.add(n.shader)
-            if not n.material: n.material = self.scene.material_handler.base
-            self.scene.material_handler.add(n.material)
+            self.engine.shader_handler.add(n.shader)
+            if not n.material: n.material = self.engine.material_handler.base
+            self.engine.material_handler.add(n.material)
             
             # Update the node attributes
             n.init_scene(self.scene)
