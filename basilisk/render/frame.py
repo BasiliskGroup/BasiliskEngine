@@ -11,15 +11,14 @@ class Frame:
     vao: mgl.VertexArray=None
     framebuffer: mgl.Framebuffer=None
 
-    def __init__(self, scene, resolution=1, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
+    def __init__(self, engine, resolution=1, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
         """
         Basilisk render destination. 
         Can be used to render to the screen or for headless rendering
         """
 
-        self.scene  = scene
-        self.engine = scene.engine
-        self.ctx    = scene.ctx
+        self.engine = engine
+        self.ctx    = engine.ctx
 
         # Load framebuffer
         self.resolution = resolution
@@ -30,7 +29,7 @@ class Frame:
 
         # Load Shaders
         self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/frame.frag')
-        self.scene.shader_handler.add(self.shader)
+        self.engine.shader_handler.add(self.shader)
 
         # Load VAO
         self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
@@ -64,7 +63,6 @@ class Frame:
         """
         
         self.framebuffer.use()
-        self.clear()
 
     def add_post_process(self, post_process: PostProcess) -> PostProcess:
         """

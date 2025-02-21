@@ -44,7 +44,7 @@ class Framebuffer:
 
         # Load Shaders
         self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/frame.frag')
-        self.engine.scene.shader_handler.add(self.shader)
+        self.engine.shader_handler.add(self.shader)
 
         # Load VAO
         self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
@@ -102,6 +102,7 @@ class Framebuffer:
         self.size = (int(self.size[0] * self.resolution_scale), int(self.size[1] * self.resolution_scale))
 
         # Create the fbo
+        print(self.size)
         self.texture = self.ctx.texture(self.size, components=self.components)
         self.depth = self.ctx.depth_texture(self.size)
         self.fbo   = self.ctx.framebuffer([self.texture], self.depth)

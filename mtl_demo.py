@@ -7,9 +7,7 @@ import cudart
 class App():
     def __init__(self):
         self.engine = bsk.Engine(grab_mouse=False)
-        self.scene = bsk.Scene()
-
-        self.engine.scene = self.scene
+        self.scene = bsk.Scene(self.engine)
 
         self.scene.camera = bsk.StaticCamera(position=(0, 0, 4))
 
@@ -106,6 +104,7 @@ class App():
 
     def start(self):
         while self.engine.running:
+            self.scene.update()
             self.update()
             if self.show_menu: self.draw()
             self.engine.update()

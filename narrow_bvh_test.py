@@ -5,8 +5,7 @@ import time
 import random
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 # start = time.time()
 cube_mesh = bsk.Mesh('tests/cube.obj')
@@ -28,7 +27,7 @@ lucy_mesh = engine.cube# bsk.Mesh('tests/cube.obj')
 mud_mtl = bsk.Material(color=(255, 255, 255))
 materials = [bsk.Material(color=(255 * (i & 4), 255 * (i & 2), 255 * (i & 1))) for i in range(1, 7)]
 
-scene.add_node(
+scene.add(bsk.Node(
     # position=(0, 0, -1), 
     # scale=(1, 2, 3),
     mesh=lucy_mesh, 
@@ -37,7 +36,7 @@ scene.add_node(
     # rotational_velocity=(0, 1, 0),
     # physics=True,
     # mass=1
-)
+))
 
 # old_time = 0
 # new_time = 0
@@ -117,4 +116,5 @@ for aabb in aabbs:
         )
 
 while engine.running:
+    scene.update()
     engine.update()

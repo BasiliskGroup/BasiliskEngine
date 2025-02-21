@@ -1,46 +1,46 @@
 import os
 from sys import platform
-import sys
-import glcontext
-from .input.path import get_root
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as pg
 import moderngl as mgl
+import glcontext  # For packaging (so it isnt a hidden import)
+from .render.shader_handler import ShaderHandler
+from .render.material_handler import MaterialHandler
+from .render.frame import Frame
+from .draw.draw_handler import DrawHandler
 from .config import Config
-from .input.mouse import Mouse
+from .input_output.mouse import Mouse
+from .input_output.clock import Clock
+from .input_output.IO_handler import IO
 from .mesh.cube import Cube
-from .render.shader import Shader
-import glcontext
 
 class Engine():
     win_size: tuple
     """Size of the engine window in pixels"""
     ctx: mgl.Context
     """ModernGL context used by the engine"""
-    scene: any
-    """Scene currently being updated and rendered by the engine"""
-    clock: pg.Clock
-    """Pygame clock used to keep track of time between frames"""
+    clock: Clock
+    """Basilisk clock used to keep track of time"""
+    shader_handler: ShaderHandler=None
+    """Handler for all shaders used in all scenes of the engine"""
+    material_handler: MaterialHandler=None
+    """Handler for all materials and images in all scenes"""
+    frame: Frame=None
+    """Default render target for all locations. Rendered to the screen at the end of the frame"""
     config: Config
     """Object containing all global attributes"""
     delta_time: float
     """Time in seconds that passed between the last frame"""
     time: float
     """Total time the engine has been running"""
-    running: bool
+    running: bool=True
     """True if the engine is still running"""
-    events: list
-    """List of all pygame"""
-    keys: list
-    """bool list containing the state of all keys this frame"""
-    previous_keys: list
-    """bool list containing the state of all keys at the previous frame"""
     mouse: Mouse
     """Object containing information about the user's mouse"""
     root: str
     """Path to the root directory containing internal data"""
-    event_resize: bool
-    """Bool for if a resize event has occured this frame"""
+    current_frame_updated: bool=False
+    """Flag for if the engine has been updated this frame"""
 
     def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, max_fps=None, grab_mouse=True, headless=False, resizable=True) -> None:
         """
@@ -56,34 +56,31 @@ class Engine():
                 Flag for headless rendering
         """
 
-        if platform == 'win32' : self.platform = 'windows'
-        elif  platform == 'darwin': self.platform = 'mac' 
-        else: self.platform = 'linux'
-
         # Save the window size
         self.win_size = win_size
-        self.event_resize = None
 
+        # Initialize pygame and set OpenGL attributes
         pg.init()  
-        # Initialize pygame and OpenGL attributes
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
-        # Check vsync against platform defaults
-        if vsync == None: vsync = True if platform == 'linux' else False
-        self.max_fps = max_fps
-        # Pygame display init
+
+        # Platform settings
+        if platform == 'win32' : self.platform = 'windows'
+        elif  platform == 'darwin': self.platform = 'mac' 
+        else: self.platform = 'linux'
+        if vsync == None: vsync = True if self.platform == 'linux' else False
+
+        # Initializae the pygame display
+        self.headless = headless
         if headless:
             pg.display.set_mode((300, 50), vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
             pg.display.iconify()
         else:
             if resizable: pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
             else: pg.display.set_mode(self.win_size, vsync=vsync, flags=pg.OPENGL | pg.DOUBLEBUF)
-        
-        self.caption = title
-        if title: pg.display.set_caption(title)
-        
-        # Init sound
+                
+        # Initalize pygame sound moduel sound
         pg.mixer.pre_init(44100, -16, 2, 512)
         pg.mixer.init()
         pg.mixer.set_num_channels(64)
@@ -94,102 +91,61 @@ class Engine():
         self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
 
         # Global attributes referenced by the handlers
-        self.headless = headless
-        self.set_configurations()
+        self.config = Config()
         self.root = os.path.dirname(__file__)
         self.cube = Cube(self)
         self.fbos = []
-
-        # Update the icon
-        pg.display.set_icon(pg.image.load(self.root + '/bsk_assets/basilisk.png'))
         
-        # Time variables
-        self.clock = pg.time.Clock()
-        self.delta_time = 0
-        self.time = 0
+        # Handlers
+        self.clock            = Clock(self, max_fps)
+        self.IO               = IO(self, grab_mouse=grab_mouse, caption=title)
+        self.material_handler = MaterialHandler(self)
+        self.shader_handler   = ShaderHandler(self)
+        self.draw_handler     = DrawHandler(self)
+        self.frame            = Frame(self)
+        self.material_handler.set_base()
 
-        # Initialize input lists
-        self.keys = pg.key.get_pressed()
-        self.previous_keys = self.keys
-        self.mouse = Mouse(grab=grab_mouse)
-
-        # Scene being used by the engine
-        self.scene = None
-
-        # Load a default shader
-        self.shader = Shader(self, self.root + '/shaders/batch.vert', self.root + '/shaders/batch.frag')
-        self.shader.hash = self.shader.hash + hash('engine_shader')
-
-        # Set the scene to running
-        self.running = True
-
-    def update(self, render=True) -> None:
+    def _update(self) -> None:
         """
-        Updates all input, physics, and time variables. Renders the current scene.
+        Internal engine update.
+        Updates all input, physics, and time variables. Clears the frame.
         """
 
-        # Tick the clock and get delta time
-        if self.max_fps: self.delta_time = self.clock.tick(self.max_fps) / 1000
-        else: self.delta_time = self.clock.tick() / 1000
-        self.time += self.delta_time
-        if not self.caption: pg.display.set_caption(f"FPS: {round(self.clock.get_fps())}")
-        self.event_resize = False
+        if self.current_frame_updated: return
 
-        # Update the previous input lists for the next frame
-        self.previous_keys = self.keys
-        
-        # Get inputs and events
-        self.events = pg.event.get()
-        self.keys = pg.key.get_pressed()
-        self.mouse.update(self.events)
-        
-        # Loop through all pygame events
-        for event in self.events:
-            if event.type == pg.QUIT: # Quit the engine
-                self.quit()
-                return
-            if event.type == pg.VIDEORESIZE:
-                # Updates the viewport
-                self.event_resize = True
-                self.win_size = (event.w, event.h)
-                self.ctx.viewport = (0, 0, event.w, event.h)
-                self.scene.camera.use()
-                self.scene.frame.resize()
-                for fbo in self.fbos: fbo.resize()
+        self.clock.update()
+        self.IO.update()
+
+        self.current_frame_updated = True
 
 
-        # Update the scene if possible
-        if self.scene: self.scene.update()
-        # Render after the scene and engine has been updated
-        if render: self.render()
-
-
-    def render(self) -> None:
+    def update(self) -> None:
         """
-        Renders the scene currently being used by the engine
+        Calls internal update if needed
+        Renders the draw handler
+        Renders the engine's frame to the screen.
         """
-        
-        # Set the ctx for rendering
+
+
+        # Must update the frame
+        if not self.current_frame_updated: self._update()
+        if not self.running: return
+
+        # Render all draw calls from the past frame
+        self.frame.use()
+        self.draw_handler.render()
+
+        # Clear the screen and render the frame
         self.ctx.screen.use()
         self.ctx.clear()
-
-        # Render the scene
-        if self.scene:self.scene.render()
-
-        # Flip pygame display buffer
+        self.frame.render()
         pg.display.flip()
 
-    def set_configurations(self):
-        """
-        Sets global configurations. These attributs are not used by the engine, just the handlers
-        """
+        self.frame.clear()
 
-        # Create a config object
-        self.config = Config()
 
-        # Set the attributes on the config object
-        setattr(self.config, "chunk_size", 40)
-        setattr(self.config, "render_distance", 5)
+        # Allow for the engine to take in input again
+        self.current_frame_updated = False
 
     def quit(self) -> None:
         """
@@ -200,18 +156,10 @@ class Engine():
         self.ctx.release()
         self.running = False
 
-    @property
-    def scene(self): return self._scene
+
     @property
     def shader(self): return self._shader
-
-    @scene.setter
-    def scene(self, value):
-        self._scene = value
-        if self._scene: 
-            self._scene.set_engine(self)
-
     @shader.setter
     def shader(self, value):
         self._shader = value
-        if self.scene: value.set_main()
+        value.set_main()

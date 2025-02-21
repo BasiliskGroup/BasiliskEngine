@@ -4,8 +4,7 @@ import glm
 import time
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 # engine.shader = bsk.Shader(engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
 
@@ -72,4 +71,5 @@ mesh = bsk.Mesh(get_data(size=16))
 scene.add(bsk.Node(position=(0, -10, 0), mesh=mesh, material=mtl))
 
 while engine.running:
+    scene.update()
     engine.update()

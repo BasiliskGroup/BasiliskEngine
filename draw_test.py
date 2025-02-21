@@ -2,11 +2,6 @@ import basilisk as bsk
 import pygame as pg
 
 engine = bsk.Engine(grab_mouse=False, max_fps=60, title=None)
-scene = bsk.Scene()
-engine.scene = scene
-
-scene.camera = bsk.StaticCamera()
-scene.sky = None
 
 brick = bsk.Image('tests/brick.png')
 

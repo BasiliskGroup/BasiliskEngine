@@ -7,32 +7,28 @@ import numpy as np
 class MaterialHandler():
     engine: ...
     """Back reference to the parent engine"""
-    scene: ...
-    """Back reference to the parent scene"""
     ctx: mgl.Context
     """Back reference to the parent context"""
     materials: list[Material]
-    """List containing all the materials in the scene"""
+    """List containing all the materials in the engine"""
     data_texture: mgl.Texture
-    """ModernGL texture containing all the material data for materials in the scene"""
+    """ModernGL texture containing all the material data for materials in the engine"""
   
-    def __init__(self, scene) -> None:
+    def __init__(self, engine) -> None:
         """
-        Handles all the materials introduced to a scene. 
+        Handles all the materials introduced to an engine. 
         Writes material information to the GPU
         """
         
         # Back references
-        self.scene  = scene
-        self.engine = scene.engine
-        self.ctx    = scene.engine.ctx
+        self.engine = engine
+        self.ctx    = engine.ctx
 
         # Initialize data
         self.materials = []
         self.data_texture = None
-        self.set_base()
 
-        self.image_handler = ImageHandler(scene)
+        self.image_handler = ImageHandler(engine)
 
     def add(self, material: Material) -> None:
         """
@@ -93,7 +89,7 @@ class MaterialHandler():
 
         if not self.data_texture: return
 
-        for shader in self.engine.scene.shader_handler.shaders:
+        for shader in self.engine.shader_handler.shaders:
             if 'materialsTexture' not in shader.uniforms: continue
 
             shader.program['materialsTexture'] = 9

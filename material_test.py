@@ -2,8 +2,7 @@ import basilisk as bsk
 import numpy as np
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 wood_img = bsk.Image('tests/floor_albedo.png')
 
@@ -23,7 +22,7 @@ scene.add(node)
 scene.camera.position = (2.5, 2, 10)
 
 while engine.running:
-    engine.update()
+    scene.update()
 
     if engine.keys[bsk.pg.K_1]:
         node.material = red
@@ -43,3 +42,5 @@ while engine.running:
         swap.color = (0, 0, 255)
     elif engine.keys[bsk.pg.K_9]:
         swap.texture = wood_img
+
+    engine.update()

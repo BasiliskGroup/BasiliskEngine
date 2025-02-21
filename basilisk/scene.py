@@ -1,5 +1,6 @@
 import moderngl as mgl
 import glm
+import pygame as pg
 
 from .mesh.mesh import Mesh
 from .render.material import Material
@@ -10,7 +11,6 @@ from .render.camera import Camera, FreeCamera
 from .nodes.node_handler import NodeHandler
 from .physics.physics_engine import PhysicsEngine
 from .collisions.collider_handler import ColliderHandler
-from .draw.draw_handler import DrawHandler
 from .render.sky import Sky
 from .render.frame import Frame
 from .particles.particle_handler import ParticleHandler
@@ -21,39 +21,55 @@ from .render.post_process import PostProcess
 from .render.framebuffer import Framebuffer
 
 class Scene():
-    engine: any
+    engine: ...=None
     """Parent engine of the scene"""
     ctx: mgl.Context
     """Reference to the engine context"""
+    camera: Camera=None
+    """"""
+    light_handler: LightHandler=None
+    """"""
+    physics_engine: PhysicsEngine=None
+    """"""
+    node_handler: NodeHandler=None
+    """"""
 
-    def __init__(self) -> None:
+    def __init__(self, engine: ...) -> None:
         """
         Basilisk scene object. Contains all nodes for the scene
         """
 
-        self.engine = None
-        self.ctx    = None
+        self.engine = engine
+        self.ctx    = engine.ctx
+        self.camera           = FreeCamera()
+        self.light_handler    = LightHandler(self)
+        self.physics_engine   = PhysicsEngine()
+        self.node_handler     = NodeHandler(self)
+        self.particle         = ParticleHandler(self)
+        self.collider_handler = ColliderHandler(self)
+        self.sky              = Sky(self.engine)
 
-        self.camera           = None
-        self.shader_handler   = None
-        self.node_handler     = None
-        self.material_handler = None
-        self.light_handler    = None
-        self.draw_handler     = None
-        self.sky              = None
-        self.frame            = None
 
-    def update(self) -> None:
+    def update(self, render: bool=True, nodes: bool=True, particles: bool=True, collisions: bool=True) -> None:
         """
         Updates the physics and in the scene
         """
-        self.particle.update()
+        
+        # Check that the engine is still running
+        self.engine._update()
+        if not self.engine.running: return
+
+        # Update based on the given parameters
+        if nodes: self.node_handler.update()
+        if particles: self.particle.update()
+        if self.engine.event_resize: self.camera.use()
         self.camera.update()
         
-        
-        self.node_handler.update()
-        if self.engine.delta_time < 0.5: # TODO this will cause physics to slow down when on low frame rate, this is probabl;y acceptable
+        if collisions and self.engine.delta_time < 0.5: # TODO this will cause physics to slow down when on low frame rate, this is probabl;y acceptable
             self.collider_handler.resolve_collisions()
+
+        # Render by default to the engine frame
+        if render: self.render()
 
     def render(self, render_target: Framebuffer|Frame=None) -> None:
         """
@@ -63,19 +79,19 @@ class Scene():
         if render_target:
             show = False
         else:
-            render_target = self.frame
+            render_target = self.engine.frame
             show = True
 
         render_target.use()
-        render_target.clear()
-        self.shader_handler.write()
+        self.engine.shader_handler.write(self)
         if self.sky: self.sky.render()
         self.node_handler.render()
         self.particle.render()
-        self.draw_handler.render()
+
 
         if self.engine.headless or not show: return
-        self.frame.render()
+
+
     
     def add(self, *objects: Node | None) -> None | Node | list:
         """
@@ -100,7 +116,7 @@ class Scene():
             
             # Add a node to the scene
             elif isinstance(bsk_object, PostProcess):
-                returns.append(self.frame.add_post_process(bsk_object)); continue
+                returns.append(self.engine.frame.add_post_process(bsk_object)); continue
             
             
             # Recived incompatable type
@@ -139,19 +155,6 @@ class Scene():
         if not returns: return None
         if len(returns) == 1: return returns[0]
         return returns
-
-    def init_handlers(self) -> None:
-        self.camera           = FreeCamera()
-        self.shader_handler   = ShaderHandler(self)
-        self.material_handler = MaterialHandler(self)
-        self.light_handler    = LightHandler(self)
-        self.physics_engine   = PhysicsEngine()
-        self.node_handler     = NodeHandler(self)
-        self.particle         = ParticleHandler(self)
-        self.collider_handler = ColliderHandler(self)
-        self.draw_handler     = DrawHandler(self)
-        self.frame            = Frame(self)
-        self.sky              = Sky(self.engine)
 
     def set_engine(self, engine: any) -> None:
         """

@@ -3,8 +3,7 @@ import random
 import glm
 
 engine = bsk.Engine()
-scene  = bsk.Scene()
-engine.scene = scene
+scene  = bsk.Scene(engine)
 # scene.physics_engine.accelerations = []
 
 # materials and meshes
@@ -43,6 +42,8 @@ objects = [scene.add(bsk.Node(
 )) for _ in range(1)]
 
 while engine.running:
+
+    scene.update()
 
     for object in objects:
         if object.y < -50: 

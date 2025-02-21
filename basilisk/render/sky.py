@@ -11,7 +11,7 @@ class Sky:
         Handler for all skybox rendering
         """
         
-        self.scene = engine.scene
+        self.engine = engine
         self.ctx   = engine.ctx
         
         if not sky_texture: sky_texture = engine.root + '/bsk_assets/skybox.png'
@@ -30,7 +30,7 @@ class Sky:
         self.shader.program['skyboxTexture']  = 8
         self.texture_cube.use(location = 8)
 
-        shader = self.scene.engine.shader
+        shader = self.engine.shader
         if 'skyboxTexture' not in shader.uniforms: return
         shader.program['skyboxTexture'] = 8
         self.texture_cube.use(location = 8)
@@ -107,8 +107,8 @@ class Sky:
 
         # Create a renderable vao
         self.vbo     = self.ctx.buffer(vertex_data)
-        root = self.scene.engine.root
-        self.shader = self.scene.shader_handler.add(Shader(self.scene.engine, root + '/shaders/sky.vert', root + '/shaders/sky.frag'))
+        root = self.engine.root
+        self.shader = self.engine.shader_handler.add(Shader(self.engine, root + '/shaders/sky.vert', root + '/shaders/sky.frag'))
         self.vao     = self.ctx.vertex_array(self.shader.program, [(self.vbo, '3f', 'in_position')], skip_errors=True)
 
     def __del__(self):

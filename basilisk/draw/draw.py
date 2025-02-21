@@ -14,7 +14,7 @@ def rect(engine: Engine, color: tuple, rect: tuple) -> None:
     """
     
     # Get the draw handler from the engine
-    draw_handler = engine.scene.draw_handler
+    draw_handler = engine.draw_handler
     if not draw_handler: return
 
     # Draw the rect
@@ -36,7 +36,7 @@ def circle(engine: Engine, color: tuple, center: tuple, radius: int, resolution:
     """
     
     # Get the draw handler from the engine
-    draw_handler = engine.scene.draw_handler
+    draw_handler = engine.draw_handler
     if not draw_handler: return
 
     # Draw the circle
@@ -57,7 +57,7 @@ def line(engine: Engine, color: tuple, p1: tuple, p2: tuple, thickness: int=1) -
     """
     
     # Get the draw handler from the engine
-    draw_handler = engine.scene.draw_handler
+    draw_handler = engine.draw_handler
     if not draw_handler: return
 
     # Draw the line
@@ -74,10 +74,10 @@ def blit(engine: Engine, image: Image, rect: tuple, alpha: float=1.0):
     """
 
     # Get the draw handler from the engine
-    draw_handler = engine.scene.draw_handler
+    draw_handler = engine.draw_handler
     if not draw_handler: return
 
-    engine.scene.material_handler.image_handler.add(image)
+    engine.material_handler.image_handler.add(image)
 
     # Blit the image
     draw_handler.blit(image, rect, alpha)
@@ -88,7 +88,7 @@ def text(engine: Engine, text: str, position: tuple, scale: float=1.0):
     USE SPARINGLY, INEFFICIENT IMPLAMENTATION
     """
     
-    font_renderer = engine.scene.draw_handler.font_renderer
+    font_renderer = engine.draw_handler.font_renderer
 
     # Render the text if it has not been cached
     if text not in font_renderer.text_renders:

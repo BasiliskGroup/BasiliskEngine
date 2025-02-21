@@ -97,9 +97,10 @@ class Node():
         
         # parents
         self.node_handler = None
-        self.scene = None
-        self.chunk = None
-        self.parent = None
+        self.scene        = None
+        self.engine       = None
+        self.chunk        = None
+        self.parent       = None
         
         # lazy update variables
         self.needs_geometric_center = True # pos
@@ -194,18 +195,19 @@ class Node():
         self.internal_scale.callback    = scale_callback
         self.internal_rotation.callback = rotation_callback
     
-    def init_scene(self, scene):
+    def init_scene(self, scene: ...) -> None:
         """
         Updates the scene of the node
         """
         self.scene = scene
+        self.engine = scene.engine
         self.node_handler = scene.node_handler
 
         # Update materials
         self.write_materials()
 
         # Update the mesh
-        self.mesh = self.mesh if self.mesh else self.scene.engine.cube
+        self.mesh = self.mesh if self.mesh else self.engine.cube
 
         # Update physics and collider
         if self.physics_body: self.physics_body.physics_engine = scene.physics_engine
@@ -387,14 +389,14 @@ class Node():
         if isinstance(self.material, list):
             mtl_index_list = []
             for mtl in self._mtl_list:
-                self.node_handler.scene.material_handler.add(mtl)
+                self.engine.material_handler.add(mtl)
                 mtl_index_list.append(mtl.index)
                 mtl_index_list.append(mtl.index)
                 mtl_index_list.append(mtl.index)
             self._material = mtl_index_list
 
         if isinstance(self.material, type(None)):
-            self.material = self.scene.material_handler.base
+            self.material = self.engine.material_handler.base
         
 
     def __repr__(self) -> str:
@@ -555,16 +557,16 @@ class Node():
             else:
                 mtl_index_list = []
                 for mtl in self._mtl_list:
-                    self.node_handler.scene.material_handler.add(mtl)
+                    self.engine.material_handler.add(mtl)
                     mtl_index_list.append(mtl.index)
                     mtl_index_list.append(mtl.index)
                     mtl_index_list.append(mtl.index)
                 self._material = mtl_index_list
         elif isinstance(value, Material): 
             self._material = value
-            if self.node_handler: self.node_handler.scene.material_handler.add(value)
+            if self.node_handler: self.engine.material_handler.add(value)
         elif isinstance(value, type(None)):
-            if self.scene: self._material = self.scene.material_handler.base
+            if self.engine: self._material = self.engine.material_handler.base
             else: self._material = None
 
         else: raise TypeError(f'Node: Invalid material value type {type(value)}')
