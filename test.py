@@ -1,5 +1,10 @@
-def test(*args: int):
-    for thing in args:
-        print(thing)
+import glm
+import random
 
-test(1, 2, 3)
+pitch = random.uniform(-1, 1)
+yaw = random.uniform(-1, 1)
+roll = random.uniform(-1, 1)
+glm.quat()
+rotation = glm.quat((pitch, yaw, roll))
+print(yaw, pitch, roll)
+print(glm.yaw(rotation), glm.pitch(rotation), glm.roll(rotation))
