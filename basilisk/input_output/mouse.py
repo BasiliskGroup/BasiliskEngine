@@ -25,12 +25,12 @@ class Mouse():
             if event.type == pg.KEYUP:
                 if event.key == pg.K_ESCAPE and self.grab:
                     # Unlock mouse
-                    pg.event.set_grab(False)
-                    pg.mouse.set_visible(True)
-            if event.type == pg.MOUSEBUTTONUP and self.grab:
+                    self.grab = False
+                    self.visible = True
+            if event.type == pg.MOUSEBUTTONUP and not self.grab:
                 # Lock mouse
-                pg.event.set_grab(True)
-                pg.mouse.set_visible(False)
+                self.grab = True
+                self.visible = False
 
     @property
     def position(self): return self._position
