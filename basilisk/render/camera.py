@@ -203,7 +203,7 @@ class FreeCamera(Camera):
         """
         Rotates the camera based on the amount of mouse movement.
         """
-        rel_x, rel_y = pg.mouse.get_rel()
+        rel_x, rel_y = self.engine.mouse.relative
         
         yaw_rotation = glm.angleAxis(SENSITIVITY * rel_x, -self.UP)
         pitch_rotation = glm.angleAxis(SENSITIVITY * rel_y, -self.right)
