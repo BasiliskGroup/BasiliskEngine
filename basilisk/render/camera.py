@@ -24,7 +24,7 @@ class Camera:
     position: glm.vec3
     """Location of the camera (maters)"""
 
-    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0), yaw=-90, pitch=0) -> None:
+    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0)) -> None:
         """
         Camera object to get view and projection matricies. Movement built in
         """
@@ -51,20 +51,6 @@ class Camera:
         
         # self.update_camera_vectors()
         self.m_view = self.get_view_matrix()
-
-    # def update_camera_vectors(self) -> None:
-    #     """
-    #     Computes the forward vector based on the pitch and yaw. Computes horizontal and vertical vectors with cross product.
-    #     """
-    #     yaw, pitch = glm.radians(self.yaw), glm.radians(self.pitch)
-
-    #     self.forward.x = glm.cos(yaw) * glm.cos(pitch)
-    #     self.forward.y = glm.sin(pitch)
-    #     self.forward.z = glm.sin(yaw) * glm.cos(pitch)
-
-    #     self.forward = glm.normalize(self.forward)
-    #     self.right = glm.normalize(glm.cross(self.forward, self.UP))
-    #     self.up = glm.normalize(glm.cross(self.right, self.forward))
 
     def use(self):
         # Updated aspect ratio of the screen
@@ -186,8 +172,8 @@ class Camera:
 
 
 class FreeCamera(Camera):
-    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0), yaw=-90, pitch=0):
-        super().__init__(position, rotation, yaw, pitch)
+    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0)):
+        super().__init__(position, rotation)
 
     def update(self) -> None:
         """
@@ -231,11 +217,16 @@ class FreeCamera(Camera):
             self.position += self.UP * velocity
         if keys[pg.K_LSHIFT]:
             self.position -= self.UP * velocity
+            
+class FixedCamera(FreeCamera):
+    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0)):
+        super().__init__(position, rotation)
 
+    def move(self): pass
 
 class FollowCamera(FreeCamera):
-    def __init__(self, parent, position=(0, 0, 20), rotation=(1, 0, 0, 0), yaw=-90, pitch=0, offset=(0, 0, 0)):
-        super().__init__(position, rotation, yaw, pitch)
+    def __init__(self, parent, position=(0, 0, 20), rotation=(1, 0, 0, 0), offset=(0, 0, 0)):
+        super().__init__(position, rotation)
         self.parent = parent
         self.offest = glm.vec3(offset)
     
@@ -247,11 +238,11 @@ class FollowCamera(FreeCamera):
         self.position = self.parent.position + self.offest
         
 class OrbitCamera(FreeCamera):
-    def __init__(self, parent, position=(0, 0, 20), rotation=(1, 0, 0, 0), yaw=-90, pitch=0, distance=5, offset=(0, 0)):
+    def __init__(self, parent, position=(0, 0, 20), rotation=(1, 0, 0, 0), distance=5, offset=(0, 0)):
         self.parent = parent
         self.distance = distance
         self.offset = glm.vec2(offset)
-        super().__init__(position, rotation, yaw, pitch)
+        super().__init__(position, rotation)
 
     def get_view_matrix(self) -> glm.mat4x4:
         return glm.lookAt(self.position, self.parent.position, self.up)
@@ -263,5 +254,5 @@ class OrbitCamera(FreeCamera):
         self.position = self.parent.position - glm.normalize(self.forward) * self.distance
 
 class StaticCamera(Camera):
-    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0), yaw=-90, pitch=0):
-        super().__init__(position, rotation, yaw, pitch)
+    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0)):
+        super().__init__(position, rotation)

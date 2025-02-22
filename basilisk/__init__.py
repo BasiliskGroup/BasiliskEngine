@@ -8,7 +8,7 @@ from .render.material import Material
 from .render.shader import Shader
 from .render.shader_handler import ShaderHandler
 from .draw import draw
-from .render.camera import FreeCamera, StaticCamera, FollowCamera, OrbitCamera
+from .render.camera import FreeCamera, StaticCamera, FollowCamera, OrbitCamera, FixedCamera
 from .render.sky import Sky
 from .render.post_process import PostProcess
 from .particles.particle_handler import ParticleHandler
