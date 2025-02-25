@@ -73,8 +73,7 @@ class IO:
                 self.event_resize = True
                 self.engine.win_size = (event.w, event.h)
                 self.engine.ctx.viewport = (0, 0, event.w, event.h)
-                self.engine.frame.resize((event.w, event.h))
-                # for fbo in self.fbos: fbo.resize()
+                for fbo in self.engine.fbos: fbo.resize()
 
     def update_caption(self) -> None:
         """

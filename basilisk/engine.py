@@ -41,6 +41,10 @@ class Engine():
     """Path to the root directory containing internal data"""
     current_frame_updated: bool=False
     """Flag for if the engine has been updated this frame"""
+    keys: list[bool]
+    """List of all keyboard inputs as booleans"""
+    previous_keys: list[bool]
+    """List of all keyoard inputs from the last frame as booleans"""
 
     def __init__(self, win_size=(800, 800), title="Basilisk Engine", vsync=None, max_fps=None, grab_mouse=True, headless=False, resizable=True) -> None:
         """
@@ -113,6 +117,7 @@ class Engine():
 
         if self.current_frame_updated: return
 
+        for fbo in self.fbos: fbo.clear()
         self.clock.update()
         self.IO.update()
 

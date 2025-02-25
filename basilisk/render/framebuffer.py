@@ -7,40 +7,76 @@ from ..render.shader import Shader
 class Framebuffer:
     engine: ...
     """Reference to the parent engine"""
-    fbo: mgl.Framebuffer = None
+    size: tuple[int] | None=None
+    """The dimensions of the framebuffer (x, y). Defaults to window size if None"""
+    scale: float=1.0
+    """Scaling factor applied to the size. Best for use with default size"""
+    texture_filter: tuple[int]=(mgl.NEAREST, mgl.NEAREST)
+    """The filter applied to the texture when rendering"""
+    fbo: mgl.Framebuffer=None
     """The core framebuffer the object provides abstraction for."""
-    texture: mgl.Texture = None
+    texture: mgl.Texture=None
     """The color texture of the framebuffer"""
-    depth: mgl.Texture = None
+    depth: mgl.Texture=None
     """The depth texture of the framebuffer"""
-    size: tuple[int]
-    """The dimensions of the framebuffer (x, y)"""
+    _color_attachments = None
+    """"""
+    _depth_attachment = None
+    """"""
 
-    def __init__(self, engine, size: tuple[int]=None, resolution_scale: float=1.0, components: int=4, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
+    def __init__(self, engine: ..., size: tuple[int]=None, n_color_attachments: int=1, scale: float=1.0, linear_filter: bool=True) -> None:
         """
-        Abstraction to the mgl framebuffer
-        Args:
-            engine: mgl.Engine: 
-                The parent engine
-            size: tuple[int]: 
-                The dimensions of the framebuffer (x, y)
+        Abstraction of the MGL framebuffer.
+        Has the given number of color attachements (4-component) and 1 depth attachment.
+        All textures are of uniform size.
+        """
+
+        self.engine         = engine
+        self.ctx            = engine.ctx
+        self._size          = size
+        self.scale          = scale
+        self.texture_filter = (mgl.LINEAR, mgl.LINEAR) if linear_filter else (mgl.NEAREST, mgl.NEAREST)
+        self.attachments    = n_color_attachments
+
+        self.load_pipeline()
+        self.generate_fbo()
+
+        self.engine.fbos.append(self)
+
+    def generate_fbo(self):
+        """
+        Generates fresh depth texture and color textures and creates an FBO 
+        """
+
+        # Release existing memory
+        self.__del__()
+
+        # Create textures
+        self._color_attachments = [self.ctx.texture(self.size, components=4)]
+        for tex in self._color_attachments: tex.filter = self.texture_filter
+        self._depth_attachment  = self.ctx.depth_texture(self.size)
+
+        # Create the internal fbo
+        self.fbo = self.ctx.framebuffer(self._color_attachments, self._depth_attachment)
+
+    def resize(self, new_size: tuple[int]=None) -> None:
+        """
+        Update set size framebuffers with the given size.
         """
         
-        # Set attributes
-        self.engine = engine
-        self.ctx = engine.ctx
-        self.components = components
+        # Check that we are not updating the size to the existing size and
+        if self._size and self._size == new_size: return
 
-        # Set the size
-        self.resolution_scale = resolution_scale
-        self._size = size
-        self.size = self._size if self._size else self.engine.win_size
-        self.size = (int(self.size[0] * resolution_scale), int(self.size[1] * resolution_scale))
-        
-        # Create the fbo
-        self.texture = self.ctx.texture(self.size, components=self.components)
-        self.depth = self.ctx.depth_texture(self.size)
-        self.fbo   = self.ctx.framebuffer([self.texture], self.depth)
+        # If we have a set size, update with the given size
+        if self._size and new_size: self._size = new_size
+
+        # Update the textures and fbo
+        self.generate_fbo()
+
+    def load_pipeline(self) -> None:
+        """
+        Loads the shader, vbo, and vao used to display the fbo
+        """
 
         # Load Shaders
         self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/frame.frag')
@@ -50,13 +86,11 @@ class Framebuffer:
         self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
         self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '3f 2f', 'in_position', 'in_uv')], skip_errors=True)
 
-        # Save the filter
-        self.filter = filter
+    def render(self, render_target=None) -> None:
 
-        # Add to the engine for updates
-        self.engine.fbos.append(self)
+        target = render_target if render_target else self.engine.frame
 
-    def render(self) -> None:
+        target.use()
         self.shader.program['screenTexture'] = 0
         self.texture.use(location=0)
         self.vao.render()
@@ -86,47 +120,170 @@ class Framebuffer:
         img = Image.frombytes('RGB', self.size, data).transpose(Image.FLIP_TOP_BOTTOM)
         img.save(f'{path}.png')
 
-    def resize(self, size: tuple[int]=None) -> None:
-        """
-        Resize the buffer to the given size. None for window size
-        """
-
-        # Release old memory
-        self.__del__()
-
-        # Set/get size attribute
-        if size:
-            self.size = size
-        else:
-            self.size = self._size if self._size else self.engine.win_size
-        self.size = (int(self.size[0] * self.resolution_scale), int(self.size[1] * self.resolution_scale))
-
-        # Create the fbo
-        print(self.size)
-        self.texture = self.ctx.texture(self.size, components=self.components)
-        self.depth = self.ctx.depth_texture(self.size)
-        self.fbo   = self.ctx.framebuffer([self.texture], self.depth)
-
-        self.filter = self._filter
 
     @property
-    def data(self):
-        return self.fbo.read(components=3, alignment=1)
-
+    def size(self) -> tuple[int]:
+        """Size of the textures in the fbo in pixels (x: int, y: int)"""
+        size = self._size if self._size else self.engine.win_size
+        size = tuple(map((lambda x: int(x * self.scale)), size))
+        return size
     @property
-    def filter(self):
-        return self.texture.filter
+    def texture(self) -> mgl.Texture:
+        """First color attachment in the fbo"""
+        return self._color_attachments[0]
+    @property
+    def color_attachments(self) -> ...:
+        """List of all color attachments in the fbo"""
+        return self._color_attachments
+    @property
+    def depth(self) -> mgl.Texture:
+        """Depth attachment of the fbo"""
+        return self._depth_attachment
+    @property
+    def data(self) -> bytes:
+        """Reads the data from the fbo"""
+        return self.fbo.read()
     
-    @filter.setter
-    def filter(self, value):
-        self._filter = value
-        self.texture.filter = value
 
+    @size.setter
+    def size(self, value: tuple[int]=None) -> tuple[int]:
+        self.resize(value)
+        return self.size
+    
     def __repr__(self) -> str:
         return f'<bsk.Framebuffer | size: {self.size}>' 
 
     def __del__(self) -> None:
-        # Release any existing memory in case of a resize
-        if self.texture: self.texture.release()
-        if self.depth: self.depth.release()
-        if self.fbo:   self.fbo.release()
+        """
+        Releases all memory used by the fbo
+        """
+
+        if self._color_attachments: [tex.release() for tex in self._color_attachments]
+        if self._depth_attachment: self._depth_attachment.release()
+        if self.fbo: self.fbo.release()
+
+# class Framebuffer:
+#     engine: ...
+#     """Reference to the parent engine"""
+#     fbo: mgl.Framebuffer = None
+#     """The core framebuffer the object provides abstraction for."""
+#     texture: mgl.Texture = None
+#     """The color texture of the framebuffer"""
+#     depth: mgl.Texture = None
+#     """The depth texture of the framebuffer"""
+#     size: tuple[int]
+#     """The dimensions of the framebuffer (x, y)"""
+
+#     def __init__(self, engine, size: tuple[int]=None, resolution_scale: float=1.0, components: int=4, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
+#         """
+#         Abstraction to the mgl framebuffer
+#         Args:
+#             engine: mgl.Engine: 
+#                 The parent engine
+#             size: tuple[int]: 
+#                 The dimensions of the framebuffer (x, y)
+#         """
+        
+#         # Set attributes
+#         self.engine = engine
+#         self.ctx = engine.ctx
+#         self.components = components
+
+#         # Set the size
+#         self.resolution_scale = resolution_scale
+#         self._size = size
+#         self.size = self._size if self._size else self.engine.win_size
+#         self.size = (int(self.size[0] * resolution_scale), int(self.size[1] * resolution_scale))
+        
+#         # Create the fbo
+#         self.texture = self.ctx.texture(self.size, components=self.components)
+#         self.depth   = self.ctx.depth_texture(self.size)
+#         self.fbo     = self.ctx.framebuffer([self.texture], self.depth)
+
+#         # Load Shaders
+#         self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/frame.frag')
+#         self.engine.shader_handler.add(self.shader)
+
+#         # Load VAO
+#         self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
+#         self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '3f 2f', 'in_position', 'in_uv')], skip_errors=True)
+
+#         # Save the filter
+#         self.filter = filter
+
+#         # Add to the engine for updates
+#         self.engine.fbos.append(self)
+
+#     def render(self) -> None:
+#         self.shader.program['screenTexture'] = 0
+#         self.texture.use(location=0)
+#         self.vao.render()
+
+#     def use(self) -> None:
+#         """
+#         Select this framebuffer for use
+#         """
+
+#         self.fbo.use()
+
+#     def clear(self) -> None:
+#         """
+#         Clear all data currently in the textures (set to black)        
+#         """
+
+#         self.fbo.clear()
+
+#     def save(self, destination: str=None) -> None:
+#         """
+#         Saves the frame as an image to the given file destination
+#         """
+
+#         path = destination if destination else 'screenshot'
+
+#         data = self.fbo.read(components=3, alignment=1)
+#         img = Image.frombytes('RGB', self.size, data).transpose(Image.FLIP_TOP_BOTTOM)
+#         img.save(f'{path}.png')
+
+#     def resize(self, size: tuple[int]=None) -> None:
+#         """
+#         Resize the buffer to the given size. None for window size
+#         """
+
+#         # Release old memory
+#         self.__del__()
+
+#         # Set/get size attribute
+#         if size:
+#             self.size = size
+#         else:
+#             self.size = self._size if self._size else self.engine.win_size
+#         self.size = (int(self.size[0] * self.resolution_scale), int(self.size[1] * self.resolution_scale))
+
+#         # Create the fbo
+#         self.texture = self.ctx.texture(self.size, components=self.components)
+#         self.depth = self.ctx.depth_texture(self.size)
+#         self.fbo   = self.ctx.framebuffer([self.texture], self.depth)
+
+#         self.filter = self._filter
+
+#     @property
+#     def data(self):
+#         return self.fbo.read(components=3, alignment=1)
+
+#     @property
+#     def filter(self):
+#         return self.texture.filter
+    
+#     @filter.setter
+#     def filter(self, value):
+#         self._filter = value
+#         self.texture.filter = value
+
+#     def __repr__(self) -> str:
+#         return f'<bsk.Framebuffer | size: {self.size}>' 
+
+#     def __del__(self) -> None:
+#         # Release any existing memory in case of a resize
+#         if self.texture: self.texture.release()
+#         if self.depth: self.depth.release()
+#         if self.fbo:   self.fbo.release()
