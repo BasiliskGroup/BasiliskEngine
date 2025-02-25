@@ -30,12 +30,14 @@ class Mesh():
     bvh: NarrowBVH
     """BVH for accessing triangle intersections with a line"""
 
-    def __init__(self, data: str | os.PathLike | np.ndarray) -> None:
+    def __init__(self, data: str | os.PathLike | np.ndarray, custom_format:bool=False) -> None:
         """
         Mesh object containing all the data needed to render an object and perform physics/collisions on it
         Args:
             data: str
                 path to the .obj file of the model or an array of the mesh data
+            custom_format: bool
+                makes expected changes to the given data if false. Leaves data as given if true
         """
         
         # Verify the path type
@@ -59,7 +61,7 @@ class Mesh():
                 self.data = np.hstack([self.data, tangents])
 
         elif isinstance(data, np.ndarray):
-            model = from_data(data)      
+            model = from_data(data, custom_format)      
             self.data = model.vertex_data
             
         else:                                                       # Invalid data type
@@ -70,6 +72,7 @@ class Mesh():
         self.indices = model.point_indices.copy()
 
         self.hash = hash(str(self.data))
+        self.custom = custom_format
 
         # generate edges from faces
         edges = [set() for _ in range(len(self.points))]

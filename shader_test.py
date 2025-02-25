@@ -1,8 +1,7 @@
 import basilisk as bsk
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
 default_shader = bsk.Shader(engine)
 normal_shader  = bsk.Shader(engine, vert='basilisk/shaders/normal.vert', frag='basilisk/shaders/normal.frag')
@@ -14,6 +13,8 @@ scene.add(bsk.Node(position=(4, 0, 0), shader=geom_shader))
 scene.add(bsk.Node(position=(0, 4, 0)))
 
 while engine.running:
+
+    scene.update()
 
     if engine.keys[bsk.pg.K_1]:
         engine.shader = default_shader

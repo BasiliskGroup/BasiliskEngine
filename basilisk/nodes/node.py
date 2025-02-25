@@ -371,13 +371,16 @@ class Node():
         if not per_vertex_mtl: node_data[-1] = self.material.index
 
         # Create an array to hold the node's data
-        data = np.zeros(shape=(mesh_data.shape[0], 25), dtype='f4')
+        width = 25 if not self.mesh.custom else 11 + mesh_data.shape[1]
+        data = np.zeros(shape=(mesh_data.shape[0], width), dtype='f4')
 
 
-        data[:,:14] = mesh_data
-        data[:,14:] = node_data
+        data[:,:mesh_data.shape[1]] = mesh_data
+        data[:,mesh_data.shape[1]:] = node_data
 
-        if per_vertex_mtl: data[:,24] = self.material
+        if per_vertex_mtl: data[:,-1] = self.material
+
+        if self.shader and not self.mesh.custom: data = np.take(data, self.shader.attribute_indices, axis=1)
 
         return data
 

@@ -79,15 +79,15 @@ class Chunk():
 
         return node
 
-    def get_program(self):
+    def get_shader(self):
         """
-        Gets the program of the chunks nodes' shader
+        Gets the bsk.Shader of the chunks nodes' shader
         """
 
         shader = self.shader
 
-        if shader: return shader.program
-        return self.chunk_handler.engine.shader.program
+        if shader: return shader
+        return self.chunk_handler.engine.shader
 
     def swap_shader(self, shader):
         """

@@ -80,10 +80,19 @@ class Shader:
             if tokens[0] == 'layout' and len(tokens) > 2 and 'in' in line:
                 self.attributes.append(tokens[-1][:-1])
 
-                if tokens[-1][:-1] not in attribute_mappings: continue
-                indices = attribute_mappings[tokens[-1][:-1]]
+                # Get the number of flots the attribute takes
+                if any(list(map(lambda x: x in tokens, ['float', 'int']))): n = 1
+                elif any(list(map(lambda x: x in tokens, ['vec2']))): n = 2
+                elif any(list(map(lambda x: x in tokens, ['vec3']))): n = 3
+                elif any(list(map(lambda x: x in tokens, ['vec4']))): n = 4
+                else: n = 1
+                self.fmt += f'{n}f '
+
+                if tokens[-1][:-1] in attribute_mappings:
+                    indices = attribute_mappings[tokens[-1][:-1]]
+                else:
+                    indices = [0 for i in range(n)]
                 self.attribute_indices.extend(indices)
-                self.fmt += f'{len(indices)}f '
 
         # Create a program with shaders
         self.program = self.ctx.program(vertex_shader=self.vertex_shader, fragment_shader=self.fragment_shader)

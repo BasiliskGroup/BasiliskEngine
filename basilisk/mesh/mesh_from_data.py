@@ -2,14 +2,20 @@ import numpy as np
 from .model import Model
 import glm
 
-def from_data(data: np.ndarray) -> Model:
+def from_data(data: np.ndarray, custom_format:bool=False) -> Model:
     """
     Converts data given to a format compatable with basilisk models
+    Args:
+        data: np.ndarray
+            array of the mesh data
+        custom_format: bool
+            makes expected changes to the given data if false. Leaves data as given if true
     """
+
+    if custom_format: return format_raw(data)
 
     # Create an empty model
     model = Model()
-    # Get the shape of the given data
 
     # Get the shape of the given data and check for a valid shape
     shape = data.shape
@@ -129,3 +135,17 @@ def get_points_and_indices(positions: np.ndarray) -> tuple[np.ndarray]:
             indices[triangle].append(i)
 
     return np.array(list(points.keys()), dtype='f4'), np.array(indices, dtype='i')
+
+def format_raw(data: np.ndarray) -> np.ndarray:
+    # Create an empty model
+    model = Model()
+
+    # Get the needed data (assume position is in the first three positions)
+    model.vertex_data = np.array(data, dtype='f4')
+    if model.vertex_data.shape[1] >= 3:
+        model.vertex_points, model.point_indices = get_points_and_indices(model.vertex_data[:,:3])
+    else:
+        model.vertex_points = np.zeros(shape=(1, model.vertex_data.shape[1]))
+        model.point_indices = np.zeros(shape=(1, 3))
+
+    return model

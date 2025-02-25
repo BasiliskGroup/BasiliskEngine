@@ -11,10 +11,7 @@ floor_normal = bsk.Image('tests/floor_normal.png')
 floor_mtl = bsk.Material(texture=floor_albedo, normal=floor_normal, roughness=.3, specular_tint=.5, specular=.2)
 
 def quad_simple() -> bsk.Mesh:
-    """Simple quad from positions"""
-    quad = np.array([[0, 0, 0], [0, 0, 10], [10, 0, 10],
-                    [0, 0, 0], [10, 0, 10], [10, 0, 0]])
-    
+    """Simple quad from positions"""    
     quad = np.array([[0, 0, 0], [0, 0, 10], [10, 0, 10],
                     [0, 0, 0], [10, 0, 10], [10, 0, 0]])
     mesh = bsk.Mesh(quad)
