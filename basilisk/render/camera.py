@@ -10,10 +10,6 @@ FOV = 50  # Degrees
 NEAR = 0.1
 FAR = 350
 
-# Camera movement constants
-SPEED = 10
-SENSITIVITY = 0.15/180
-
 class Camera:
     engine: ...
     """Back reference to the parent engine"""
@@ -23,8 +19,12 @@ class Camera:
     """Aspect ratio of the engine window"""
     position: glm.vec3
     """Location of the camera (maters)"""
+    speed: float
+    """The speed that the camera moves in space"""
+    sensitivity: float
+    """The speed at which the camera turns"""
 
-    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0)) -> None:
+    def __init__(self, position=(0, 0, 20), rotation=(1, 0, 0, 0), speed: float=10, sensitivity: float=2) -> None:
         """
         Camera object to get view and projection matricies. Movement built in
         """
@@ -43,6 +43,9 @@ class Camera:
         self.m_view = self.get_view_matrix()
         # Projection matrix
         self.m_proj = self.get_projection_matrix()
+        # Movement attributes
+        self.speed = speed
+        self.sensitivity = sensitivity
 
     def update(self) -> None:
         """
@@ -191,8 +194,8 @@ class FreeCamera(Camera):
         """
         rel_x, rel_y = self.engine.mouse.relative
         
-        yaw_rotation = glm.angleAxis(SENSITIVITY * rel_x, -self.UP)
-        pitch_rotation = glm.angleAxis(SENSITIVITY * rel_y, -self.right)
+        yaw_rotation = glm.angleAxis(self.sensitivity / 1000 * rel_x, -self.UP)
+        pitch_rotation = glm.angleAxis(self.sensitivity / 1000 * rel_y, -self.right)
         new_rotation = yaw_rotation * pitch_rotation * self.rotation
         
         v_new = new_rotation * self.UP
@@ -203,7 +206,7 @@ class FreeCamera(Camera):
         """
         Checks for button presses and updates vectors accordingly. 
         """
-        velocity = (SPEED + self.engine.keys[pg.K_CAPSLOCK] * 10) * self.engine.delta_time
+        velocity = (self.speed + self.engine.keys[pg.K_CAPSLOCK] * 10) * self.engine.delta_time
         keys = self.engine.keys
         if keys[pg.K_w]:
             self.position += glm.normalize(glm.vec3(self.forward.x, 0, self.forward.z)) * velocity
