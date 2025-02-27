@@ -15,6 +15,7 @@ while engine.running:
     if engine.keys[bsk.pg.K_4]: fbo.show = 3
     if engine.keys[bsk.pg.K_5]: fbo.show = 4
     if engine.keys[bsk.pg.K_6]: fbo.show = 5
+    if engine.keys[bsk.pg.K_7]: fbo.show = 6
 
     scene.update(render=False)
     scene.render(fbo)

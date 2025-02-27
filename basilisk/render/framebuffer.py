@@ -166,9 +166,18 @@ class Framebuffer:
     def show(self, value: int) -> None:
         value = validate_int("Framebuffer", "show", value)
         if value == self._show: return
+
+        # Verify the range
+        if value < 0 or value > len(self.color_attachments): raise ValueError(f'Framebuffer.show: invalid color attachement to show, {value} is out of range')
+        elif value == len(self.color_attachments): src = self.depth
+        else: src = self.color_attachments[value]
+
+        # Update value
         self._show = value
+
+        # Bind the correct texture
         self.shader.program['screenTexture'] = value+1
-        self.color_attachments[value].use(location=value+1)
+        src.use(location=value+1)
 
     def __repr__(self) -> str:
         return f'<bsk.Framebuffer | size: {self.size}>' 

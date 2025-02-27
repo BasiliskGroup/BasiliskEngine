@@ -98,13 +98,13 @@ class Shader:
         # Create a program with shaders
         self.program = self.ctx.program(vertex_shader=self.vertex_shader, fragment_shader=self.fragment_shader)
 
-    def set_main(self):
+    def set_main(self, scene):
         """
         Selects a shader for use
         """
         
         self.engine.shader_handler.add(self)
-        self.engine.scene.node_handler.chunk_handler.swap_default(self)
+        if scene.node_handler: scene.node_handler.chunk_handler.swap_default(self)
 
     def write(self, name: str, value) -> None:
         """

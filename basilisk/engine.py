@@ -164,7 +164,3 @@ class Engine():
 
     @property
     def shader(self): return self._shader
-    @shader.setter
-    def shader(self, value):
-        self._shader = value
-        value.set_main()
