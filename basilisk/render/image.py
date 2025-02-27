@@ -19,6 +19,8 @@ class Image():
     """Array of the texture data"""
     size: int
     """The width and height in pixels of the image"""
+    texture: mgl.Texture | None=None
+    """Texture of the image. Only created and retrived if needed by other module"""
 
     def __init__(self, path: str | os.PathLike | pg.Surface | mgl.Texture) -> None:
         """
@@ -81,8 +83,39 @@ class Image():
         """
         ...
 
+    def build_texture(self, ctx: mgl.Context) -> mgl.Texture:
+        """
+        Builds a texture from the image data
+        """
+
+        # Release existing memory
+        if self.texture: self.texture.release()
+
+        # Make the texture from image data
+        self.texture = ctx.texture((self.size, self.size), components=4, data=self.data)
+        # Texture formatting
+        self.texture.build_mipmaps()
+        self.texture.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+        self.texture.anisotropy = 32.0
+        
+        return self.texture
+
+    def use(self, slot: int) -> None:
+        """
+        Use the image at the given slot
+        """
+        
+        if not self.texture:
+            raise LookupError("bsk.Image: cannot use an image without a texture. Use texture.build_texture() before texture.use()")
+
+        # Bind to the given slot
+        self.texture.use(location=slot)
+
     def __repr__(self) -> str:
         """
         Returns a string representation of the object
         """
         return f'<Basilisk Image | {self.name}, ({self.size}x{self.size}), {sys.getsizeof(self.data) / 1024 / 1024:.2} mb>'
+    
+    def __del__(self) -> None:
+        if self.texture: self.texture.release()

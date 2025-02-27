@@ -1,5 +1,5 @@
 import moderngl as mgl
-import random
+from .image import Image
 
 attribute_mappings = {
     'in_position'  : [0, 1, 2],
@@ -48,6 +48,7 @@ class Shader:
         self.attribute_indices = []
         self.fmt               = ''
         self.attributes        = []
+        self.bindings = 1
 
         # Default vertex and fragment shaders
         if vert == None: vert = self.engine.root + '/shaders/batch.vert'
@@ -112,6 +113,21 @@ class Shader:
         
         self.program[name].write(value)
     
+    def bind(self, sampler: mgl.Texture | mgl.TextureArray | mgl.TextureCube | Image, name: str, slot: int=None) -> None:
+        """
+        Binds the given sampler to the next availible slot
+        """
+
+        # Use the next slot if no slot is given
+        if not slot: slot = self.bindings; self.bindings+=1
+
+        if isinstance(sampler, Image,): sampler = sampler.build_texture(self.ctx)
+
+        # Use the sampler
+        self.program[name] = slot
+        sampler.use(location=slot)
+        
+
     def __del__(self) -> int:
         if self.program: self.program.release()
 
