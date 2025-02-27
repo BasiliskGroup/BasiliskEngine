@@ -37,7 +37,7 @@ class Framebuffer:
         self._size          = size
         self.scale          = scale
         self.texture_filter = (mgl.LINEAR, mgl.LINEAR) if linear_filter else (mgl.NEAREST, mgl.NEAREST)
-        self.n_attachments    = n_color_attachments
+        self.n_attachments  = n_color_attachments
 
         self.load_pipeline()
         self.generate_fbo()
@@ -53,7 +53,7 @@ class Framebuffer:
         self.__del__()
 
         # Create textures
-        self._color_attachments = [self.ctx.texture(self.size, components=4) for i in range(self.attachments)]
+        self._color_attachments = [self.ctx.texture(self.size, components=4) for i in range(self.n_attachments)]
         for tex in self._color_attachments: tex.filter = self.texture_filter
         self._depth_attachment  = self.ctx.depth_texture(self.size)
 
