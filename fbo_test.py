@@ -5,7 +5,7 @@ scene = bsk.Scene(engine)
 
 scene.add(bsk.Node())
 
-fbo = bsk.Framebuffer(engine)
+fbo = bsk.Framebuffer(engine, n_color_attachments=2)
 fbo2 = bsk.Framebuffer(engine)
 
 while engine.running:

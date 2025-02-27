@@ -55,7 +55,7 @@ class Chunk():
         if not self.batch.vbo: return
         
         data = node.get_data()
-        self.batch.vbo.write(data, node.data_index * 25 * 4)
+        self.batch.vbo.write(data, node.data_index * data.shape[1] * 4)
 
     def add(self, node):
         """

@@ -1,15 +1,23 @@
 import basilisk as bsk
+import random
 
 engine = bsk.Engine(grab_mouse=False)
 scene  = bsk.Scene(engine)
 scene.camera = bsk.StaticCamera()
 
 red = bsk.Material(color=(255, 50, 50))
-meshes = [None, bsk.Mesh('tests/sphere.obj')]
+meshes = [
+    None, 
+    bsk.Mesh('tests/sphere.obj'), 
+    bsk.Mesh('tests/drawer.obj'), 
+    bsk.Mesh('tests/key.obj'),
+    bsk.Mesh('tests/dresser.obj'),
+    bsk.Mesh('tests/picture_frame.obj')
+    ]
 
 for x in range(-10, 10, 3):
     for y in range(-10, 10, 3):
-        scene.add(bsk.Node(position=(x, y, 0), mesh=meshes[(x + y) % 2]))
+        scene.add(bsk.Node(position=(x, y, 0), mesh=random.choice(meshes)))
 
 while engine.running:
     
