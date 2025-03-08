@@ -2,6 +2,7 @@ import numpy as np
 import moderngl as mgl
 from PIL import Image
 from ..render.shader import Shader
+from ..generic.input_validation import validate_int
 
 
 class Framebuffer:
@@ -36,7 +37,7 @@ class Framebuffer:
         self._size          = size
         self.scale          = scale
         self.texture_filter = (mgl.LINEAR, mgl.LINEAR) if linear_filter else (mgl.NEAREST, mgl.NEAREST)
-        self.n_attachments    = n_color_attachments
+        self.n_attachments  = n_color_attachments
 
         self.load_pipeline()
         self.generate_fbo()
@@ -58,6 +59,10 @@ class Framebuffer:
 
         # Create the internal fbo
         self.fbo = self.ctx.framebuffer(self._color_attachments, self._depth_attachment)
+
+        # Set the show attachment to default
+        self._show = -1
+        self.show = 0
 
     def resize(self, new_size: tuple[int]=None) -> None:
         """
@@ -86,13 +91,18 @@ class Framebuffer:
         self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
         self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '3f 2f', 'in_position', 'in_uv')], skip_errors=True)
 
-    def render(self, render_target=None) -> None:
+    def render(self, render_target=None, show: int=None) -> None:
+        """
+        Render the fbo to the screen
+        If the fbo has multiple attachments, show will specifiy which is shown
+        Depth is considered the last show element
+        """
+
+        if not isinstance(show, type(None)): self.show = show
 
         target = render_target if render_target else self.engine.frame
-
         target.use()
-        self.shader.program['screenTexture'] = 0
-        self.texture.use(location=0)
+
         self.vao.render()
 
     def use(self) -> None:
@@ -143,13 +153,32 @@ class Framebuffer:
     def data(self) -> bytes:
         """Reads the data from the fbo"""
         return self.fbo.read()
-    
+    @property
+    def show(self) -> int:
+        return self._show
 
     @size.setter
     def size(self, value: tuple[int]=None) -> tuple[int]:
         self.resize(value)
         return self.size
     
+    @show.setter
+    def show(self, value: int) -> None:
+        value = validate_int("Framebuffer", "show", value)
+        if value == self._show: return
+
+        # Verify the range
+        if value < 0 or value > len(self.color_attachments): raise ValueError(f'Framebuffer.show: invalid color attachement to show, {value} is out of range')
+        elif value == len(self.color_attachments): src = self.depth
+        else: src = self.color_attachments[value]
+
+        # Update value
+        self._show = value
+
+        # Bind the correct texture
+        self.shader.program['screenTexture'] = value+1
+        src.use(location=value+1)
+
     def __repr__(self) -> str:
         return f'<bsk.Framebuffer | size: {self.size}>' 
 

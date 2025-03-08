@@ -87,7 +87,7 @@ class Chunk():
         shader = self.shader
 
         if shader: return shader
-        return self.chunk_handler.engine.shader
+        return self.chunk_handler.scene.shader
 
     def swap_shader(self, shader):
         """

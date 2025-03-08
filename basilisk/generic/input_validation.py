@@ -3,6 +3,14 @@ import glm
 from ..render.image import Image
 
 
+def validate_int(module: str, name: str, value: int | float | glm.int32) -> float:
+    if isinstance(value, int) or isinstance(value, float):
+        return int(round(value))
+    elif isinstance(value, glm.int32):
+        return int(value.value)
+    else:
+        raise TypeError(f"{module}: Invalid {name} value type {type(value)}. Expected float.")
+
 def validate_float(module: str, name: str, value: float | int | glm.float32) -> float:
     if isinstance(value, float) or isinstance(value, int):
         return float(value)
@@ -10,7 +18,7 @@ def validate_float(module: str, name: str, value: float | int | glm.float32) -> 
         return float(value.value)
     else:
         raise TypeError(f"{module}: Invalid {name} value type {type(value)}. Expected float.")
-    
+
 def validate_glm_vec3(module: str, name: str, value: tuple | list | glm.vec3 | np.ndarray) -> glm.vec3:
     if isinstance(value, tuple) or isinstance(value, list) or isinstance(value, np.ndarray):
         if len(value) != 3: raise ValueError(f"{module}: Invalid number of values for {name}. Expected 3 values, got {len(value)} values")

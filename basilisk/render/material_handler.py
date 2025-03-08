@@ -13,6 +13,8 @@ class MaterialHandler():
     """List containing all the materials in the engine"""
     data_texture: mgl.Texture
     """ModernGL texture containing all the material data for materials in the engine"""
+    image_handler: ImageHandler=None
+    """Handler for all images in the game"""
   
     def __init__(self, engine) -> None:
         """

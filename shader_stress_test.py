@@ -1,7 +1,7 @@
 import basilisk as bsk
 import random
 
-engine = bsk.Engine()
+engine = bsk.Engine(title=None)
 scene = bsk.Scene(engine)
 
 default_shader = bsk.Shader(engine)
@@ -21,9 +21,9 @@ for x in range(-n, n):
 while engine.running:
     scene.update()
     if engine.keys[bsk.pg.K_1]:
-        engine.shader = default_shader
+        scene.shader = default_shader
     if engine.keys[bsk.pg.K_2]:
-        engine.shader = normal_shader
+        scene.shader = normal_shader
     if engine.keys[bsk.pg.K_3]:
-        engine.shader = geom_shader
+        scene.shader = geom_shader
     engine.update()

@@ -4,8 +4,7 @@ import pygame as pg
 
 from .mesh.mesh import Mesh
 from .render.material import Material
-from .render.shader_handler import ShaderHandler
-from .render.material_handler import MaterialHandler
+from .render.shader import Shader
 from .render.light_handler import LightHandler
 from .render.camera import Camera, FreeCamera
 from .nodes.node_handler import NodeHandler
@@ -34,13 +33,14 @@ class Scene():
     node_handler: NodeHandler=None
     """"""
 
-    def __init__(self, engine: ...) -> None:
+    def __init__(self, engine: ..., shader: Shader=None) -> None:
         """
         Basilisk scene object. Contains all nodes for the scene
         """
 
         self.engine = engine
         self.ctx    = engine.ctx
+        self.shader = shader if shader else engine.shader
         self.camera           = FreeCamera()
         self.light_handler    = LightHandler(self)
         self.physics_engine   = PhysicsEngine()
@@ -69,7 +69,11 @@ class Scene():
             self.collider_handler.resolve_collisions()
 
         # Render by default to the engine frame
-        if render: self.render()
+        if not render: return
+
+        # Check if the user is giving a destination
+        if not isinstance(render, bool): self.render(renders)
+        else: self.render()
 
     def render(self, render_target: Framebuffer|Frame=None) -> None:
         """
@@ -92,7 +96,6 @@ class Scene():
         if self.engine.headless or not show: return
 
 
-    
     def add(self, *objects: Node | None) -> None | Node | list:
         """
         Adds the given object(s) to the scene. Can pass in any scene objects:
@@ -263,6 +266,8 @@ class Scene():
     def sky(self): return self._sky
     @property
     def nodes(self): return self.node_handler.nodes
+    @property
+    def shader(self): return self._shader
 
     @camera.setter
     def camera(self, value: Camera):
@@ -278,3 +283,8 @@ class Scene():
             raise TypeError(f'Scene: Invalid sky type: {type(value)}. Expected type bsk.Sky or None')
         self._sky = value
         if value: self._sky.write()
+
+    @shader.setter
+    def shader(self, value):
+        self._shader = value
+        value.set_main(self)

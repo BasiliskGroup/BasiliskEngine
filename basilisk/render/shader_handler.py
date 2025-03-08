@@ -28,7 +28,7 @@ class ShaderHandler:
         self.shaders = set()
 
         # Load a default shader
-        self.default_shader = Shader(self, self.engine.root + '/shaders/batch.vert', self.engine.root + '/shaders/batch.frag')
+        self.default_shader = Shader(self.engine, self.engine.root + '/shaders/batch.vert', self.engine.root + '/shaders/batch.frag')
         self.default_shader.hash = self.default_shader.hash + hash('engine_shader')
         self.add(self.default_shader)
         setattr(self.engine, "_shader", self.default_shader)
