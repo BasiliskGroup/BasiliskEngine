@@ -293,7 +293,7 @@ class Node():
         relative = glm.inverse(self.model_matrix) * child.model_matrix
         position = glm.vec3(relative[3])
         scale = glm.vec3([glm.length(relative[i]) for i in range(3)])
-        rotation = glm.quat_cast(glm.mat3x3(*[glm.vec3(relative[i]) / scale[i] for i in range(3)])) # TODO ensure that these are the correct calculations
+        rotation = child.rotation * glm.inverse(self.rotation.data)
         
         # compute relative transformations
         if relative_position or (relative_position is None and child.relative_position): child.relative_position = position

@@ -7,13 +7,14 @@ scene  = bsk.Scene(engine)
 
 parent = bsk.Node(
     scale = (3, 1, 3),
+    rotation = glm.angleAxis(random.uniform(-1, 1), glm.normalize([random.uniform(-1, 1) for _ in range(3)]))
 )
 child  = bsk.Node(
     position = (3, 0, 0),
     scale = (0.5, 0.5, 0.5),
     # relative_scale=False,
     # relative_rotation= False
-    relative_position=False
+    # relative_position=False
 )
 grandchild = bsk.Node(
     position = (1.5, 0, 0),
@@ -28,8 +29,8 @@ parent.add(child)
 
 while engine.running:
         
-    parent.scale += [random.uniform(-0.01, 0.01) for _ in range(3)]
-    parent.position += [random.uniform(-0.01, 0.01) for _ in range(3)]
+    # parent.scale += [random.uniform(-0.01, 0.01) for _ in range(3)]
+    # parent.position += [random.uniform(-0.01, 0.01) for _ in range(3)]
     if engine.keys[bsk.pg.K_e]: parent.rotation = glm.normalize([random.uniform(-1, 1) for _ in range(3)])
     
     scene.update()
