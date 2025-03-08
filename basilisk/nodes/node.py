@@ -300,10 +300,6 @@ class Node():
         if relative_scale    or (relative_scale    is None and child.relative_scale):    child.relative_scale    = scale
         if relative_rotation or (relative_rotation is None and child.relative_rotation): child.relative_rotation = rotation
         
-        print(child.relative_position)
-        print(child.relative_scale)
-        print(child.relative_rotation)
-        
         # add as a child to by synchronized and controlled
         if self.node_handler: self.node_handler.add(child)
         child.parent = self
