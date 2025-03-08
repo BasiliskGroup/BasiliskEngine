@@ -19,11 +19,11 @@ class Node():
     """The scale of the node in meters in each direction"""
     rotation: Quat
     """The rotation of the node"""
-    position_relative: bool
+    relative_position: bool
     """The position of this node relative to the parent node"""
-    scale_relative: bool
+    relative_scale: bool
     """The scale of this node relative to the parent node"""
-    rotation_relative: bool
+    relative_rotation: bool
     """The rotation of this node relative to the parent node"""
     forward: glm.vec3
     """The forward facing vector of the node"""
@@ -239,9 +239,9 @@ class Node():
         if self.relative_scale:    transform  = glm.scale(transform, self.parent.scale.data)
         
         # set this node's transforms based on the parent
-        self.position = transform * self.relative_position
-        self.scale = self.relative_scale * self.parent.scale.data
-        self.rotation = self.relative_rotation * self.parent.rotation.data
+        if self.relative_position: self.position = transform * self.relative_position
+        if self.relative_scale:    self.scale = self.relative_scale * self.parent.scale.data
+        if self.relative_rotation: self.rotation = self.relative_rotation * self.parent.rotation.data
         
         for child in self.children: child.sync_data()
         
@@ -287,16 +287,22 @@ class Node():
         """
         Adopts a node as a child. Relative transforms can be changed, if left bank they will not be chnaged from the current child nodes settings.
         """
-        if child in self.children: return
+        if child in self.children or child is self: return
+        assert isinstance(child, Node), 'Nodes can only accept other Nodes as children.'
+        
+        relative = glm.inverse(self.model_matrix) * child.model_matrix
+        position = glm.vec3(relative[3])
+        scale = glm.vec3([glm.length(relative[i]) for i in range(3)])
+        rotation = glm.quat_cast(glm.mat3x3(*[glm.vec3(relative[i]) / scale[i] for i in range(3)])) # TODO ensure that these are the correct calculations
         
         # compute relative transformations
-        if relative_position or (relative_position is None and child.relative_position): child.relative_position = child.position.data - self.position.data
-        if relative_scale    or (relative_scale    is None and child.relative_scale):    child.relative_scale    = child.scale.data / self.scale.data
-        if relative_rotation or (relative_rotation is None and child.relative_rotation): child.relative_rotation = child.rotation.data * glm.inverse(self.rotation.data)
+        if relative_position or (relative_position is None and child.relative_position): child.relative_position = position
+        if relative_scale    or (relative_scale    is None and child.relative_scale):    child.relative_scale    = scale
+        if relative_rotation or (relative_rotation is None and child.relative_rotation): child.relative_rotation = rotation
         
-        # print(child.relative_position)
-        # print(child.relative_scale)
-        # print(child.relative_rotation)
+        print(child.relative_position)
+        print(child.relative_scale)
+        print(child.relative_rotation)
         
         # add as a child to by synchronized and controlled
         if self.node_handler: self.node_handler.add(child)
