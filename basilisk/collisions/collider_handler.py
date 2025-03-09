@@ -187,7 +187,8 @@ class ColliderHandler():
                 has_collided, simplex = collide_gjk(node1, node2)
                 if not has_collided: continue
                 
-                face, polytope = get_epa_from_gjk(node1, node2, simplex)
+                faces, polytope = get_epa_from_gjk(node1, node2, simplex)
+                face = faces[0]
                 vec, distance  = face[1], face[0]
                 
                 # TODO replace with own contact algorithm
