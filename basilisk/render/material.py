@@ -152,7 +152,9 @@ class Material():
     @texture.setter
     def texture(self, value: Image | None):
         self._texture = validate_image("Material", "texture", value)
-        if self.material_handler: self.material_handler.write(regenerate=True)
+        if not self.material_handler: return
+        self.material_handler.image_handler.add(value)
+        self.material_handler.write(regenerate=True)
         
     @normal.setter
     def normal(self, value: Image | None):

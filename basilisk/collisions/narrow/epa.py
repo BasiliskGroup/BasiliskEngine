@@ -19,7 +19,7 @@ def get_epa_from_gjk(node1: Node, node2: Node, polytope: polytope_type, epsilon:
     # develope the polytope until the nearest real face has been found, within epsilon
     while True:
         new_point = get_support_point(node1, node2, faces[0][1])
-        if new_point in polytope or glm.length(new_point.support_point) - faces[0][0] < epsilon: return faces[0], polytope
+        if new_point in polytope or glm.length(new_point.support_point) - faces[0][0] < epsilon: return faces, polytope
         faces, polytope = insert_point(polytope, faces, new_point)
 
 def insert_point(polytope: polytope_type, faces: face_type, point: glm.vec3, epsilon: float=0) -> tuple[face_type, polytope_type]:

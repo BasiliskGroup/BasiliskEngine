@@ -19,8 +19,10 @@ class Image():
     """Array of the texture data"""
     size: int
     """The width and height in pixels of the image"""
+    texture: mgl.Texture | None=None
+    """Texture of the image. Only created and retrived if needed by other module"""
 
-    def __init__(self, path: str | os.PathLike | pg.Surface) -> None:
+    def __init__(self, path: str | os.PathLike | pg.Surface | mgl.Texture) -> None:
         """
         A basilisk image object that contains a moderngl texture
         Args:
@@ -29,18 +31,24 @@ class Image():
         """
         
         # Check if the user is loading a pygame surface
-        if isinstance(path, pg.Surface):
-            self.from_pg_surface(path)
-            return
+        if isinstance(path, str) or isinstance(path, os.PathLike):
+            return self._from_path(path)
+        elif isinstance(path, pg.Surface):
+            return self._from_surface(path)
+        elif isinstance(path, mgl.Texture):
+            return self._from_texture(path)
+        
+        raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.PathLike')
 
-        # Verify the path type
-        if not isinstance(path, str) and not isinstance(path, os.PathLike):
-            raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.PathLike')
-
+    def _from_path(self, path: str | os.PathLike) -> None:
+        """
+        Loads a basilisk image from a pygame surface
+        Args:
+        """
+        
         # Get name from path
         self.name = path.split('/')[-1].split('\\')[-1].split('.')[0]
 
-        # Set the texture
         # Load image
         img = PIL_Image.open(path).convert('RGBA')
         # Set the size in one of the size buckets
@@ -53,7 +61,7 @@ class Image():
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
 
-    def from_pg_surface(self, surf: pg.Surface) -> None:
+    def _from_surface(self, surf: pg.Surface) -> None:
         """
         Loads a basilisk image from a pygame surface
         Args:
@@ -69,8 +77,45 @@ class Image():
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
 
+    def _from_texture(self, texture: mgl.Texture):
+        """
+        
+        """
+        ...
+
+    def build_texture(self, ctx: mgl.Context) -> mgl.Texture:
+        """
+        Builds a texture from the image data
+        """
+
+        # Release existing memory
+        if self.texture: self.texture.release()
+
+        # Make the texture from image data
+        self.texture = ctx.texture((self.size, self.size), components=4, data=self.data)
+        # Texture formatting
+        self.texture.build_mipmaps()
+        self.texture.filter = (mgl.LINEAR_MIPMAP_LINEAR, mgl.LINEAR)
+        self.texture.anisotropy = 32.0
+        
+        return self.texture
+
+    def use(self, slot: int) -> None:
+        """
+        Use the image at the given slot
+        """
+        
+        if not self.texture:
+            raise LookupError("bsk.Image: cannot use an image without a texture. Use texture.build_texture() before texture.use()")
+
+        # Bind to the given slot
+        self.texture.use(location=slot)
+
     def __repr__(self) -> str:
         """
         Returns a string representation of the object
         """
         return f'<Basilisk Image | {self.name}, ({self.size}x{self.size}), {sys.getsizeof(self.data) / 1024 / 1024:.2} mb>'
+    
+    def __del__(self) -> None:
+        if self.texture: self.texture.release()

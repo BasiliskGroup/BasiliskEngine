@@ -1,14 +1,14 @@
 import numpy as np
 import moderngl as mgl
-
+from .shader import Shader
 
 class Batch():
     chunk: ...
     """Reference to the parent chunk of the batch"""
     ctx: mgl.Context
     """Reference to the context of the parent engine"""
-    program: mgl.Program
-    """Reference to the program used by batches"""
+    shader: Shader
+    """Reference to the bsk.Shader used by batches"""
     vao: mgl.VertexArray
     """The vertex array of the batch. Used for rendering"""
     vbo: mgl.Buffer
@@ -23,7 +23,7 @@ class Batch():
         # Back references
         self.chunk = chunk
         self.ctx = chunk.chunk_handler.engine.ctx
-        self.program = self.chunk.get_program()
+        self.shader = self.chunk.get_shader()
 
         # Set intial values
         self.vbo = None
@@ -35,7 +35,7 @@ class Batch():
         Returns True if batch was successful.
         """
 
-        self.program = self.chunk.get_program()
+        self.shader = self.chunk.get_shader()
 
         # Empty list to contain all vertex data of models in the chunk
         batch_data = []
@@ -68,12 +68,29 @@ class Batch():
 
         # Create the vbo and the vao from mesh data
         self.vbo = self.ctx.buffer(batch_data)
+        self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, self.shader.fmt, *self.shader.attributes)], skip_errors=True)
+
+
+        return True
+
+    def swap_shader(self, shader):
+        """
+        Swap the shader without rebatching
+        """
+        
+        # Check there is actually something to swap
+        if not self.vao: return
+        
+        # Release old data
+        self.vao.release()
+
+        # Make new vao with old data
+        self.program = shader.program
         self.vao = self.ctx.vertex_array(self.program, [(self.vbo, 
                                                          '3f 2f 3f 3f 3f 3f 4f 3f 1f', 
                                                          *['in_position', 'in_uv', 'in_normal', 'in_tangent', 'in_bitangent', 'obj_position', 'obj_rotation', 'obj_scale', 'obj_material'])], 
                                                          skip_errors=True)
-        
-        return True
+
 
     def __repr__(self) -> str:
         return f'<Basilisk Batch | {self.chunk.chunk_key}, {self.vbo.size / 1024  / 1024} mb>'

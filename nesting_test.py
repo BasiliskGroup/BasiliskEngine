@@ -1,34 +1,38 @@
 import basilisk as bsk
 import random
+import glm
 
 engine = bsk.Engine()
-scene  = bsk.Scene()
-engine.scene = scene
+scene  = bsk.Scene(engine)
 
 parent = bsk.Node(
-    velocity=(1, 0, 0),
-    rotational_velocity=(0.1, 0.1, 0)
+    scale = (3, 1, 3),
+    rotation = glm.angleAxis(random.uniform(-1, 1), glm.normalize([random.uniform(-1, 1) for _ in range(3)]))
 )
 child  = bsk.Node(
-    position = (1, 0, 0),
-    scale = (0.5, 0.5, 0.5)
+    position = (3, 0, 0),
+    scale = (0.5, 0.5, 0.5),
+    # relative_scale=False,
+    # relative_rotation= False
+    # relative_position=False
 )
 grandchild = bsk.Node(
     position = (1.5, 0, 0),
     scale = (2, 0.2, 0.2)
 )
 
-child.add(grandchild)
-
+# child.add(grandchild)
 scene.add(parent)
+parent.add(child)
+# scene.add(grandchild)
+# parent.add(child)
 
-print(len(scene.node_handler.nodes))
-
-did = False
 while engine.running:
-    if not did:
-        parent.add(child)
-        did = True
-    parent.scale += [random.uniform(-0.01, 0.01) for i in range(3)]
+        
+    # parent.scale += [random.uniform(-0.01, 0.01) for _ in range(3)]
+    # parent.position += [random.uniform(-0.01, 0.01) for _ in range(3)]
+    if engine.keys[bsk.pg.K_e]: parent.rotation = glm.normalize([random.uniform(-1, 1) for _ in range(3)])
+    
+    scene.update()
     engine.update()
     

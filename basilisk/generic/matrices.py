@@ -1,14 +1,16 @@
 import glm
+from ..generic.vec3 import Vec3
+from ..generic.quat import Quat
 
 
 # transform matrices
-def get_model_matrix(position: glm.vec3, scale: glm.vec3, rotation: glm.quat) -> glm.mat4x4:
+def get_model_matrix(position: Vec3, scale: Vec3, rotation: Quat) -> glm.mat4x4:
     """
     Gets projection matrix from object data
     """
-    translation_matrix  = glm.translate(glm.mat4(1.0), position)
-    rotation_matrix     = glm.mat4_cast(rotation)
-    scale_matrix        = glm.scale(glm.mat4(1.0), scale)
+    translation_matrix  = glm.translate(glm.mat4(1.0), position.data)
+    rotation_matrix     = glm.mat4_cast(rotation.data)
+    scale_matrix        = glm.scale(glm.mat4(1.0), scale.data)
     model_matrix        = translation_matrix * glm.transpose(rotation_matrix) * scale_matrix
     return model_matrix
 

@@ -1,5 +1,5 @@
 import moderngl as mgl
-import random
+from .image import Image
 
 attribute_mappings = {
     'in_position'  : [0, 1, 2],
@@ -48,6 +48,7 @@ class Shader:
         self.attribute_indices = []
         self.fmt               = ''
         self.attributes        = []
+        self.bindings = 1
 
         # Default vertex and fragment shaders
         if vert == None: vert = self.engine.root + '/shaders/batch.vert'
@@ -80,21 +81,30 @@ class Shader:
             if tokens[0] == 'layout' and len(tokens) > 2 and 'in' in line:
                 self.attributes.append(tokens[-1][:-1])
 
-                if tokens[-1][:-1] not in attribute_mappings: continue
-                indices = attribute_mappings[tokens[-1][:-1]]
+                # Get the number of flots the attribute takes
+                if any(list(map(lambda x: x in tokens, ['float', 'int']))): n = 1
+                elif any(list(map(lambda x: x in tokens, ['vec2']))): n = 2
+                elif any(list(map(lambda x: x in tokens, ['vec3']))): n = 3
+                elif any(list(map(lambda x: x in tokens, ['vec4']))): n = 4
+                else: n = 1
+                self.fmt += f'{n}f '
+
+                if tokens[-1][:-1] in attribute_mappings:
+                    indices = attribute_mappings[tokens[-1][:-1]]
+                else:
+                    indices = [0 for i in range(n)]
                 self.attribute_indices.extend(indices)
-                self.fmt += f'{len(indices)}f '
 
         # Create a program with shaders
         self.program = self.ctx.program(vertex_shader=self.vertex_shader, fragment_shader=self.fragment_shader)
 
-    def set_main(self):
+    def set_main(self, scene):
         """
         Selects a shader for use
         """
         
-        self.engine.scene.shader_handler.add(self)
-        self.engine.scene.node_handler.chunk_handler.update_all()
+        self.engine.shader_handler.add(self)
+        if scene.node_handler: scene.node_handler.chunk_handler.swap_default(self)
 
     def write(self, name: str, value) -> None:
         """
@@ -103,6 +113,21 @@ class Shader:
         
         self.program[name].write(value)
     
+    def bind(self, sampler: mgl.Texture | mgl.TextureArray | mgl.TextureCube | Image, name: str, slot: int=None) -> None:
+        """
+        Binds the given sampler to the next availible slot
+        """
+
+        # Use the next slot if no slot is given
+        if not slot: slot = self.bindings; self.bindings+=1
+
+        if isinstance(sampler, Image,): sampler = sampler.build_texture(self.ctx)
+
+        # Use the sampler
+        self.program[name] = slot
+        sampler.use(location=slot)
+        
+
     def __del__(self) -> int:
         if self.program: self.program.release()
 

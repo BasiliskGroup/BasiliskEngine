@@ -6,10 +6,8 @@ import time
 import random
 
 engine = bsk.Engine()
-scene = bsk.Scene()
-engine.scene = scene
+scene = bsk.Scene(engine)
 
-cube_mesh = bsk.cube
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 
 mud = bsk.Image("tests/mud.png")
@@ -22,25 +20,24 @@ blue = bsk.Material(color=(0, 0, 255))
 aabb_edges = []
 is_pressed = False
 
-stationary = scene.add_node(
+stationary = scene.add(bsk.Node(
     position=[random.uniform(-10, 10), random.uniform(-3, -10), random.uniform(-10, 10)], 
     scale=[random.uniform(0.5, 2) for _ in range(3)],
     rotation=[random.uniform(-10, 10), random.uniform(-3, -10), random.uniform(-10, 10)], 
-    mesh=cube_mesh, 
     material=blue,
-    collisions=True
-)
+    collision=True
+))
 
-node = scene.add_node(
+node = scene.add(bsk.Node(
     position=[random.uniform(-10, 10), random.uniform(-3, -10), random.uniform(-10, 10)], 
     scale=[random.uniform(0.5, 2) for _ in range(3)],
     rotation=[random.uniform(-10, 10), random.uniform(-3, -10), random.uniform(-10, 10)], 
-    mesh=cube_mesh, 
     material=blue,
-    collisions=True
-)
+    collision=True
+))
 
 while engine.running:
+    scene.update()
     keys = pg.key.get_pressed()
     if keys[pg.K_u]: node.position += (0.01, 0, 0)
     if keys[pg.K_j]: node.position -= (0.01, 0, 0)
@@ -49,7 +46,7 @@ while engine.running:
     if keys[pg.K_o]: node.position += (0, 0.01, 0)
     if keys[pg.K_p]: node.position -= (0, 0.01, 0)
     
-    vec = engine.scene.collider_handler.bvh.get_collided(node.collider)
+    vec = scene.collider_handler.bvh.get_collided(node.collider)
     print(vec)
     
     engine.update()

@@ -15,19 +15,23 @@ class ShaderHandler:
     uniform_values: dict = {}
     """Dictionary containing uniform values"""    
 
-    def __init__(self, scene) -> None:
+    def __init__(self, engine) -> None:
         """
         Handles all the shader programs in a basilisk scene
         """
         
         # Back references
-        self.scene  = scene
-        self.engine = scene.engine
-        self.ctx    = scene.engine.ctx
+        self.engine = engine
+        self.ctx    = engine.ctx
 
         # Initalize dictionaries
         self.shaders = set()
-        self.add(self.engine.shader)
+
+        # Load a default shader
+        self.default_shader = Shader(self.engine, self.engine.root + '/shaders/batch.vert', self.engine.root + '/shaders/batch.frag')
+        self.default_shader.hash = self.default_shader.hash + hash('engine_shader')
+        self.add(self.default_shader)
+        setattr(self.engine, "_shader", self.default_shader)
 
     def add(self, shader: Shader) -> None:
         """
@@ -41,14 +45,13 @@ class ShaderHandler:
 
         self.shaders.add(shader)
         
-        if self.scene.material_handler:
-            self.scene.light_handler.write()
-            self.scene.material_handler.write()
-            self.scene.material_handler.image_handler.write()
+        if self.engine.material_handler:
+            self.engine.material_handler.write()
+            self.engine.material_handler.image_handler.write()
 
         return shader
 
-    def get_uniforms_values(self) -> None:
+    def get_uniforms_values(self, scene: ...) -> None:
         """
         Gets uniforms from various parts of the scene.
         These values are stored and used in write_all_uniforms and update_uniforms.
@@ -56,17 +59,18 @@ class ShaderHandler:
         """
         
         self.uniform_values = {
-            'projectionMatrix' : self.scene.camera.m_proj,
-            'viewMatrix' : self.scene.camera.m_view,
-            'cameraPosition' : self.scene.camera.position,
+            'projectionMatrix' : scene.camera.m_proj,
+            'viewMatrix' : scene.camera.m_view,
+            'cameraPosition' : scene.camera.position,
+            'viewportDimensions' : glm.vec2(self.engine.win_size),
         }
 
-    def write(self) -> None:
+    def write(self, scene: ...) -> None:
         """
         Writes all of the uniforms in every shader program.
         """
 
-        self.get_uniforms_values()
+        self.get_uniforms_values(scene)
         for uniform in self.uniform_values:
             for shader in self.shaders:
                 if not uniform in shader.uniforms: continue  # Does not write uniforms not in the shader

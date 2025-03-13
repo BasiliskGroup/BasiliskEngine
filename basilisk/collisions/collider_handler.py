@@ -5,7 +5,7 @@ from .broad.broad_bvh import BroadBVH
 from .narrow.gjk import collide_gjk
 from .narrow.epa import get_epa_from_gjk
 from .narrow.contact_manifold import get_contact_manifold, separate_polytope
-from .narrow.dataclasses import SupportPoint, ContactPoint, ContactManifold
+from .narrow.dataclasses import ContactPoint, ContactManifold, Collision
 from ..nodes.node import Node
 from ..generic.collisions import get_sat_axes
 from ..physics.impulse import calculate_collisions
@@ -47,8 +47,7 @@ class ColliderHandler():
         Resets collider collision values and resolves all collisions in the scene
         """
         # reset collision data
-        for collider in self.colliders: collider.collisions = {}
-        
+        for collider in self.colliders: collider.collisions = []
         
         # update BVH
         for collider in self.colliders:
@@ -122,7 +121,7 @@ class ColliderHandler():
             # traverse bvh to find aabb aabb collisions
             colliding = self.bvh.get_collided(collider1)
             for collider2 in colliding:
-                if collider1 is collider2: continue
+                if collider1 is collider2 or (collider1.collision_group is not None and collider1.collision_group == collider2.collision_group): continue
                 if ((collider1, collider2) if id(collider1) < id(collider2) else (collider2, collider1)) in collisions: continue
                 
                 # run broad collision for specified mesh types
@@ -142,13 +141,12 @@ class ColliderHandler():
             for point in incoming:
                 incoming_indices.add(point.index)
                 if point.index not in existing or glm.length2(point.vertex - existing[point.index]) > 1e-5: existing[point.index] = glm.vec3(point.vertex)
-                # if glm.length2(point.vertex - existing[point.index]) != 0: print(point.vertex - existing[point.index])
                     
             # remove changed stored points
             remove_indices = []
             for index, vertex in existing.items():
                 if index in incoming_indices: continue
-                if glm.length2(node.get_vertex(index) - vertex) > 1e-5: remove_indices.append(index) # check to see if point has moved
+                if glm.length2(node.collider.get_vertex(index) - vertex) > 1e-5: remove_indices.append(index) # check to see if point has moved
             
             # remove unused and moved points
             for index in remove_indices: del existing[index]
@@ -189,14 +187,19 @@ class ColliderHandler():
                 has_collided, simplex = collide_gjk(node1, node2)
                 if not has_collided: continue
                 
-                face, polytope = get_epa_from_gjk(node1, node2, simplex)
+                faces, polytope = get_epa_from_gjk(node1, node2, simplex)
+                face = faces[0]
                 vec, distance  = face[1], face[0]
                 
                 # TODO replace with own contact algorithm
                 points1 = [ContactPoint(p.index1, p.vertex1) for p in polytope]
                 points2 = [ContactPoint(p.index2, p.vertex2) for p in polytope]
                 
-            if glm.dot(vec, node2.position - node1.position) > 0: vec *= -1
+            if glm.dot(vec, node2.position.data - node1.position.data) > 0: vec *= -1
+            
+            # add collision data to colliders
+            collider1.collisions.append(Collision(node2, vec))
+            collider2.collisions.append(Collision(node1, -vec))
             
             # apply impulse if a collider has a physic body
             if node1.physics_body or node2.physics_body:
@@ -205,12 +208,9 @@ class ColliderHandler():
                 points1, points2 = separate_polytope(points1, points2, vec)
                 self.merge_contact_points(vec, collider1, collider2, points1, points2)
                 
-                # for manifold in self.contact_manifolds.values(): print(list(manifold.contact_points1.values()) + list(manifold.contact_points2.values()))
-                
                 collider_tuple = (collider1, collider2)
-                # print(self.contact_manifolds[collider_tuple])
                 manifold = get_contact_manifold(
-                    node1.position - vec, 
+                    node1.position.data - vec, 
                     vec, 
                     self.contact_manifolds[collider_tuple].contact_points1.values(), 
                     self.contact_manifolds[collider_tuple].contact_points2.values()
@@ -219,9 +219,6 @@ class ColliderHandler():
                 collision_normal = node1.velocity - node2.velocity
                 collision_normal = vec if glm.length2(collision_normal) < 1e-12 else glm.normalize(collision_normal)
                 calculate_collisions(collision_normal, node1, node2, manifold, node1.get_inverse_inertia(), node2.get_inverse_inertia(), node1.center_of_mass, node2.center_of_mass)
-
-                # for i, point in enumerate(manifold):
-                #     self.scene.add(Node(position = point, scale = (0.1, 0.1, 0.1)))
             
             # resolve collision penetration
             multiplier = 0.5 if not (node1.static or node2.static) else 1

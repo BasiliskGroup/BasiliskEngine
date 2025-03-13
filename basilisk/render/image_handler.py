@@ -2,15 +2,12 @@ import moderngl as mgl
 import glm
 import numpy as np
 
-
 texture_sizes = (8, 64, 512, 1024, 2048)
 
 
 class ImageHandler():
-    engine: any
+    engine: ...
     """Back refernce to the parent engine"""
-    scene: any
-    """Back refernce to the parent scene"""
     ctx: mgl.Context
     """Back reference to the Context used by the scene/engine"""
     images: list
@@ -18,16 +15,15 @@ class ImageHandler():
     texture_arrays: dict
     """Dictionary of textures arrays for writting textures to GPU"""
 
-    def __init__(self, scene) -> None:
+    def __init__(self, engine) -> None:
         """
         Container for all the basilisk image objects in the scene.
         Handles the managment and writting of all image textures.
         """
         
         # Set back references
-        self.scene  = scene
-        self.engine = scene.engine
-        self.ctx    = scene.engine.ctx
+        self.engine = engine
+        self.ctx    = engine.ctx
 
         self.images = []
         self.texture_arrays = {size : [] for size in texture_sizes}
@@ -83,11 +79,13 @@ class ImageHandler():
         Writes all texture arrays to shaders that use images 
         """
 
+        if not self.engine.shader_handler: return
+
         if regenerate: self.generate_texture_array()
 
         if not self.texture_arrays: return
 
-        for shader in self.engine.scene.shader_handler.shaders:
+        for shader in self.engine.shader_handler.shaders:
             if 'textureArrays[5]' not in shader.uniforms: continue
 
             for i, size in enumerate(texture_sizes):

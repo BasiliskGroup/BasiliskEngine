@@ -55,7 +55,7 @@ class Chunk():
         if not self.batch.vbo: return
         
         data = node.get_data()
-        self.batch.vbo.write(data, node.data_index * 25 * 4)
+        self.batch.vbo.write(data, node.data_index * data.shape[1] * 4)
 
     def add(self, node):
         """
@@ -79,15 +79,22 @@ class Chunk():
 
         return node
 
-    def get_program(self):
+    def get_shader(self):
         """
-        Gets the program of the chunks nodes' shader
+        Gets the bsk.Shader of the chunks nodes' shader
         """
 
         shader = self.shader
 
-        if shader: return shader.program
-        return self.chunk_handler.engine.shader.program
+        if shader: return shader
+        return self.chunk_handler.scene.shader
+
+    def swap_shader(self, shader):
+        """
+        Swaps the batches shader to the given shader
+        """
+        
+        self.batch.swap_shader(shader)
 
     def __repr__(self) -> str:
         return f'<Basilisk Chunk | {self.position}, {len(self.nodes)} nodes, {"static" if self.static else "dynamic"}>'

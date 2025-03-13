@@ -9,9 +9,6 @@ from ..generic.input_validation import validate_color, validate_rect, validate_p
 
 class DrawHandler():
     engine: ...
-    """Back reference to the parent engine"""
-    scene: ...
-    """Back reference to the parent scene"""
     ctx: mgl.Context
     """Back reference to the parent context"""
     program: mgl.Program
@@ -23,15 +20,14 @@ class DrawHandler():
     vao: mgl.VertexArray=None
     """VAO for rendering all 2D draw calls"""
     
-    def __init__(self, scene) -> None:
+    def __init__(self, engine) -> None:
         # Back references
-        self.scene  = scene
-        self.engine = scene.engine
-        self.ctx    = scene.engine.ctx
+        self.engine = engine
+        self.ctx    = engine.ctx
 
         # Get the shader
         root = self.engine.root
-        self.shader = self.scene.shader_handler.add(Shader(self.engine, root + '/shaders/draw.vert', root + '/shaders/draw.frag'))
+        self.shader = self.engine.shader_handler.add(Shader(self.engine, root + '/shaders/draw.vert', root + '/shaders/draw.frag'))
 
         # Initialize draw data as blank
         self.draw_data = []
@@ -55,7 +51,7 @@ class DrawHandler():
 
         # Create buffer and VAO
         self.vbo = self.ctx.buffer(data)
-        self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '2f 4f 1i', *['in_position', 'in_color', 'in_uses_image'])], skip_errors=True)
+        self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '2f 4f 1i 1f', *['in_position', 'in_color', 'in_uses_image', 'in_alpha'])], skip_errors=True)
 
         # Render the VAO
         self.ctx.enable(mgl.BLEND)
@@ -82,10 +78,10 @@ class DrawHandler():
         p3 = (rect[0] + rect[2], rect[1]          )
         p4 = (rect[0] + rect[2], rect[1] + rect[3])
 
-        v1 = (*p1, *color, 0)
-        v2 = (*p2, *color, 0)
-        v3 = (*p3, *color, 0)
-        v4 = (*p4, *color, 0)
+        v1 = (*p1, *color, 0, 0.0)
+        v2 = (*p2, *color, 0, 0.0)
+        v3 = (*p3, *color, 0, 0.0)
+        v4 = (*p4, *color, 0, 0.0)
 
         self.draw_data.extend([
             v1, v3, v2,
@@ -111,14 +107,14 @@ class DrawHandler():
         outer_color  = validate_color('draw', 'color', outer_color)
         p1 = validate_point(center)
 
-        v1 = (*p1, *color, 0)
+        v1 = (*p1, *color, 0, 0.0)
         theta = 0
         delta_theta = (2 * 3.1415) / resolution
 
         for triangle in range(resolution):
-            v2 = (center[0] + radius * cos(theta), center[1] + radius * sin(theta), *outer_color, 0)
+            v2 = (center[0] + radius * cos(theta), center[1] + radius * sin(theta), *outer_color, 0, 0.0)
             theta += delta_theta
-            v3 = (center[0] + radius * cos(theta), center[1] + radius * sin(theta), *outer_color, 0)
+            v3 = (center[0] + radius * cos(theta), center[1] + radius * sin(theta), *outer_color, 0, 0.0)
             self.draw_data.extend([v1, v2, v3])
 
     def draw_line(self, color: tuple, p1: tuple, p2: tuple, thickness: int=1):
@@ -146,14 +142,14 @@ class DrawHandler():
         theta = atan2(*unit)
         perp_vector = glm.vec2(cos(-theta), sin(-theta)) * thickness
 
-        v1 = (*(p1 - perp_vector), *color, 0)
-        v2 = (*(p1 + perp_vector), *color, 0)
-        v3 = (*(p2 - perp_vector), *color, 0)
-        v4 = (*(p2 + perp_vector), *color, 0)
+        v1 = (*(p1 - perp_vector), *color, 0, 0.0)
+        v2 = (*(p1 + perp_vector), *color, 0, 0.0)
+        v3 = (*(p2 - perp_vector), *color, 0, 0.0)
+        v4 = (*(p2 + perp_vector), *color, 0, 0.0)
         
         self.draw_data.extend([v1, v3, v4, v2, v1, v4])
 
-    def blit(self, image: Image, rect: tuple):
+    def blit(self, image: Image, rect: tuple, alpha: float=1.0):
         rect  = validate_rect(rect)
 
         p1 = (rect[0]          , rect[1]          )
@@ -161,10 +157,10 @@ class DrawHandler():
         p3 = (rect[0] + rect[2], rect[1]          )
         p4 = (rect[0] + rect[2], rect[1] + rect[3])
 
-        v1 = (*p1, *image.index, 0, 0, 1)
-        v2 = (*p2, *image.index, 0, 1, 1)
-        v3 = (*p3, *image.index, 1, 0, 1)
-        v4 = (*p4, *image.index, 1, 1, 1)
+        v1 = (*p1, *image.index, 0, 0, 1, alpha)
+        v2 = (*p2, *image.index, 0, 1, 1, alpha)
+        v3 = (*p3, *image.index, 1, 0, 1, alpha)
+        v4 = (*p4, *image.index, 1, 1, 1, alpha)
 
         self.draw_data.extend([
             v1, v3, v2,

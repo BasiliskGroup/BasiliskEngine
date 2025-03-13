@@ -1,6 +1,9 @@
 import glm
 from dataclasses import dataclass
 
+from basilisk.generic.vec3 import Vec3
+# from ...nodes.node import Node
+
 # frozen because data does not need to be mutable
 # used in creating polytopes for GJK/EPA
 @dataclass(frozen=True)
@@ -17,7 +20,7 @@ class SupportPoint():
 @dataclass(frozen=True)
 class ContactPoint():
     index: int
-    vertex: glm.vec3
+    vertex: Vec3
     
 # contact manifold object used in the contact handler list
 @dataclass
@@ -25,3 +28,8 @@ class ContactManifold():
     normal: glm.vec3
     contact_points1: dict[int : glm.vec3] # contact point index : collision position
     contact_points2: dict[int : glm.vec3]
+    
+@dataclass
+class Collision():
+    node: ...
+    normal: glm.vec3
