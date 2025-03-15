@@ -75,7 +75,9 @@ class Chunk():
         if node == None: return
 
         self.nodes.remove(node)
-        if self.batch and self.batch.vbo: self.batch.vbo.clear()
+        if self.batch and self.batch.vbo: 
+            self.batch.vbo.clear()
+            self.batch.batch()
 
         return node
 

@@ -106,6 +106,8 @@ class ChunkHandler():
         # Add the node to the chunk
         self.shader_groups[shader][node.static][chunk_key].add(node)
 
+        node.chunk = self.shader_groups[shader][node.static][chunk_key]
+
         # Update the chunk
         self.updated_chunks.add(self.shader_groups[shader][node.static][chunk_key])
 

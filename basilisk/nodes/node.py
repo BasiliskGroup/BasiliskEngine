@@ -159,8 +159,17 @@ class Node():
 
         # callback function to be added to the custom Vec3 and Quat classes
         def position_callback():
+
             if self.chunk:
-                self.chunk.node_update_callback(self)
+                
+                chunk_size = self.scene.engine.config.chunk_size
+                chunk_pos = self.position // chunk_size
+
+                if self.chunk.position[0] == chunk_pos.x and self.chunk.position[1] == chunk_pos.y and self.chunk.position[2] == chunk_pos.z:
+                    self.chunk.node_update_callback(self)
+                else:
+                    self.chunk.remove(self)
+                    self.chunk.chunk_handler.add(self)
             
             # update variables
             self.needs_geometric_center = True
