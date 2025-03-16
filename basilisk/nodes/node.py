@@ -1,9 +1,11 @@
 import glm
+import inspect # TODO testing import
 import numpy as np
 from .helper import node_is
 from ..generic.vec3 import Vec3
 from ..generic.quat import Quat
 from ..generic.matrices import get_model_matrix
+from ..generic.math import relative_transforms
 from ..mesh.mesh import Mesh
 from ..render.material import Material
 from ..physics.physics_body import PhysicsBody
@@ -227,8 +229,8 @@ class Node():
         Updates the node's movement variables based on the delta time
         """
         # update based on physical properties
-        if any(self.velocity): self.position += dt * self.velocity
-        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation.data - dt / 2 * self.rotation.data * glm.quat(0, *self.rotational_velocity))
+        if any(self.velocity): self.position.data += dt * self.velocity
+        if any(self.rotational_velocity): self.rotation.data = glm.normalize(self.rotation.data - dt / 2 * self.rotation.data * glm.quat(0, *self.rotational_velocity))
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
@@ -248,9 +250,9 @@ class Node():
         if self.relative_scale:    transform  = glm.scale(transform, self.parent.scale.data)
         
         # set this node's transforms based on the parent
-        if self.relative_position: self.position = transform * self.relative_position
-        if self.relative_scale:    self.scale = self.relative_scale * self.parent.scale.data
-        if self.relative_rotation: self.rotation = self.relative_rotation * self.parent.rotation.data
+        if self.relative_position: self.position.data = transform * self.relative_position
+        if self.relative_scale:    self.scale.data = self.relative_scale * self.parent.scale.data
+        if self.relative_rotation: self.rotation.data = self.relative_rotation * self.parent.rotation.data
         
         for child in self.children: child.sync_data()
         
@@ -299,10 +301,7 @@ class Node():
         if child in self.children or child is self: return
         assert isinstance(child, Node), 'Nodes can only accept other Nodes as children.'
         
-        relative = glm.inverse(self.model_matrix) * child.model_matrix
-        position = glm.vec3(relative[3])
-        scale = glm.vec3([glm.length(relative[i]) for i in range(3)])
-        rotation = child.rotation * glm.inverse(self.rotation.data)
+        position, scale, rotation = relative_transforms(self, child)
         
         # compute relative transformations
         if relative_position or (relative_position is None and child.relative_position): child.relative_position = position
@@ -518,8 +517,10 @@ class Node():
             self.internal_position.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid position value type {type(value)}')
         
-        # # compute relative position if all cases passed
-        # if self.parent and self.relative_position: self.relative_position = self.internal_position.data - self.parent.position
+        # recompute relative transforms when user sets transform
+        if not self.parent or not self.relative_position: return
+        position, scale, rotation = relative_transforms(self.parent, self)
+        self.relative_position = position
     
     @scale.setter
     def scale(self, value: tuple | list | glm.vec3 | np.ndarray):
@@ -530,8 +531,10 @@ class Node():
             self.internal_scale.data = glm.vec3(value)
         else: raise TypeError(f'Node: Invalid scale value type {type(value)}')
         
-        # # compute relative scale
-        # if self.parent and self.relative_scale: self.relative_scale = self.internal_scale.data / self.parent.scale
+        # recompute relative transforms when user sets transform
+        if not self.parent or not self.relative_scale: return
+        position, scale, rotation = relative_transforms(self.parent, self)
+        self.relative_scale = scale
 
     @rotation.setter
     def rotation(self, value: tuple | list | glm.vec3 | glm.quat | glm.vec4 | np.ndarray):
@@ -543,8 +546,10 @@ class Node():
             else: raise ValueError(f'Node: Invalid number of values for rotation. Expected 3 or 4, got {len(value)}')
         else: raise TypeError(f'Node: Invalid rotation value type {type(value)}')
         
-        # # compute relative rotation
-        # if self.parent and self.relative_rotation: self.relative_rotation = self.rotation * glm.inverse(self.parent.rotation)
+        # recompute relative transforms when user sets transform
+        if not self.parent or not self.relative_rotation: return
+        position, scale, rotation = relative_transforms(self.parent, self)
+        self.relative_rotation = rotation
 
     @forward.setter
     def forward(self, value: tuple | list | glm.vec3 | np.ndarray):

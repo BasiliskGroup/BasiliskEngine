@@ -222,5 +222,5 @@ class ColliderHandler():
             
             # resolve collision penetration
             multiplier = 0.5 if not (node1.static or node2.static) else 1
-            if not node1.static: node1.position += multiplier * vec * distance
-            if not node2.static: node2.position -= multiplier * vec * distance
+            if not node1.static: node1.position.data += multiplier * vec * distance
+            if not node2.static: node2.position.data -= multiplier * vec * distance

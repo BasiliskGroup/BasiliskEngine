@@ -29,9 +29,9 @@ parent.add(child)
 
 while engine.running:
         
-    # parent.scale += [random.uniform(-0.01, 0.01) for _ in range(3)]
-    # parent.position += [random.uniform(-0.01, 0.01) for _ in range(3)]
-    if engine.keys[bsk.pg.K_e]: parent.rotation = glm.normalize([random.uniform(-1, 1) for _ in range(3)])
+    parent.scale += 0.001
+    parent.position -= 0.001
+    if engine.keys[bsk.pg.K_e]: child.rotation = glm.normalize([random.uniform(-1, 1) for _ in range(3)])
     
     scene.update()
     engine.update()
