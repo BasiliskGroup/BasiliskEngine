@@ -95,7 +95,7 @@ class Engine():
         self.ctx.enable(flags=mgl.DEPTH_TEST | mgl.CULL_FACE | mgl.BLEND)
 
         # Global attributes referenced by the handlers
-        self.config = Config()
+        self.config = Config(self)
         self.root = os.path.dirname(__file__)
         self.cube = Cube(self)
         self.fbos = []

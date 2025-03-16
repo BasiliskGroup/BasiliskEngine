@@ -60,6 +60,10 @@ class Framebuffer:
         # Create the internal fbo
         self.fbo = self.ctx.framebuffer(self._color_attachments, self._depth_attachment)
 
+        # Texture attributes
+        self.texture.repeat_x = False
+        self.texture.repeat_y = False
+
         # Set the show attachment to default
         self._show = -1
         self.show = 0
@@ -190,3 +194,10 @@ class Framebuffer:
         if self._color_attachments: [tex.release() for tex in self._color_attachments]
         if self._depth_attachment: self._depth_attachment.release()
         if self.fbo: self.fbo.release()
+        if self.vbo: self.vbo.release()
+        if self.vao: self.vao.release()
+        if self.shader: 
+            if self.shader in self.engine.shader_handler.shaders: self.engine.shader_handler.shaders.remove(self.shader)
+            self.shader.__del__()
+
+        if self in self.engine.fbos: self.engine.fbos.remove(self)

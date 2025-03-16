@@ -63,6 +63,8 @@ class ShaderHandler:
             'viewMatrix' : scene.camera.m_view,
             'cameraPosition' : scene.camera.position,
             'viewportDimensions' : glm.vec2(self.engine.win_size),
+            'gamma' : self.engine.config.gamma,
+            'exposure' : self.engine.config.exposure
         }
 
     def write(self, scene: ...) -> None:
