@@ -1,6 +1,8 @@
 #version 330 core
 
 layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 bloomColor;
+
 
 in vec4     color;
 in vec2     imageIndex;
@@ -20,4 +22,5 @@ void main() {
     else {
         fragColor = color;
     }
+    bloomColor = vec4(0.0);
 }

@@ -44,7 +44,7 @@ class Material():
     def __init__(self, name: str=None, color: tuple=(255.0, 255.0, 255.0), texture: Image=None, normal: Image=None, roughness_map: Image=None, ao_map: Image=None, 
                  roughness: float=0.7, subsurface: float=0.2, sheen: float=0.5, sheen_tint: float=0.5,
                  anisotropic: float=0.0, specular: float=1.0, metallicness: float=0.0, specular_tint: float=0.0,
-                 clearcoat: float=0.5, clearcoat_gloss: float=0.25) -> None:
+                 clearcoat: float=0.5, clearcoat_gloss: float=0.25, emissive_color: tuple=(0.0, 0.0, 0.0)) -> None:
         """
         Basilisk Material object. Contains the data and images references used by the material.
         Args:
@@ -79,6 +79,7 @@ class Material():
         self.specular_tint   = specular_tint
         self.clearcoat       = clearcoat
         self.clearcoat_gloss = clearcoat_gloss
+        self.emissive_color  = emissive_color
 
     def get_data(self) -> list:
         """
@@ -105,6 +106,9 @@ class Material():
         # Add ao data
         if self.ao_map: data.extend([1, self.ao_map.index.x, self.ao_map.index.y])
         else: data.extend([0, 0, 0])
+
+        # Add emissive data
+        data.extend([self.emissive_color.x / 255.0, self.emissive_color.y / 255.0, self.emissive_color.z / 255.0])
 
         return data
 
@@ -142,13 +146,15 @@ class Material():
     def clearcoat(self):       return self._clearcoat
     @property
     def clearcoat_gloss(self): return self._clearcoat_gloss
+    @property
+    def emissive_color(self):  return self._emissive_color
 
 
     @color.setter
     def color(self, value: tuple | list | glm.vec3 | np.ndarray):
         self._color = validate_glm_vec3("Material", "color", value)
         if self.material_handler: self.material_handler.write(regenerate=True)
-        
+
     @texture.setter
     def texture(self, value: Image | None):
         self._texture = validate_image("Material", "texture", value)
@@ -219,4 +225,9 @@ class Material():
     @clearcoat_gloss.setter
     def clearcoat_gloss(self, value: float | int | glm.float32):
         self._clearcoat_gloss = validate_float("Material", "clearcoat gloss", value)
+        if self.material_handler: self.material_handler.write(regenerate=True)
+
+    @emissive_color.setter
+    def emissive_color(self, value: tuple | list | glm.vec3 | np.ndarray):
+        self._emissive_color = validate_glm_vec3("Material", "emissive color", value)
         if self.material_handler: self.material_handler.write(regenerate=True)

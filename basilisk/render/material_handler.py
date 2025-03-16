@@ -71,7 +71,7 @@ class MaterialHandler():
         if self.data_texture: self.data_texture.release()
 
         # Create empty texture data
-        material_data = np.zeros(shape=(len(self.materials), 25), dtype="f4")
+        material_data = np.zeros(shape=(len(self.materials), 28), dtype="f4")
 
         # Get data from the materials
         for i, mtl in enumerate(self.materials):

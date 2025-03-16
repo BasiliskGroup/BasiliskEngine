@@ -7,6 +7,7 @@ class Mouse():
         self._relative = [0, 0]
         self.buttons = pg.mouse.get_pressed()
         self.previous_buttons = pg.mouse.get_pressed()
+        self.initial_grab = grab
         self.grab = grab
         self.visible = not self.grab
 
@@ -23,11 +24,11 @@ class Mouse():
 
         for event in events:
             if event.type == pg.KEYUP:
-                if event.key == pg.K_ESCAPE and self.grab:
+                if event.key == pg.K_ESCAPE and self.grab and self.initial_grab:
                     # Unlock mouse
                     self.grab = False
                     self.visible = True
-            if event.type == pg.MOUSEBUTTONUP and not self.grab:
+            if event.type == pg.MOUSEBUTTONUP and not self.grab and self.initial_grab:
                 # Lock mouse
                 self.grab = True
                 self.visible = False

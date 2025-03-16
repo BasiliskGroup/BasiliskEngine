@@ -53,7 +53,7 @@ class Framebuffer:
         self.__del__()
 
         # Create textures
-        self._color_attachments = [self.ctx.texture(self.size, components=4) for i in range(self.n_attachments)]
+        self._color_attachments = [self.ctx.texture(self.size, components=4, dtype='f4') for i in range(self.n_attachments)]
         for tex in self._color_attachments: tex.filter = self.texture_filter
         self._depth_attachment  = self.ctx.depth_texture(self.size)
 

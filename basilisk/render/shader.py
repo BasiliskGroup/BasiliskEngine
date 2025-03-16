@@ -119,9 +119,9 @@ class Shader:
         """
 
         # Use the next slot if no slot is given
-        if not slot: slot = self.bindings; self.bindings+=1
+        if slot == None: slot = self.bindings; self.bindings+=1
 
-        if isinstance(sampler, Image,): sampler = sampler.build_texture(self.ctx)
+        if isinstance(sampler, Image): sampler = sampler.build_texture(self.ctx)
 
         # Use the sampler
         self.program[name] = slot

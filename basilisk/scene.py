@@ -88,9 +88,9 @@ class Scene():
 
         render_target.use()
         self.engine.shader_handler.write(self)
-        if self.sky: self.sky.render()
         self.node_handler.render()
         self.particle.render()
+        if self.sky: self.sky.render()
 
 
         if self.engine.headless or not show: return

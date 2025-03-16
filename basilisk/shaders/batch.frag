@@ -1,6 +1,7 @@
 #version 330 core
 
 layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 bloomColor;
 
 // Structs needed for the shader
 struct textArray {
@@ -14,8 +15,10 @@ struct DirectionalLight {
     float ambient;
 };  
 
+// Material struct sent to fragment shader
 struct Material {
     vec3  color;
+    vec3  emissiveColor;
     float roughness;
     float subsurface;
     float sheen;
@@ -223,12 +226,12 @@ void main() {
     vec3 viewDir = vec3(normalize(cameraPosition - position));
 
     // Get lighting vectors
-    vec3 albedo     = getAlbedo(mtl, uv, gamma);
-    vec3 normal     = getNormal(mtl, TBN);
+    vec3  albedo     = getAlbedo(mtl, uv, gamma);
+    vec3  normal     = getNormal(mtl, TBN);
     float ao        = getAo(mtl, uv);
     float roughness = getRoughness(mtl, uv);
-    vec3 tangent    = TBN[0];
-    vec3 bitangent  = TBN[1];
+    vec3  tangent    = TBN[0];
+    vec3  bitangent  = TBN[1];
 
     // Orthogonalize the tangent and bitangent according to the mapped normal vector
     tangent = tangent - dot(normal, tangent) * normal;
@@ -270,8 +273,18 @@ void main() {
 
     // light_result *= mix(vec3(1.0), texture(skyboxTexture, reflect(-V, N)).rgb, mtl.metallicness);
     // Gamma correction
-    finalColor = pow(finalColor, vec3(1.0/gamma));
+    // finalColor = pow(finalColor, vec3(1.0/gamma));
 
     // Output fragment color
-    fragColor = vec4(finalColor, 1.0);
+    float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722)) + dot(mtl.emissiveColor, vec3(1));
+    fragColor = vec4(finalColor + mtl.emissiveColor, 1.0);
+
+    // Filter out bright pixels for bloom
+    // bloomColor = vec4(0.0, 0.0, 0.0, 1.0);
+    if (brightness > 0.5) {
+        bloomColor = vec4(fragColor.rgb, 1.0);
+    }
+    else{
+        bloomColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
 }
