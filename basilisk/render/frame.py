@@ -52,14 +52,15 @@ class Frame:
 
         if self.engine.event_resize: self.bloom.generate_bloom_buffers()
 
+        self.bloom.render()
+        
         for process in self.post_processes:
-            self.ping_pong_buffer = process.apply(self.framebuffer, self.ping_pong_buffer)
+            self.ping_pong_buffer = process.apply([('screenTexture', self.framebuffer)], self.ping_pong_buffer)
             
             temp = self.framebuffer
             self.framebuffer = self.ping_pong_buffer
             self.ping_pong_buffer = temp
         
-        self.bloom.render()
         self.ctx.screen.use()
         self.shader.bind(self.framebuffer.texture, 'screenTexture', 0)
         self.shader.bind(self.bloom.texture, 'bloomTexture', 1)

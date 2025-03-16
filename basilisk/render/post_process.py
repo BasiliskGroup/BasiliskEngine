@@ -35,7 +35,7 @@ class PostProcess:
 
         # Load Shaders
         self.shader = Shader(self.engine, self.engine.root + f'/shaders/frame.vert', frag)
-        self.engine.scene.shader_handler.add(self.shader)
+        self.engine.shader_handler.add(self.shader)
 
         # Load VAO
         self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
@@ -49,15 +49,15 @@ class PostProcess:
         self.fbo.texture.filter = self.filter
 
 
-    def apply(self, source: mgl.Texture | Image | Framebuffer, destination: mgl.Texture | Image | Framebuffer=None) -> mgl.Texture | Image | Framebuffer:
+    def apply(self, source: list[tuple[str, mgl.Texture]] | list[tuple[str, Image]] | list[tuple[str, Framebuffer]], destination: mgl.Texture | Image | Framebuffer=None) -> mgl.Texture | Image | Framebuffer:
         """
         Applies a post process shader to a texture source.
         Returns the modified texture or renders to the destination if given
         """
 
-        if isinstance(source, Framebuffer):   return self._apply_to_framebuffer(source, destination)
-        elif isinstance(source, mgl.Texture): return self._apply_to_texture(source, destination)
-        elif isinstance(source, Image):       return self._apply_to_image(source, destination)
+        if   isinstance(source[0][1], Framebuffer): return self._apply_to_framebuffer(source, destination)
+        elif isinstance(source[0][1], mgl.Texture): return self._apply_to_texture(source, destination)
+        elif isinstance(source[0][1], Image):       return self._apply_to_image(source, destination)
         
         raise ValueError(f'PostProces.apply: Invalid postprocess source type {type(source)}')
 
@@ -74,8 +74,9 @@ class PostProcess:
         self.fbo.clear()
 
         # Load the source texture to the shader
-        self.shader.program['screenTexture'] = 0
-        source.use(location=0)
+        for i, src in enumerate(source):
+            self.shader.program[src[0]] = i
+            src[1].use(location=i)
 
         # Apply the post process
         self.vao.render()
@@ -93,12 +94,13 @@ class PostProcess:
             fbo.texture.filter = self.filter
         else:
             fbo = detination
-            old_filter = fbo.filter
+            old_filter = fbo.texture_filter
             fbo.texture.filter = self.filter
 
         # Load the source texture to the shader
-        self.shader.program['screenTexture'] = 0
-        source.texture.use(location=0)
+        for i, src in enumerate(source):
+            self.shader.program[src[0]] = i
+            src[1].texture.use(location=i)
 
         fbo.use()
         fbo.clear()
@@ -138,3 +140,8 @@ class PostProcess:
         # Make an image from the texture
         image = Image()
         return image
+    
+    def __del__(self):
+        if self.vao: self.vao.release()
+        if self.vbo: self.vbo.release()
+        if self.fbo: self.fbo.release()
