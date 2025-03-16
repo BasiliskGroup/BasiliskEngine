@@ -288,3 +288,4 @@ class Scene():
     def shader(self, value):
         self._shader = value
         value.set_main(self)
+        if self.light_handler: self.light_handler.write(value)

@@ -43,6 +43,9 @@ class DrawHandler():
         
         if not self.draw_data: return
 
+        self.ctx.enable(mgl.BLEND)
+        self.ctx.blend_func = mgl.ADDITIVE_BLENDING
+
         # Reverse the draw order, and convert to C-like array
         self.draw_data.reverse()
         data = np.array(self.draw_data, dtype='f4')
@@ -54,8 +57,6 @@ class DrawHandler():
         self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '2f 4f 1i 1f', *['in_position', 'in_color', 'in_uses_image', 'in_alpha'])], skip_errors=True)
 
         # Render the VAO
-        self.ctx.enable(mgl.BLEND)
-        self.ctx.blend_equation = mgl.ADDITIVE_BLENDING
         self.vao.render()
 
         # Clera the draw data
@@ -64,6 +65,8 @@ class DrawHandler():
         self.vbo = None
         self.vao = None
         self.draw_data.clear()
+
+        self.ctx.disable(mgl.BLEND)
 
     def draw_rect(self, color: tuple, rect: tuple) -> None:
         """

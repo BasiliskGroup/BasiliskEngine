@@ -1,5 +1,7 @@
 #version 330 core
-out vec4 fragColor;
+
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 bloomColor;
 
 in vec2 uv;
 in vec3 position;
@@ -12,6 +14,7 @@ uniform textArray textureArrays[5];
 
 struct Material {
     vec3  color;
+    vec3  emissiveColor;
     float roughness;
     float subsurface;
     float sheen;
@@ -69,4 +72,6 @@ void main()
     // Get color and gamma correction
     fragColor = vec4(color * (.2 + diff), 1.0);
     fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
+
+    bloomColor = vec4(mtl.emissiveColor, 1.0);
 }

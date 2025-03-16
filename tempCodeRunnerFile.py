@@ -1,1 +1,1 @@
-scene.sky = None
+materials

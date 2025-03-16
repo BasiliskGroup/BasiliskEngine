@@ -42,7 +42,7 @@ class ParticleHandler:
 
         # Get material ID
         if material == None: material_index = 0
-        elif isinstance(material, Material): 
+        elif isinstance(material, Material):
             self.scene.engine.material_handler.add(material)
             material_index = material.index
         else: raise ValueError(f'particle_handler.add: Invalid particle material type: {type(material)}')

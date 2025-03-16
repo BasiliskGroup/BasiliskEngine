@@ -5,8 +5,10 @@ scene = bsk.Scene(engine)
 
 emissive_mtl = bsk.Material(emissive_color=(2 * 255, 1.5 * 255, 50))
 
-cube = bsk.Node(material=emissive_mtl)
-scene.add(cube)
+sphere_mesh = bsk.Mesh('tests/sphere.obj')
+
+node = bsk.Node(mesh=sphere_mesh, material=emissive_mtl)
+scene.add(node)
 
 
 while engine.running:

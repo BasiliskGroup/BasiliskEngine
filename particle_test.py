@@ -9,7 +9,7 @@ cylinder = bsk.Mesh('tests/cylinder.obj')
 sphere = bsk.Mesh('tests/sphere.obj')
 meshes = [None, monkey, cylinder, sphere]
 
-red = bsk.Material(color=(255, 0, 0))
+red = bsk.Material(emissive_color=(4 * 255, 50, 50))
 floor_img = bsk.Image('tests/floor_albedo.png')
 floor_norm = bsk.Image('tests/floor_normal.png')
 floor = bsk.Material(texture=floor_img, normal=floor_norm)

@@ -28,9 +28,6 @@ class Frame:
         self.framebuffer.texture.repeat_x = False
         self.framebuffer.texture.repeat_y = False
 
-        self.ctx.enable(mgl.BLEND)
-        self.ctx.blend_func = mgl.ADDITIVE_BLENDING
-
         # Load Shaders
         self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/bloom_frame.frag')
         self.engine.shader_handler.add(self.shader)
@@ -50,6 +47,9 @@ class Frame:
         Renders the current frame to the screen
         """
 
+        self.ctx.enable(mgl.BLEND)
+        self.ctx.blend_func = mgl.ADDITIVE_BLENDING
+
         if self.engine.event_resize: self.bloom.generate_bloom_buffers()
 
         for process in self.post_processes:
@@ -64,6 +64,8 @@ class Frame:
         self.shader.bind(self.framebuffer.texture, 'screenTexture', 0)
         self.shader.bind(self.bloom.texture, 'bloomTexture', 1)
         self.vao.render()
+
+        self.ctx.disable(mgl.BLEND)
 
     def use(self) -> None:
         """
