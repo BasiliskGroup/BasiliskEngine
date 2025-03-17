@@ -1,1 +1,0 @@
-engine.frame.bloom.render()
