@@ -29,9 +29,10 @@ parent.add(child)
 
 while engine.running:
         
-    parent.scale += 0.001
+    # parent.scale += 0.001
     parent.position -= 0.001
-    if engine.keys[bsk.pg.K_e]: child.rotation = glm.normalize([random.uniform(-1, 1) for _ in range(3)])
+    child.position = glm.vec3(1, 5, 3)
+    if engine.keys[bsk.pg.K_e]: child.rotational_velocity = glm.vec3(3, 0, 0)
     
     scene.update()
     engine.update()

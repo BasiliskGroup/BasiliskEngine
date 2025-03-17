@@ -229,8 +229,8 @@ class Node():
         Updates the node's movement variables based on the delta time
         """
         # update based on physical properties
-        if any(self.velocity): self.position.data += dt * self.velocity
-        if any(self.rotational_velocity): self.rotation.data = glm.normalize(self.rotation.data - dt / 2 * self.rotation.data * glm.quat(0, *self.rotational_velocity))
+        if any(self.velocity): self.position += dt * self.velocity # NOTE this should be an external setter, do not change to self.position.data
+        if any(self.rotational_velocity): self.rotation = glm.normalize(self.rotation.data - dt / 2 * self.rotation.data * glm.quat(0, *self.rotational_velocity)) # NOTE see translational velocity note
 
         if self.physics_body:
             self.velocity += self.physics_body.get_delta_velocity(dt)
