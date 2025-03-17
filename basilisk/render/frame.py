@@ -109,3 +109,6 @@ class Frame:
         
         if self.vbo: self.vbo.release()
         if self.vao: self.vao.release()
+
+    @property
+    def texture(self): return self.framebuffer.texture

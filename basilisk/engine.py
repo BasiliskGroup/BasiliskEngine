@@ -124,7 +124,7 @@ class Engine():
         self.current_frame_updated = True
 
 
-    def update(self) -> None:
+    def update(self, render=True) -> None:
         """
         Calls internal update if needed
         Renders the draw handler
@@ -141,13 +141,14 @@ class Engine():
         self.draw_handler.render()
 
         # Clear the screen and render the frame
-        self.ctx.screen.use()
-        self.ctx.clear()
-        self.frame.render()
+        if render:
+            self.ctx.screen.use()
+            self.ctx.clear()
+            self.frame.render()
+
+            self.frame.clear()
+
         pg.display.flip()
-
-        self.frame.clear()
-
 
         # Allow for the engine to take in input again
         self.current_frame_updated = False

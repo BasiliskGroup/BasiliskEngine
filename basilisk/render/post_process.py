@@ -4,7 +4,6 @@ from .shader import Shader
 from .image import Image
 from .framebuffer import Framebuffer
 
-
 class PostProcess:
     engine: ...
     """Reference to the parent engine"""
@@ -14,6 +13,7 @@ class PostProcess:
     """Shader object used by the post process"""
     vao: mgl.VertexArray
     """Screenspace render vao"""
+    fbo: Framebuffer=None
 
     def __init__(self, engine, shader_path: str=None, size: tuple=None, components: int=4, filter=(mgl.LINEAR, mgl.LINEAR)) -> None:
         """
@@ -49,17 +49,33 @@ class PostProcess:
         self.fbo.texture.filter = self.filter
 
 
-    def apply(self, source: list[tuple[str, mgl.Texture]] | list[tuple[str, Image]] | list[tuple[str, Framebuffer]], destination: mgl.Texture | Image | Framebuffer=None) -> mgl.Texture | Image | Framebuffer:
+    def apply(self, sources: list[tuple[str, mgl.Texture]] | list[tuple[str, Image]] | list[tuple[str, Framebuffer]], destination: mgl.Texture | Image | Framebuffer=None) -> mgl.Texture | Image | Framebuffer:
         """
         Applies a post process shader to a texture source.
         Returns the modified texture or renders to the destination if given
         """
 
-        if   isinstance(source[0][1], Framebuffer): return self._apply_to_framebuffer(source, destination)
-        elif isinstance(source[0][1], mgl.Texture): return self._apply_to_texture(source, destination)
-        elif isinstance(source[0][1], Image):       return self._apply_to_image(source, destination)
-        
-        raise ValueError(f'PostProces.apply: Invalid postprocess source type {type(source)}')
+        # Write all the given sources to the GPU
+        self._write_sources(sources)
+
+        # Get the redner target
+        if isinstance(destination, Framebuffer) or isinstance(destination, type(self.engine.frame)): fbo = destination
+        elif isinstance(destination, mgl.Texture): fbo = self.ctx.framebuffer([destination], None)
+        elif isinstance(destination, Image): fbo = self.ctx.framebuffer([destination.texture], None)
+
+        # Apply the post process
+        fbo.use()
+        fbo.clear()
+        self.vao.render()
+
+        # Simply return the given fbo if provided
+        if isinstance(destination, Framebuffer) or isinstance(destination, type(self.engine.frame)): return destination
+
+        # Else, need to release the data and return the texture
+        texture = fbo.color_attachments[0]
+        fbo.release()
+        return texture
+
 
     def resize(self, size: tuple=None):
         """
@@ -67,6 +83,24 @@ class PostProcess:
         """
         
         self.size = size if size else self.engine.win_size
+
+    def _write_sources(self, sources: list[tuple[str, mgl.Texture]] | list[tuple[str, Image]] | list[tuple[str, Framebuffer]]):
+        """
+        Writes all given source images to the GPU
+        """
+        
+        for i, source in enumerate(sources):
+            # Get the name and data
+            name, data = source
+
+            # Extract the needed data
+            if   isinstance(data, mgl.Texture): texture = data
+            elif isinstance(data, Image) or isinstance(data, Framebuffer) or isinstance(data, type(self.engine.frame)): texture = data.texture
+            else: raise ValueError(f'PostProces.apply: Invalid postprocess source type {type(source)}')
+
+            # Write the texture
+            self.shader.program[name] = i
+            texture.use(location=i)
 
     def _render_post_process(self, source: mgl.Texture):
         # Clear and use the fbo as a render target
@@ -144,4 +178,4 @@ class PostProcess:
     def __del__(self):
         if self.vao: self.vao.release()
         if self.vbo: self.vbo.release()
-        if self.fbo: self.fbo.release()
+        if self.fbo: self.fbo.__del__()

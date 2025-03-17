@@ -1,6 +1,7 @@
 #version 330 core
 
-out vec4 fragColor;
+layout (location = 0) out vec4 fragColor;
+layout (location = 1) out vec4 bloomColor;
 
 in vec2 uv;
 
@@ -29,4 +30,6 @@ void main(){
         //sample the texture
     	fragColor = vec4(mix(texture(screenTexture, crt_uv).rgb,vec3(0.0), apply), 1.0);
     }
+
+    bloomColor = vec4(0.0, 0.0, 0.0, 0.0);
 }
