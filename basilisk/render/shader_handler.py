@@ -3,6 +3,12 @@ import glm
 from .shader import Shader
 
 
+# Camera view constants
+FOV = 50  # Degrees
+NEAR = 0.1
+FAR = 350
+
+
 class ShaderHandler:
     engine: ...
     """Back reference to the parent engine"""
@@ -64,7 +70,10 @@ class ShaderHandler:
             'cameraPosition' : scene.camera.position,
             'viewportDimensions' : glm.vec2(self.engine.win_size),
             'gamma' : self.engine.config.gamma,
-            'exposure' : self.engine.config.exposure
+            'exposure' : self.engine.config.exposure,
+            'near' : glm.float32(NEAR),
+            'far' : glm.float32(FAR),
+            'FOV' : glm.float32(FOV)
         }
 
     def write(self, scene: ...) -> None:

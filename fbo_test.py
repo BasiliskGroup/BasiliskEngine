@@ -2,17 +2,17 @@ import basilisk as bsk
 
 engine = bsk.Engine()
 scene = bsk.Scene(engine)
+scene.ctx.multisample = True
 
 scene.add(bsk.Node())
 
-fbo = bsk.Framebuffer(engine, n_color_attachments=2)
+fbo1 = bsk.Framebuffer(engine)
 fbo2 = bsk.Framebuffer(engine)
+
 
 while engine.running:
     scene.update(render=False)
-
-    scene.render(fbo)
-    fbo.render(fbo2)
-    fbo2.render()
-    
-    engine.update()
+    scene.render()
+    scene.frame.render(fbo1)
+    fbo1.render()
+    engine.update(render=False)

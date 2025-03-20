@@ -7,4 +7,7 @@ scene.add(bsk.Node())
 
 while engine.running:
     scene.update()
+
+    # scene.frame.input_buffer.render(color_attachment=1)
+
     engine.update()

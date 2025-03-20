@@ -2,6 +2,8 @@
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out vec4 bloomColor;
+layout (location = 2) out vec4 normalTexture;
+
 
 in vec2 uv;
 in vec3 position;
@@ -73,5 +75,8 @@ void main()
     fragColor = vec4(color * (.2 + diff), 1.0);
     fragColor.rgb = pow(fragColor.rgb, vec3(1.0/gamma));
 
+    normalTexture = vec4(abs(normal), 1.0);
+
     bloomColor = vec4(mtl.emissiveColor, 1.0);
+
 }

@@ -25,7 +25,7 @@ class Framebuffer:
     _depth_attachment = None
     """"""
 
-    def __init__(self, engine: ..., size: tuple[int]=None, n_color_attachments: int=1, scale: float=1.0, linear_filter: bool=True) -> None:
+    def __init__(self, engine: ..., shader: Shader=None, size: tuple[int]=None, n_color_attachments: int=1, scale: float=1.0, linear_filter: bool=True) -> None:
         """
         Abstraction of the MGL framebuffer.
         Has the given number of color attachements (4-component) and 1 depth attachment.
@@ -36,6 +36,7 @@ class Framebuffer:
         self.ctx            = engine.ctx
         self._size          = size
         self.scale          = scale
+        self.shader         = shader
         self.texture_filter = (mgl.LINEAR, mgl.LINEAR) if linear_filter else (mgl.NEAREST, mgl.NEAREST)
         self.n_attachments  = n_color_attachments
 
@@ -50,19 +51,20 @@ class Framebuffer:
         """
 
         # Release existing memory
-        self.__del__()
+        if self._color_attachments: [tex.release() for tex in self._color_attachments]
+        if self._depth_attachment: self._depth_attachment.release()
 
         # Create textures
         self._color_attachments = [self.ctx.texture(self.size, components=4, dtype='f4') for i in range(self.n_attachments)]
-        for tex in self._color_attachments: tex.filter = self.texture_filter
+        for tex in self._color_attachments: 
+            tex.filter = self.texture_filter
+            tex.repeat_x = False
+            tex.repeat_y = False
+
         self._depth_attachment  = self.ctx.depth_texture(self.size)
 
         # Create the internal fbo
         self.fbo = self.ctx.framebuffer(self._color_attachments, self._depth_attachment)
-
-        # Texture attributes
-        self.texture.repeat_x = False
-        self.texture.repeat_y = False
 
         # Set the show attachment to default
         self._show = -1
@@ -88,26 +90,27 @@ class Framebuffer:
         """
 
         # Load Shaders
-        self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/frame.frag')
+        if not self.shader: self.shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/frame.frag')
         self.engine.shader_handler.add(self.shader)
 
         # Load VAO
         self.vbo = self.ctx.buffer(np.array([[-1, -1, 0, 0, 0], [1, -1, 0, 1, 0], [1, 1, 0, 1, 1], [-1, 1, 0, 0, 1], [-1, -1, 0, 0, 0], [1, 1, 0, 1, 1]], dtype='f4'))
         self.vao = self.ctx.vertex_array(self.shader.program, [(self.vbo, '3f 2f', 'in_position', 'in_uv')], skip_errors=True)
 
-    def render(self, render_target=None, show: int=None) -> None:
+    def render(self, target=None, color_attachment: int=0, auto_bind=True) -> None:
         """
         Render the fbo to the screen
         If the fbo has multiple attachments, show will specifiy which is shown
         Depth is considered the last show element
         """
 
-        if not isinstance(show, type(None)): self.show = show
+        # if not isinstance(show, type(None)): self.show = show
 
-        target = render_target if render_target else self.engine.frame
-        target.use()
+        target.use() if target else self.ctx.screen.use()
 
+        if auto_bind: self.bind(self.color_attachments[min(color_attachment, len(self.color_attachments) - 1)], 'screenTexture', 0)
         self.vao.render()
+
 
     def use(self) -> None:
         """
@@ -116,12 +119,19 @@ class Framebuffer:
 
         self.fbo.use()
 
-    def clear(self) -> None:
+    def clear(self, color: tuple=(0, 0, 0, 0)) -> None:
         """
         Clear all data currently in the textures (set to black)        
         """
 
         self.fbo.clear()
+
+    def bind(self, sampler: mgl.Texture | mgl.TextureArray | mgl.TextureCube , name: str, slot: int=None):
+        """
+        Binds a texture to the fbo's shader
+        """
+        
+        self.shader.bind(sampler, name, slot)
 
     def save(self, destination: str=None) -> None:
         """
@@ -180,7 +190,7 @@ class Framebuffer:
         self._show = value
 
         # Bind the correct texture
-        self.shader.program['screenTexture'] = value+1
+        # self.shader.program['screenTexture'] = value+1
         src.use(location=value+1)
 
     def __repr__(self) -> str:

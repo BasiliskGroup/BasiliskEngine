@@ -2,6 +2,7 @@
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out vec4 bloomColor;
+layout (location = 2) out vec4 normalTexture;
 
 
 in vec4     color;
@@ -22,5 +23,6 @@ void main() {
     else {
         fragColor = color;
     }
+    normalTexture = vec4(0.0);
     bloomColor = vec4(0.0);
 }
