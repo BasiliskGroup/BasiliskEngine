@@ -2,9 +2,10 @@ import basilisk as bsk
 
 engine = bsk.Engine(title=None)
 scene = bsk.Scene(engine)
+scene.sky=None
 
 img = bsk.Image('tests/mud.png')
-emissive_mtl = bsk.Material(texture=img, emissive_color=(1 * 255, .5 * 255, 50))
+emissive_mtl = bsk.Material(emissive_color=(.7 * 255, .5 * 255, 50))
 
 sphere_mesh = bsk.Mesh('tests/sphere.obj')
 

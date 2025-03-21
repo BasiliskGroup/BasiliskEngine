@@ -10,7 +10,6 @@ scene.add(bsk.Node())
 
 edge_detect_shader = bsk.Shader(engine, vert='basilisk/shaders/frame.vert', frag='tests/shaders/edge.frag')
 edge_detect_fbo = bsk.Framebuffer(engine, shader=edge_detect_shader)
-
 edges = bsk.Framebuffer(engine)
 
 while engine.running:
@@ -21,7 +20,5 @@ while engine.running:
     edge_detect_fbo.render(edges, auto_bind=False)
 
     edges.render()
-
-    # scene.frame.input_buffer.render(color_attachment=2)
 
     engine.update(render=False)
