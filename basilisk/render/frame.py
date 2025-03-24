@@ -55,10 +55,12 @@ class Frame:
         #     self.ping_pong_buffer = temp
         
 
-        self.bloom.render()
+        if self.engine.config.bloom_enabled: 
+            self.bloom.render()
+            self.shader.bind(self.bloom.texture, 'bloomTexture', 1)
+        
         target.use() if target else self.output_buffer.use()
         self.shader.bind(self.input_buffer.texture, 'screenTexture', 0)
-        self.shader.bind(self.bloom.texture, 'bloomTexture', 1)
         self.vao.render()
 
     def render(self, target=None) -> None:

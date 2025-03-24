@@ -76,7 +76,8 @@ class ImageHandler():
 
     def write(self, regenerate=False) -> None:
         """
-        Writes all texture arrays to shaders that use images 
+        Writes all texture arrays to shaders that use images
+        Uses bind slots [10, 11, 12, 13, 14]
         """
 
         if not self.engine.shader_handler: return
@@ -91,8 +92,7 @@ class ImageHandler():
             for i, size in enumerate(texture_sizes):
                 if not size in self.texture_arrays: continue
                 if not self.texture_arrays[size]: continue
-                shader.program[f'textureArrays[{i}].array'] = i + 3
-                self.texture_arrays[size].use(location=i+3)
+                shader.bind(self.texture_arrays[size], f'textureArrays[{i}].array', i + 10)
 
     def get(self, identifier: str | int) -> any:
         """

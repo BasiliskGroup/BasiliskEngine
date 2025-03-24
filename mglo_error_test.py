@@ -6,9 +6,12 @@ scene = bsk.Scene(engine)
 cube   = bsk.Mesh('tests/cube.obj')
 monkey = bsk.Mesh('tests/monkey.obj')
 
+print(f'cube: {cube}')
+print(f'monkey: {monkey}')
+
 node = bsk.Node(physics=True, collision=True)
 floor = bsk.Node(position=(0, -5, 0), scale=(10, .5, 10), physics=False, collision=True)
-scene.add(node, floor)
+scene.add(node)
 
 while engine.running:
     scene.update()

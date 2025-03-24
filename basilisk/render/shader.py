@@ -13,7 +13,6 @@ attribute_mappings = {
     'obj_material' : [24],
 }
 
-
 class Shader:
     program: mgl.Program=None
     """Shader program for the vertex and fragment shader"""
@@ -106,7 +105,7 @@ class Shader:
         self.engine.shader_handler.add(self)
         if scene.node_handler: scene.node_handler.chunk_handler.swap_default(self)
 
-    def write(self, name: str, value) -> None:
+    def write(self, value, name: str) -> None:
         """
         Writes a uniform to the shader program
         """
@@ -117,6 +116,8 @@ class Shader:
         """
         Binds the given sampler to the next availible slot
         """
+
+        # print(f'Binding {name} to slot {slot}')
 
         # Use the next slot if no slot is given
         if slot == None: slot = self.bindings; self.bindings+=1

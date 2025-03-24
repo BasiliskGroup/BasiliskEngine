@@ -1,6 +1,6 @@
 import basilisk as bsk
 
-engine = bsk.Engine()
+engine = bsk.Engine(title=None)
 scene = bsk.Scene(engine)
 scene.ctx.multisample = True
 
