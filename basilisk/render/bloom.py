@@ -27,19 +27,23 @@ class Bloom:
         GPU downsamples and upsamples the bloom texture to blur it
         """
     
-        if not self.frame.engine.config.bloom_enabled:
-            getattr(self, f'upscale_buffer_0').clear()
-            return
+        self.clear()
 
         n = self.engine.config.bloom_quality
 
-        self.downsample(self.frame.framebuffer.color_attachments[1], getattr(self, f'bloom_buffer_{0}'))
+
+        self.ctx.enable(mgl.BLEND)
+        self.ctx.blend_func = mgl.ADDITIVE_BLENDING
+
+        self.downsample(self.frame.input_buffer.color_attachments[1], getattr(self, f'bloom_buffer_{0}'))
         for i in range(0, n):
             self.downsample(getattr(self, f'bloom_buffer_{i}'), getattr(self, f'bloom_buffer_{i + 1}'))
 
         self.upsample(getattr(self, f'bloom_buffer_{n - 1}'), getattr(self, f'bloom_buffer_{n}'), getattr(self, f'upscale_buffer_{n}'))
         for i in range(n - 1, -1, -1):
             self.upsample(getattr(self, f'upscale_buffer_{i + 1}'), getattr(self, f'bloom_buffer_{i}'), getattr(self, f'upscale_buffer_{i}'))
+
+        self.ctx.disable(mgl.BLEND)
 
     def downsample(self, source: Framebuffer, dest: Framebuffer) -> None:
         """
@@ -78,31 +82,43 @@ class Bloom:
         # Render using the upsample vao (3x3 tent filter)
         self.upsample_vao.render()
 
+        return dest
+
     def generate_bloom_buffers(self) -> None:
         """
         Generates n buffers for down/up sampling
         """
 
         n = self.engine.config.bloom_quality
-        size = self.frame.framebuffer.size
+        size = self.frame.input_buffer.size
 
         for i in range(100):
             try:
                 getattr(self, f'bloom_buffer_{i}').__del__()
                 getattr(self, f'upscale_buffer_{i}').__del__()
             except:
-                ...
+                break
 
         for i in range(n + 1):
-            fbo = Framebuffer(self.engine, (max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
+            fbo = Framebuffer(self.engine, size=(max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
             fbo.texture.repeat_x = False
             fbo.texture.repeat_y = False
             setattr(self, f'bloom_buffer_{i}', fbo)
 
-            fbo = Framebuffer(self.engine, (max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
+            fbo = Framebuffer(self.engine, size=(max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
             fbo.texture.repeat_x = False
             fbo.texture.repeat_y = False
             setattr(self, f'upscale_buffer_{i}', fbo)
 
+    def clear(self):
+        for i in range(100):
+            try:
+                getattr(self, f'bloom_buffer_{i}').clear()
+                getattr(self, f'upscale_buffer_{i}').clear()
+            except:
+                break
+
     @property
     def texture(self): return getattr(self, f'upscale_buffer_0').texture
+    @property
+    def fbo(self): return getattr(self, f'upscale_buffer_0')

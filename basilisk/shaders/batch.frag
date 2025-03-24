@@ -2,6 +2,8 @@
 
 layout (location = 0) out vec4 fragColor;
 layout (location = 1) out vec4 bloomColor;
+layout (location = 2) out vec4 normalTexture;
+
 
 // Structs needed for the shader
 struct textArray {
@@ -276,15 +278,17 @@ void main() {
     // finalColor = pow(finalColor, vec3(1.0/gamma));
 
     // Output fragment color
-    float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722)) + dot(mtl.emissiveColor, vec3(1));
+    float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722)) + dot(lightResult.specular, vec3(.2)) + dot(mtl.emissiveColor, vec3(1));
     fragColor = vec4(finalColor + mtl.emissiveColor, 1.0);
 
-    // Filter out bright pixels for bloom
-    // bloomColor = vec4(0.0, 0.0, 0.0, 1.0);
+    normalTexture = vec4(abs(N), 1.0);
+
+    // // Filter out bright pixels for bloom
     if (brightness > 0.5) {
         bloomColor = vec4(fragColor.rgb, 1.0);
     }
     else{
         bloomColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
+
 }

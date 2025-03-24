@@ -6,15 +6,16 @@ class Sky:
     texture_cube=None
     vbo          = None
     vao          = None
-    def __init__(self, engine, sky_texture: str | list=None):
+    def __init__(self, scene, sky_texture: str | list=None):
         """
         Handler for all skybox rendering
         """
         
-        self.engine = engine
-        self.ctx   = engine.ctx
+        self.scene  = scene
+        self.engine = scene.engine
+        self.ctx    = scene.ctx
         
-        if not sky_texture: sky_texture = engine.root + '/bsk_assets/skybox.png'
+        if not sky_texture: sky_texture = self.engine.root + '/bsk_assets/skybox.png'
 
         self.set_renderer()
         self.set_texture(sky_texture)

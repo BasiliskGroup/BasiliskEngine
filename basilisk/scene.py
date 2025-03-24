@@ -47,7 +47,8 @@ class Scene():
         self.node_handler     = NodeHandler(self)
         self.particle         = ParticleHandler(self)
         self.collider_handler = ColliderHandler(self)
-        self.sky              = Sky(self.engine)
+        self.sky              = Sky(self)
+        self.frame            = Frame(self.engine)
 
 
     def update(self, render: bool=True, nodes: bool=True, particles: bool=True, collisions: bool=True) -> None:
@@ -55,45 +56,42 @@ class Scene():
         Updates the physics and in the scene
         """
         
-        # Check that the engine is still running
+        # Call the internal engine update (for IO and time)
         self.engine._update()
+
+        # Check that the engine is still running
         if not self.engine.running: return
 
         # Update based on the given parameters
         if nodes: self.node_handler.update()
         if particles: self.particle.update()
-        if self.engine.event_resize: self.camera.use()
+
+        # Update the camera
         self.camera.update()
+        if self.engine.event_resize: self.camera.use()
         
         if collisions and self.engine.delta_time < 0.5: # TODO this will cause physics to slow down when on low frame rate, this is probabl;y acceptable
             self.collider_handler.resolve_collisions()
 
-        # Render by default to the engine frame
-        if not render: return
+        # Render by default to the scene frame
+        if render: self.render()
 
-        # Check if the user is giving a destination
-        if not isinstance(render, bool): self.render(renders)
-        else: self.render()
-
-    def render(self, render_target: Framebuffer|Frame=None) -> None:
+    def render(self, target=None) -> None:
         """
         Renders all the nodes with meshes in the scene
         """
 
-        if render_target:
-            show = False
-        else:
-            render_target = self.engine.frame
-            show = True
-
-        render_target.use()
+        target.use() if target else self.frame.use(); self.frame.clear()
         self.engine.shader_handler.write(self)
-        self.node_handler.render()
         self.particle.render()
+        self.node_handler.render()
         if self.sky: self.sky.render()
 
+        if target: return
+        # This will show the frame to screen on engine.update()
+        self.frame.scene_render(target)
+        self.engine.frames.append(self.frame)
 
-        if self.engine.headless or not show: return
 
 
     def add(self, *objects: Node | None) -> None | Node | list:

@@ -107,6 +107,7 @@ class Engine():
         self.shader_handler   = ShaderHandler(self)
         self.draw_handler     = DrawHandler(self)
         self.frame            = Frame(self)
+        self.frames = []
         self.material_handler.set_base()
 
     def _update(self) -> None:
@@ -115,14 +116,19 @@ class Engine():
         Updates all input, physics, and time variables. Clears the frame.
         """
 
+        # Used to lock this internal update until user calls engine.update()
         if self.current_frame_updated: return
-
-        for fbo in self.fbos: fbo.clear()
-        self.clock.update()
-        self.IO.update()
-
         self.current_frame_updated = True
 
+        # Clear frame data
+        for fbo in self.fbos: fbo.clear()
+        self.frames.clear()
+        self.frame.clear()
+        self.ctx.clear()
+
+        # Update time and IO
+        self.clock.update()
+        self.IO.update()
 
     def update(self, render=True) -> None:
         """
@@ -133,21 +139,20 @@ class Engine():
 
 
         # Must update the frame
-        if not self.current_frame_updated: self._update()
+        self._update()
         if not self.running: return
 
         # Render all draw calls from the past frame
-        self.frame.use()
+        self.ctx.screen.use()
         self.draw_handler.render()
 
         # Clear the screen and render the frame
         if render:
-            self.ctx.screen.use()
-            self.ctx.clear()
+            for frame in self.frames:
+                frame.render(self.frame.output_buffer)
             self.frame.render()
 
-            self.frame.clear()
-
+        # Even though we may not render here, the user might be rendering in their file, so we need to flip
         pg.display.flip()
 
         # Allow for the engine to take in input again

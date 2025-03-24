@@ -39,9 +39,9 @@ class Collider():
     def __init__(self, node, collider_mesh: str|Mesh=None, static_friction: glm.vec3=0.7, kinetic_friction: glm.vec3=0.3, elasticity: glm.vec3=0.2, collision_group: str=None):
         self.collider_handler = None
         self.node = node
-        self.static_friction = static_friction if elasticity else 0.8 # added checks to prevent floats being set to None. Also done for kinetic and elasticity
+        self.static_friction = static_friction if static_friction else 0.8 # added checks to prevent floats being set to None. Also done for kinetic and elasticity
         self.mesh = collider_mesh
-        self.kinetic_friction = kinetic_friction if elasticity else 0.4
+        self.kinetic_friction = kinetic_friction if kinetic_friction else 0.4
         self.elasticity = elasticity if elasticity else 0.1
         self.collision_group = collision_group
         self.collision_velocity = 0
