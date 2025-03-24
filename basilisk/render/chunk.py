@@ -1,3 +1,4 @@
+import sys
 from .batch import Batch
 
 
@@ -55,7 +56,12 @@ class Chunk():
         if not self.batch.vbo: return
         
         data = node.get_data()
-        self.batch.vbo.write(data, node.data_index * data.shape[1] * 4)
+
+        try:
+            self.batch.vbo.write(data, node.data_index * data.shape[1] * 4)
+        except:
+            print(f"\n---------------------------\nMLGO ERROR:\n\tdata index: {node.data_index}\n\tdata shape: {data.shape}\n\tdata: {data}\n\tbuffer size: {self.batch.vbo.size}")
+            sys.exit()
 
     def add(self, node):
         """
