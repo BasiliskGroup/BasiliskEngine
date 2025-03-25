@@ -57,7 +57,7 @@ class Chunk():
         
         data = node.get_data()
 
-        if (node.data_index * data.shape[1] + (data.shape[0] * data.shape[1])) > self.batch.vbo.size:
+        if ((node.data_index * data.shape[1] + (data.shape[0] * data.shape[1])) * 4) > self.batch.vbo.size:
             self.batch.batch()
         else:
             self.batch.vbo.write(data, node.data_index * data.shape[1] * 4)
