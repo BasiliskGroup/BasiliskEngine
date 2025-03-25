@@ -1,3 +1,4 @@
+import sys
 from .batch import Batch
 
 
@@ -55,7 +56,11 @@ class Chunk():
         if not self.batch.vbo: return
         
         data = node.get_data()
-        self.batch.vbo.write(data, node.data_index * data.shape[1] * 4)
+
+        if (node.data_index * data.shape[1] + (data.shape[0] * data.shape[1])) > self.batch.vbo.size:
+            self.batch.batch()
+        else:
+            self.batch.vbo.write(data, node.data_index * data.shape[1] * 4)
 
     def add(self, node):
         """

@@ -14,12 +14,11 @@ class Bloom:
         self.downsample_shader = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/bloom_downsample.frag')
         self.upsample_shader   = Shader(self.engine, self.engine.root + '/shaders/frame.vert', self.engine.root + '/shaders/bloom_upsample.frag')
         
-        self.engine.shader_handler.add(self.downsample_shader)
-        self.engine.shader_handler.add(self.upsample_shader)
-
         self.downsample_vao = self.ctx.vertex_array(self.downsample_shader.program, [(self.frame.vbo, '3f 2f', 'in_position', 'in_uv')], skip_errors=True)
         self.upsample_vao   = self.ctx.vertex_array(self.upsample_shader.program, [(self.frame.vbo, '3f 2f', 'in_position', 'in_uv')], skip_errors=True)
 
+        self.upsample_buffers = []
+        self.downsample_buffers = []
         self.generate_bloom_buffers()
 
     def render(self) -> None:
@@ -35,13 +34,20 @@ class Bloom:
         self.ctx.enable(mgl.BLEND)
         self.ctx.blend_func = mgl.ADDITIVE_BLENDING
 
-        self.downsample(self.frame.input_buffer.color_attachments[1], getattr(self, f'bloom_buffer_{0}'))
-        for i in range(0, n):
-            self.downsample(getattr(self, f'bloom_buffer_{i}'), getattr(self, f'bloom_buffer_{i + 1}'))
+        # Render the screen's bloom texture to a local buffer
+        bloom_texture = self.frame.input_buffer.color_attachments[1]
+        self.downsample_shader.bind(bloom_texture, 'screenTexture', 0)
+        self.downsample_shader.write(glm.ivec2(bloom_texture.size), 'textureSize')
+        self.downsample_buffers[0].clear()
+        self.downsample_buffers[0].use()
+        self.downsample_vao.render()
 
-        self.upsample(getattr(self, f'bloom_buffer_{n - 1}'), getattr(self, f'bloom_buffer_{n}'), getattr(self, f'upscale_buffer_{n}'))
+        for i in range(0, n):
+            self.downsample(self.downsample_buffers[i], self.downsample_buffers[i + 1])
+
+        self.upsample(self.downsample_buffers[n - 1], self.downsample_buffers[n], self.upsample_buffers[n])
         for i in range(n - 1, -1, -1):
-            self.upsample(getattr(self, f'upscale_buffer_{i + 1}'), getattr(self, f'bloom_buffer_{i}'), getattr(self, f'upscale_buffer_{i}'))
+            self.upsample(self.upsample_buffers[i + 1], self.downsample_buffers[i], self.upsample_buffers[i])
 
         self.ctx.disable(mgl.BLEND)
 
@@ -56,7 +62,7 @@ class Bloom:
         else: texture = source
 
         self.downsample_shader.bind(texture, 'screenTexture', 0)
-        self.downsample_shader.write('textureSize', glm.ivec2(source.size))
+        self.downsample_shader.write(glm.ivec2(source.size), 'textureSize')
 
         # Clear and use the destination fbo
         dest.use()
@@ -73,7 +79,7 @@ class Bloom:
         # Bind the source texture to the shader
         self.upsample_shader.bind(high.texture, 'highTexture', 0)
         self.upsample_shader.bind(low.texture, 'lowTexture', 1)
-        self.upsample_shader.write('textureSize', glm.ivec2(low.size))
+        self.upsample_shader.write(glm.ivec2(low.size), 'textureSize')
 
         # Clear and use the destination fbo
         dest.use()
@@ -92,33 +98,21 @@ class Bloom:
         n = self.engine.config.bloom_quality
         size = self.frame.input_buffer.size
 
-        for i in range(100):
-            try:
-                getattr(self, f'bloom_buffer_{i}').__del__()
-                getattr(self, f'upscale_buffer_{i}').__del__()
-            except:
-                break
+        self.downsample_buffers = []
+        self.upsample_buffers = []
 
         for i in range(n + 1):
-            fbo = Framebuffer(self.engine, size=(max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
-            fbo.texture.repeat_x = False
-            fbo.texture.repeat_y = False
-            setattr(self, f'bloom_buffer_{i}', fbo)
+            downsample_fbo = Framebuffer(self.engine, size=(max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
+            upsample_fbo = Framebuffer(self.engine, size=(max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
 
-            fbo = Framebuffer(self.engine, size=(max(size[0] // (2 ** (i)), 1), max(size[1] // (2 ** (i)), 1)))
-            fbo.texture.repeat_x = False
-            fbo.texture.repeat_y = False
-            setattr(self, f'upscale_buffer_{i}', fbo)
+            self.downsample_buffers.append(downsample_fbo)
+            self.upsample_buffers.append(upsample_fbo)
 
     def clear(self):
-        for i in range(100):
-            try:
-                getattr(self, f'bloom_buffer_{i}').clear()
-                getattr(self, f'upscale_buffer_{i}').clear()
-            except:
-                break
+        for buffer in self.upsample_buffers + self.downsample_buffers:
+            buffer.clear()
 
     @property
-    def texture(self): return getattr(self, f'upscale_buffer_0').texture
+    def fbo(self): return self.upsample_buffers[0]
     @property
-    def fbo(self): return getattr(self, f'upscale_buffer_0')
+    def texture(self): return self.fbo.texture

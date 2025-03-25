@@ -142,14 +142,12 @@ class Engine():
         self._update()
         if not self.running: return
 
-        # Render all draw calls from the past frame
-        self.ctx.screen.use()
-        self.draw_handler.render()
 
         # Clear the screen and render the frame
         if render:
-            for frame in self.frames:
-                frame.render(self.frame.output_buffer)
+            # Render all draw calls from the past frame
+            self.ctx.screen.use()
+            self.draw_handler.render()
             self.frame.render()
 
         # Even though we may not render here, the user might be rendering in their file, so we need to flip

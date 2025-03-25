@@ -89,8 +89,7 @@ class Scene():
 
         if target: return
         # This will show the frame to screen on engine.update()
-        self.frame.scene_render(target)
-        self.engine.frames.append(self.frame)
+        self.frame.scene_render(self.ctx.screen)
 
 
 

@@ -85,6 +85,7 @@ class MaterialHandler():
     def write(self, regenerate=False) -> None:
         """
         Writes all material data to relavent shaders
+        Uses bind slot 15
         """
 
         if regenerate: self.generate_material_texture()
@@ -94,8 +95,7 @@ class MaterialHandler():
         for shader in self.engine.shader_handler.shaders:
             if 'materialsTexture' not in shader.uniforms: continue
 
-            shader.program['materialsTexture'] = 9
-            self.data_texture.use(location=9)
+            shader.bind(self.data_texture, 'materialsTexture', 15)
 
     def get(self, identifier: str | int) -> any:
         """

@@ -1,13 +1,12 @@
 import basilisk as bsk
 
-engine = bsk.Engine()
+engine = bsk.Engine(title=None)
 scene = bsk.Scene(engine)
+engine.config.bloom_enabled = False
 
 scene.add(bsk.Node())
 
 while engine.running:
+    print('-----------')
     scene.update()
-
-    # scene.frame.input_buffer.render(color_attachment=1)
-
-    engine.update()
+    engine.update(render=False)

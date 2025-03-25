@@ -1,3 +1,18 @@
+"""
+
+---------------------------------------
+Standard Reserved Bind Slots Mappings:
+    8 : Bloom
+    9 : Sky
+    10: Images[0]
+    11: Images[1]
+    12: Images[2]
+    13: Images[3]
+    14: Images[4]
+    15: Material Texture
+
+"""
+
 import moderngl as mgl
 import glm
 from .shader import Shader
@@ -85,7 +100,7 @@ class ShaderHandler:
         for uniform in self.uniform_values:
             for shader in self.shaders:
                 if not uniform in shader.uniforms: continue  # Does not write uniforms not in the shader
-                shader.write(uniform, self.uniform_values[uniform])
+                shader.write(self.uniform_values[uniform], uniform)
 
     def release(self) -> None:
         """
