@@ -273,22 +273,17 @@ void main() {
     vec3 finalColor = albedo * 0.3 * mix(vec3(1.0), reflect_sky, mtl.metallicness);
     finalColor += (lightResult.diffuse + lightResult.specular + lightResult.clearcoat);
 
-    // light_result *= mix(vec3(1.0), texture(skyboxTexture, reflect(-V, N)).rgb, mtl.metallicness);
-    // Gamma correction
-    // finalColor = pow(finalColor, vec3(1.0/gamma));
-
     // Output fragment color
-    float brightness = dot(fragColor.rgb, vec3(0.2126, 0.7152, 0.0722)) + dot(lightResult.specular, vec3(.2)) + dot(mtl.emissiveColor, vec3(1));
+    float brightness = dot(finalColor, vec3(0.2126, 0.7152, 0.0722)) + dot(lightResult.specular, vec3(.2)) + dot(mtl.emissiveColor, vec3(1));
     fragColor = vec4(finalColor + mtl.emissiveColor, 1.0);
 
     normalTexture = vec4(abs(N), 1.0);
 
-    // // Filter out bright pixels for bloom
+    // Filter out bright pixels for bloom
     if (brightness > 0.5) {
         bloomColor = vec4(fragColor.rgb, 1.0);
     }
     else{
         bloomColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
-
 }

@@ -27,12 +27,12 @@ class Sky:
         self.vao.render()
 
     def write(self):
-        """
-        Writes the sky texture cube to the GPU. 
-        Uses bind slot 9
-        """
-        
-        self.shader.bind(self.texture_cube, 'skyboxTexture', 9)
+        # Write the texture cube to the sky shader
+        self.shader.bind(self.texture_cube, 'skyboxTexture', 8)
+
+        shader = self.engine.shader
+        if 'skyboxTexture' not in shader.uniforms: return
+        shader.bind(self.texture_cube, 'skyboxTexture', 8)
 
 
     def set_texture(self, skybox_images: list):

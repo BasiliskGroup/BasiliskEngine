@@ -95,7 +95,7 @@ class MaterialHandler():
         for shader in self.engine.shader_handler.shaders:
             if 'materialsTexture' not in shader.uniforms: continue
 
-            shader.bind(self.data_texture, 'materialsTexture', 15)
+            shader.bind(self.data_texture, 'materialsTexture', 9)
 
     def get(self, identifier: str | int) -> any:
         """
