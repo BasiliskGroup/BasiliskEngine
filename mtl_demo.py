@@ -99,8 +99,8 @@ class App():
 
     def draw_slider(self, y, value, title=None):
         if title: bsk.draw.text(self.engine, title, (45, y * 30 + 15), scale=0.25)
-        bsk.draw.rect(self.engine, (100, 100, 100, 150), (90, y * 30 + 10, 200, 10))
-        bsk.draw.rect(self.engine, (200, 200, 200, 150), (90 + value * 200, y * 30 + 5, 10, 20))
+        bsk.draw.rect(self.engine, (100, 100, 100, 255), (90, y * 30 + 10, 200, 10))
+        bsk.draw.rect(self.engine, (200, 200, 200, 255), (90 + value * 200, y * 30 + 5, 10, 20))
 
     def start(self):
         while self.engine.running:

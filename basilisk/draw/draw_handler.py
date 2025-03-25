@@ -44,10 +44,11 @@ class DrawHandler():
         if not self.draw_data: return
 
         self.ctx.enable(mgl.BLEND)
-        self.ctx.blend_func = mgl.ADDITIVE_BLENDING
+        self.ctx.disable(mgl.DEPTH_TEST)
+        self.ctx.blend_func = mgl.DEFAULT_BLENDING
 
         # Reverse the draw order, and convert to C-like array
-        self.draw_data.reverse()
+        # self.draw_data.reverse()
         data = np.array(self.draw_data, dtype='f4')
         ratio = np.array([2 / self.engine.win_size[0], 2 / self.engine.win_size[1]])
         data[:,:2] = data[:,:2] * ratio - 1
@@ -67,6 +68,8 @@ class DrawHandler():
         self.draw_data.clear()
 
         self.ctx.disable(mgl.BLEND)
+        self.ctx.enable(mgl.DEPTH_TEST)
+
 
     def draw_rect(self, color: tuple, rect: tuple) -> None:
         """
@@ -87,8 +90,8 @@ class DrawHandler():
         v4 = (*p4, *color, 0, 0.0)
 
         self.draw_data.extend([
-            v1, v3, v2,
-            v2, v3, v4
+            v1, v2, v3,
+            v2, v4, v3
         ])
 
     def draw_circle(self, color: tuple, center: tuple, radius: int, resolution: int=20, outer_color: tuple=None) -> None:
@@ -118,7 +121,7 @@ class DrawHandler():
             v2 = (center[0] + radius * cos(theta), center[1] + radius * sin(theta), *outer_color, 0, 0.0)
             theta += delta_theta
             v3 = (center[0] + radius * cos(theta), center[1] + radius * sin(theta), *outer_color, 0, 0.0)
-            self.draw_data.extend([v1, v2, v3])
+            self.draw_data.extend([v1, v3, v2])
 
     def draw_line(self, color: tuple, p1: tuple, p2: tuple, thickness: int=1):
         """
@@ -150,7 +153,7 @@ class DrawHandler():
         v3 = (*(p2 - perp_vector), *color, 0, 0.0)
         v4 = (*(p2 + perp_vector), *color, 0, 0.0)
         
-        self.draw_data.extend([v1, v3, v4, v2, v1, v4])
+        self.draw_data.extend([v1, v4, v3, v2, v4, v1])
 
     def blit(self, image: Image, rect: tuple, alpha: float=1.0):
         rect  = validate_rect(rect)
@@ -166,8 +169,8 @@ class DrawHandler():
         v4 = (*p4, *image.index, 1, 1, 1, alpha)
 
         self.draw_data.extend([
-            v1, v3, v2,
-            v2, v3, v4
+            v1, v2, v3,
+            v2, v4, v3
         ])
 
     def __del__(self) -> None:

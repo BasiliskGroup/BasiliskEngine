@@ -142,13 +142,12 @@ class Engine():
         self._update()
         if not self.running: return
 
-
         # Clear the screen and render the frame
         if render:
             # Render all draw calls from the past frame
             self.ctx.screen.use()
             self.draw_handler.render()
-            self.frame.render()
+            # self.frame.render()
 
         # Even though we may not render here, the user might be rendering in their file, so we need to flip
         pg.display.flip()

@@ -270,20 +270,23 @@ void main() {
     lightResult.diffuse  *= mix(vec3(1.0), ambient_sky, 0.25);
     lightResult.diffuse  *= ao;
 
-    vec3 finalColor = albedo * 0.3 * mix(vec3(1.0), reflect_sky, mtl.metallicness);
-    finalColor += (lightResult.diffuse + lightResult.specular + lightResult.clearcoat);
+    vec3 finalColor = lightResult.diffuse + lightResult.specular + lightResult.clearcoat;
 
-    // Output fragment color
-    float brightness = dot(finalColor, vec3(0.2126, 0.7152, 0.0722)) + dot(lightResult.specular, vec3(.2)) + dot(mtl.emissiveColor, vec3(1));
-    fragColor = vec4(finalColor + mtl.emissiveColor, 1.0);
-
-    normalTexture = vec4(abs(N), 1.0);
-
+    float brightness = dot(finalColor, vec3(0.2126, 0.7152, 0.0722)) + dot(lightResult.specular, vec3(.15)) + dot(mtl.emissiveColor, vec3(1));
     // Filter out bright pixels for bloom
-    if (brightness > 0.5) {
-        bloomColor = vec4(fragColor.rgb, 1.0);
+    float threshold = 0.5;
+    if (brightness > threshold) {
+        bloomColor = vec4(max(finalColor + mtl.emissiveColor - threshold, 0.0), 1.0);
     }
     else{
         bloomColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
+    
+
+    // Output fragment color
+    finalColor += albedo * 0.3 * mix(vec3(1.0), reflect_sky, mtl.metallicness) + mtl.emissiveColor;
+    fragColor = vec4(finalColor, 1.0);
+
+    normalTexture = vec4(abs(N), 1.0);
+
 }
