@@ -74,22 +74,24 @@ class Scene():
             self.collider_handler.resolve_collisions()
 
         # Render by default to the scene frame
-        if render: self.render()
+        if render: self.render(self.engine.frame.output_buffer)
 
     def render(self, target=None) -> None:
         """
         Renders all the nodes with meshes in the scene
         """
 
-        target.use() if target else self.frame.use(); self.frame.clear()
+        # target.use() if target else self.frame.use(); self.frame.clear()
+        self.frame.use()
+        self.frame.clear()
         self.engine.shader_handler.write(self)
         self.particle.render()
         self.node_handler.render()
         if self.sky: self.sky.render()
 
-        if target: return
+        self.frame.scene_render(target)
         # This will show the frame to screen on engine.update()
-        self.frame.scene_render(self.ctx.screen)
+        # self.frame.scene_render(self.ctx.screen)
 
 
 

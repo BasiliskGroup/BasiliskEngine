@@ -147,7 +147,7 @@ class Engine():
             # Render all draw calls from the past frame
             self.ctx.screen.use()
             self.draw_handler.render()
-            # self.frame.render()
+            self.frame.render(self.ctx.screen)
 
         # Even though we may not render here, the user might be rendering in their file, so we need to flip
         pg.display.flip()

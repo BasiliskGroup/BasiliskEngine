@@ -12,7 +12,7 @@ fbo2 = bsk.Framebuffer(engine)
 
 while engine.running:
     scene.update(render=False)
-    scene.render()
-    scene.frame.render(fbo1)
-    fbo1.render()
+    scene.render(fbo1)
+    fbo1.render(fbo2)
+    fbo2.render()
     engine.update(render=False)
