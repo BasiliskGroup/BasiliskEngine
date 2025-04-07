@@ -10,8 +10,9 @@ node = bsk.Node(scale = glm.vec3(0.1))
 scene.add(node)
 
 while engine.running:
+    scene.update(render = False)
     node.position = camera.position + camera.forward * 2
     node.rotation = glm.conjugate(camera.rotation)
-    scene.update()
+    scene.render()
     engine.update()
     
