@@ -22,25 +22,29 @@ class Image():
     texture: mgl.Texture | None=None
     """Texture of the image. Only created and retrived if needed by other module"""
 
-    def __init__(self, path: str | os.PathLike | pg.Surface | mgl.Texture) -> None:
+    def __init__(self, path: str | os.PathLike | pg.Surface | mgl.Texture, flip_x: bool=False, flip_y: bool=True) -> None:
         """
         A basilisk image object that contains a moderngl texture
         Args:
             path: str | os.PathLike | pg.Surface
                 The string path to the image. Can also read a pygame surface
+            flip_x: bool=True
+                Flips the image vertically. Should be True for using the internal cube lmao
+            flip_y: bool=True
+                Flips the image vertically. Should be True for blender imports
         """
         
         # Check if the user is loading a pygame surface
         if isinstance(path, str) or isinstance(path, os.PathLike):
-            return self._from_path(path)
+            return self._from_path(path, flip_x, flip_y)
         elif isinstance(path, pg.Surface):
-            return self._from_surface(path)
+            return self._from_surface(path, flip_x, flip_y)
         elif isinstance(path, mgl.Texture):
-            return self._from_texture(path)
+            return self._from_texture(path, flip_x, flip_y)
         
         raise TypeError(f'Invalid path type: {type(path)}. Expected a string or os.PathLike')
 
-    def _from_path(self, path: str | os.PathLike) -> None:
+    def _from_path(self, path: str | os.PathLike, flip_x: bool=False, flip_y: bool=True) -> None:
         """
         Loads a basilisk image from a pygame surface
         Args:
@@ -51,6 +55,8 @@ class Image():
 
         # Load image
         img = PIL_Image.open(path).convert('RGBA')
+        if flip_x: img = img.transpose(PIL_Image.FLIP_LEFT_RIGHT)
+        if flip_y: img = img.transpose(PIL_Image.FLIP_TOP_BOTTOM)
         # Set the size in one of the size buckets
         size_buckets = texture_sizes
         self.size = size_buckets[np.argmin(np.array([abs(size - img.size[0]) for size in size_buckets]))]
@@ -61,11 +67,13 @@ class Image():
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
 
-    def _from_surface(self, surf: pg.Surface) -> None:
+    def _from_surface(self, surf: pg.Surface, flip_x: bool=False, flip_y: bool=True) -> None:
         """
         Loads a basilisk image from a pygame surface
         Args:
         """
+
+        surf = pg.transform.flip(surf, flip_x, flip_y)
         
         # Set the size in one of the size buckets
         size_buckets = texture_sizes
@@ -77,7 +85,7 @@ class Image():
         # Default index value (to be set by image handler)
         self.index = glm.ivec2(1, 1)
 
-    def _from_texture(self, texture: mgl.Texture):
+    def _from_texture(self, texture: mgl.Texture, flip_x: bool=False, flip_y: bool=True):
         """
         
         """

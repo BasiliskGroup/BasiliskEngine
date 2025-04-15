@@ -26,11 +26,11 @@ class Sky:
         """
         self.vao.render()
 
-    def write(self):
+    def write(self, target: ...=None):
         # Write the texture cube to the sky shader
         self.shader.bind(self.texture_cube, 'skyboxTexture', 8)
 
-        shader = self.engine.shader
+        shader = target if target else self.scene.shader
         if 'skyboxTexture' not in shader.uniforms: return
         shader.bind(self.texture_cube, 'skyboxTexture', 8)
 
