@@ -40,6 +40,7 @@ class Scene():
 
         self.engine = engine
         self.ctx    = engine.ctx
+        self.sky    = None
         self.shader = shader if shader else engine.shader
         self.camera           = FreeCamera()
         self.light_handler    = LightHandler(self)
@@ -288,3 +289,4 @@ class Scene():
         self._shader = value
         value.set_main(self)
         if self.light_handler: self.light_handler.write(value)
+        if self.sky: self.sky.write()
