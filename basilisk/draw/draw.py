@@ -93,7 +93,7 @@ def text(engine: Engine, text: str, position: tuple, scale: float=1.0):
     # Render the text if it has not been cached
     if text not in font_renderer.text_renders:
         surf = font_renderer.render(text).convert_alpha()
-        text_image = Image(surf)
+        text_image = Image(surf, flip_y=False)
         font_renderer.text_renders[text] = (text_image, surf.get_rect())
     
     # Blit the text image
