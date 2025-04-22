@@ -30,7 +30,7 @@ class Mesh():
     bvh: NarrowBVH
     """BVH for accessing triangle intersections with a line"""
 
-    def __init__(self, data: str | os.PathLike | np.ndarray, custom_format:bool=False) -> None:
+    def __init__(self, data: str | os.PathLike | np.ndarray, custom_format:bool=False, generate_bvh: bool=True) -> None:
         """
         Mesh object containing all the data needed to render an object and perform physics/collisions on it
         Args:
@@ -102,7 +102,7 @@ class Mesh():
         self.center_of_mass /= self.volume
         
         # data structrues
-        self.bvh = NarrowBVH(self)
+        self.bvh = NarrowBVH(self) if generate_bvh else None
         
     def get_inertia_tensor(self, scale: glm.vec3) -> glm.mat3x3:
         """

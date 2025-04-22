@@ -13,10 +13,15 @@ materials = [bsk.Material(color=(255 * (i & 4), 255 * (i & 2), 255 * (i & 1))) f
 
 cube_mesh = engine.cube
 cylinder_mesh = bsk.Mesh('tests/cylinder.obj')
-sphere_mesh = bsk.Mesh('tests/sphere.obj')
+sphere_mesh = bsk.Mesh('tests/sphere.obj', generate_bvh=False)
 # monkey_mesh = bsk.Mesh('tests/monkey.obj')
 # bunny_mesh = bsk.Mesh('tests/bunny.obj')
 meshes = [cube_mesh]
+
+scene.add(bsk.Node(
+    mesh = sphere_mesh,
+    scale = (1, 10, 1)
+))
 
 # creating nodes
 platform = scene.add(bsk.Node(
