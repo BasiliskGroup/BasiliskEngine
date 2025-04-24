@@ -9,7 +9,7 @@ brick = bsk.Image('tests/brick.png')
 surf = pg.Surface((100, 100))
 surf.fill((0, 255, 255))
 pg.draw.rect(surf, (255, 0, 0), (10, 10, 60, 60))
-pg_img = bsk.Image(surf)
+pg_img = bsk.Image(surf, flip_y=True)
 
 while engine.running:
 

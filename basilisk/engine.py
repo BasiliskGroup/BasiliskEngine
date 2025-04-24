@@ -145,7 +145,7 @@ class Engine():
         # Clear the screen and render the frame
         if render:
             # Render all draw calls from the past frame
-            self.ctx.screen.use()
+            self.frame.output_buffer.use()
             self.draw_handler.render()
             self.frame.render(self.ctx.screen)
 

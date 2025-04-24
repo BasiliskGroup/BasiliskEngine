@@ -45,7 +45,7 @@ class DrawHandler():
 
         self.ctx.enable(mgl.BLEND)
         self.ctx.disable(mgl.DEPTH_TEST)
-        self.ctx.blend_func = mgl.DEFAULT_BLENDING
+        # self.ctx.blend_func = mgl.DEFAULT_BLENDING
 
         # Reverse the draw order, and convert to C-like array
         # self.draw_data.reverse()
