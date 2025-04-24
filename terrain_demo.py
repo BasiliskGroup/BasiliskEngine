@@ -65,8 +65,10 @@ def get_data(size=30, offset=(0, 0)):
 
     return np.array(mesh_data)
 
+t1 = time.time()
+mesh = bsk.Mesh(get_data(size=100), generate_bvh=False)
+print(time.time() - t1)
 
-mesh = bsk.Mesh(get_data(size=16))
 
 scene.add(bsk.Node(position=(0, -10, 0), mesh=mesh, material=mtl))
 

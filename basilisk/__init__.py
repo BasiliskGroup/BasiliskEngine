@@ -15,6 +15,7 @@ from .particles.particle_handler import ParticleHandler
 from .render.framebuffer import Framebuffer
 from .audio.sound import Sound
 
+
 # expose internal algorithms
 from .collisions.narrow.epa import get_epa_from_gjk
 from .collisions.narrow.gjk import collide_gjk
