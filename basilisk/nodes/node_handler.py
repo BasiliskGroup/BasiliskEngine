@@ -96,3 +96,12 @@ class NodeHandler():
             node.node_handler = None
             
         for child in node.children: self.remove(child)
+
+    def clear(self) -> None:
+        """
+        Removes all nodes from the scene
+        TODO: this is prolly not the optimal solution lmao
+        """
+        
+        while self.nodes:
+            self.remove(self.nodes[0])

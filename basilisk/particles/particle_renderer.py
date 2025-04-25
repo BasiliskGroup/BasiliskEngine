@@ -9,7 +9,7 @@ from numba import njit
 def update_particle_matrix(particle_instances, dt):
     particle_instances[:,6:9] += particle_instances[:,9:12] * dt
     particle_instances[:,:3] += particle_instances[:,6:9] * dt
-    particle_instances[:,5] -= dt/3
+    particle_instances[:,5] -= dt
     return particle_instances
 
 @njit
@@ -87,7 +87,6 @@ class ParticleRenderer:
         # Create and add the particle to the scene
         new_particle = np.array([*position, material, scale, life, *velocity, *acceleration])
         self.particle_instances = np.vstack([new_particle, self.particle_instances], dtype='f4')
-
 
     def __del__(self):
         self.instance_buffer.release()

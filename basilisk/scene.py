@@ -159,6 +159,10 @@ class Scene():
         if len(returns) == 1: return returns[0]
         return returns
 
+    def clear(self) -> None:
+        self.node_handler.clear()
+        self.particle.clear()
+
     def set_engine(self, engine: any) -> None:
         """
         Sets the back references to the engine and creates handlers with the context

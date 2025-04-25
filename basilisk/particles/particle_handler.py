@@ -61,5 +61,9 @@ class ParticleHandler:
 
     def render(self) -> None:
         for renderer in self.particle_renderers.values(): renderer.render()
+
     def update(self) -> None:
         for renderer in self.particle_renderers.values(): renderer.update()
+
+    def clear(self) -> None:
+        self.particle_renderers.clear()
