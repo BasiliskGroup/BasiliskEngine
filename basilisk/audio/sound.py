@@ -13,12 +13,12 @@ class Sound:
         self.source = pg.mixer.Sound(path)
         self.volume = 100
 
-    def play(self, fade: float=0.0):
+    def play(self, fade: float=0.0, loops: int=0):
         """
         Play the sound at the given volume level. Fades in over `fade` seconds
         """
 
-        self.source.play(fade_ms=int(fade * 1000))
+        self.source.play(fade_ms=int(fade * 1000), loops=loops)
 
     def stop(self, fade: float=0.0):
         """

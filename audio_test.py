@@ -11,7 +11,7 @@ song.play()
 while engine.running:
 
     if engine.keys[bsk.pg.K_1]:
-        sound.play(0)
+        sound.play(0, loops=10)
 
     if engine.keys[bsk.pg.K_2]:
         song.play(1)
