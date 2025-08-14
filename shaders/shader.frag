@@ -1,0 +1,16 @@
+#version 330 core
+
+in vec3 normal;
+in vec2 uv;
+
+out vec4 fragColor;
+
+uniform sampler2D texture1;
+
+void main() {
+
+    vec3 globalLight = normalize(vec3(.5, -1, .25));
+    vec3 brightness = (dot(normal, globalLight) + 1) / 2
+
+    fragColor = brightness * texture(texture1, uv);
+} 
