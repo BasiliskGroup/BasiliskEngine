@@ -10,7 +10,7 @@ uniform sampler2D texture1;
 void main() {
 
     vec3 globalLight = normalize(vec3(.5, -1, .25));
-    vec3 brightness = (dot(normal, globalLight) + 1) / 2
+    float brightness = (dot(normal, globalLight) + 1) / 2;
 
     fragColor = brightness * texture(texture1, uv);
 } 
