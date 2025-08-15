@@ -18,19 +18,19 @@ Mesh::Mesh(const std::string modelPath) {
         for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
             Vertex vertex {
                 {
-                mesh->mVertices[i].x, 
-                mesh->mVertices[i].y, 
-                mesh->mVertices[i].z,
+                    mesh->mVertices[i].x, 
+                    mesh->mVertices[i].y, 
+                    mesh->mVertices[i].z,
                 },
                 {
-                mesh->mTextureCoords[0][i].x,
-                mesh->mTextureCoords[0][i].y
+                    mesh->mTextureCoords[0][i].x,
+                    mesh->mTextureCoords[0][i].y,
                 },
                 {
-                mesh->mNormals[i].x,
-                mesh->mNormals[i].y,
-                mesh->mNormals[i].z
-                }
+                    mesh->mNormals[i].x,
+                    mesh->mNormals[i].y,
+                    mesh->mNormals[i].z,
+                },
             };
 
             vertices.push_back(vertex);
