@@ -12,7 +12,7 @@ int main() {
     Scene   scene(&engine);
 
     Shader  shader("shaders/shader.vert", "shaders/shader.frag");
-    Mesh    sphereMesh("models/john.obj");
+    Mesh    sphereMesh("models/sphere.obj");
 
     Texture containerTexture("textures/container.jpg");
     Texture floorTexture("textures/floor_albedo.png");

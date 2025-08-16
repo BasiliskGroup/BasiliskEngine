@@ -26,8 +26,7 @@ std::vector<Attribute> getAttributes(Shader* shader) {
     glGetProgramiv(shader->getID(), GL_ACTIVE_ATTRIBUTES, &numAttributes);
     glGetProgramiv(shader->getID(), GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxNameLength);
 
-    std::vector<Attribute> attributes;
-    attributes.reserve(numAttributes);
+    std::vector<Attribute> attributes(numAttributes);
 
     for (int i = 0; i < numAttributes; ++i) {
         std::vector<GLchar> nameBuf(maxNameLength);
@@ -53,7 +52,7 @@ std::vector<Attribute> getAttributes(Shader* shader) {
             default: continue;
         }
 
-        attributes.push_back({ name, location, type, componentCount, sizeInBytes });
+        attributes.at(location) = { name, location, type, componentCount, sizeInBytes };
     }
 
     return attributes;
@@ -66,13 +65,10 @@ unsigned int VAO::bindAttributes(Shader* shader) {
     unsigned int stride = getStride(attributes);
 
     unsigned int offset = 0;
-    for (const Attribute& attribute : attributes) {
-        int location = glGetAttribLocation(shader->getID(), attribute.name.c_str());
-        if (location == -1) { continue; }
-        
+    for (const Attribute& attribute : attributes) {        
         // Set the attribute parameters
-        glVertexAttribPointer(location, attribute.count, GL_FLOAT, GL_FALSE, stride, (const void*)(GLintptr)offset);
-        glEnableVertexAttribArray(location);
+        glVertexAttribPointer(attribute.location, attribute.count, GL_FLOAT, GL_FALSE, stride, (const void*)(GLintptr)offset);
+        glEnableVertexAttribArray(attribute.location);
         
         // Jump offset forward
         offset += attribute.size;

@@ -16,10 +16,11 @@ Mesh::Mesh(const std::string modelPath) {
         if (!mesh->HasPositions()) { continue; }
 
         for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-            Vertex vertex {
+
+            vertices.push_back({
                 {
-                    mesh->mVertices[i].x, 
-                    mesh->mVertices[i].y, 
+                    mesh->mVertices[i].x,
+                    mesh->mVertices[i].y,
                     mesh->mVertices[i].z,
                 },
                 {
@@ -31,9 +32,7 @@ Mesh::Mesh(const std::string modelPath) {
                     mesh->mNormals[i].y,
                     mesh->mNormals[i].z,
                 },
-            };
-
-            vertices.push_back(vertex);
+            });
         }
 
         // Process faces (indices)
