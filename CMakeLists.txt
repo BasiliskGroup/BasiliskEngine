@@ -25,14 +25,64 @@ add_executable(render ${SRC_FILES})
 target_include_directories(render PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(render glad glfw glm assimp stb)
 
-# ADD THESE LINES TO COPY SHADERS
-# Ensure the 'shaders' directory exists in the build output
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/shaders)
-# Copy the contents of your source shaders directory to the build shaders directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Set source and destination directories
+set(SHADERS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
+set(SHADERS_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+# Get all shader files
+file(GLOB_RECURSE SHADER_FILES
+    "${SHADERS_SRC_DIR}/*"
+)
+# Custom command to copy shaders
+add_custom_command(
+    OUTPUT ${SHADERS_DST_DIR}/.shader_copy_stamp
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${SHADERS_SRC_DIR} ${SHADERS_DST_DIR}
+    COMMAND ${CMAKE_COMMAND} -E touch ${SHADERS_DST_DIR}/.shader_copy_stamp
+    DEPENDS ${SHADER_FILES}
+    COMMENT "Copying shaders to build directory"
+)
+# Custom target that depends on the above command
+add_custom_target(copy_shaders ALL
+    DEPENDS ${SHADERS_DST_DIR}/.shader_copy_stamp
+)
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/textures)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/models)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# Set source and destination directories
+set(TEXTURES_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/textures")
+set(TEXTURES_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/textures")
+# Get all texture files
+file(GLOB_RECURSE TEXTURE_FILES
+    "${TEXTURES_SRC_DIR}/*"
+)
+# Custom command to copy textures
+add_custom_command(
+    OUTPUT ${TEXTURES_DST_DIR}/.textures_copy_stamp
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${TEXTURES_SRC_DIR} ${TEXTURES_DST_DIR}
+    COMMAND ${CMAKE_COMMAND} -E touch ${TEXTURES_DST_DIR}/.textures_copy_stamp
+    DEPENDS ${TEXTURE_FILES}
+    COMMENT "Copying textures to build directory"
+)
+# Custom target that depends on the above command
+add_custom_target(copy_textures ALL
+    DEPENDS ${TEXTURES_DST_DIR}/.textures_copy_stamp
+)
+
+
+# Set source and destination directories
+set(MODELS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/models")
+set(MODELS_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/models")
+# Get all texture files
+file(GLOB_RECURSE MODEL_FILES
+    "${MODELS_SRC_DIR}/*"
+)
+# Custom command to copy textures
+add_custom_command(
+    OUTPUT ${MODELS_DST_DIR}/.models_copy_stamp
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODELS_SRC_DIR} ${MODELS_SRC_DIR}
+    COMMAND ${CMAKE_COMMAND} -E touch ${MODELS_DST_DIR}/.models_copy_stamp
+    DEPENDS ${MODEL_FILES}
+    COMMENT "Copying model to build directory"
+)
+# Custom target that depends on the above command
+add_custom_target(copy_models ALL
+    DEPENDS ${MODELS_DST_DIR}/.models_copy_stamp
+)
