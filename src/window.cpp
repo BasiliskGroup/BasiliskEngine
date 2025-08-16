@@ -1,7 +1,7 @@
 #include "window.h"
 
 
-void framebuffer_resize_callback(GLFWwindow* window) {
+void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
     glViewport(0, 0, fbWidth, fbHeight);
@@ -21,7 +21,7 @@ Window::Window(unsigned int width, unsigned int height, const std::string title)
 
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    window = glfwCreateWindow(width, height, title, NULL, NULL);
+    window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
