@@ -74,10 +74,11 @@ set(MODELS_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/models")
 file(GLOB_RECURSE MODEL_FILES
     "${MODELS_SRC_DIR}/*"
 )
+
 # Custom command to copy textures
 add_custom_command(
     OUTPUT ${MODELS_DST_DIR}/.models_copy_stamp
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODELS_SRC_DIR} ${MODELS_SRC_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${MODELS_SRC_DIR} ${MODELS_DST_DIR}
     COMMAND ${CMAKE_COMMAND} -E touch ${MODELS_DST_DIR}/.models_copy_stamp
     DEPENDS ${MODEL_FILES}
     COMMENT "Copying model to build directory"

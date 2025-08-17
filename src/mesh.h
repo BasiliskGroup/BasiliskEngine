@@ -2,16 +2,7 @@
 #define MESH_H
 
 #include "includes.h"
-#include "vbo.h"
-#include "ebo.h"
-
-#pragma pack(push, 1) // Set alignment to 1 byte
-struct Vertex {
-    vec3 position;
-    vec2 uv;
-    vec3 normal;
-};
-#pragma pack(pop) // Restore original alignment
+#include "buffer.h"
 
 
 class Mesh {

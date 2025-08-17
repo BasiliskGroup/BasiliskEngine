@@ -1,5 +1,7 @@
 #include "node.h"
 
+unsigned int Node::maxID = 0;
+std::vector<unsigned int> Node::freeIDs = {};
 
 Node::Node(
     Shader* shader, 
@@ -15,6 +17,15 @@ Node::Node(
     position   (position),
     rotation   (rotation),
     scale      (scale) {
+
+    // Each node needs a unique ID for batching
+    if (freeIDs.empty()) {
+        id = maxID++;
+    }
+    else {
+        id = freeIDs.back();
+        freeIDs.pop_back();
+    }
 }
 
 void Node::render() {

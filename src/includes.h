@@ -11,6 +11,7 @@
 #include <set>
 #include <memory>
 #include <unordered_map>
+#include <tuple>
 #include <cstdlib> 
 
 #include <glad/glad.h>
@@ -51,6 +52,12 @@ using quat = glm::quat;
 bool hasNaN(const vec3& v);
 
 // commonly used data structures
+struct Vertex {
+    vec3 position;
+    vec2 uv;
+    vec3 normal;
+};
+
 struct vec6 {
     glm::vec3 linear;
     glm::vec3 angular;
