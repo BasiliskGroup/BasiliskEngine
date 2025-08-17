@@ -3,6 +3,7 @@
 
 #include "includes.h"
 #include "texture.h"
+#include "buffer.h"
 
 class Shader {
     private:
@@ -15,6 +16,7 @@ class Shader {
         void use();
         
         void bind(const std::string&  name, Texture* texture, unsigned int slot);
+        void bind(const std::string&  name, TBO* buffer, unsigned int slot);
         
         void setUniform(const std::string&  name, int value);
         void setUniform(const std::string&  name, float value);

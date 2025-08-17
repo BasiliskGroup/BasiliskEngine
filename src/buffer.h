@@ -27,23 +27,28 @@ class Buffer {
 
 
 class VBO : public Buffer {
-public:
-    template<typename T>
-    VBO(const std::vector<T>& data, bool dynamic=false)
-        : VBO(data.data(), data.size() * sizeof(T), dynamic) {}
-    
-    VBO(const void* data, unsigned int size, bool dynamic=false)
-        : Buffer(data, size, GL_ARRAY_BUFFER, dynamic) {}
+    public:
+        template<typename T>
+        VBO(const std::vector<T>& data, bool dynamic=false): VBO(data.data(), data.size() * sizeof(T), dynamic) {}
+        VBO(const void* data, unsigned int size, bool dynamic=false): Buffer(data, size, GL_ARRAY_BUFFER, dynamic) {}
 };
 
 class EBO : public Buffer {
-public:
-    template<typename T>
-    EBO(const std::vector<T>& data, bool dynamic=false)
-        : EBO(data.data(), data.size() * sizeof(T), dynamic) {}
-    
-    EBO(const void* data, unsigned int size, bool dynamic=false)
-        : Buffer(data, size, GL_ELEMENT_ARRAY_BUFFER, dynamic) {}
+    public:
+        template<typename T>
+        EBO(const std::vector<T>& data, bool dynamic=false): EBO(data.data(), data.size() * sizeof(T), dynamic) {}
+        EBO(const void* data, unsigned int size, bool dynamic=false): Buffer(data, size, GL_ELEMENT_ARRAY_BUFFER, dynamic) {}
+};
+
+class TBO : public Buffer {
+    private:
+        unsigned int textureID;
+    public:
+        template<typename T>
+        TBO(const std::vector<T>& data, bool dynamic=false): TBO(data.data(), data.size() * sizeof(T), dynamic) {}
+        TBO(const void* data, unsigned int size, bool dynamic=false);
+
+        inline unsigned int getTextureID() { return textureID; }
 };
 
 #endif

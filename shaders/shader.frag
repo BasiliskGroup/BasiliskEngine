@@ -7,10 +7,13 @@ out vec4 fragColor;
 
 uniform sampler2D texture1;
 
+uniform samplerBuffer uBuffer;
+
+
 void main() {
 
     vec3 globalLight = normalize(vec3(.5, 1, .25));
     float brightness = (dot(normal, globalLight) + 1) / 2;
 
-    fragColor = brightness * texture(texture1, uv);
+    fragColor = brightness * texture(texture1, uv) * texelFetch(uBuffer, 2);
 } 

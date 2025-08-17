@@ -89,6 +89,13 @@ void Shader::bind(const std::string&  name, Texture* texture, unsigned int slot)
     setUniform(name.c_str(), (int)slot);   
 }
 
+void Shader::bind(const std::string&  name, TBO* buffer, unsigned int slot) {
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_BUFFER, buffer->getTextureID());
+    setUniform(name.c_str(), (int)slot);   
+}
+
+
 // Helper for uniform setting
 int getUniformLocation(unsigned int program, const std::string& name){
     glUseProgram(program);

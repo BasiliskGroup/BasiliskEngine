@@ -19,3 +19,12 @@ void Buffer::write(const void* data, unsigned int size, unsigned int offset) {
 }
 
 Buffer::~Buffer() { glDeleteBuffers(1, &ID); }
+
+
+TBO::TBO(const void* data, unsigned int size, bool dynamic): Buffer(data, size, GL_TEXTURE_BUFFER, dynamic)  {
+    bind();
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_BUFFER, textureID);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, ID);
+    unbind();
+}

@@ -5,7 +5,7 @@
 #include "shader.h"
 #include "node.h"
 #include "mesh.h"
-
+#include "buffer.h"
 
 int main() {
     Engine  engine(1200, 900, "Basilisk");
@@ -16,6 +16,10 @@ int main() {
 
     Texture containerTexture("textures/container.jpg");
     Texture floorTexture("textures/floor_albedo.png");
+
+    
+    TBO tbo(std::vector<float>{1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0});
+    shader.bind("uBuffer", &tbo, 3);    
 
     int n = 10;
     for (int x = 0; x < n; x++) {
