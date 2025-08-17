@@ -15,5 +15,5 @@ void main() {
     vec3 globalLight = normalize(vec3(.5, 1, .25));
     float brightness = (dot(normal, globalLight) + 1) / 2;
 
-    fragColor = brightness * texture(texture1, uv) * texelFetch(uBuffer, 2);
+    fragColor = brightness * texture(texture1, uv) * texelFetch(uBuffer, 3);
 } 

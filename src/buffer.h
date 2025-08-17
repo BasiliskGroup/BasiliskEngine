@@ -8,12 +8,15 @@ class Buffer {
         unsigned int ID;
         unsigned int size;
         unsigned int bufferType;
+        unsigned int textureID;
 
     public:
         template<typename T>
         Buffer(const std::vector<T>& data, unsigned int bufferType, bool dynamic=false) : Buffer(data.data(), data.size() * sizeof(T), bufferType=GL_ARRAY_BUFFER, dynamic=false) {}
         Buffer(const void* data, unsigned int size, unsigned int bufferType=GL_ARRAY_BUFFER, bool dynamic=false);
         ~Buffer();
+
+        void resize();
 
         template<typename T>
         inline void write(const std::vector<T>& data, unsigned int offset = 0) { write(data.data(), data.size() * sizeof(T), offset); }
@@ -48,7 +51,9 @@ class TBO : public Buffer {
         TBO(const std::vector<T>& data, bool dynamic=false): TBO(data.data(), data.size() * sizeof(T), dynamic) {}
         TBO(const void* data, unsigned int size, bool dynamic=false);
 
+        void createTexture();
         inline unsigned int getTextureID() { return textureID; }
+        void resize();
 };
 
 #endif

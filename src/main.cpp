@@ -18,8 +18,10 @@ int main() {
     Texture floorTexture("textures/floor_albedo.png");
 
     
-    TBO tbo(std::vector<float>{1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0});
-    shader.bind("uBuffer", &tbo, 3);    
+    TBO tbo(std::vector<float>{1.0, 0.0, 0.0, 1.0}, true);
+    shader.bind("uBuffer", &tbo, 1);
+    
+    tbo.write(std::vector<float>{0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0}, 4 * sizeof(float));
 
     int n = 10;
     for (int x = 0; x < n; x++) {
