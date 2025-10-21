@@ -23,6 +23,14 @@ VAO::VAO(Shader* shader, VBO* vertices, EBO* indices): shader(shader), vbo(verti
 }
 
 /**
+ * @brief Destroy the VAO object and release GPU data
+ * 
+ */
+VAO::~VAO() {
+    glDeleteVertexArrays(1, &ID); 
+}
+
+/**
  * @brief Bind a VBO to this VAO with a given list of attribs. Can be used for standard vbo or instance buffer.
  * 
  * @param buffer Pointer to the vbo to bind 

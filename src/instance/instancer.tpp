@@ -34,6 +34,13 @@ Instancer<T>::Instancer(Shader* shader, Mesh* mesh, std::vector<std::string> mod
     vao->bindAttributes(instanceFormat, 1);
 }
 
+template <typename T>
+Instancer<T>::~Instancer() {
+    delete vao;
+    delete vbo;
+    delete ebo;
+    glDeleteBuffers(1, &instanceVBO);
+}
 
 /**
  * @brief Helper to upload data from the CPU vector to the GPU

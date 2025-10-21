@@ -142,5 +142,6 @@ void Window::clear(float r, float g, float b, float a) {
  * 
  */
 Window::~Window() {
+    glfwDestroyWindow(window);
     glfwTerminate();
 }

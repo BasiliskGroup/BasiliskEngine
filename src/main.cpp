@@ -54,7 +54,6 @@ int main() {
     Instancer<point>* instancer = new Instancer<point>(shader, mesh, {"in_position", "in_uv", "in_normal"}, {"instance_position"});
 
     // Create buffer of instance data (just a grid of positions in this case)
-    std::vector<float> translations {};
     int n = 10;
     float offset = 5.0f;
     for (int x = -n; x < n; x++) {
@@ -92,7 +91,10 @@ int main() {
     // Free memory allocations
     delete image;
     delete texture;
+    delete instancer;
     delete shader;
     delete mesh;
     delete window;
+    delete keys;
+    delete mouse;
 }
