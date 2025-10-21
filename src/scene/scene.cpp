@@ -1,4 +1,4 @@
-#include "scene/basilisk.h"
+#include "basilisk.h"
 
 Scene::Scene() {
     root = new Node(this, nullptr);
@@ -6,5 +6,4 @@ Scene::Scene() {
 
 Scene::~Scene() {
     delete root;
-    delete solver;
 }

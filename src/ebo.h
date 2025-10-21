@@ -1,7 +1,7 @@
 #ifndef EBO_H
 #define EBO_H
 
-#include "includes.h"
+#include "util/includes.h"
 
 class EBO {
     private:

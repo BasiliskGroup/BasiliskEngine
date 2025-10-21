@@ -17,7 +17,7 @@ target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(FetchContent)
 add_subdirectory(include)
 
-# Collect all cpp files except entry points 
+# Collect all cpp files except entry points
 file(GLOB_RECURSE ENGINE_SRC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.tpp
@@ -31,6 +31,7 @@ list(REMOVE_ITEM ENGINE_SRC
 add_executable(basilisk main.cpp ${ENGINE_SRC})
 target_include_directories(basilisk PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(basilisk glad glfw glm assimp stb)
+
 # --- Copy shaders ---
 set(SHADERS_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
 set(SHADERS_DST_DIR "${CMAKE_CURRENT_BINARY_DIR}/shaders")

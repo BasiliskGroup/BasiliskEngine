@@ -1,7 +1,7 @@
 #ifndef MOUSE_H
 #define MOUSE_H
 
-#include "includes.h"
+#include "util/includes.h"
 #include "window.h"
 
 class Mouse {

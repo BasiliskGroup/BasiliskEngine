@@ -1,7 +1,7 @@
 #ifndef VAO_H
 #define VAO_H
 
-#include "includes.h"
+#include "util/includes.h"
 #include "vbo.h"
 #include "ebo.h"
 #include "shader.h"

@@ -1,7 +1,7 @@
 #ifndef MAT_H
 #define MAT_H
 
-#include "includes.h"
+#include "util/includes.h"
 
 class Matrix {
     private:

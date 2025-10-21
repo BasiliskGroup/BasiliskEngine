@@ -1,5 +1,4 @@
 #include "scene/basilisk.h"
-#include "util/print.h"
 
 
 Node::Node(Scene* scene) : scene(scene), parent(scene->getRoot()) {

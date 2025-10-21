@@ -44,9 +44,14 @@
 // tbb
 
 
-// import assimp Jonah Stuff
-#include <assimp/scene.h>
+// STB
 #include <stb/stb_image.h>
+#include <stb/stb_image_resize2.h>
+
+// Assimp
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include "util/constants.h"
 

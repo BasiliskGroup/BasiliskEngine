@@ -3,6 +3,7 @@
 
 #include "instancer.h"
 #include "shader.h"
+#include "scene/node.h"
 
 template <typename T>
 class InstanceHandler<T> {

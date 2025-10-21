@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "includes.h"
+#include "util/includes.h"
 #include "texture.h"
 #include "textureArray.h"
 

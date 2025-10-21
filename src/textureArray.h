@@ -1,7 +1,7 @@
 #ifndef TEXTURE_ARRAY_H
 #define TEXTURE_ARRAY_H
 
-#include "includes.h"
+#include "util/includes.h"
 #include "image.h"
 
 class TextureArray {

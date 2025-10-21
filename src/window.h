@@ -1,7 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "includes.h"
+#include "util/includes.h"
 
 class Window {
     private:

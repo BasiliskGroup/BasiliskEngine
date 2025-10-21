@@ -1,7 +1,7 @@
 #ifndef VBO_H
 #define VBO_H
 
-#include "includes.h"
+#include "util/includes.h"
 
 class VBO {
     private:
