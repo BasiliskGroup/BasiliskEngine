@@ -17,7 +17,7 @@ target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(FetchContent)
 add_subdirectory(include)
 
-# Collect all cpp files except entry points
+# Collect all cpp files except entry points 
 file(GLOB_RECURSE ENGINE_SRC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.tpp
