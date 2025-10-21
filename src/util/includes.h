@@ -101,4 +101,10 @@ enum ForceType {
     IGNORE_COLLISION
 };
 
+struct Vertex {
+    vec3 position;
+    vec2 uv;
+    vec3 normal;
+};
+
 #endif
