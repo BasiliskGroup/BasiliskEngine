@@ -9,19 +9,19 @@
  * 
  */
 
-#include "src/window.h"
-#include "src/shader.h"
-#include "src/vbo.h"
-#include "src/ebo.h"
-#include "src/vao.h"
-#include "src/image.h"
-#include "src/texture.h"
-#include "src/mat.h"
-#include "src/camera.h"
-#include "src/mouse.h"
-#include "src/keyboard.h"
-#include "src/mesh.h"
-#include "src/instancer.h"
+#include "window.h"
+#include "shader.h"
+#include "vbo.h"
+#include "ebo.h"
+#include "vao.h"
+#include "image.h"
+#include "texture.h"
+#include "mat.h"
+#include "camera.h"
+#include "mouse.h"
+#include "keyboard.h"
+#include "mesh.h"
+#include "instancer.h"
 
 struct point {
     float x;

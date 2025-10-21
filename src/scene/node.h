@@ -7,8 +7,6 @@ class Scene;
 
 class Node {
     private:
-        // Game data
-        glm::
         // stored in tree
         Scene* scene;
         Node* parent;
