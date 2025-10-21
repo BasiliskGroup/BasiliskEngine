@@ -223,7 +223,7 @@ void Shader::bind(const char* name, Texture* texture, unsigned int slot) {
  * 
  * @param name Name of the texture on the shader
  * @param textureArray Pointer to the texture array to bind
- * @param slot Slot to bind the texutre to [1-16]
+ * @param slot Slot to bind the texutre to [0-15]
  */
 void Shader::bind(const char* name, TextureArray* textureArray, unsigned int slot) {
     use();

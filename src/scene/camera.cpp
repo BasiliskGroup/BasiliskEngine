@@ -64,13 +64,13 @@ void Camera::updateProjection() {
 
 /**
  * @brief Write the view and projection matrices to the given shader.
- *        Assumes uniform names are 'view' and 'projection'
+ *        Assumes uniform names are 'uView' and 'uProjection'
  * 
  * @param shader 
  */
 void Camera::use(Shader* shader) {
-    shader->setUniform("view", view);
-    shader->setUniform("projection", projection);
+    shader->setUniform("uView", view);
+    shader->setUniform("uProjection", projection);
 }
 
 void Camera::moveSide(float distance) {

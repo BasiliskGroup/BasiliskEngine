@@ -34,7 +34,7 @@ target_include_directories(engine PUBLIC
 target_link_libraries(engine
     glad
     glfw
-    glm
+    glm 
     assimp
     stb
     xsimd

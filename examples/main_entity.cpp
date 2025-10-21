@@ -21,8 +21,10 @@
 #include "IO/keyboard.h"
 #include "render/mesh.h"
 #include "instance/instancer.h"
+#include "entity/entity.h"
+#include "entity/entity2d.h"
 #include "scene/camera2d.h"
-#include "entity/entityHandler.h"
+
 
 int main() {
     // Create a GLFW window
@@ -35,28 +37,20 @@ int main() {
     mouse->setGrab();
 
     // Create a camera object
-    Camera camera3d({-3, 0, 0});
-    Camera2D camera2d({0, 0});
+    Camera camera({-3, 0, 0});
 
     // Load shader from file
-    Shader* shader3d = new Shader("shaders/entity_3d.vert", "shaders/entity_3d.frag");
-    Shader* shader2d = new Shader("shaders/entity_2d.vert", "shaders/entity_2d.frag");
+    Shader* shader = new Shader("shaders/entity_3d.vert", "shaders/entity_3d.frag");
     
     // Data for making entity
-    Mesh* cube = new Mesh("models/cube.obj");
-    Mesh* quad = new Mesh("models/quad.obj");
+    Mesh* mesh = new Mesh("models/cube.obj");
     Image* image = new Image("textures/container.jpg");
     Texture* texture = new Texture(image);
     texture->setFilter(GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
         
-    // Create entities
-    EntityHandler* entityHandler = new EntityHandler();
-
-    Entity* entity3d = new Entity(shader3d, cube, texture);
-    Entity2D* entity2d = new Entity2D(shader2d, quad, texture, {100, 100});
-
-    entityHandler->add(entity3d);
-    entityHandler->add(entity2d);
+    // Create an entity
+    Entity* entity = new Entity(shader, mesh, texture);
+    Entity* entity2 = new Entity(shader, mesh, texture, {0, 4, 0});
 
     // Main loop continues as long as the window is open
     while (window->isRunning()) {
@@ -72,12 +66,11 @@ int main() {
         }
 
         // Update the camera for movement
-        camera3d.update(mouse, keys);
-        camera2d.update(mouse, keys);
-        camera3d.use(shader3d);
-        camera2d.use(shader2d);
-        
-        entityHandler->render();
+        camera.update(mouse, keys);
+        // Use the camera on the shader
+        camera.use(shader);
+        entity->render();
+        entity2->render();
 
         // Show the screen
         window->render();
@@ -86,13 +79,10 @@ int main() {
     // Free memory allocations
     delete image;
     delete texture;
-    delete entity3d;
-    delete entity2d;
-    delete shader3d;
-    delete shader2d;
-    delete entityHandler;
-    delete cube;
-    delete quad;
+    // delete entity;
+    delete shader;
+    // delete shader2D;
+    // delete quad;
     delete window;
     delete keys;
     delete mouse;

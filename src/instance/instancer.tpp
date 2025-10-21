@@ -34,6 +34,11 @@ Instancer<T>::Instancer(Shader* shader, Mesh* mesh, std::vector<std::string> mod
     vao->bindAttributes(instanceFormat, 1);
 }
 
+/**
+ * @brief Destroy the Instancer object
+ * 
+ * @tparam T 
+ */
 template <typename T>
 Instancer<T>::~Instancer() {
     delete vao;

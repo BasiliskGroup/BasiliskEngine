@@ -126,6 +126,8 @@ void VAO::render(unsigned int instanceCount) {
     // Use the shader and this VAO
     shader->use();
     bind();
+    vbo->bind();
+    if (ebo) { ebo->bind(); }
     
     // Choose render method based on EBO
     if (ebo) {
