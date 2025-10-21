@@ -1,5 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "image.h"
+#include "render/image.h"
 
 /**
  * @brief Construct a new Image object from image file

@@ -1,4 +1,4 @@
-#include "vao.h"
+#include "render/vao.h"
 
 /**
  * @brief Construct a new VAO object with a shader object, VBO, and optional EBO

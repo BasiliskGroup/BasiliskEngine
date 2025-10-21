@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "render/shader.h"
 
 /**
  * @brief Get the component count of an OpenGL type. Not an exhaustive function, only valid for BOOL, INT, and FLOAT type. 

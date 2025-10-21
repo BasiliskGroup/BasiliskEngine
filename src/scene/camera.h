@@ -3,9 +3,9 @@
 
 
 #include "util/includes.h"
-#include "shader.h"
-#include "mouse.h"
-#include "keyboard.h"
+#include "render/shader.h"
+#include "IO/mouse.h"
+#include "IO/keyboard.h"
 
 class Camera {
     private:

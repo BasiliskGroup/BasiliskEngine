@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "scene/camera.h"
 
 
 /**

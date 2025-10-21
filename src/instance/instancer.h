@@ -2,11 +2,11 @@
 #define INSTANCER_H
 
 #include "util/includes.h"
-#include "shader.h"
-#include "vbo.h"
-#include "vao.h"
-#include "ebo.h"
-#include "mesh.h"
+#include "render/shader.h"
+#include "render/vbo.h"
+#include "render/vao.h"
+#include "render/ebo.h"
+#include "render/mesh.h"
 
 template <typename T>
 class Instancer {

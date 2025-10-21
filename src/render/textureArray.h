@@ -2,7 +2,7 @@
 #define TEXTURE_ARRAY_H
 
 #include "util/includes.h"
-#include "image.h"
+#include "render/image.h"
 
 class TextureArray {
     private:

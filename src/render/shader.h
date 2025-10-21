@@ -2,8 +2,8 @@
 #define SHADER_H
 
 #include "util/includes.h"
-#include "texture.h"
-#include "textureArray.h"
+#include "render/texture.h"
+#include "render/textureArray.h"
 
 // GLint location, GLint count, unsigned int dataType, unsigned int stride, unsigned int offset
 struct Attribute {

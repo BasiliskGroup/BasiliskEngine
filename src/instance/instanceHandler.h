@@ -1,8 +1,8 @@
 #ifndef INSTANCE_HANDLER_H
 #define INSTANCE_HANDLER_H
 
-#include "instancer.h"
-#include "shader.h"
+#include "instance/instancer.h"
+#include "render/shader.h"
 #include "scene/node.h"
 
 template <typename T>

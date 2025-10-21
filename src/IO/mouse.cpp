@@ -1,4 +1,4 @@
-#include "mouse.h"
+#include "IO/mouse.h"
 
 /**
  * @brief Update the state of the mouse and store previous state

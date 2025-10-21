@@ -2,7 +2,7 @@
 #define MOUSE_H
 
 #include "util/includes.h"
-#include "window.h"
+#include "IO/window.h"
 
 class Mouse {
     private:

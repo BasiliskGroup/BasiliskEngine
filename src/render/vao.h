@@ -2,9 +2,9 @@
 #define VAO_H
 
 #include "util/includes.h"
-#include "vbo.h"
-#include "ebo.h"
-#include "shader.h"
+#include "render/vbo.h"
+#include "render/ebo.h"
+#include "render/shader.h"
 
 class VAO {
     private:

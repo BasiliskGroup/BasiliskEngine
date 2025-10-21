@@ -2,7 +2,7 @@
 #define KEYBOARD_H
 
 #include "util/includes.h"
-#include "window.h"
+#include "IO/window.h"
 
 class Keyboard {
     private:
