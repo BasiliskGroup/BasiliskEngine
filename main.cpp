@@ -21,7 +21,6 @@
 #include "src/mouse.h"
 #include "src/keyboard.h"
 #include "src/mesh.h"
-#include "src/node.h"
 #include "src/instancer.h"
 
 struct point {
