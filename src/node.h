@@ -2,50 +2,35 @@
 #define NODE_H
 
 #include "includes.h"
+#include "shader.h"
+#include "texture.h"
 #include "mesh.h"
-#include "buffer.h"
+#include "vbo.h"
+#include "ebo.h"
 #include "vao.h"
+#include "mat.h"
 
-
-class Node {        
-    static unsigned int maxID;
-    static std::vector<unsigned int> freeIDs;
-
+class Node {
     private:
-        // Transformations
-        vec3 position;
-        quat rotation;
-        vec3 scale;
-        mat4x4 model;
+        glm::vec3 position;
+        glm::vec3 rotation;
+        glm::vec3 scale;
+        Matrix modelMatrix;
 
-        // Rendering
+        Shader* shader;
         Mesh* mesh;
         Texture* texture;
-        VAO vao;
 
-        // Physics
-        vec6 veclocity;
-
-        // Batching Information
-        unsigned int id;
+        VBO* vbo;
+        EBO* ebo;
+        VAO* vao;
 
     public:
-        Node(Shader* shader, Mesh* mesh, Texture* texture, vec3 position = vec3(0, 0, 0), quat rotation = quat(1, 0, 0, 0), vec3 scale = vec3(1, 1, 1));
-        ~Node() { freeIDs.push_back(id); }
-        
+        Node(Shader* shader, Mesh* mesh, Texture* texture);
+        ~Node();
+
+        void update();
         void render();
-        void update(float deltaTime);
-
-        inline vec3& getPosition() { return position; }
-        inline quat& getRotation() { return rotation; }
-        inline vec3& getScale()    { return scale; }
-
-        inline void setPosition(vec3 position) { this->position = position; }
-        inline void setRotation(quat rotation) { this->rotation = rotation; }
-        inline void setScale(vec3 scale)       { this->scale = scale; }
-
-        inline VAO* getVAO() { return &vao; }
 };
-
 
 #endif

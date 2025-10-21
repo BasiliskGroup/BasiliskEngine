@@ -1,38 +1,60 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+
 #include "includes.h"
 #include "shader.h"
-#include "engine.h"
-#include "keys.h"
-#include <algorithm>
-
+#include "mouse.h"
+#include "keyboard.h"
 
 class Camera {
     private:
-        Engine* engine;
-
-        float pitch, yaw;
-        float fov;
-        float speed, sensitivity;
-
-        glm::vec3 position;
-        glm::vec3 direction;
-
         glm::mat4 view;
         glm::mat4 projection;
+
+        glm::vec3 position;
+        glm::vec3 worldUp {0.0f, 1.0f, 0.0};
+        glm::vec3 forward;
+        glm::vec3 right;
+        glm::vec3 up;
+    
+        float pitch;
+        float yaw;
+
+        float fov = 45.0f;
+        float aspect = 1.0f;
+        float near = 0.1f;
+        float far = 100.0f;
+        float sensitivity = 1.0;
+
+        void updateProjection();
+        void updateView();
+
     public:
-        Camera(Engine* engine);
-        void update();
-        void write(Shader* shader);
+        Camera(glm::vec3 position, float pitch = 0.0, float yaw = 0.0);
 
-        glm::vec3 getPosition() { return position; }
-        glm::vec3 getDirection() { return direction; }
+        void update(Mouse* mouse, Keyboard* keys);
+        void use(Shader* shader);
 
-        void setPosition(glm::vec3 position) { this->position = position; }
-        void setDirection(glm::vec3 direction) { this->direction = direction; }
-        void setFOV(float fov);
-        void updatePerspective();
+        void moveSide(float distance);
+        void moveForward(float distance);
+        void moveUp(float distance);
+
+        float getX() { return position.x; }
+        float getZ() { return position.y; }
+        float getY() { return position.z; }
+        float getYaw() { return yaw; }
+        float getPitch() { return pitch; }
+
+        void setX(float x) { position.x = x; updateView(); }
+        void setY(float y) { position.y = y; updateView(); }
+        void setZ(float z) { position.z = z; updateView(); }
+        void setYaw(float yaw) { this->yaw = yaw; updateView(); }
+        void setPitch(float pitch) { this->pitch = pitch; updateView(); }
+        void setFOV(float fov) { this->fov = fov; updateProjection();}
+        void setAspect(float aspect) { this->aspect = aspect; updateProjection();}
+        void setNear(float near) { this->near = near; updateProjection();}
+        void setFar(float far) { this->far = far; updateProjection();}
 };
 
 #endif

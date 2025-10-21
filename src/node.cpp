@@ -1,43 +1,35 @@
 #include "node.h"
 
-unsigned int Node::maxID = 0;
-std::vector<unsigned int> Node::freeIDs = {};
 
-Node::Node(
-    Shader* shader, 
-    Mesh* mesh, 
-    Texture* texture,
-    vec3 position, 
-    quat rotation, 
-    vec3 scale
-): 
-    vao        (VAO(shader, mesh->getVBO(), mesh->getEBO())),
-    mesh       (mesh),
-    texture    (texture),
-    position   (position),
-    rotation   (rotation),
-    scale      (scale) {
+Node::Node(Shader* shader, Mesh* mesh, Texture* texture) : shader(shader), mesh(mesh), texture(texture) {
+    vbo = new VBO(mesh->getVertices());
+    ebo = new EBO(mesh->getIndices());
+    vao = new VAO(shader, vbo, ebo);
 
-    // Each node needs a unique ID for batching
-    if (freeIDs.empty()) {
-        id = maxID++;
-    }
-    else {
-        id = freeIDs.back();
-        freeIDs.pop_back();
-    }
+    position = glm::vec3(0.0f, 0.0f, 0.0f);
+    rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    scale    = glm::vec3(1.0f, 1.0f, 1.0f);
 }
+
+
+Node::~Node() {
+    delete vbo;
+    delete ebo;
+}
+
+
+void Node::update() {
+    modelMatrix.makeIdentity();
+    modelMatrix.translate(position);
+    modelMatrix.rotate(glm::vec3(1.0, 0.0, 0.0), rotation.x);
+    modelMatrix.rotate(glm::vec3(0.0, 1.0, 0.0), rotation.y);
+    modelMatrix.rotate(glm::vec3(0.0, 0.0, 1.0), rotation.z);
+    modelMatrix.scale(scale);
+}
+
 
 void Node::render() {
-    vao.getShader()->bind("texture1", texture, 0);
-    vao.getShader()->setUniform("model", model);
-    vao.render();
-}
-
-void Node::update(float deltaTime) {
-    mat4x4 modelTranslation = glm::translate(mat4x4(1), position);
-    mat4x4 modelRotation =  mat4x4(rotation);
-    mat4x4 modelScale = glm::scale(mat4x4(1), scale);
-
-    model = modelTranslation * modelRotation * modelScale;
+    shader->bind("uTexture", texture, 0);
+    shader->setUniform("model", modelMatrix.getMatrix());
+    vao->render();
 }

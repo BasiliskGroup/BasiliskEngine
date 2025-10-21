@@ -1,26 +1,21 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "includes.h"
+#include "image.h"
 
 class Texture {
     private:
-        int width, height, nChannels;
-        unsigned int ID;
-        unsigned char* data;
+        unsigned int id;
 
     public:
-        Texture(const std::string& path);
-        unsigned int getID() { return ID; }
-};
+        Texture(Image* image);
+        ~Texture();
 
-inline GLenum getFormat(int nChannels) {
-    switch (nChannels) {
-        case 1: return GL_RED;
-        case 3: return GL_RGB;
-        case 4: return GL_RGBA;
-        default: return GL_RGB;
-    }
-}
+        void bind();        
+        void setFilter(unsigned int magFilter, unsigned int minFilter);
+        void setWrap(unsigned int wrap);
+
+        unsigned int getID() { return id; }
+};
 
 #endif

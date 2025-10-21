@@ -1,6 +1,10 @@
 #include "mesh.h"
 
-
+/**
+ * @brief Construct a new Mesh object from a model
+ * 
+ * @param modelPath The path to the model to load
+ */
 Mesh::Mesh(const std::string modelPath) {
     Assimp::Importer importer;
 
@@ -48,7 +52,4 @@ Mesh::Mesh(const std::string modelPath) {
     }
 
     importer.FreeScene();
-
-    vbo = new VBO(vertices);
-    ebo = new EBO(indices);
 }

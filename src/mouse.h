@@ -6,25 +6,33 @@
 
 class Mouse {
     private:
-        GLFWwindow* window;
+        Window* window;
         double x, y;
         double previousX, previousY;
+
+        bool left, middle, right;
+        bool previousLeft;
+        bool previousMiddle;
+        bool previousRight;
+    
     public:
-        Mouse(GLFWwindow* window): window(window), x(400), y(300), previousX(400), previousY(300) {}
+        Mouse(Window* window): window(window), x(400), y(300), previousX(400), previousY(300) {}
         
         void update();
 
-        bool clicked();
-        bool middleClicked();
-        bool rightClicked();
-        bool leftDown();
-        bool middleDown();
-        bool rightDown();
+        bool getClicked()       { return left && !previousLeft; }
+        bool getMiddleClicked() { return middle && !previousMiddle; }
+        bool getRightClicked()  { return right && !previousRight; }
 
-        double getX();
-        double getY();
-        double getRelativeX();
-        double getRelativeY();
+        bool getLeftDown()   { return left; }
+        bool getMiddleDown() { return middle; }
+        bool getRightDown()  { return right; }
+
+        double getX() { return x; }
+        double getY() { return y; }
+
+        double getRelativeX() { return x - previousX; }
+        double getRelativeY() { return y - previousY; }
 
         void setGrab();
         void setVisible();

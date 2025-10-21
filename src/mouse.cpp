@@ -1,34 +1,46 @@
 #include "mouse.h"
 
-
+/**
+ * @brief Update the state of the mouse and store previous state
+ * 
+ */
 void Mouse::update() {
+    // Store the previous frame's mouse state
     previousX = x;
     previousY = y;
-    glfwGetCursorPos(window, &x, &y);
+    
+    previousLeft   = left;
+    previousMiddle = middle;
+    previousRight  = right;
+    
+    // Update the position and click states
+    glfwGetCursorPos(window->getWindow(), &x, &y);
+
+    left = glfwGetMouseButton(window->getWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+    middle = glfwGetMouseButton(window->getWindow(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+    right = glfwGetMouseButton(window->getWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 }
 
-bool Mouse::clicked() {
-    return false;
+/**
+ * @brief Grabs the mouse and hides it
+ * 
+ */
+void Mouse::setGrab() {
+    glfwSetInputMode(window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
-bool Mouse::middleClicked() {
-    return false;
+/**S
+ * @brief Shows the mouse and ungrabs it
+ * 
+ */
+void Mouse::setVisible() {
+    glfwSetInputMode(window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-bool Mouse::rightClicked() {
-    return false;
+/**
+ * @brief Hides the mouse but does not grab it
+ * 
+ */
+void Mouse::setHidden() {
+    glfwSetInputMode(window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
-
-bool Mouse::leftDown() { return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS; }
-bool Mouse::middleDown() { return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS; }
-bool Mouse::rightDown() { return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS; }
-
-double Mouse::getX() { return x; }
-double Mouse::getY() { return y; }
-double Mouse::getRelativeX() { return x - previousX; }
-double Mouse::getRelativeY() { return y - previousY; }
-
-void Mouse::setGrab() { glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); }
-void Mouse::setVisible() { glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); }
-void Mouse::setHidden() { glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN); }
-
