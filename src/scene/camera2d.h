@@ -23,6 +23,8 @@ class Camera2D {
 
         void update(Mouse* mouse, Keyboard* keys);
         void use(Shader* shader);
+
+        void setPosition(glm::vec2 position) { this->position = position; }
 };
 
 

@@ -28,7 +28,7 @@ void Camera2D::use(Shader* shader) {
  * @param keys 
  */
 void Camera2D::update(Mouse* mouse, Keyboard* keys) {
-
+    updateView();
 }
 
 /**

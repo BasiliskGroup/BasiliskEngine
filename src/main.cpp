@@ -71,7 +71,13 @@ int main() {
             mouse->setGrab();
         }
 
+        glm::vec2 pos = entity2d->getPosition();
+        pos.x += keys->getPressed(GLFW_KEY_RIGHT) - keys->getPressed(GLFW_KEY_LEFT);
+        pos.y += keys->getPressed(GLFW_KEY_DOWN) - keys->getPressed(GLFW_KEY_UP);
+        entity2d->setPosition(pos);
+
         // Update the camera for movement
+        camera2d.setPosition({camera3d.getX() * 10, camera3d.getY() * 10});
         camera3d.update(mouse, keys);
         camera2d.update(mouse, keys);
         camera3d.use(shader3d);

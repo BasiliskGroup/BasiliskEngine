@@ -40,6 +40,7 @@ class Camera {
         void moveForward(float distance);
         void moveUp(float distance);
 
+        glm::vec3 getPosition() { return position; }
         float getX() { return position.x; }
         float getZ() { return position.y; }
         float getY() { return position.z; }

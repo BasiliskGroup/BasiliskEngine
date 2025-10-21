@@ -48,7 +48,7 @@ void VirtualEntity<position_type, rotation_type, scale_type>::render() {
  */
 template<typename position_type, typename rotation_type, typename scale_type>
 void VirtualEntity<position_type, rotation_type, scale_type>::setPosition(position_type position) {
-    position = position;
+    this->position = position;
     updateModel();
 }
 
