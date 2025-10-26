@@ -5,7 +5,7 @@
  * 
  * @param position Starting position of the camera
  */
-Camera2D::Camera2D(glm::vec2 position): position(position) {
+Camera2D::Camera2D(Engine* engine, glm::vec2 position): engine(engine), position(position) {
     updateProjection();
     updateView();
 }
@@ -27,7 +27,7 @@ void Camera2D::use(Shader* shader) {
  * @param mouse 
  * @param keys 
  */
-void Camera2D::update(Engine* engine) {
+void Camera2D::update() {
     updateView();
 }
 

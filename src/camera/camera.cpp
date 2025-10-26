@@ -8,14 +8,14 @@
  * @param pitch 
  * @param yaw 
  */
-Camera::Camera(glm::vec3 position, float pitch, float yaw): 
-    position(position), pitch(pitch), yaw(yaw) 
+Camera::Camera(Engine* engine, glm::vec3 position, float pitch, float yaw): 
+    engine(engine), position(position), pitch(pitch), yaw(yaw) 
 {
     updateView();
     updateProjection();
 }
 
-void Camera::update(Engine* engine) {
+void Camera::update() {
 
     // Get mouse and keyboard from engine
     Mouse* mouse = engine->getMouse();

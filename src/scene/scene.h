@@ -4,14 +4,16 @@
 #include "util/includes.h"
 #include "engine/engine.h"
 #include "camera/virtualCamera.h"
+#include "camera/camera.h"
 #include "nodes/nodeHandler.h"
-#include "virtualNode.h"
+#include "nodes/node.h"
 
 class Scene {
     private:
         Engine* engine;
-        VirtualCamera camera;
-        NodeHandler nodeHandler;
+        Camera* camera;
+        NodeHandler* nodeHandler;
+        Shader* shader;
 
     public:
         Scene(Engine* engine);
@@ -20,10 +22,12 @@ class Scene {
         void update();
         void render();
 
-        void add(VirtualNode node);
+        void add(Node* node);
 
-        void setCamera(VirtualCamera camera) { this->camera = camera; }
-        VirtualCamera getCamera() { return camera; }
+        void setCamera(Camera* camera) { this->camera = camera; }
+
+        inline Shader* getShader() { return shader; }
+        inline Camera* getCamera() { return camera; }
 };
 
 #endif

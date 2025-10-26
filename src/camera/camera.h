@@ -10,6 +10,8 @@
 
 class Camera : public VirtualCamera {
     private:
+        Engine* engine;
+
         glm::vec3 position;
         glm::vec3 worldUp {0.0f, 1.0f, 0.0};
         glm::vec3 forward;
@@ -29,9 +31,9 @@ class Camera : public VirtualCamera {
         void updateView();
 
     public:
-        Camera(glm::vec3 position, float pitch = 0.0, float yaw = 0.0);
+        Camera(Engine* engine, glm::vec3 position = {0.0f, 0.0f, 0.0f}, float pitch = 0.0, float yaw = 0.0);
 
-        void update(Engine* engine);
+        void update();
         void use(Shader* shader);
 
         void moveSide(float distance);

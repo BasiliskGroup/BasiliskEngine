@@ -14,7 +14,7 @@ class VirtualCamera {
         virtual void updateView() = 0;
 
     public:
-        virtual void update(Engine* engine) = 0;
+        virtual void update() = 0;
         virtual void use(Shader* shader) = 0;
 };
 

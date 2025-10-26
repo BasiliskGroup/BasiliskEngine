@@ -10,15 +10,17 @@
 
 class Camera2D : public VirtualCamera{
     private:
+        Engine* engine;
+
         glm::vec2 position;
 
         void updateProjection();
         void updateView();
 
     public:
-        Camera2D(glm::vec2 position={0.0f, 0.0f});
+        Camera2D(Engine* engine, glm::vec2 position = {0.0f, 0.0f});
 
-        void update(Engine* engine);
+        void update();
         void use(Shader* shader);
 
         void setPosition(glm::vec2 position) { this->position = position; }
