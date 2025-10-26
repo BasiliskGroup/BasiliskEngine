@@ -9,7 +9,7 @@
 #include "render/shader.h"
 
 template<typename position_type, typename rotation_type, typename scale_type>
-class VirtualEntity {
+class VirtualNode {
     private:
         Shader* shader;
         Mesh* mesh;
@@ -28,8 +28,8 @@ class VirtualEntity {
         virtual void updateModel() = 0;
         
     public:
-        VirtualEntity(Shader* shader, Mesh* mesh, Texture* texture, position_type position, rotation_type rotation, scale_type scale);
-        ~VirtualEntity();
+        VirtualNode(Shader* shader, Mesh* mesh, Texture* texture, position_type position, rotation_type rotation, scale_type scale);
+        ~VirtualNode();
 
         void render();
 
@@ -42,6 +42,6 @@ class VirtualEntity {
         scale_type getScale() const { return scale; }
 };
 
-#include "entity/virtualEntity.tpp"
+#include "nodes/virtualNode.tpp"
 
 #endif

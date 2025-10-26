@@ -22,17 +22,11 @@
 #include "render/mesh.h"
 #include "instance/instancer.h"
 #include "scene/camera2d.h"
-#include "entity/entityHandler.h"
+#include "nodes/nodeHandler.h"
+#include "engine/engine.h"
 
 int main() {
-    // Create a GLFW window
-    Window* window = new Window(800, 800, "Example 13: Instance");
-    
-    // Create a key object for keyboard inputs
-    Keyboard* keys = new Keyboard(window);
-    // Create a mouse object for mouse input
-    Mouse* mouse = new Mouse(window);
-    mouse->setGrab();
+    Engine* engine = new Engine(800, 800, "Basilisk");
 
     // Create a camera object
     Camera camera3d({-3, 0, 0});
@@ -42,64 +36,52 @@ int main() {
     Shader* shader3d = new Shader("shaders/entity_3d.vert", "shaders/entity_3d.frag");
     Shader* shader2d = new Shader("shaders/entity_2d.vert", "shaders/entity_2d.frag");
     
-    // Data for making entity
+    // Data for making node
     Mesh* cube = new Mesh("models/cube.obj");
     Mesh* quad = new Mesh("models/quad.obj");
     Image* image = new Image("textures/container.jpg");
     Texture* texture = new Texture(image);
-    texture->setFilter(GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
         
     // Create entities
-    EntityHandler* entityHandler = new EntityHandler();
+    NodeHandler* nodeHandler = new NodeHandler();
 
-    Entity* entity3d = new Entity(shader3d, cube, texture);
-    Entity2D* entity2d = new Entity2D(shader2d, quad, texture, {100, 100});
+    Node* node3d = new Node(shader3d, cube, texture);
+    Node2D* node2d = new Node2D(shader2d, quad, texture, {100, 100});
 
-    entityHandler->add(entity3d);
-    entityHandler->add(entity2d);
+    nodeHandler->add(node3d);
+    nodeHandler->add(node2d);
 
     // Main loop continues as long as the window is open
-    while (window->isRunning()) {
-        // Fill the screen with a low blue color
-        window->clear(0.2, 0.3, 0.3, 1.0);
-        // Update Mouse
-        mouse->update();
-        if (keys->getPressed(GLFW_KEY_ESCAPE)) {
-            mouse->setVisible();
-        }
-        if (mouse->getClicked()) {
-            mouse->setGrab();
-        }
+    while (engine->isRunning()) {
+        engine->update();
 
-        glm::vec2 pos = entity2d->getPosition();
-        pos.x += keys->getPressed(GLFW_KEY_RIGHT) - keys->getPressed(GLFW_KEY_LEFT);
-        pos.y += keys->getPressed(GLFW_KEY_DOWN) - keys->getPressed(GLFW_KEY_UP);
-        entity2d->setPosition(pos);
+        glm::vec2 pos = node2d->getPosition();
+        pos.x += engine->getKeyboard()->getPressed(GLFW_KEY_RIGHT) - engine->getKeyboard()->getPressed(GLFW_KEY_LEFT);
+        pos.y += engine->getKeyboard()->getPressed(GLFW_KEY_DOWN) - engine->getKeyboard()->getPressed(GLFW_KEY_UP);
+        node2d->setPosition(pos);
 
         // Update the camera for movement
         camera2d.setPosition({camera3d.getX() * 10, camera3d.getY() * 10});
-        camera3d.update(mouse, keys);
-        camera2d.update(mouse, keys);
+        camera3d.update(engine->getMouse(), engine->getKeyboard());
+        camera2d.update(engine->getMouse(), engine->getKeyboard());
         camera3d.use(shader3d);
         camera2d.use(shader2d);
         
-        entityHandler->render();
+        nodeHandler->render();
 
         // Show the screen
-        window->render();
+        engine->render();
     }
 
     // Free memory allocations
     delete image;
     delete texture;
-    delete entity3d;
-    delete entity2d;
+    delete node3d;
+    delete node2d;
     delete shader3d;
     delete shader2d;
-    delete entityHandler;
+    delete nodeHandler;
     delete cube;
     delete quad;
-    delete window;
-    delete keys;
-    delete mouse;
+    delete engine;
 }

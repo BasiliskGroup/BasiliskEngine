@@ -1,6 +1,6 @@
-#include "entity/entity.h"
+#include "nodes/node.h"
 
-void Entity::updateModel() {
+void Node::updateModel() {
     model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model = glm::rotate(model, rotation.x, glm::vec3(1.0, 0.0, 0.0));

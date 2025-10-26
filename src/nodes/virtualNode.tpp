@@ -1,7 +1,7 @@
-#include "entity/virtualEntity.h"
+#include "nodes/virtualNode.h"
 
 /**
- * @brief Construct a new Entity object
+ * @brief Construct a new Node object
  * 
  * @param shader 
  * @param mesh 
@@ -11,7 +11,7 @@
  * @param scale 
  */
 template<typename position_type, typename rotation_type, typename scale_type>
-VirtualEntity<position_type, rotation_type, scale_type>::VirtualEntity(Shader* shader, Mesh* mesh, Texture* texture, position_type position, rotation_type rotation, scale_type scale):
+VirtualNode<position_type, rotation_type, scale_type>::VirtualNode(Shader* shader, Mesh* mesh, Texture* texture, position_type position, rotation_type rotation, scale_type scale):
     shader(shader), mesh(mesh), texture(texture), position(position), rotation(rotation), scale(scale){
 
     vbo = new VBO(mesh->getVertices());
@@ -20,56 +20,56 @@ VirtualEntity<position_type, rotation_type, scale_type>::VirtualEntity(Shader* s
 }
 
 /**
- * @brief Destroy the Entity object. Release the vbo, ebo, and vao
+ * @brief Destroy the Node object. Release the vbo, ebo, and vao
  * 
  */
 template<typename position_type, typename rotation_type, typename scale_type>
-VirtualEntity<position_type, rotation_type, scale_type>::~VirtualEntity() {
+VirtualNode<position_type, rotation_type, scale_type>::~VirtualNode() {
     delete vao;
     delete vbo;
     delete ebo;
 }
 
 /**
- * @brief Render the vao on this entity
+ * @brief Render the vao on this node
  * 
  */
 template<typename position_type, typename rotation_type, typename scale_type>
-void VirtualEntity<position_type, rotation_type, scale_type>::render() {
+void VirtualNode<position_type, rotation_type, scale_type>::render() {
     shader->bind("uTexture", texture, 0);
     shader->setUniform("uModel", model);
     vao->render();
 }
 
 /**
- * @brief Update the position of the entity
+ * @brief Update the position of the node
  * 
  * @param position 
  */
 template<typename position_type, typename rotation_type, typename scale_type>
-void VirtualEntity<position_type, rotation_type, scale_type>::setPosition(position_type position) {
+void VirtualNode<position_type, rotation_type, scale_type>::setPosition(position_type position) {
     this->position = position;
     updateModel();
 }
 
 /**
- * @brief Update the rotation of the entity
+ * @brief Update the rotation of the node
  * 
  * @param rotation 
  */
 template<typename position_type, typename rotation_type, typename scale_type>
-void VirtualEntity<position_type, rotation_type, scale_type>::setRotation(rotation_type rotation) {
+void VirtualNode<position_type, rotation_type, scale_type>::setRotation(rotation_type rotation) {
     rotation = rotation;
     updateModel();
 }
 
 /**
- * @brief Update the scale of the entity
+ * @brief Update the scale of the node
  * 
  * @param scale 
  */
 template<typename position_type, typename rotation_type, typename scale_type>
-void VirtualEntity<position_type, rotation_type, scale_type>::setScale(scale_type scale) {
+void VirtualNode<position_type, rotation_type, scale_type>::setScale(scale_type scale) {
     scale = scale;
     updateModel();
 }
