@@ -3,15 +3,13 @@
 
 
 #include "util/includes.h"
+#include "camera/virtualCamera.h"
 #include "render/shader.h"
-#include "IO/mouse.h"
-#include "IO/keyboard.h"
+#include "engine/engine.h"
 
-class Camera {
+
+class Camera : public VirtualCamera {
     private:
-        glm::mat4 view;
-        glm::mat4 projection;
-
         glm::vec3 position;
         glm::vec3 worldUp {0.0f, 1.0f, 0.0};
         glm::vec3 forward;
@@ -33,7 +31,7 @@ class Camera {
     public:
         Camera(glm::vec3 position, float pitch = 0.0, float yaw = 0.0);
 
-        void update(Mouse* mouse, Keyboard* keys);
+        void update(Engine* engine);
         void use(Shader* shader);
 
         void moveSide(float distance);

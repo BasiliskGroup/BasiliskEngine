@@ -9,28 +9,26 @@
  * 
  */
 
-#include "IO/window.h"
 #include "render/shader.h"
 #include "render/vbo.h"
 #include "render/ebo.h"
 #include "render/vao.h"
 #include "render/image.h"
 #include "render/texture.h"
-#include "scene/camera.h"
-#include "IO/mouse.h"
-#include "IO/keyboard.h"
+#include "camera/camera.h"
+#include "camera/camera2d.h"
 #include "render/mesh.h"
 #include "instance/instancer.h"
-#include "scene/camera2d.h"
 #include "nodes/nodeHandler.h"
 #include "engine/engine.h"
+#include "camera/virtualCamera.h"
 
 int main() {
     Engine* engine = new Engine(800, 800, "Basilisk");
 
     // Create a camera object
-    Camera camera3d({-3, 0, 0});
-    Camera2D camera2d({0, 0});
+    Camera* camera3d = new Camera({-3, 0, 0});
+    Camera2D* camera2d = new Camera2D({0, 0});
 
     // Load shader from file
     Shader* shader3d = new Shader("shaders/entity_3d.vert", "shaders/entity_3d.frag");
@@ -61,11 +59,10 @@ int main() {
         node2d->setPosition(pos);
 
         // Update the camera for movement
-        camera2d.setPosition({camera3d.getX() * 10, camera3d.getY() * 10});
-        camera3d.update(engine->getMouse(), engine->getKeyboard());
-        camera2d.update(engine->getMouse(), engine->getKeyboard());
-        camera3d.use(shader3d);
-        camera2d.use(shader2d);
+        camera3d->update(engine);
+        camera2d->update(engine);
+        camera3d->use(shader3d);
+        camera2d->use(shader2d);
         
         nodeHandler->render();
 

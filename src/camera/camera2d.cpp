@@ -1,4 +1,4 @@
-#include "scene/camera2d.h"
+#include "camera/camera2d.h"
 
 /**
  * @brief Construct a new Camera 2D object
@@ -27,7 +27,7 @@ void Camera2D::use(Shader* shader) {
  * @param mouse 
  * @param keys 
  */
-void Camera2D::update(Mouse* mouse, Keyboard* keys) {
+void Camera2D::update(Engine* engine) {
     updateView();
 }
 

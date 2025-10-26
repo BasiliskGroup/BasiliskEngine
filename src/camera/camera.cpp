@@ -1,4 +1,4 @@
-#include "scene/camera.h"
+#include "camera/camera.h"
 
 
 /**
@@ -15,7 +15,11 @@ Camera::Camera(glm::vec3 position, float pitch, float yaw):
     updateProjection();
 }
 
-void Camera::update(Mouse* mouse, Keyboard* keys) {
+void Camera::update(Engine* engine) {
+
+    // Get mouse and keyboard from engine
+    Mouse* mouse = engine->getMouse();
+    Keyboard* keys = engine->getKeyboard();
 
     // Looking
     float yOffset = mouse->getRelativeY() * sensitivity / 5;
