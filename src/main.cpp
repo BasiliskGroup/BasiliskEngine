@@ -15,7 +15,7 @@
 #include "camera/camera2d.h"
 #include "render/mesh.h"
 #include "engine/engine.h"
-#include "scene/scene.h"
+#include "scene/sceneRoute.h"
 
 int main() {
     Engine* engine = new Engine(800, 800, "Basilisk");
@@ -26,8 +26,9 @@ int main() {
     Image* image = new Image("textures/container.jpg");
     Texture* texture = new Texture(image);
         
-    Node* node = new Node(scene->getShader(), cube, texture);
-    scene->add(node);
+    Node* parent = new Node(scene, scene->getShader(), cube, texture);
+    Node* node = new Node(parent, scene->getShader(), cube, texture);
+    new Node(node, scene->getShader(), cube, texture);
 
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {

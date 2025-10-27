@@ -1,5 +1,5 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef SCENE2D_H
+#define SCENE2D_H
 
 #include "util/includes.h"
 #include "engine/engine.h"
@@ -8,17 +8,17 @@
 #include "camera/camera.h"
 #include "render/shader.h"
 
-class Node;
+class Node2D;
 
-class Scene : public VirtualScene<Node, vec3, quat, vec3> {
+class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
     private:
         Engine* engine;
         Camera* camera;
         Shader* shader;
 
     public:
-        Scene(Engine* engine);
-        ~Scene();
+        Scene2D(Engine* engine);
+        ~Scene2D();
 
         void update();
         void render();

@@ -1,26 +1,26 @@
 #include "scene/sceneRoute.h"
-#include "util/print.h"
 
 
-Scene::Scene(Engine* engine) : VirtualScene<Node, vec3, quat, vec3>(), engine(engine) {
+Scene2D::Scene2D(Engine* engine): engine(engine) {
     camera = new Camera(engine);
     shader = new Shader("shaders/entity_3d.vert", "shaders/entity_3d.frag");
 }
 
-Scene::~Scene() {
+Scene2D::~Scene2D() {
     delete camera;
     delete shader;
 }
 
-void Scene::update() {
+void Scene2D::update() {
     camera->update();
     camera->use(shader);
 }
 
-void Scene::render() {
+void Scene2D::render() {
     shader->use();
     for (auto it = ++root->begin(); it != root->end(); ++it) {
-        Node* node = *it;
+        
+        Node2D* node = *it;
         node->render();
     }
 }

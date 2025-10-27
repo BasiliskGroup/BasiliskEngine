@@ -17,10 +17,6 @@ void NodeHandler::add(Node2D* node) {
 }
 
 void NodeHandler::render() {
-    for (Node* node : entities3d) {
-        node->render();
-    }
-    for (Node2D* node : entities2d) {
-        node->render();
-    }
+    
+    
 }

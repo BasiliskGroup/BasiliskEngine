@@ -3,15 +3,23 @@
 
 #include "util/includes.h"
 #include "nodes/virtualNode.h"
+#include "scene/virtualScene.h"
 
-class Node : public VirtualNode<glm::vec3, glm::vec3, glm::vec3>{
-    protected:
-        void updateModel() override;
+class Node : public VirtualNode<Node, vec3, quat, vec3> {
+    private:
+        using Scene = VirtualScene<Node, vec3, quat, vec3>;
+
     public:
-        Node(Shader* shader, Mesh* mesh, Texture* texture, glm::vec3 position={0, 0, 0}, glm::vec3 rotation={0, 0, 0}, glm::vec3 scale={1, 1, 1})
-            : VirtualNode(shader, mesh, texture, position, rotation, scale) {
-                updateModel();
-        }
+        Node(Scene* scene, Shader* shader, Mesh* mesh, Texture* texture, vec3 position={0, 0, 0}, quat rotation={1, 0, 0, 0}, vec3 scale={1, 1, 1});
+        Node(Node* parent, Shader* shader, Mesh* mesh, Texture* texture, vec3 position={0, 0, 0}, quat rotation={1, 0, 0, 0}, vec3 scale={1, 1, 1});
+        Node(Scene* scene, Node* parent);
+
+        void setPosition(vec3 position);
+        void setRotation(quat rotation);
+        void setScale(vec3 scale);
+
+    private:
+        void updateModel();
 };
 
 #endif
