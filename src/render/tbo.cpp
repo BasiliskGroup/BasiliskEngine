@@ -1,5 +1,11 @@
 #include "render/tbo.h"
 
+/**
+ * @brief Construct a new TBO object. Can be used to store arbitray data on the GPU
+ * 
+ * @param data Inital data to store
+ * @param size Size of the data in bytes
+ */
 TBO::TBO(const void* data, unsigned int size) {
     // Create one buffer, and update VBO with the buffer ID
     glGenBuffers(1, &ID);
