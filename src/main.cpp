@@ -1,7 +1,5 @@
 #include "basilisk.h"
 
-#include "resource/textureServer.h"
-
 int main() {
     Engine* engine = new Engine(800, 800, "Basilisk");
     Scene* scene = new Scene(engine);
