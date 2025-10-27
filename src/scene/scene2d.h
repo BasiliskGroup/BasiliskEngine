@@ -5,7 +5,7 @@
 #include "engine/engine.h"
 #include "camera/virtualCamera.h"
 #include "scene/virtualScene.h"
-#include "camera/camera.h"
+#include "camera/camera2d.h"
 #include "render/shader.h"
 
 class Node2D;
@@ -13,7 +13,7 @@ class Node2D;
 class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
     private:
         Engine* engine;
-        Camera* camera;
+        Camera2D* camera;
         Shader* shader;
 
     public:
@@ -23,10 +23,10 @@ class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
         void update();
         void render();
 
-        void setCamera(Camera* camera) { this->camera = camera; }
+        void setCamera(Camera2D* camera) { this->camera = camera; }
 
         inline Shader* getShader() { return shader; }
-        inline Camera* getCamera() { return camera; }
+        inline Camera2D* getCamera() { return camera; }
 };
 
 #endif

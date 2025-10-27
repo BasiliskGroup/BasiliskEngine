@@ -1,5 +1,6 @@
 #include "engine/engine.h"
 #include "scene/scene.h"
+#include "scene/scene2d.h"
 #include "IO/window.h"
 #include "IO/mouse.h"
 #include "IO/keyboard.h"
@@ -20,6 +21,7 @@
 namespace bsk {
     using Engine = ::Engine;
     using Scene = ::Scene;
+    using Scene2D = ::Scene2D;
     using Window = ::Window;
     using Mouse = ::Mouse;
     using Keyboard = ::Keyboard;
