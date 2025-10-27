@@ -31,7 +31,7 @@ target_include_directories(engine PUBLIC
 )
 
 # Link deps
-target_link_libraries(engine 
+target_link_libraries(engine
     glad
     glfw
     glm 

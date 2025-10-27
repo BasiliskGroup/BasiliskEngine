@@ -9,13 +9,9 @@
  * 
  */
 
-#include "render/image.h"
-#include "render/texture.h"
-#include "camera/camera.h"
-#include "camera/camera2d.h"
-#include "render/mesh.h"
-#include "engine/engine.h"
-#include "scene/scene.h"
+
+#include "basilisk.h"
+
 
 int main() {
     Engine* engine = new Engine(800, 800, "Basilisk");
