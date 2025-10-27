@@ -1,17 +1,6 @@
-/**
- * @file main.cpp
- * @author Jonah Coffelt
- * @brief ...
- * @version 0.1
- * @date 2025-10-14
- * 
- * @copyright Copyright (c) 2025
- * 
- */
-
-
 #include "basilisk.h"
 
+#include "resource/textureServer.h"
 
 int main() {
     Engine* engine = new Engine(800, 800, "Basilisk");
