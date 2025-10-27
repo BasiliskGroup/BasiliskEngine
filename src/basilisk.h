@@ -12,6 +12,7 @@
 #include "render/vao.h"
 #include "render/vbo.h"
 #include "render/ebo.h"
+#include "render/tbo.h"
 #include "camera/camera.h"
 #include "camera/camera2d.h"
 
@@ -31,6 +32,7 @@ namespace bsk {
     using VAO = ::VAO;
     using VBO = ::VBO;
     using EBO = ::EBO;
+    using TBO = ::TBO;
     using Camera = ::Camera;
     using Camera2D = ::Camera2D;
 }

@@ -4,6 +4,7 @@
 #include "util/includes.h"
 #include "render/texture.h"
 #include "render/textureArray.h"
+#include "render/tbo.h"
 
 // GLint location, GLint count, unsigned int dataType, unsigned int stride, unsigned int offset
 struct Attribute {
@@ -30,6 +31,7 @@ class Shader {
 
         void bind(const char* name, Texture* texture, unsigned int slot);
         void bind(const char* name, TextureArray* textureArray, unsigned int slot);
+        void bind(const char* name, TBO* textureArray, unsigned int slot);
 
         int getUniformLocation(const char* name);
         unsigned int getStride() { return stride; }
