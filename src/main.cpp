@@ -33,7 +33,6 @@ int main() {
     // Free memory allocations
     delete image;
     delete texture;
-    delete node;
     delete cube;
     delete quad;
     delete scene;
