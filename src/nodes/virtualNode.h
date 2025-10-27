@@ -97,7 +97,6 @@ private:
 
     // helper functions to avoid copying code
     void clear();
-    void shallowCopy(const VirtualNode& other);
     void createBuffers();
 };
 

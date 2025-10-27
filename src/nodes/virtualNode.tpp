@@ -1,5 +1,20 @@
 #include "scene/sceneRoute.h"
 
+/**
+ * @brief Construct a new Virtual Node< Derived,  P,  R,  S>:: Virtual Node object
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param scene 
+ * @param shader 
+ * @param mesh 
+ * @param texture 
+ * @param position 
+ * @param rotation 
+ * @param scale 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
     scene(scene), 
@@ -14,6 +29,21 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     createBuffers();
 }
 
+/**
+ * @brief Construct a new Virtual Node< Derived,  P,  R,  S>:: Virtual Node object
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param parent 
+ * @param shader 
+ * @param mesh 
+ * @param texture 
+ * @param position 
+ * @param rotation 
+ * @param scale 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
     scene(parent->getScene()), 
@@ -29,6 +59,16 @@ VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Shader* shader, Mesh
     createBuffers();
 }
 
+/**
+ * @brief Construct a new Virtual Node< Derived,  P,  R,  S>:: Virtual Node object
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param scene 
+ * @param parent 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Derived* parent) : 
     scene(scene), 
@@ -48,6 +88,15 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     }
 }
 
+/**
+ * @brief Construct a new Virtual Node< Derived, P, R, S>:: Virtual Node object
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param other 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived,P,R,S>::VirtualNode(const VirtualNode& other) noexcept
     : scene(other.scene),
@@ -75,6 +124,15 @@ VirtualNode<Derived,P,R,S>::VirtualNode(const VirtualNode& other) noexcept
     parent->children.push_back(asNode());
 }
 
+/**
+ * @brief Construct a new Virtual Node< Derived,  P,  R,  S>:: Virtual Node object
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param other 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
     : scene(other.scene),
@@ -106,11 +164,29 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
     parent->children.push_back(asNode());
 }
 
+/**
+ * @brief Destroy the Virtual Node< Derived,  P,  R,  S>:: Virtual Node object
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived, P, R, S>::~VirtualNode() {
     clear();
 }
 
+/**
+ * @brief Copies a VirtualNode and all of its children
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param other 
+ * @return VirtualNode<Derived, P, R, S>& 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const VirtualNode& other) noexcept {
     if (this == &other) return *this;
@@ -141,6 +217,16 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const Vi
     return *this;
 }
 
+/**
+ * @brief Moves a VirualNode to this node
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param other 
+ * @return VirtualNode<Derived, P, R, S>& 
+ */
 template<typename Derived, typename P, typename R, typename S>
 VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualNode&& other) noexcept {
     if (this == &other) return *this;
@@ -184,6 +270,15 @@ void VirtualNode<Derived, P, R, S>::render() {
     vao->render();
 }
 
+/**
+ * @brief Safely adds a VirtualNode to this VirtualNode's subtree
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param child 
+ */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::add(Derived* child) {
     child->parent->remove(child);
@@ -191,6 +286,15 @@ void VirtualNode<Derived, P, R, S>::add(Derived* child) {
     children.push_back(child);
 }
 
+/**
+ * @brief Safely removes a Vurtual from the children subtree
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param child 
+ */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::remove(Derived* child) {
     auto it = std::find(children.begin(), children.end(), child);
@@ -199,6 +303,14 @@ void VirtualNode<Derived, P, R, S>::remove(Derived* child) {
     }
 }
 
+/**
+ * @brief Detaches the VirtualNode and deletes all children
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::clear() {
     // delete tree
@@ -219,11 +331,14 @@ void VirtualNode<Derived, P, R, S>::clear() {
     }
 }
 
-template<typename Derived, typename P, typename R, typename S>
-void VirtualNode<Derived, P, R, S>::shallowCopy(const VirtualNode& other) {
-    
-}
-
+/**
+ * @brief Creates the VBO, EBO, and VAO for the VirtualNode
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::createBuffers() {
     vbo = new VBO(mesh->getVertices());
