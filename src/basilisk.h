@@ -16,7 +16,7 @@
 #include "render/tbo.h"
 #include "camera/camera.h"
 #include "camera/camera2d.h"
-
+#include "render/material.h"
 
 namespace bsk {
     using Engine = ::Engine;
@@ -31,6 +31,7 @@ namespace bsk {
     using Texture = ::Texture;
     using Image = ::Image;
     using Shader = ::Shader;
+    using Material = ::Material;
     using VAO = ::VAO;
     using VBO = ::VBO;
     using EBO = ::EBO;
