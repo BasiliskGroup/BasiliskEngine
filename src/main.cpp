@@ -1,21 +1,6 @@
-/**
- * @file main.cpp
- * @author Jonah Coffelt
- * @brief ...
- * @version 0.1
- * @date 2025-10-14
- * 
- * @copyright Copyright (c) 2025
- * 
- */
+#include "basilisk.h"
 
-#include "render/image.h"
-#include "render/texture.h"
-#include "camera/camera.h"
-#include "camera/camera2d.h"
-#include "render/mesh.h"
-#include "engine/engine.h"
-#include "scene/sceneRoute.h"
+#include "resource/textureServer.h"
 
 int main() {
     Engine* engine = new Engine(800, 800, "Basilisk");

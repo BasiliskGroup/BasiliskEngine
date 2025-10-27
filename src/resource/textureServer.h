@@ -4,6 +4,7 @@
 #include "util/includes.h"
 #include "render/image.h"
 #include "render/textureArray.h"
+#include "render/shader.h"
 
 class TextureServer {
     private:
@@ -17,7 +18,9 @@ class TextureServer {
         TextureServer(std::vector<unsigned int> sizeBuckets = {256, 512, 1024, 2048});
 
         std::pair<unsigned int, unsigned int> add(Image* image);
-        std::pair<unsigned int, unsigned int> get(Image* image);
+        std::pair<unsigned int, unsigned int> get(Image* image) { return imageMapping.at(image); }
+
+        void write(Shader* shader, std::string name, unsigned int startSlot = 0);
 };
 
 #endif

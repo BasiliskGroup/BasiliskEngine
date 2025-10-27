@@ -209,7 +209,7 @@ void Shader::use() {
  * 
  * @param name Name of the texture on the shader
  * @param texture Pointer to the texture to bind
- * @param slot Slot to bind the texutre to [1-16]
+ * @param slot Slot to bind the texutre to [0-15]
  */
 void Shader::bind(const char* name, Texture* texture, unsigned int slot) {
     use();
@@ -219,7 +219,7 @@ void Shader::bind(const char* name, Texture* texture, unsigned int slot) {
 }
 
 /**
- * @brief Binds a texture arraY to the shader
+ * @brief Binds a texture array to the shader
  * 
  * @param name Name of the texture on the shader
  * @param textureArray Pointer to the texture array to bind
@@ -229,6 +229,20 @@ void Shader::bind(const char* name, TextureArray* textureArray, unsigned int slo
     use();
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray->getID());
+    setUniform(name, (int)slot);
+}
+
+/**
+ * @brief Binds a tbo to the shader
+ * 
+ * @param name Name of the uniform samplerBuffer on the shader
+ * @param tbo Pointer to the TBO object 
+ * @param slot Slot to bind the tbo [0-15]
+ */
+void Shader::bind(const char* name, TBO* tbo, unsigned int slot) {
+    use();
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_BUFFER, tbo->getID());
     setUniform(name, (int)slot);
 }
 
