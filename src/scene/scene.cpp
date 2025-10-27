@@ -4,7 +4,7 @@
 
 Scene::Scene(Engine* engine) : VirtualScene<Node, vec3, quat, vec3>(), engine(engine) {
     camera = new Camera(engine);
-    shader = new Shader("shaders/entity_3d.vert", "shaders/entity_3d.frag");
+    shader = new Shader("shaders/default.vert", "shaders/default.frag");
 }
 
 Scene::~Scene() {

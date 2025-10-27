@@ -3,7 +3,7 @@
 
 Scene2D::Scene2D(Engine* engine): engine(engine) {
     camera = new Camera2D(engine);
-    shader = new Shader("shaders/entity_2d.vert", "shaders/entity_2d.frag");
+    shader = new Shader("shaders/default2D.vert", "shaders/default2D.frag");
 }
 
 Scene2D::~Scene2D() {
