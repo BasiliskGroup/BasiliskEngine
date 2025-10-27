@@ -75,3 +75,23 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(engine PUBLIC -fsanitize=address -fno-omit-frame-pointer -g)
     target_link_options(engine PUBLIC -fsanitize=address -fno-omit-frame-pointer)
 endif()
+
+# -----------------------
+# documentation
+# -----------------------
+
+find_package(Doxygen OPTIONAL_COMPONENTS dot)
+
+if(DOXYGEN_FOUND)
+    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
+    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.out)
+
+    add_custom_target(doc
+        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_IN}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM
+    )
+else()
+    message(STATUS "Doxygen not found, 'doc' target will not be available.")
+endif()
