@@ -14,6 +14,8 @@ int main() {
     Node* parent = new Node(scene, scene->getShader(), cube, texture);
     Node* node = new Node(parent, scene->getShader(), cube, texture);
     new Node(node, scene->getShader(), cube, texture);
+    Node* clone = node;
+    clone = std::move(parent);
 
     Node2D* square = new Node2D(scene2D, scene2D->getShader(), quad, texture);
 
@@ -34,6 +36,7 @@ int main() {
     delete image;
     delete texture;
     delete cube;
+    delete node;
     delete quad;
     delete scene;
     delete scene2D;

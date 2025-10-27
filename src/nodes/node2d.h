@@ -16,6 +16,13 @@ class Node2D : public VirtualNode<Node2D, vec2, float, vec2> {
         Node2D(Node2D* parent, Shader* shader, Mesh* mesh, Texture* texture, vec2 position={0, 0}, float rotation=0, vec2 scale={100, 100});
         Node2D(Scene2D* scene, Node2D* parent);
 
+        // already defined in VirtualNode
+        Node2D(const Node2D& other) noexcept = default;
+        Node2D(Node2D&& other) noexcept = default;
+        ~Node2D() = default;
+        Node2D& operator=(const Node2D& other) noexcept = default;
+        Node2D& operator=(Node2D&& other) noexcept = default;
+
         void setPosition(vec2 position);
         void setRotation(float rotation);
         void setScale(vec2 scale);

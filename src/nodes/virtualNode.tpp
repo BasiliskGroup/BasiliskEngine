@@ -1,105 +1,232 @@
 #include "scene/sceneRoute.h"
 
-/**
- * @brief Construct a new Node object
- * 
- * @param shader 
- * @param mesh 
- * @param texture 
- * @param position 
- * @param rotation
- * @param scale 
- */
-template<typename derived, typename position_type, typename rotation_type, typename scale_type>
-VirtualNode<derived, position_type, rotation_type, scale_type>::VirtualNode(VirtualScene<NodeType, position_type, rotation_type, scale_type>* scene, Shader* shader, Mesh* mesh, Texture* texture, position_type position, rotation_type rotation, scale_type scale):
-    scene(scene), parent(scene->getRoot()), shader(shader), mesh(mesh), texture(texture), position(position), rotation(rotation), scale(scale) {
-
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
+    scene(scene), 
+    parent(scene->getRoot()), 
+    shader(shader), mesh(mesh), 
+    texture(texture), 
+    position(position), 
+    rotation(rotation), 
+    scale(scale) 
+{
     parent->children.push_back(asNode());
-
-    vbo = new VBO(mesh->getVertices());
-    ebo = new EBO(mesh->getIndices());
-    vao = new VAO(shader, vbo, ebo);
+    createBuffers();
 }
 
-template<typename derived, typename position_type, typename rotation_type, typename scale_type>
-VirtualNode<derived, position_type, rotation_type, scale_type>::VirtualNode(NodeType* parent, Shader* shader, Mesh* mesh, Texture* texture, position_type position, rotation_type rotation, scale_type scale):
-    scene(parent->getScene()), parent(parent), shader(shader), mesh(mesh), texture(texture), position(position), rotation(rotation), scale(scale) {
-
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
+    scene(parent->getScene()), 
+    parent(parent), 
+    shader(shader), 
+    mesh(mesh), 
+    texture(texture), 
+    position(position), 
+    rotation(rotation), 
+    scale(scale) 
+{
     parent->children.push_back(asNode());
-
-    vbo = new VBO(mesh->getVertices());
-    ebo = new EBO(mesh->getIndices());
-    vao = new VAO(shader, vbo, ebo);
+    createBuffers();
 }
 
-template<typename derived, typename position_type, typename rotation_type, typename scale_type>
-VirtualNode<derived, position_type, rotation_type, scale_type>::VirtualNode(VirtualScene<NodeType, position_type, rotation_type, scale_type>* scene, NodeType* parent):
-    scene(scene), parent(parent), shader(nullptr), mesh(nullptr), texture(nullptr), position(), rotation(), scale(), vbo(nullptr), ebo(nullptr), vao(nullptr) {
-
-        if (parent != nullptr) {
-            parent->children.push_back(asNode());
-        }
-    }
-
-/**
- * @brief Destroy the Node object. Release the vbo, ebo, and vao
- * 
- */
-template<typename derived, typename position_type, typename rotation_type, typename scale_type>
-VirtualNode<derived, position_type, rotation_type, scale_type>::~VirtualNode() {
-    if (vao) delete vao;
-    if (vbo) delete vbo;
-    if (ebo) delete ebo;
-
-    // delete tree
-    while (children.size() > 0) {
-        NodeType* child = children.back();
-        delete child;
-    }
-
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Derived* parent) : 
+    scene(scene), 
+    parent(parent), 
+    shader(nullptr), 
+    mesh(nullptr), 
+    texture(nullptr), 
+    position(), // default
+    rotation(), // default
+    scale(), // default
+    vbo(nullptr), 
+    ebo(nullptr), 
+    vao(nullptr) 
+{
     if (parent != nullptr) {
-        parent->remove(asNode());
+        parent->children.push_back(asNode());
     }
+}
+
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived,P,R,S>::VirtualNode(const VirtualNode& other) noexcept
+    : scene(other.scene),
+      parent(other.parent),
+      shader(other.shader),
+      mesh(other.mesh),
+      texture(other.texture),
+      position(other.position),
+      rotation(other.rotation),
+      scale(other.scale),
+      model(other.model),
+      vbo(nullptr),
+      ebo(nullptr),
+      vao(nullptr)
+{
+    // copy children
+    for (auto* child : other.children) {
+        auto clone = new Derived(*child);
+        clone->parent = asNode();
+        children.push_back(clone);
+    }
+
+    // initialize
+    createBuffers();
+    parent->children.push_back(asNode());
+}
+
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
+    : scene(other.scene),
+      parent(other.parent),
+      shader(other.shader),
+      mesh(other.mesh),
+      texture(other.texture),
+      vbo(other.vbo),
+      ebo(other.ebo),
+      vao(other.vao),
+      position(std::move(other.position)),
+      rotation(std::move(other.rotation)),
+      scale(std::move(other.scale)),
+      model(std::move(other.model)),
+      children(std::move(other.children))
+{
+    // rebind children to new parent
+    for (auto* child : children)
+        child->parent = asNode();
+
+    // make other safe to destroy
+    other.vbo = nullptr;
+    other.ebo = nullptr;
+    other.vao = nullptr;
+    other.parent = nullptr;
+    other.children.clear();
+
+    // initialize self
+    parent->children.push_back(asNode());
+}
+
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>::~VirtualNode() {
+    clear();
+}
+
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const VirtualNode& other) noexcept {
+    if (this == &other) return *this;
+    clear();
+
+    // copy values
+    scene = other.scene;
+    parent = other.parent;
+    shader = other.shader;
+    mesh = other.mesh;
+    texture = other.texture;
+    position = other.position;
+    rotation = other.rotation;
+    scale = other.scale;
+    model = other.model;
+
+    // copy children
+    for (auto* child : other.children) {
+        auto clone = new Derived(*child);
+        clone->parent = asNode();
+        children.push_back(clone);
+    }
+
+    // initialize
+    createBuffers();
+    parent->children.push_back(asNode());
+
+    return *this;
+}
+
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualNode&& other) noexcept {
+    if (this == &other) return *this;
+    clear();
+    
+    // move values
+    scene = other.scene;
+    parent = other.parent;
+    shader = other.shader;
+    mesh = other.mesh;
+    texture = other.texture;
+    position = std::move(other.position);
+    rotation = std::move(other.rotation);
+    scale = std::move(other.scale);
+    model = std::move(other.model);
+
+    // move children
+    children = std::move(other.children);
+    for (auto* child : children)
+        child->parent = asNode();
+
+    // initialize
+    parent->children.push_back(asNode());
+
+    // unbind other so it doesn't delete our stuff
+    other.vbo = nullptr;
+    other.ebo = nullptr;
+    other.vao = nullptr;
+    other.children.clear();
+    return *this;
 }
 
 /**
  * @brief Render the vao on this node
  * 
  */
-template<typename derived, typename position_type, typename rotation_type, typename scale_type>
-void VirtualNode<derived, position_type, rotation_type, scale_type>::render() {
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::render() {
     shader->bind("uTexture", texture, 0);
     shader->setUniform("uModel", model);
     vao->render();
 }
 
-/**
- * @brief 
- * 
- * @tparam position_type 
- * @tparam rotation_type 
- * @tparam scale_type 
- * @param child 
- */
-template<typename derived, typename position_type, typename rotation_type, typename scale_type>
-void VirtualNode<derived, position_type, rotation_type, scale_type>::add(NodeType* child) {
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::add(Derived* child) {
     child->parent->remove(child);
     child->parent = this;
     children.push_back(child);
 }
 
-/**
- * @brief 
- * 
- * @tparam position_type 
- * @tparam rotation_type 
- * @tparam scale_type 
- * @param child 
- */
-template<typename derived, typename position_type, typename rotation_type, typename scale_type>
-void VirtualNode<derived, position_type, rotation_type, scale_type>::remove(NodeType* child) {
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::remove(Derived* child) {
     auto it = std::find(children.begin(), children.end(), child);
     if (it != children.end()) {
         children.erase(it);
     }
+}
+
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::clear() {
+    // delete tree
+    for (auto* child : children) {
+        delete child;
+    }
+    children.clear();
+
+    // delete buffers
+    if (vao) { delete vao; vao = nullptr; }
+    if (vbo) { delete vbo; vbo = nullptr; }
+    if (ebo) { delete ebo; ebo = nullptr; }
+
+    // remove from parent
+    if (parent != nullptr) {
+        parent->remove(asNode());
+        parent = nullptr;
+    }
+}
+
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::shallowCopy(const VirtualNode& other) {
+    
+}
+
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::createBuffers() {
+    vbo = new VBO(mesh->getVertices());
+    ebo = new EBO(mesh->getIndices());
+    vao = new VAO(shader, vbo, ebo);
 }

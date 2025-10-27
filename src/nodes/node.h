@@ -14,6 +14,13 @@ class Node : public VirtualNode<Node, vec3, quat, vec3> {
         Node(Node* parent, Shader* shader, Mesh* mesh, Texture* texture, vec3 position={0, 0, 0}, quat rotation={1, 0, 0, 0}, vec3 scale={1, 1, 1});
         Node(Scene* scene, Node* parent);
 
+        // already defined in VirtualNode
+        Node(const Node& other) noexcept = default;
+        Node(Node&& other) noexcept = default;
+        ~Node() = default;
+        Node& operator=(const Node& other) noexcept = default;
+        Node& operator=(Node&& other) noexcept = default;
+
         void setPosition(vec3 position);
         void setRotation(quat rotation);
         void setScale(vec3 scale);
