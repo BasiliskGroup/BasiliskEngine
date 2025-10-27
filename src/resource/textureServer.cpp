@@ -15,7 +15,7 @@ TextureServer::TextureServer(std::vector<unsigned int> sizeBuckets): sizeBuckets
 /**
  * @brief Clamps a given size x to the nearest bucket size
  * 
- * @param x 
+ * @param x Value to clamp
  * @return unsigned int 
  */
 unsigned int TextureServer::getClosestSize(unsigned int x) {
@@ -29,7 +29,7 @@ unsigned int TextureServer::getClosestSize(unsigned int x) {
 /**
  * @brief Adds an image to the array and returns it mapping as a pair <index of the array, index in the array>
  * 
- * @param image 
+ * @param image Pointer to the image to add to the server
  * @return std::pair<unsigned int, unsigned int> 
  */
 std::pair<unsigned int, unsigned int> TextureServer::add(Image* image) {
@@ -55,6 +55,13 @@ std::pair<unsigned int, unsigned int> TextureServer::add(Image* image) {
     return location;
 }
 
+/**
+ * @brief Write all of the texture arrays in this server to a given shader
+ * 
+ * @param shader The shader to write to
+ * @param name The name of the uniform array. For example, if you have `textureArrays[NUM_ARRAYS]` in your shader, use "textureArrays" for the name.
+ * @param startSlot The first GPU slot to use. Each bucket will use a slot. Slots used contiguously. 
+ */
 void TextureServer::write(Shader* shader, std::string name, unsigned int startSlot) {
     unsigned int slot = 0;
     for (TextureArray* array : textureArrays) {
