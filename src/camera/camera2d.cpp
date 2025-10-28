@@ -6,6 +6,7 @@
  * @param position Starting position of the camera
  */
 Camera2D::Camera2D(Engine* engine, glm::vec2 position): engine(engine), position(position) {
+    viewScale = glm::vec2(10.0f, 10.0f);
     updateProjection();
     updateView();
 }
@@ -28,6 +29,21 @@ void Camera2D::use(Shader* shader) {
  * @param keys 
  */
 void Camera2D::update() {
+    
+    // Get mouse and keyboard from engine
+    Mouse* mouse = engine->getMouse();
+    Keyboard* keys = engine->getKeyboard();
+    
+    // Movement
+    float speed = 3.0;
+    float dt = 0.005;
+    float velocity = (speed * dt);
+
+    position.x += (keys->getPressed(GLFW_KEY_D) - keys->getPressed(GLFW_KEY_A)) * velocity;
+    position.y += (keys->getPressed(GLFW_KEY_W) - keys->getPressed(GLFW_KEY_S)) * velocity;
+
+    std::cout << "(" << position.x << ", " << position.y << ")" << std::endl;
+
     updateView();
 }
 
@@ -36,7 +52,7 @@ void Camera2D::update() {
  * 
  */
 void Camera2D::updateProjection() {
-    projection = glm::ortho(0.0f, 800.0f, 800.0f, 0.0f, -1.0f, 1.0f);
+    projection = glm::ortho(0.0f, viewScale.x, viewScale.y, 0.0f, -1.0f, 1.0f);
 }
 
 /**
@@ -45,5 +61,6 @@ void Camera2D::updateProjection() {
  */
 void Camera2D::updateView() {
     view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(position, 0.0f));
+    glm::vec2 translation(viewScale.x / 2.0 - position.x, viewScale.y / 2.0 + position.y);
+    view = glm::translate(view, glm::vec3(translation, 0.0f));
 }

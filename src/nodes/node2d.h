@@ -12,8 +12,8 @@ class Node2D : public VirtualNode<Node2D, vec2, float, vec2> {
         float layer=0.0;
 
     public:
-        Node2D(Scene2D* scene, Shader* shader, Mesh* mesh, Texture* texture, vec2 position={0, 0}, float rotation=0, vec2 scale={100, 100});
-        Node2D(Node2D* parent, Shader* shader, Mesh* mesh, Texture* texture, vec2 position={0, 0}, float rotation=0, vec2 scale={100, 100});
+        Node2D(Scene2D* scene, Shader* shader, Mesh* mesh, Texture* texture, vec2 position={0, 0}, float rotation=0, vec2 scale={1, 1});
+        Node2D(Node2D* parent, Shader* shader, Mesh* mesh, Texture* texture, vec2 position={0, 0}, float rotation=0, vec2 scale={1, 1});
         Node2D(Scene2D* scene, Node2D* parent);
 
         // already defined in VirtualNode

@@ -13,6 +13,7 @@ class Camera2D : public VirtualCamera{
         Engine* engine;
 
         glm::vec2 position;
+        glm::vec2 viewScale;
 
         void updateProjection();
         void updateView();
