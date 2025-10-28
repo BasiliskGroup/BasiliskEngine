@@ -16,10 +16,11 @@
  * @param scale 
  */
 template<typename Derived, typename P, typename R, typename S>
-VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
+VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
     scene(scene), 
     parent(scene->getRoot()), 
-    shader(shader), mesh(mesh), 
+    shader(scene->getShader()), 
+    mesh(mesh), 
     texture(texture), 
     position(position), 
     rotation(rotation), 
@@ -45,10 +46,10 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
  * @param scale 
  */
 template<typename Derived, typename P, typename R, typename S>
-VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
+VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
     scene(parent->getScene()), 
     parent(parent), 
-    shader(shader), 
+    shader(parent->getShader()), 
     mesh(mesh), 
     texture(texture), 
     position(position), 

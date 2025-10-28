@@ -180,11 +180,18 @@ void Shader::loadAttributes() {
 
     glGetProgramiv(ID, GL_ACTIVE_ATTRIBUTES, &nAttributes);
 
-    stride = 0;
+    attributes.resize(nAttributes);
+
     for (GLint i = 0; i < nAttributes; i++) {
         glGetActiveAttrib(ID, (GLuint)i, bufSize, &length, &size, &type, name);
-        attributes.push_back({name, i, getGLTypeComponentCount(type), type, stride});
-        stride += getGLTypeSize(type);
+        GLint location = glGetAttribLocation(ID, name);
+        attributes.at(location) = {name, location, getGLTypeComponentCount(type), type, 0};
+    }
+
+    stride = 0;
+    for (GLint i = 0; i < nAttributes; i++) {
+        attributes.at(i).offset = stride;
+        stride += getGLTypeSize(attributes.at(i).dataType);
     }
 }
 

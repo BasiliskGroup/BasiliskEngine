@@ -63,8 +63,8 @@ public:
 
     // we don't want a default constructor, every node must be a part of a tree
     VirtualNode(VirtualScene<Derived, P, R, S>* scene, Derived* parent); // used to create root nodes
-    VirtualNode(VirtualScene<Derived, P, R, S>* scene, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale);
-    VirtualNode(Derived* parent, Shader* shader, Mesh* mesh, Texture* texture, P position, R rotation, S scale);
+    VirtualNode(VirtualScene<Derived, P, R, S>* scene, Mesh* mesh, Texture* texture, P position, R rotation, S scale);
+    VirtualNode(Derived* parent, Mesh* mesh, Texture* texture, P position, R rotation, S scale);
     VirtualNode(const VirtualNode& other) noexcept;
     VirtualNode(VirtualNode&& other) noexcept;
     ~VirtualNode();
@@ -83,6 +83,7 @@ public:
     S getScale() const { return scale; }
     VirtualScene<Derived, P, R, S>* getScene() const { return scene; }
     Derived* getParent() const { return parent; }
+    Shader* getShader() { return shader; }
 
     // node hierarchy
     const std::vector<Derived*>& getChildren() { return children; }
