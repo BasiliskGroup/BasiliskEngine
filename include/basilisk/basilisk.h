@@ -1,6 +1,11 @@
 #ifndef BASILISK_H
 #define BASILISK_H
 
+// necessary includes
+#include "util/includes.h"
+#include "util/print.h"
+
+// basilisk types
 #include "engine/engine.h"
 #include "scene/scene.h"
 #include "scene/scene2d.h"
