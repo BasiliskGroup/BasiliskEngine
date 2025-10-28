@@ -42,8 +42,6 @@ void Camera2D::update() {
     position.x += (keys->getPressed(GLFW_KEY_D) - keys->getPressed(GLFW_KEY_A)) * velocity;
     position.y += (keys->getPressed(GLFW_KEY_W) - keys->getPressed(GLFW_KEY_S)) * velocity;
 
-    std::cout << "(" << position.x << ", " << position.y << ")" << std::endl;
-
     updateView();
 }
 
