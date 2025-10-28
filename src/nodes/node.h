@@ -10,8 +10,8 @@ class Node : public VirtualNode<Node, vec3, quat, vec3> {
         using Scene = VirtualScene<Node, vec3, quat, vec3>;
 
     public:
-        Node(Scene* scene, Shader* shader, Mesh* mesh, Texture* texture, vec3 position={0, 0, 0}, quat rotation={1, 0, 0, 0}, vec3 scale={1, 1, 1});
-        Node(Node* parent, Shader* shader, Mesh* mesh, Texture* texture, vec3 position={0, 0, 0}, quat rotation={1, 0, 0, 0}, vec3 scale={1, 1, 1});
+        Node(Scene* scene, Mesh* mesh, Texture* texture, vec3 position={0, 0, 0}, quat rotation={1, 0, 0, 0}, vec3 scale={1, 1, 1});
+        Node(Node* parent, Mesh* mesh, Texture* texture, vec3 position={0, 0, 0}, quat rotation={1, 0, 0, 0}, vec3 scale={1, 1, 1});
         Node(Scene* scene, Node* parent);
 
         // already defined in VirtualNode
