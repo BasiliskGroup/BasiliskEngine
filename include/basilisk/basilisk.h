@@ -2,8 +2,8 @@
 #define BASILISK_H
 
 // necessary includes
-#include "util/includes.h"
-#include "util/print.h"
+#include "includes.h"
+#include "print.h"
 
 // basilisk types
 #include "engine/engine.h"

@@ -57,7 +57,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "constants.h"
+#include "util/constants.h"
 
 #define DEBUG_PRINT true
 #define DEBUG_LINEAR_PRINT false

@@ -26,10 +26,10 @@ configure_file(
     COPYONLY
 )
 
-# Copy constants.h if it exists
-if(EXISTS ${BASILISK_SRC_DIR}/constants.h)
+# Copy constants.h if it exists in util/
+if(EXISTS ${BASILISK_SRC_DIR}/util/constants.h)
     configure_file(
-        ${BASILISK_SRC_DIR}/constants.h
+        ${BASILISK_SRC_DIR}/util/constants.h
         ${BASILISK_INCLUDE_DIR}/constants.h
         COPYONLY
     )
