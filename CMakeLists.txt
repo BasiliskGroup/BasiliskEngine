@@ -5,6 +5,37 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ======================================================
+# Auto-copy all header files from src/ to include/basilisk
+# ======================================================
+
+set(BASILISK_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(BASILISK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/basilisk)
+file(MAKE_DIRECTORY ${BASILISK_INCLUDE_DIR})
+
+# Copy util/includes.h to include/basilisk/
+configure_file(
+    ${BASILISK_SRC_DIR}/util/includes.h
+    ${BASILISK_INCLUDE_DIR}/includes.h
+    COPYONLY
+)
+
+# Copy util/print.h to include/basilisk/ (if you want it public too)
+configure_file(
+    ${BASILISK_SRC_DIR}/util/print.h
+    ${BASILISK_INCLUDE_DIR}/print.h
+    COPYONLY
+)
+
+# Copy constants.h if it exists
+if(EXISTS ${BASILISK_SRC_DIR}/constants.h)
+    configure_file(
+        ${BASILISK_SRC_DIR}/constants.h
+        ${BASILISK_INCLUDE_DIR}/constants.h
+        COPYONLY
+    )
+endif()
+
+# ======================================================
 # Dependencies
 # ======================================================
 
