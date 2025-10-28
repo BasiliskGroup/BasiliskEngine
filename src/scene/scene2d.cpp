@@ -9,6 +9,7 @@
 Scene2D::Scene2D(Engine* engine): engine(engine) {
     camera = new Camera2D(engine);
     shader = new Shader("shaders/default2D.vert", "shaders/default2D.frag");
+    solver = new Solver();
 }
 
 /**
@@ -18,6 +19,7 @@ Scene2D::Scene2D(Engine* engine): engine(engine) {
 Scene2D::~Scene2D() {
     delete camera;
     delete shader;
+    delete solver;
 }
 
 /**

@@ -1,12 +1,12 @@
 #include "scene/sceneRoute.h"
 
-Node2D::Node2D(Scene2D* scene, Mesh* mesh, Texture* texture, vec2 position, float rotation, vec2 scale)
-    : VirtualNode(scene, mesh, texture, position, rotation, scale) {
+Node2D::Node2D(Scene2D* scene, Params params)
+    : VirtualNode(scene, params.mesh, params.texture, params.position, params.rotation, params.scale) {
     updateModel();
 }
 
-Node2D::Node2D(Node2D* parent, Mesh* mesh, Texture* texture, vec2 position, float rotation, vec2 scale)
-    : VirtualNode(parent, mesh, texture, position, rotation, scale) {
+Node2D::Node2D(Node2D* parent, Params params)
+    : VirtualNode(parent, params.mesh, params.texture, params.position, params.rotation, params.scale) {
     updateModel();
 }
 

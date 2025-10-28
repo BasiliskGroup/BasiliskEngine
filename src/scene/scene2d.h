@@ -7,6 +7,7 @@
 #include "scene/virtualScene.h"
 #include "camera/camera2d.h"
 #include "render/shader.h"
+#include "solver/solver.h"
 
 class Node2D;
 
@@ -15,6 +16,7 @@ class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
         Engine* engine;
         Camera2D* camera;
         Shader* shader;
+        Solver* solver;
 
     public:
         Scene2D(Engine* engine);
