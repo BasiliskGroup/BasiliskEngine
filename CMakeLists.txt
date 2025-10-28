@@ -81,11 +81,11 @@ target_link_libraries(basilisk
         stb
 )
 
-target_compile_options(basilisk PRIVATE
-    -O3
-    -ffast-math
-    -march=native
-)
+# target_compile_options(basilisk PRIVATE
+#     -O3
+#     -ffast-math
+#     -march=native
+# )
 
 # AddressSanitizer (optional, only when building directly)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
