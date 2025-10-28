@@ -1,12 +1,12 @@
 #include "scene/sceneRoute.h"
 
-Node::Node(Scene* scene, Mesh* mesh, Texture* texture, vec3 position, quat rotation, vec3 scale)
-    : VirtualNode(scene, mesh, texture, position, rotation, scale) {
+Node::Node(Scene* scene, Params params)
+    : VirtualNode(scene, params.mesh, params.texture, params.position, params.rotation, params.scale) {
     updateModel();
 }
 
-Node::Node(Node* parent, Mesh* mesh, Texture* texture, vec3 position, quat rotation, vec3 scale)
-    : VirtualNode(parent, mesh, texture, position, rotation, scale) {
+Node::Node(Node* parent, Params params)
+    : VirtualNode(parent, params.mesh, params.texture, params.position, params.rotation, params.scale) {
     updateModel();
 }
 
