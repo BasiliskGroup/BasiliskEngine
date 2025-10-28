@@ -3,8 +3,6 @@
 Node2D::Node2D(Scene2D* scene, Mesh* mesh, Texture* texture, vec2 position, float rotation, vec2 scale)
     : VirtualNode(scene, mesh, texture, position, rotation, scale) {
     updateModel();
-    vao->bindAttribute(0, 3, GL_FLOAT, shader->getStride(), 0);
-    vao->bindAttribute(1, 2, GL_FLOAT, shader->getStride(), 3 * sizeof(float));
 }
 
 Node2D::Node2D(Node2D* parent, Mesh* mesh, Texture* texture, vec2 position, float rotation, vec2 scale)
