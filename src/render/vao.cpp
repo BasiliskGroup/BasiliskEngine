@@ -18,6 +18,7 @@ VAO::VAO(Shader* shader, VBO* vertices, EBO* indices): shader(shader), vbo(verti
 
     // Bind attributes
     for (auto attrib : shader->getAttributes()) {
+        std::cout << attrib.name << ", " << attrib.location << ", " << attrib.count << std::endl;
         bindAttribute(attrib.location, attrib.count, attrib.dataType, shader->getStride(), attrib.offset);
     }
 }

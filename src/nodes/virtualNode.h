@@ -17,10 +17,6 @@ private:
     Shader* shader;
     Mesh* mesh;
     Texture* texture;
-    
-    VBO* vbo;
-    EBO* ebo;
-    VAO* vao;
 
 protected:
     VirtualScene<Derived, P, R, S>* scene;
@@ -31,6 +27,10 @@ protected:
     R rotation;
     S scale;
     glm::mat4 model;
+
+    VBO* vbo;
+    EBO* ebo;
+    VAO* vao;
 
 public:
     class iterator {
