@@ -79,18 +79,12 @@ target_link_libraries(basilisk
         glm
         assimp
         stb
-        xsimd
 )
 
-target_compile_options(game PRIVATE
-    # Optimization for Release builds only
-    $<$<CONFIG:Release>:-O3>
-    $<$<CONFIG:Release>:-march=native>
-    # -ffast-math
-    # Windows equivalents (Release only to avoid conflict with /RTC1)
-    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/O2 /arch:AVX2>
-    # Enable C++ alternative operators on Windows (all configs)
-    $<$<CXX_COMPILER_ID:MSVC>:/permissive->
+target_compile_options(basilisk PRIVATE
+    -O3
+    -ffast-math
+    -march=native
 )
 
 # AddressSanitizer (optional, only when building directly)

@@ -29,11 +29,3 @@ FetchContent_Declare(
   GIT_TAG        v6.0.2
 )
 FetchContent_MakeAvailable(assimp)
-
-# (Optional but recommended: xsimd for vectorization)
-FetchContent_Declare(
-  xsimd
-  GIT_REPOSITORY https://github.com/xtensor-stack/xsimd.git
-  GIT_TAG        11.1.0
-)
-FetchContent_MakeAvailable(xsimd)
