@@ -4,45 +4,51 @@ project(Basilisk)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# -----------------------
+# ======================================================
 # Dependencies
-# -----------------------
+# ======================================================
 
+# glad
 add_library(glad STATIC include/glad/glad.c)
 target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# stb (header-only)
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# External deps (glm, glfw, assimp, xsimd)
 include(FetchContent)
 add_subdirectory(include)
 
-# -----------------------
-# Library target
-# -----------------------
+# ======================================================
+# Library target (Basilisk)
+# ======================================================
 
 file(GLOB_RECURSE ENGINE_SRC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/**/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-# Remove main.cpp if it exists
+# Remove test main.cpp (not part of the library)
 list(REMOVE_ITEM ENGINE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
 add_library(basilisk STATIC ${ENGINE_SRC})
 
-target_include_directories(basilisk PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+# Key change: expose both include/basilisk and src for headers
+target_include_directories(basilisk
+    PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>  # Add this
+        $<INSTALL_INTERFACE:include>
 )
 
 target_link_libraries(basilisk
-    glad
-    glfw
-    glm 
-    assimp
-    stb
-    xsimd
+    PUBLIC
+        glad
+        glfw
+        glm
+        assimp
+        stb
+        xsimd
 )
 
 target_compile_options(basilisk PRIVATE
@@ -51,54 +57,39 @@ target_compile_options(basilisk PRIVATE
     -march=native
 )
 
-# -----------------------
-# Test executable
-# -----------------------
-
-add_executable(engine
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-)
-
-target_link_libraries(engine PRIVATE basilisk)
-
-# -----------------------
-# Resource copying
-# -----------------------
-
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/shaders)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/textures)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/models)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-# -----------------------
-# Debug (AddressSanitizer)
-# -----------------------
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+# AddressSanitizer (optional, only when building directly)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
     target_compile_options(basilisk PUBLIC -fsanitize=address -fno-omit-frame-pointer -g)
     target_link_options(basilisk PUBLIC -fsanitize=address -fno-omit-frame-pointer)
 endif()
 
-# -----------------------
-# Documentation
-# -----------------------
+# ======================================================
+# Test executable (only when building as main project)
+# ======================================================
 
-find_package(Doxygen OPTIONAL_COMPONENTS dot)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    add_executable(engine ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+    target_link_libraries(engine PRIVATE basilisk)
 
-if(DOXYGEN_FOUND)
-    set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
-    set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.out)
+    # Resource copying
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
-    add_custom_target(doc
-        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_IN}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Generating API documentation with Doxygen"
-        VERBATIM
-    )
-else()
-    message(STATUS "Doxygen not found, 'doc' target will not be available.")
+# ======================================================
+# Documentation (Doxygen) - only when building as main project
+# ======================================================
+
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    find_package(Doxygen OPTIONAL_COMPONENTS dot)
+    if(DOXYGEN_FOUND)
+        set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile)
+        add_custom_target(doc
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_IN}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Generating API documentation with Doxygen"
+            VERBATIM
+        )
+    endif()
 endif()

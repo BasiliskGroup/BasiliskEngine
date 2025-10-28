@@ -1,3 +1,6 @@
+#ifndef BASILISK_H
+#define BASILISK_H
+
 #include "engine/engine.h"
 #include "scene/scene.h"
 #include "scene/scene2d.h"
@@ -39,3 +42,5 @@ namespace bsk {
     using Camera = ::Camera;
     using Camera2D = ::Camera2D;
 }
+
+#endif

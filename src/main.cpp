@@ -1,4 +1,4 @@
-#include "basilisk.h"
+#include <basilisk/basilisk.h>
 
 int main() {
     Engine* engine = new Engine(800, 800, "Basilisk");
