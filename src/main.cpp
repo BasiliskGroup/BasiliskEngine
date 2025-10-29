@@ -32,23 +32,36 @@ int main() {
     // // deleting solver should always be last
     // delete solver;
     // return 0;
+    
+    std::vector<float> quadData {
+        // Triangle 1
+        -0.8f, -0.8f, 0.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+
+        // Triangle 2
+        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
+    };
 
     Engine* engine = new Engine(800, 800, "Basilisk");
-    Scene2D* scene2D = new Scene2D(engine);
+    Scene2D* scene = new Scene2D(engine);
 
     // Data for making node
-    Mesh* quad = new Mesh("models/quad.obj");
+    // Mesh* quad = new Mesh("models/quad.obj");
+    Mesh* quad = new Mesh(quadData);
     Image* image = new Image("textures/container.jpg");
     Texture* texture = new Texture(image);
         
-    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=texture });
+    Node2D* square = new Node2D(scene, { .mesh=quad, .texture=texture });
 
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
 
-        scene2D->update();
-        scene2D->render();
+        scene->update();
+        scene->render();
 
         engine->render();
     }
@@ -57,6 +70,6 @@ int main() {
     delete image;
     delete texture;
     delete quad;
-    delete scene2D;
+    delete scene;
     delete engine;
 }
