@@ -8,7 +8,14 @@
 TextureServer::TextureServer(std::vector<unsigned int> sizeBuckets): sizeBuckets(sizeBuckets) {
     for (unsigned int size : sizeBuckets) {
         TextureArray* array = new TextureArray(size, size);
+        std::cout << "Adding Array : " << size << std::endl;
         textureArrays.push_back(array);
+    }
+}
+
+TextureServer::~TextureServer() {
+    for (TextureArray* array : textureArrays) {
+        delete array;
     }
 }
 
@@ -34,10 +41,17 @@ unsigned int TextureServer::getClosestSize(unsigned int x) {
  */
 std::pair<unsigned int, unsigned int> TextureServer::add(Image* image) {
 
+    // Return default image if nullptr is passed
+    if (image == nullptr) {
+        return {0, 0};
+    }
+
+    // Do not double add image, simply return existing mapping
     if (imageMapping.count(image)) {
         return get(image);
     }
 
+    // Get the buckest size to add this image to. Will likely resize the image. 
     unsigned int size = getClosestSize(image->getWidth());
 
     // Get the index of the closest bucket size
@@ -56,6 +70,21 @@ std::pair<unsigned int, unsigned int> TextureServer::add(Image* image) {
 }
 
 /**
+ * @brief Get the mapping of the image as a pair <index of the array, index in the array>
+ * 
+ * @param image The image to get
+ * @return std::pair<unsigned int, unsigned int> 
+ */
+std::pair<unsigned int, unsigned int> TextureServer::get(Image* image) { 
+    // Return default image if nullptr is passed or the image has not been added.
+    if (image == nullptr || imageMapping.count(image) <= 0) {
+        return {0, 0};
+    }
+    // Return mapping
+    return imageMapping.at(image); 
+}
+
+/**
  * @brief Write all of the texture arrays in this server to a given shader
  * 
  * @param shader The shader to write to
@@ -65,7 +94,7 @@ std::pair<unsigned int, unsigned int> TextureServer::add(Image* image) {
 void TextureServer::write(Shader* shader, std::string name, unsigned int startSlot) {
     unsigned int slot = 0;
     for (TextureArray* array : textureArrays) {
-        shader->bind((name + "[" + std::to_string(slot) + "]").c_str(), array, startSlot + slot);
+        shader->bind((name + "[" + std::to_string(slot) + "].array").c_str(), array, startSlot + slot);
         slot++;
     }
 }

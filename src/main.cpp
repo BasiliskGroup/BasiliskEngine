@@ -32,50 +32,44 @@ int main() {
     // // deleting solver should always be last
     // delete solver;
     // return 0;
-    
-    std::vector<float> quadData {
-        // Triangle 1
-        -0.8f, -0.8f, 0.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-
-        // Triangle 2
-        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
-    };
 
     Engine* engine = new Engine(800, 800, "Basilisk");
-    Scene2D* scene2D = new Scene2D(engine);
+    Scene2D* scene = new Scene2D(engine);
 
     // Data for making node
-    // Mesh* quad = new Mesh("models/quad.obj");
-    Mesh* quad = new Mesh(quadData);
+    Mesh* quad = new Mesh("models/quad.obj");
     Image* image = new Image("textures/container.jpg");
-    Texture* texture = new Texture(image);
-        
-    // physics
-    Collider* squareCollider = new Collider(scene2D->getSolver(), {{-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}});
+    Image* image2 = new Image("textures/floor_albedo.png");
+    Material* material = new Material({1.0, 1.0, 0.0}, image);
+    Material* material2 = new Material({1.0, 1.0, 0.0}, image2);
 
-    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=texture, .collider=squareCollider });
-    new Node2D(square, { .mesh=quad, .texture=texture, .position={1, 1} });
-    Node2D* clone = new Node2D(*square);
-    clone->setPosition({3, 4});
+    Node2D* square = new Node2D(scene, { .mesh=quad, .material=material});
+    Node2D* square2 = new Node2D(scene, { .mesh=quad, .material=material2, .position={3, 4}});
 
+    // TODO: Move these things to be automatic
+    // This needs to be moved into node render call
+    scene->getShader()->setUniform("uMaterialID", (int)scene->getEngine()->getResourceServer()->getMaterialServer()->get(material2));
+
+    // TODO: Figure out why needs to be rewritten 
+    engine->getResourceServer()->write(scene->getShader(), "textureArrays", "materials");
+    
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
-
-        scene2D->update();
-        scene2D->render();
+        
+        scene->update();
+        scene->render();
 
         engine->render();
     }
 
-    // Free memory allocations
+    delete material;
+    delete material2;
     delete image;
-    delete texture;
+    delete image2;
+    delete square;
+    delete square2;
     delete quad;
-    delete scene2D;
+    delete scene;
     delete engine;
 }

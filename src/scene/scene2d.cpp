@@ -8,8 +8,9 @@
  */
 Scene2D::Scene2D(Engine* engine): engine(engine) {
     camera = new Camera2D(engine);
-    shader = new Shader("shaders/default2D.vert", "shaders/default2D.frag");
+    shader = new Shader("shaders/instance2D.vert", "shaders/instance2D.frag");
     solver = new Solver();
+    engine->getResourceServer()->write(shader, "textureArrays", "materials");
 }
 
 /**

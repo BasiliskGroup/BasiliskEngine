@@ -1,15 +1,17 @@
 #include "scene/sceneRoute.h"
 
 Node2D::Node2D(VirtualScene2D* scene, Params params)
-    : VirtualNode(scene, params.mesh, params.texture, params.position, params.rotation, params.scale), rigid(nullptr) {
+    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
     updateModel();
     bindRigid(params);
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
 }
 
 Node2D::Node2D(Node2D* parent, Params params)
-    : VirtualNode(parent, params.mesh, params.texture, params.position, params.rotation, params.scale), rigid(nullptr) {
+    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
     updateModel();
     bindRigid(params);
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
 }
 
 Node2D::Node2D(VirtualScene2D* scene, Node2D* parent) : VirtualNode(scene, parent), rigid(nullptr) {}

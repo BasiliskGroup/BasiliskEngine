@@ -5,6 +5,7 @@
 #include "IO/window.h"
 #include "IO/keyboard.h"
 #include "IO/mouse.h"
+#include "resource/resourceServer.h"
 
 
 class Engine {
@@ -12,6 +13,7 @@ class Engine {
         Window* window;
         Keyboard* keyboard;
         Mouse* mouse;
+        ResourceServer* resourceServer;
 
         double deltaTime;
 
@@ -23,9 +25,10 @@ class Engine {
         void update();
         void render();
         
-        GLFWwindow* getWindow() { return window->getWindow(); }
-        Mouse* getMouse() { return mouse; }
-        Keyboard* getKeyboard() { return keyboard; }
+        inline GLFWwindow* getWindow() const { return window->getWindow(); }
+        inline Mouse* getMouse() const { return mouse; }
+        inline Keyboard* getKeyboard() const { return keyboard; }
+        inline ResourceServer* getResourceServer() const { return resourceServer; }
 };
 
 #endif

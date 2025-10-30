@@ -5,6 +5,7 @@ Engine::Engine(int width, int height, const char* title) {
     window = new Window(width, height, title);
     mouse = new Mouse(window);
     keyboard = new Keyboard(window);
+    resourceServer = new ResourceServer();
 
     mouse->setGrab();
 }
@@ -12,6 +13,7 @@ Engine::Engine(int width, int height, const char* title) {
 Engine::~Engine() {
     delete mouse;
     delete keyboard;
+    delete resourceServer;
     delete window;
 }
 

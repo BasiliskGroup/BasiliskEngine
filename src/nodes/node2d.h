@@ -18,7 +18,7 @@ public:
     struct Params {
         // graphics
         Mesh* mesh = nullptr;
-        Texture* texture = nullptr;
+        Material* material = nullptr;
         vec2 position = { 0, 0 };
         float rotation = 0;
         vec2 scale = { 1, 1 };

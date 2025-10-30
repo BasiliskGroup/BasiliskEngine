@@ -12,9 +12,9 @@ class Node;
 
 class Scene : public VirtualScene<Node, vec3, quat, vec3> {
     private:
-        Engine* engine;
         Camera* camera;
         Shader* shader;
+        Engine* engine;
 
     public:
         Scene(Engine* engine);
@@ -27,6 +27,7 @@ class Scene : public VirtualScene<Node, vec3, quat, vec3> {
 
         inline Shader* getShader() { return shader; }
         inline Camera* getCamera() { return camera; }
+        inline Engine* getEngine() { return engine; }
 };
 
 #endif

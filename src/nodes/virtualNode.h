@@ -7,6 +7,7 @@
 #include "render/vao.h"
 #include "render/mesh.h"
 #include "render/shader.h"
+#include "render/material.h"
 
 template<typename NodeType, typename P, typename R, typename S>
 class VirtualScene;
@@ -16,7 +17,7 @@ class VirtualNode {
 private:
     Shader* shader;
     Mesh* mesh;
-    Texture* texture;
+    Material* material;
 
 protected:
     VirtualScene<Derived, P, R, S>* scene;
@@ -63,8 +64,8 @@ public:
 
     // we don't want a default constructor, every node must be a part of a tree
     VirtualNode(VirtualScene<Derived, P, R, S>* scene, Derived* parent); // used to create root nodes
-    VirtualNode(VirtualScene<Derived, P, R, S>* scene, Mesh* mesh, Texture* texture, P position, R rotation, S scale);
-    VirtualNode(Derived* parent, Mesh* mesh, Texture* texture, P position, R rotation, S scale);
+    VirtualNode(VirtualScene<Derived, P, R, S>* scene, Mesh* mesh, Material* material, P position, R rotation, S scale);
+    VirtualNode(Derived* parent, Mesh* mesh, Material* material, P position, R rotation, S scale);
     VirtualNode(const VirtualNode& other) noexcept;
     VirtualNode(VirtualNode&& other) noexcept;
     ~VirtualNode();
@@ -84,6 +85,7 @@ public:
     VirtualScene<Derived, P, R, S>* getScene() const { return scene; }
     Derived* getParent() const { return parent; }
     Shader* getShader() { return shader; }
+    Material* getMaterial() { return material; }
 
     // node hierarchy
     const std::vector<Derived*>& getChildren() { return children; }
