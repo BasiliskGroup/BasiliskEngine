@@ -85,6 +85,7 @@ public:
     VirtualScene<Derived, P, R, S>* getScene() const { return scene; }
     Derived* getParent() const { return parent; }
     Shader* getShader() { return shader; }
+    Material* getMaterial() { return material; }
 
     // node hierarchy
     const std::vector<Derived*>& getChildren() { return children; }

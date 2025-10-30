@@ -113,16 +113,28 @@ VirtualNode<Derived,P,R,S>::VirtualNode(const VirtualNode& other) noexcept
       ebo(nullptr),
       vao(nullptr)
 {
-    // copy children
-    for (auto* child : other.children) {
+    std::vector<Derived*> childrenCopy = other.children;
+    
+    // Deep copy children
+    for (auto* child : childrenCopy) {
         auto clone = new Derived(*child);
+        // Save parent pointer BEFORE any vector operations
+        Derived* cloneParent = clone->parent;
+        
+        // clone's constructor added it to other.parent - remove it
+        if (cloneParent && cloneParent != asNode()) {
+            cloneParent->remove(clone);
+        }
         clone->parent = asNode();
         children.push_back(clone);
     }
 
-    // initialize
     createBuffers();
-    parent->children.push_back(asNode());
+    
+    // Add ourselves to parent
+    if (parent) {
+        parent->children.push_back(asNode());
+    }
 }
 
 /**
@@ -154,15 +166,17 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
     for (auto* child : children)
         child->parent = asNode();
 
+    if (parent) {
+        parent->remove(other.asNode());
+        parent->children.push_back(asNode());
+    }
+
     // make other safe to destroy
     other.vbo = nullptr;
     other.ebo = nullptr;
     other.vao = nullptr;
     other.parent = nullptr;
     other.children.clear();
-
-    // initialize self
-    parent->children.push_back(asNode());
 }
 
 /**
@@ -195,7 +209,6 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const Vi
 
     // copy values
     scene = other.scene;
-    parent = other.parent;
     shader = other.shader;
     mesh = other.mesh;
     material = other.material;
@@ -204,16 +217,31 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const Vi
     scale = other.scale;
     model = other.model;
 
+    // Make a copy of the children vector to avoid iterator invalidation
+    std::vector<Derived*> childrenCopy = other.children;
+    
     // copy children
-    for (auto* child : other.children) {
+    for (auto* child : childrenCopy) {
         auto clone = new Derived(*child);
+        // Save parent pointer before any vector operations
+        Derived* cloneParent = clone->parent;
+        
+        // Remove clone from wherever it was added
+        if (cloneParent && cloneParent != asNode()) {
+            cloneParent->remove(clone);
+        }
         clone->parent = asNode();
         children.push_back(clone);
     }
 
     // initialize
     createBuffers();
-    parent->children.push_back(asNode());
+    
+    // Set parent and add to parent's children
+    parent = other.parent;
+    if (parent) {  
+        parent->children.push_back(asNode());
+    }
 
     return *this;
 }
@@ -250,7 +278,10 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
         child->parent = asNode();
 
     // initialize
-    parent->children.push_back(asNode());
+    if (parent) {
+        parent->remove(other.asNode());
+        parent->children.push_back(asNode());
+    }
 
     // unbind other so it doesn't delete our stuff
     other.vbo = nullptr;
@@ -267,7 +298,6 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::render() {
     shader->setUniform("uModel", model);
-    // shader->setUniform("uMaterialID", (int)scene->getEngine()->getResourceServer()->getMaterialServer()->get(material));
     vao->render();
 }
 
@@ -283,7 +313,7 @@ void VirtualNode<Derived, P, R, S>::render() {
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::add(Derived* child) {
     child->parent->remove(child);
-    child->parent = this;
+    child->parent = asNode();
     children.push_back(child);
 }
 
@@ -314,11 +344,14 @@ void VirtualNode<Derived, P, R, S>::remove(Derived* child) {
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::clear() {
+    auto toDelete = std::move(children);
+    children.clear(); // vector is now empty before we delete
+
     // delete tree
-    for (auto* child : children) {
+    for (Derived* child : toDelete) {
+        child->parent = nullptr;
         delete child;
     }
-    children.clear();
 
     // delete buffers
     if (vao) { delete vao; vao = nullptr; }

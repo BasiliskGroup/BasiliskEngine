@@ -18,9 +18,11 @@ Scene2D::Scene2D(Engine* engine): engine(engine) {
  * 
  */
 Scene2D::~Scene2D() {
-    delete camera;
-    delete shader;
-    delete solver;
+    VirtualScene::clear();
+
+    delete camera; camera = nullptr;
+    delete shader; shader = nullptr;
+    delete solver; solver = nullptr;
 }
 
 /**

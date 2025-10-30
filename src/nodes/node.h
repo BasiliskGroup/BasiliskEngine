@@ -3,24 +3,24 @@
 
 #include "util/includes.h"
 #include "nodes/virtualNode.h"
-#include "scene/virtualScene.h"
+#include "scene/scene.h"
 
 class Node : public VirtualNode<Node, vec3, quat, vec3> {
     private:
-        using Scene = VirtualScene<Node, vec3, quat, vec3>;
+        using VirtualScene3D = VirtualScene<Node, vec3, quat, vec3>;
 
     public:
         struct Params {
-            Mesh* mesh;
-            Material* material;
+            Mesh* mesh = nullptr;
+            Material* material = nullptr;
             vec3 position = { 0, 0, 0 };
             quat rotation = { 1, 0, 0, 0 };
             vec3 scale = { 1, 1, 1 };
         };
 
-        Node(Scene* scene, Params params);
+        Node(VirtualScene3D* scene, Params params);
         Node(Node* parent, Params params);
-        Node(Scene* scene, Node* parent);
+        Node(VirtualScene3D* scene, Node* parent);
 
         // already defined in VirtualNode
         Node(const Node& other) noexcept = default;
@@ -32,6 +32,8 @@ class Node : public VirtualNode<Node, vec3, quat, vec3> {
         void setPosition(vec3 position);
         void setRotation(quat rotation);
         void setScale(vec3 scale);
+
+        Scene* getScene() { return (Scene*) scene; }
 
     private:
         void updateModel();

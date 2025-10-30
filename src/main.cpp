@@ -6,7 +6,7 @@
 
 int main() {
     // Solver* solver = new Solver();
-    // Collider* cubeCollider = new Collider(solver, {{-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}});
+    
 
     // float dx = 5;
     // float dr = 2 * 3.14;

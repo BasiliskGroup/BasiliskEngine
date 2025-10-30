@@ -16,4 +16,7 @@
 
 #include "solver/solver.h"
 
+// node interactions
+#include "nodes/node2d.h"
+
 #endif
