@@ -41,20 +41,23 @@ int main() {
     Image* image = new Image("textures/container.jpg");
     Image* image2 = new Image("textures/floor_albedo.png");
     Material* material = new Material({1.0, 1.0, 0.0}, image);
+    Material* material2 = new Material({1.0, 1.0, 0.0}, image2);
 
     Node2D* square = new Node2D(scene, { .mesh=quad, .material=material});
+    Node2D* square2 = new Node2D(scene, { .mesh=quad, .material=material2, .position={3, 4}});
 
     // TODO: Move these things to be automatic
-    // This needs to be moved into node constructor
-    engine->getResourceServer()->getMaterialServer()->add(material);
     // This needs to be moved into node render call
-    scene->getShader()->setUniform("uMaterialID", (int)scene->getEngine()->getResourceServer()->getMaterialServer()->get(material));
+    scene->getShader()->setUniform("uMaterialID", (int)scene->getEngine()->getResourceServer()->getMaterialServer()->get(material2));
 
+    
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
-
+        
         scene->update();
+        // TODO: Figure out why needs to be written every frame 
+        engine->getResourceServer()->write(scene->getShader(), "textureArrays", "materials");
         scene->render();
 
         engine->render();
