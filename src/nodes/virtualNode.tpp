@@ -380,8 +380,7 @@ void VirtualNode<Derived, P, R, S>::createBuffers() {
         vbo = new VBO(mesh->getVertices());
         ebo = nullptr;
         vao = new VAO(shader, vbo);
-    }
-    else {
+    } else {
         vbo = new VBO(mesh->getVertices());
         ebo = new EBO(mesh->getIndices());
         vao = new VAO(shader, vbo, ebo);

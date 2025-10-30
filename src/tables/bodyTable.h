@@ -76,6 +76,8 @@ public:
     void resize(uint newCapacity) override;
     void compact() override;
     uint insert(Rigid* body, vec3 pos, vec3 vel, vec2 scale, float friction, float mass, uint collider, float radius);
+
+    void writeToNodes();
 };
 
 #endif

@@ -89,6 +89,8 @@ void Solver::step(float dt) {
     print("------------------------------------------");
     printDurationUS(beforeStep, timeNow(), "Total: ");
     print("");
+
+    bodyTable->writeToNodes();
 }
 
 void Solver::compactBodies() {

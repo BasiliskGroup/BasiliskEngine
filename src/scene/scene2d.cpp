@@ -28,7 +28,11 @@ Scene2D::~Scene2D() {
  * @brief Update the scene (camera updates)
  * 
  */
-void Scene2D::update() {
+void Scene2D::update(float dt) {
+    // physics
+    solver->step(dt);
+
+    // camera
     camera->update();
     camera->use(shader);
 }

@@ -66,7 +66,7 @@ int main() {
     while (engine->isRunning()) {
         engine->update();
 
-        scene2D->update();
+        scene2D->update(1.0 / 600.0);
         scene2D->render();
 
         engine->render();

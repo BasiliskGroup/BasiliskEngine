@@ -164,3 +164,14 @@ void Rigid::clear() {
         node = nullptr;
     }
 }
+
+// --------------------
+// setters
+// --------------------
+void Rigid::setPosition(const vec3& pos) {
+    getBodyTable()->getPos()[index] = pos;
+}
+
+void Rigid::setVelocity(const vec3& vel) {
+    getBodyTable()->getVel()[index] = vel;
+}

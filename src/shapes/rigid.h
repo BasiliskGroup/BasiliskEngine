@@ -44,6 +44,7 @@ public:
 
     BodyTable* getBodyTable();
     Node2D* getNode() { return node; }
+    uint getIndex() { return index; }
 
     vec3 getPos();
     vec2 getScale();
@@ -52,7 +53,9 @@ public:
     vec3 getVel();
     uint getColliderIndex();
 
-    uint getIndex() { return index; }
+    // setters
+    void setPosition(const vec3& pos);
+    void setVelocity(const vec3& vel);
 
     void setIndex(uint index) { this->index = index; }
     void setNode(Node2D* node) {this->node = node; }

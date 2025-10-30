@@ -22,7 +22,7 @@ class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
         Scene2D(Engine* engine);
         ~Scene2D();
 
-        void update();
+        void update(float dt);
         void render();
 
         void setCamera(Camera2D* camera) { this->camera = camera; }

@@ -1,4 +1,7 @@
 #include "tables/bodyTable.h"
+#include "scene/sceneRoute.h"
+#include "util/print.h"
+
 
 BodyTable::BodyTable(uint capacity) {
     resize(capacity);
@@ -130,4 +133,16 @@ uint BodyTable::insert(Rigid* body, vec3 pos, vec3 vel, vec2 scale, float fricti
 void BodyTable::markAsDeleted(uint index) {
     bodies[index] = nullptr;
     toDelete[index] = true;
+}
+
+void BodyTable::writeToNodes() {
+    for (uint i = 0; i < size; i++) {
+        Node2D* node = bodies[i]->getNode();
+        vec3& pos = this->pos[i];
+
+        print(pos);
+
+        node->setPosition(pos);
+        node->setRotation(pos.z);
+    }
 }

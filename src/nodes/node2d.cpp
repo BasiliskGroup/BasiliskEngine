@@ -16,12 +16,12 @@ Node2D::Node2D(VirtualScene2D* scene, Node2D* parent) : VirtualNode(scene, paren
 
 Node2D::Node2D(const Node2D& other) noexcept : VirtualNode(other), rigid(nullptr) {
     if (this == &other) return;
-    // setRigid(other);
+    setRigid(other);
 }
 
 Node2D::Node2D(Node2D&& other) noexcept : VirtualNode(std::move(other)), rigid(nullptr) {
     if (this == &other) return;
-    // setRigid(std::move(other));
+    setRigid(std::move(other));
 }
 
 Node2D::~Node2D() {
@@ -33,7 +33,7 @@ Node2D& Node2D::operator=(const Node2D& other) noexcept {
     VirtualNode::operator=(other);
 
     clear();
-    // setRigid(other);
+    setRigid(other);
 
     return *this;
 }
@@ -43,7 +43,7 @@ Node2D& Node2D::operator=(Node2D&& other) noexcept {
     VirtualNode::operator=(std::move(other));
 
     clear();
-    // setRigid(std::move(other));
+    setRigid(std::move(other));
 
     return *this;    
 }
@@ -60,11 +60,13 @@ void Node2D::updateModel() {
 }
 
 void Node2D::setPosition(vec2 position) {
+    this->rigid->setPosition({position.x, position.y, this->rotation});
     this->position = position;
     updateModel();
 }
 
 void Node2D::setRotation(float rotation) {
+    this->rigid->setPosition({this->position.x, this->position.y, rotation});
     this->rotation = rotation;
     updateModel();
 }
