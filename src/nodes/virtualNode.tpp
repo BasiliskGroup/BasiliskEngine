@@ -376,7 +376,14 @@ void VirtualNode<Derived, P, R, S>::clear() {
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::createBuffers() {
-    vbo = new VBO(mesh->getVertices());
-    ebo = new EBO(mesh->getIndices());
-    vao = new VAO(shader, vbo, ebo);
+    if (mesh->getIndices().empty()) {
+        vbo = new VBO(mesh->getVertices());
+        ebo = nullptr;
+        vao = new VAO(shader, vbo);
+    }
+    else {
+        vbo = new VBO(mesh->getVertices());
+        ebo = new EBO(mesh->getIndices());
+        vao = new VAO(shader, vbo, ebo);
+    }
 }
