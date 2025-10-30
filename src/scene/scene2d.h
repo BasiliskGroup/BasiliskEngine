@@ -13,10 +13,10 @@ class Node2D;
 
 class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
     private:
-        Engine* engine;
         Camera2D* camera;
         Shader* shader;
         Solver* solver;
+        Engine* engine;
 
     public:
         Scene2D(Engine* engine);
@@ -29,6 +29,7 @@ class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
 
         inline Shader* getShader() { return shader; }
         inline Camera2D* getCamera() { return camera; }
+        inline Engine* getEngine() { return engine; }
 };
 
 #endif

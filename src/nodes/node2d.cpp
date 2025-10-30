@@ -1,12 +1,13 @@
 #include "scene/sceneRoute.h"
 
 Node2D::Node2D(Scene2D* scene, Params params)
-    : VirtualNode(scene, params.mesh, params.texture, params.position, params.rotation, params.scale) {
+    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale) {
+    // ((Scene2D)scene)->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
     updateModel();
 }
 
 Node2D::Node2D(Node2D* parent, Params params)
-    : VirtualNode(parent, params.mesh, params.texture, params.position, params.rotation, params.scale) {
+    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale) {
     updateModel();
 }
 

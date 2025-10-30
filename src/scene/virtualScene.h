@@ -2,6 +2,8 @@
 #define VIRTUAL_SCENE_H
 
 #include "render/shader.h"
+#include "resource/resourceServer.h"
+#include "engine/engine.h"
 
 template<typename NodeType, typename position_type, typename rotation_type, typename scale_type>
 class VirtualScene {

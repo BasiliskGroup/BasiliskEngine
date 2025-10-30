@@ -12,7 +12,9 @@
 TextureArray::TextureArray(unsigned int width, unsigned int height, std::vector<Image*> images, unsigned int capacity): width(width), height(height), images(images) {
     this->capacity = glm::max((unsigned int)images.size(), capacity);
     glGenTextures(1, &id);
+    bind();
     generate();
+    unbind();
 }
 
 /**
@@ -28,19 +30,19 @@ TextureArray::~TextureArray() {
  * 
  */
 void TextureArray::generate() {
-    // Generate new array
-    bind();
-    
+
     // Set the filter to liear by default
-    setFilter(GL_LINEAR, GL_LINEAR);
-    setWrap(GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
     // Set up the array
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, width, height, capacity, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     // Upload the data for each image
     for (unsigned int i = 0; i < images.size(); i++) {
-        uploadImage(images.at(i), i);
+        uploadImage(images.at(i), i); // This now assumes the texture is already bound
     }
 }
 
@@ -49,6 +51,7 @@ void TextureArray::generate() {
  * 
  */
 void TextureArray::uploadImage(Image* image, unsigned int position) {
+
     // Resize the image
     unsigned char* data = new unsigned char[width * height * 4];
     stbir_resize_uint8_linear(image->getData(), image->getWidth(), image->getHeight(), 0, data, width, height, 0, STBIR_RGBA);
@@ -68,6 +71,8 @@ void TextureArray::uploadImage(Image* image, unsigned int position) {
  * @return unsigned int of the location of the image in the array. 
  */
 unsigned int TextureArray::add(Image* image) {
+    bind();
+    
     images.push_back(image);
     
     if (images.size() > capacity) {
@@ -77,6 +82,8 @@ unsigned int TextureArray::add(Image* image) {
     else {
         uploadImage(image, images.size() - 1);
     }
+
+    unbind();
 
     return images.size() - 1;
 }
@@ -104,11 +111,11 @@ void TextureArray::unbind() {
  * @param minFilter GL_LINEAR
  */
 void TextureArray::setFilter(unsigned int magFilter, unsigned int minFilter) {
-    // Bind the texture array
-    bind();
     // Set filter
+    bind();
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, magFilter);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, minFilter);
+    unbind();
 }
 
 /**
@@ -117,9 +124,9 @@ void TextureArray::setFilter(unsigned int magFilter, unsigned int minFilter) {
  * @param wrap GL_REPEAT 
  */
 void TextureArray::setWrap(unsigned int wrap) {
-    // Bind the texture array
-    bind();
     // Set wrap
+    bind();
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, wrap);	
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, wrap);
+    unbind();
 }

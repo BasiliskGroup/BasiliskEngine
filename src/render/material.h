@@ -43,19 +43,19 @@ class Material {
 
     public:
         Material(
-            const glm::vec3& color,
+            const glm::vec3& color = {1.0f, 1.0f, 1.0f},
 
-            Image* albedo,
-            Image* normal,
+            Image* albedo = nullptr,
+            Image* normal = nullptr,
 
-            float subsurface,
-            float sheen,
-            float sheenTint,
-            float anisotropic,
-            float specular,
-            float metallicness,
-            float clearcoat,
-            float clearcoatGloss
+            float subsurface = 0.0f,
+            float sheen = 0.0f,
+            float sheenTint = 0.0f,
+            float anisotropic = 0.0f,
+            float specular = 0.75f,
+            float metallicness = 0.0f,
+            float clearcoat = 0.0f,
+            float clearcoatGloss = 0.0f
         )
             : color(color),
 

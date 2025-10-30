@@ -119,7 +119,7 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
             COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_IN}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Generating API documentation with Doxygen"
-            VERBATIM
+            VERBATIM 
         )
     endif()
 endif()

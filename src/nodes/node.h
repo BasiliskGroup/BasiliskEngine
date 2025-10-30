@@ -12,7 +12,7 @@ class Node : public VirtualNode<Node, vec3, quat, vec3> {
     public:
         struct Params {
             Mesh* mesh;
-            Texture* texture;
+            Material* material;
             vec3 position = { 0, 0, 0 };
             quat rotation = { 1, 0, 0, 0 };
             vec3 scale = { 1, 1, 1 };

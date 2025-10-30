@@ -32,29 +32,23 @@ int main() {
     // // deleting solver should always be last
     // delete solver;
     // return 0;
-    
-    std::vector<float> quadData {
-        // Triangle 1
-        -0.8f, -0.8f, 0.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-
-        // Triangle 2
-        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
-    };
 
     Engine* engine = new Engine(800, 800, "Basilisk");
     Scene2D* scene = new Scene2D(engine);
 
     // Data for making node
-    // Mesh* quad = new Mesh("models/quad.obj");
-    Mesh* quad = new Mesh(quadData);
+    Mesh* quad = new Mesh("models/quad.obj");
     Image* image = new Image("textures/container.jpg");
-    Texture* texture = new Texture(image);
-        
-    Node2D* square = new Node2D(scene, { .mesh=quad, .texture=texture });
+    Image* image2 = new Image("textures/floor_albedo.png");
+    Material* material = new Material({1.0, 1.0, 0.0}, image);
+
+    Node2D* square = new Node2D(scene, { .mesh=quad, .material=material});
+
+    // TODO: Move these things to be automatic
+    // This needs to be moved into node constructor
+    engine->getResourceServer()->getMaterialServer()->add(material);
+    // This needs to be moved into node render call
+    scene->getShader()->setUniform("uMaterialID", (int)scene->getEngine()->getResourceServer()->getMaterialServer()->get(material));
 
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
@@ -66,9 +60,10 @@ int main() {
         engine->render();
     }
 
-    // Free memory allocations
+    delete material;
     delete image;
-    delete texture;
+    delete image2;
+    delete square;
     delete quad;
     delete scene;
     delete engine;

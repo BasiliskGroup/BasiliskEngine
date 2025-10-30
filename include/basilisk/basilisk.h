@@ -22,9 +22,11 @@
 #include "render/vbo.h"
 #include "render/ebo.h"
 #include "render/tbo.h"
+#include "render/material.h"
+#include "resource/materialServer.h"
 #include "camera/camera.h"
 #include "camera/camera2d.h"
-#include "render/material.h"
+
 
 namespace bsk {
     using Engine = ::Engine;
@@ -46,6 +48,7 @@ namespace bsk {
     using TBO = ::TBO;
     using Camera = ::Camera;
     using Camera2D = ::Camera2D;
+    using MaterialServer = ::MaterialServer;
 }
 
 #endif
