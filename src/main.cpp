@@ -50,23 +50,25 @@ int main() {
     // This needs to be moved into node render call
     scene->getShader()->setUniform("uMaterialID", (int)scene->getEngine()->getResourceServer()->getMaterialServer()->get(material2));
 
+    // TODO: Figure out why needs to be rewritten 
+    engine->getResourceServer()->write(scene->getShader(), "textureArrays", "materials");
     
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
         
         scene->update();
-        // TODO: Figure out why needs to be written every frame 
-        engine->getResourceServer()->write(scene->getShader(), "textureArrays", "materials");
         scene->render();
 
         engine->render();
     }
 
     delete material;
+    delete material2;
     delete image;
     delete image2;
     delete square;
+    delete square2;
     delete quad;
     delete scene;
     delete engine;
