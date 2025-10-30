@@ -1,6 +1,6 @@
 #include "scene/sceneRoute.h"
 
-Node::Node(Scene* scene, Params params)
+Node::Node(VirtualScene3D* scene, Params params)
     : VirtualNode(scene, params.mesh, params.texture, params.position, params.rotation, params.scale) {
     updateModel();
 }
@@ -10,7 +10,7 @@ Node::Node(Node* parent, Params params)
     updateModel();
 }
 
-Node::Node(Scene* scene, Node* parent) : VirtualNode(scene, parent) {}
+Node::Node(VirtualScene3D* scene, Node* parent) : VirtualNode(scene, parent) {}
 
 void Node::updateModel() {
     model = glm::mat4(1.0f);

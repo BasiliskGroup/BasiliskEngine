@@ -1,7 +1,14 @@
 #include "solver/physics.h"
 
 
-Rigid::Rigid(Solver* solver, vec3 pos, vec2 scale, float density, float friction, vec3 vel, Collider* collider) : solver(solver), forces(nullptr), next(nullptr), prev(nullptr) {
+Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, Collider* collider) : 
+    solver(solver), 
+    node(node), 
+    forces(nullptr), 
+    next(nullptr), 
+    prev(nullptr), 
+    density(density) 
+{
     // Add to linked list
     solver->insert(this);
 
@@ -12,6 +19,26 @@ Rigid::Rigid(Solver* solver, vec3 pos, vec2 scale, float density, float friction
     float radius = glm::length(scale * 0.5f);
 
     index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, collider->getIndex(), radius);
+}   
+
+Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, uint collider) : 
+    solver(solver), 
+    node(node), 
+    forces(nullptr), 
+    next(nullptr), 
+    prev(nullptr), 
+    density(density) 
+{
+    // Add to linked list
+    solver->insert(this);
+
+    // compute intermediate values
+    float volume = 1; // replace with collider volume
+    float mass = scale.x * scale.y * density * volume; 
+    float moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
+    float radius = glm::length(scale * 0.5f);
+
+    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, collider, radius);
 }   
 
 Rigid::~Rigid() {
@@ -26,6 +53,34 @@ Rigid::~Rigid() {
         delete curForce;
         curForce = nextForce;
     }
+}
+
+BodyTable* Rigid::getBodyTable() {
+    return solver->getBodyTable();
+}
+
+vec3 Rigid::getPos() {
+    return getBodyTable()->getPos()[index];
+}
+
+vec2 Rigid::getScale() {
+    return getBodyTable()->getScale()[index];
+}
+
+float Rigid::getDensity() {
+    return density;
+}
+
+float Rigid::getFriction() {
+    return getBodyTable()->getFriction()[index];
+}
+
+vec3 Rigid::getVel() {
+    return getBodyTable()->getVel()[index];
+}
+
+uint Rigid::getColliderIndex() {
+    return getBodyTable()->getCollider()[index];
 }
 
 // ----------------------
@@ -101,4 +156,11 @@ ushort Rigid::constrainedTo(uint other) const {
 
 void Rigid::draw() {
 
+}
+
+void Rigid::clear() {
+    if (node != nullptr) {
+        delete node;
+        node = nullptr;
+    }
 }

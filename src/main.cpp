@@ -6,7 +6,7 @@
 
 int main() {
     // Solver* solver = new Solver();
-    // Collider* cubeCollider = new Collider(solver, {{-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}});
+    
 
     // float dx = 5;
     // float dr = 2 * 3.14;
@@ -41,7 +41,13 @@ int main() {
     Image* image = new Image("textures/container.jpg");
     Texture* texture = new Texture(image);
         
-    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=texture });
+    // physics
+    Collider* squareCollider = new Collider(scene2D->getSolver(), {{-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}});
+
+    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=texture, .collider=squareCollider });
+    new Node2D(square, { .mesh=quad, .texture=texture, .position={1, 1} });
+    Node2D* clone = new Node2D(*square);
+    clone->setPosition({3, 4});
 
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {

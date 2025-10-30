@@ -14,11 +14,19 @@ public:
     }
 
     virtual ~VirtualScene() {
-        delete root;
+        clear();
     }
 
     inline NodeType* getRoot() const { return root; }
     virtual Shader* getShader() = 0;
+
+protected:
+    void clear() {
+        if (root != nullptr) {
+            delete root;
+            root = nullptr;
+        }
+    }
 };
 
 #endif
