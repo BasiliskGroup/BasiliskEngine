@@ -6,6 +6,7 @@
 void print(std::string str);
 void print(char* str);
 void print(int n);
+void print(long l);
 void print(uint n);
 void print(float f);
 void print(const vec2& vec);

@@ -28,7 +28,7 @@ public:
 
         // physics
         Collider* collider = nullptr;
-        float density = 0;
+        float density = 1;
         float friction = 0.4;
     };
 

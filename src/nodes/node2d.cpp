@@ -4,6 +4,7 @@ Node2D::Node2D(VirtualScene2D* scene, Params params)
     : VirtualNode(scene, params.mesh, params.texture, params.position, params.rotation, params.scale), rigid(nullptr) {
     updateModel();
     bindRigid(params);
+    getScene()->getEngine();
 }
 
 Node2D::Node2D(Node2D* parent, Params params)

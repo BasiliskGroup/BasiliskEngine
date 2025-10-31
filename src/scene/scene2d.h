@@ -30,6 +30,7 @@ class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
         inline Shader* getShader() { return shader; }
         inline Camera2D* getCamera() { return camera; }
         inline Solver* getSolver() { return solver; }
+        inline Engine* getEngine() { return engine; }
 };
 
 #endif

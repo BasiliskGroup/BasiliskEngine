@@ -109,7 +109,7 @@ void BodyTable::compact() {
     }
 }
 
-uint BodyTable::insert(Rigid* body, vec3 pos, vec3 vel, vec2 scale, float friction, float mass, uint collider, float radius) {
+uint BodyTable::insert(Rigid* body, vec3 pos, vec3 vel, vec2 scale, float friction, float mass, float moment, uint collider, float radius) {
     if (size == capacity) {
         resize(capacity * 2);
     }
@@ -122,6 +122,7 @@ uint BodyTable::insert(Rigid* body, vec3 pos, vec3 vel, vec2 scale, float fricti
     this->scale[size] = scale;
     this->friction[size] = friction;
     this->mass[size] = mass;
+    this->moment[size] = moment;
     this->collider[size] = collider;
     this->radius[size] = radius;
     this->updated[size] = false;
@@ -139,9 +140,6 @@ void BodyTable::writeToNodes() {
     for (uint i = 0; i < size; i++) {
         Node2D* node = bodies[i]->getNode();
         vec3& pos = this->pos[i];
-
-        print(pos);
-
         node->setPosition(pos);
         node->setRotation(pos.z);
     }

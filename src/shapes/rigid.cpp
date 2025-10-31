@@ -18,7 +18,7 @@ Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, 
     float moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
     float radius = glm::length(scale * 0.5f);
 
-    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, collider->getIndex(), radius);
+    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider->getIndex(), radius);
 }   
 
 Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, uint collider) : 
@@ -38,7 +38,7 @@ Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, 
     float moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
     float radius = glm::length(scale * 0.5f);
 
-    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, collider, radius);
+    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider, radius);
 }   
 
 Rigid::~Rigid() {

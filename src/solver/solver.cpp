@@ -1,4 +1,5 @@
 #include "solver/physics.h"
+#include "util/debug.h"
 
 
 Solver::Solver() : forces(nullptr), bodies(nullptr) {
@@ -25,29 +26,46 @@ Solver::~Solver() {
  * @param dt time that has passed since last step
  */
 void Solver::step(float dt) {
+
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
+
     auto beforeStep = timeNow();
     compactBodies();
     printDurationUS(beforeStep, timeNow(), "Body Compact:\t\t");
+
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
 
     auto beforeTransform = timeNow();
     bodyTable->computeTransforms();
     printDurationUS(beforeTransform, timeNow(), "Body Transform:\t\t");
 
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
+
     // NOTE bodies are compact after this point
 
-    auto beforeBroad = timeNow();
-    sphericalCollision(); // broad collision TODO replace with BVH
-    std::cout << "Broad Pairs:\t\t" << collisionPairs.size() << std::endl;
-    printDurationUS(beforeBroad, timeNow(), "Broad Collision:\t");
+    // auto beforeBroad = timeNow();
+    // sphericalCollision(); // broad collision TODO replace with BVH
+    // std::cout << "Broad Pairs:\t\t" << collisionPairs.size() << std::endl;
+    // printDurationUS(beforeBroad, timeNow(), "Broad Collision:\t");
 
-    auto beforeNarrow = timeNow();
-    narrowCollision(); // -> uncompacts manifolds
-    printDurationUS(beforeNarrow, timeNow(), "Narrow Collision:\t");
+    // auto beforeNarrow = timeNow();
+    // narrowCollision(); // -> uncompacts manifolds
+    // printDurationUS(beforeNarrow, timeNow(), "Narrow Collision:\t");
 
     // warmstart forces -> uncompacts forces
     auto beforeCompact = timeNow();
     compactForces();
     printDurationUS(beforeCompact, timeNow(), "Force Compact:\t\t");
+
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
 
     // NOTE bodies and forces are compact after this point
 
@@ -55,40 +73,71 @@ void Solver::step(float dt) {
     warmstartManifolds();
     printDurationUS(beforeManifoldWarm, timeNow(), "Manifold Warm:\t\t");
 
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
+
     auto beforeForceWarm = timeNow();
     void warmstartForces();
     printDurationUS(beforeForceWarm, timeNow(), "Force Warm:\t\t");
+
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
 
     auto beforeBodyWarm = timeNow();
     warmstartBodies(dt);
     printDurationUS(beforeBodyWarm, timeNow(), "Body Warm:\t\t");
 
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
+
     auto beforeMainPreload = timeNow();
     mainloopPreload();
     printDurationUS(beforeMainPreload, timeNow(), "Preload:\t\t");
+
+    for (uint i = 0; i < bodyTable->getSize(); i++) {
+        print(bodyTable->getPos()[i]);
+    }
 
     print("-----------------------------------------");
 
     // main solver loop
     auto beforeMain = timeNow();
     for (ushort iter = 0; iter < iterations; iter++) {
+
+        print("start");
+        for (uint i = 0; i < bodyTable->getSize(); i++) {
+            print(bodyTable->getPos()[i]);
+        }
+
         auto beforePrimal = timeNow();
         primalUpdate(dt);
         printPrimalDuration(beforePrimal, timeNow());
+        print("");
+
+        for (uint i = 0; i < bodyTable->getSize(); i++) {
+            print(bodyTable->getPos()[i]);
+        }
 
         auto beforeDual = timeNow();
         dualUpdate(dt);
         printDualDuration(beforeDual, timeNow());
+
+        for (uint i = 0; i < bodyTable->getSize(); i++) {
+            print(bodyTable->getPos()[i]);
+        }
     }
-    printDurationUS(beforeMain, timeNow(), "Main Loop:\t\t");
+    // printDurationUS(beforeMain, timeNow(), "Main Loop:\t\t");
 
     auto beforeVel = timeNow();
     updateVelocities(dt);
-    printDurationUS(beforeVel, timeNow(), "Velocities:\t\t");
+    // printDurationUS(beforeVel, timeNow(), "Velocities:\t\t");
 
-    print("------------------------------------------");
-    printDurationUS(beforeStep, timeNow(), "Total: ");
-    print("");
+    // print("------------------------------------------");
+    // printDurationUS(beforeStep, timeNow(), "Total: ");
+    // print("");
 
     bodyTable->writeToNodes();
 }
@@ -352,8 +401,14 @@ void Solver::primalUpdate(float dt) {
             continue;
         }
 
+        if (hasNaN(inertial[b])) throw std::runtime_error("inertial has NaN");
+        if (hasNaN(pos[b])) throw std::runtime_error("pos has NaN");
+
         lhs[b] = glm::diagonal3x3(vec3{ mass[b], mass[b], moment[b] } / (dt * dt));
         rhs[b] = lhs[b] * (pos[b] - inertial[b]);
+
+        if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");
+        if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
 
         // TODO replace this with known counting sort
         Rigid* body = bodyPtrs[b];
@@ -380,8 +435,21 @@ void Solver::primalUpdate(float dt) {
         }
 
         // Solve the SPD linear system using LDL and apply the update (Eq. 4)
-        vec3 x;
+        vec3 x = vec3(0);
+
+        if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
+        if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");
+        
+        print("rhs");
+        print(rhs[b]);
+
+        print("lhs");
+        print(lhs[b]);
+        
         solve(lhs[b], x, rhs[b]);
+
+        if (hasNaN(x)) throw std::runtime_error("x has NaN");
+        
         pos[b] -= x;
     }
 }

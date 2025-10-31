@@ -12,6 +12,10 @@ void print(int n) {
     std::cout << n << std::endl;
 }
 
+void print(long l) {
+    std::cout << l << std::endl;
+}
+
 void print(uint n) {
     std::cout << n << std::endl;
 }
