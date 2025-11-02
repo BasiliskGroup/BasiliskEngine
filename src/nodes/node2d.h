@@ -44,8 +44,10 @@ public:
     Node2D& operator=(Node2D&& other) noexcept;
 
     void setPosition(vec2 position);
+    void setPosition(vec3 position);
     void setRotation(float rotation);
     void setScale(vec2 scale);
+    void setVelocity(vec3 velocity);
 
     Scene2D* getScene() { return (Scene2D*) scene; }
 

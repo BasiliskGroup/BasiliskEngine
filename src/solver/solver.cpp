@@ -26,26 +26,13 @@ Solver::~Solver() {
  * @param dt time that has passed since last step
  */
 void Solver::step(float dt) {
-
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
-
     auto beforeStep = timeNow();
     compactBodies();
     printDurationUS(beforeStep, timeNow(), "Body Compact:\t\t");
 
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
-
     auto beforeTransform = timeNow();
     bodyTable->computeTransforms();
     printDurationUS(beforeTransform, timeNow(), "Body Transform:\t\t");
-
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
 
     // NOTE bodies are compact after this point
 
@@ -59,80 +46,46 @@ void Solver::step(float dt) {
     // printDurationUS(beforeNarrow, timeNow(), "Narrow Collision:\t");
 
     // warmstart forces -> uncompacts forces
-    auto beforeCompact = timeNow();
-    compactForces();
-    printDurationUS(beforeCompact, timeNow(), "Force Compact:\t\t");
-
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
+    // auto beforeCompact = timeNow();
+    // compactForces();
+    // printDurationUS(beforeCompact, timeNow(), "Force Compact:\t\t");
 
     // NOTE bodies and forces are compact after this point
 
-    auto beforeManifoldWarm = timeNow();
-    warmstartManifolds();
-    printDurationUS(beforeManifoldWarm, timeNow(), "Manifold Warm:\t\t");
+    // auto beforeManifoldWarm = timeNow();
+    // warmstartManifolds();
+    // printDurationUS(beforeManifoldWarm, timeNow(), "Manifold Warm:\t\t");
 
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
-
-    auto beforeForceWarm = timeNow();
-    void warmstartForces();
-    printDurationUS(beforeForceWarm, timeNow(), "Force Warm:\t\t");
-
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
+    // auto beforeForceWarm = timeNow();
+    // void warmstartForces();
+    // printDurationUS(beforeForceWarm, timeNow(), "Force Warm:\t\t");
 
     auto beforeBodyWarm = timeNow();
     warmstartBodies(dt);
-    printDurationUS(beforeBodyWarm, timeNow(), "Body Warm:\t\t");
-
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
+    // printDurationUS(beforeBodyWarm, timeNow(), "Body Warm:\t\t");
 
     auto beforeMainPreload = timeNow();
     mainloopPreload();
-    printDurationUS(beforeMainPreload, timeNow(), "Preload:\t\t");
+    // printDurationUS(beforeMainPreload, timeNow(), "Preload:\t\t");
 
-    for (uint i = 0; i < bodyTable->getSize(); i++) {
-        print(bodyTable->getPos()[i]);
-    }
-
-    print("-----------------------------------------");
+    // print("-----------------------------------------");
 
     // main solver loop
     auto beforeMain = timeNow();
     for (ushort iter = 0; iter < iterations; iter++) {
-
-        print("start");
-        for (uint i = 0; i < bodyTable->getSize(); i++) {
-            print(bodyTable->getPos()[i]);
-        }
-
         auto beforePrimal = timeNow();
         primalUpdate(dt);
-        printPrimalDuration(beforePrimal, timeNow());
-        print("");
-
-        for (uint i = 0; i < bodyTable->getSize(); i++) {
-            print(bodyTable->getPos()[i]);
-        }
+        // printPrimalDuration(beforePrimal, timeNow());
 
         auto beforeDual = timeNow();
         dualUpdate(dt);
-        printDualDuration(beforeDual, timeNow());
-
-        for (uint i = 0; i < bodyTable->getSize(); i++) {
-            print(bodyTable->getPos()[i]);
-        }
+        // printDualDuration(beforeDual, timeNow());
     }
     // printDurationUS(beforeMain, timeNow(), "Main Loop:\t\t");
 
     auto beforeVel = timeNow();
     updateVelocities(dt);
+
     // printDurationUS(beforeVel, timeNow(), "Velocities:\t\t");
 
     // print("------------------------------------------");
@@ -415,6 +368,8 @@ void Solver::primalUpdate(float dt) {
         for (Force* f = body->getForces(); f != nullptr; f = f->getNextA()) {
             uint forceIndex = f->getIndex();
 
+            throw std::runtime_error("force exists");
+
             computeConstraints(forceIndex, forceIndex + 1, MANIFOLD);
             computeDerivatives(forceIndex, forceIndex + 1, MANIFOLD);
 
@@ -440,11 +395,11 @@ void Solver::primalUpdate(float dt) {
         if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
         if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");
         
-        print("rhs");
-        print(rhs[b]);
+        // print("rhs");
+        // print(rhs[b]);
 
-        print("lhs");
-        print(lhs[b]);
+        // print("lhs");
+        // print(lhs[b]);
         
         solve(lhs[b], x, rhs[b]);
 
@@ -464,6 +419,8 @@ void Solver::dualUpdate(float dt) {
 
     for (uint forceIndex = 0; forceIndex < forceTable->getSize(); forceIndex++) {
         computeConstraints(forceIndex, forceIndex + 1, MANIFOLD);
+
+        throw std::runtime_error("force exists");
 
         for (uint j = 0; j < MANIFOLD_ROWS; j++) {
             // Use lambda as 0 if it's not a hard constraint

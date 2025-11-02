@@ -66,6 +66,13 @@ void Node2D::setPosition(vec2 position) {
     updateModel();
 }
 
+void Node2D::setPosition(vec3 position) {
+    this->rigid->setPosition(position);
+    this->position = {position.x , position.y};
+    this->rotation = position.z;
+    updateModel();
+}
+
 void Node2D::setRotation(float rotation) {
     this->rigid->setPosition({this->position.x, this->position.y, rotation});
     this->rotation = rotation;
@@ -75,6 +82,10 @@ void Node2D::setRotation(float rotation) {
 void Node2D::setScale(vec2 scale) {
     this->scale = scale;
     updateModel();
+}
+
+void Node2D::setVelocity(vec3 velocity) {
+    this->rigid->setVelocity(velocity);
 }
 
 void Node2D::bindRigid(Params& params) {

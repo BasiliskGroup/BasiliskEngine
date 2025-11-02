@@ -29,16 +29,17 @@ int main() {
     // physics
     Collider* squareCollider = new Collider(scene2D->getSolver(), {{-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}});
 
-    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=texture, .collider=squareCollider, .density=1 });
+    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=texture, .collider=squareCollider, .density=1, .velocity={1, 0, 1} });
     new Node2D(square, { .mesh=quad, .texture=texture, .position={1, 1} });
     Node2D* clone = new Node2D(*square);
     clone->setPosition({3, 4});
+    clone->setVelocity({5, 5, 25});
 
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
 
-        scene2D->update(1.0 / 60.0);
+        scene2D->update(1.0 / 600.0);
         scene2D->render();
 
         engine->render();

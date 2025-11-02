@@ -31,10 +31,14 @@ void BodyTable::computeTransforms() {
 }
 
 void BodyTable::warmstartBodies(const float dt, const float gravity) {
+    vec3 gravityVec = { 0, gravity, 0 };
     for (uint i = 0; i < size; i++) {
 
+        print("pos enter warm");
+        print(pos[i]);
+
         // Compute inertial position (Eq 2)
-        inertial[i] = pos[i] + vel[i] * dt + gravity * (dt * dt) * (float) (mass[i] > 0);
+        inertial[i] = pos[i] + vel[i] * dt + gravityVec * (dt * dt) * (float) (mass[i] > 0);
 
         // Adaptive warmstart (See original VBD paper) TODO
         vec3 accel = (vel[i] - prevVel[i]) / dt;
@@ -44,7 +48,12 @@ void BodyTable::warmstartBodies(const float dt, const float gravity) {
 
         // Save initial position (x-) and compute warmstarted position (See original VBD paper)
         initial[i] = pos[i];
-        pos[i] += vel[i] * dt + gravity * (accelWeight * dt * dt);
+
+        print("vel");
+        print(vel[i]);
+        print(pos[i]);
+        pos[i] = initial[i] + vel[i] * dt + gravityVec * (accelWeight * dt * dt);
+        print(pos[i]);
     }
 }
 
@@ -140,7 +149,12 @@ void BodyTable::writeToNodes() {
     for (uint i = 0; i < size; i++) {
         Node2D* node = bodies[i]->getNode();
         vec3& pos = this->pos[i];
+
+        // print((long) node);
+        // print(pos);
+        // print(vel[i]);
+        // print("");
+
         node->setPosition(pos);
-        node->setRotation(pos.z);
     }
 }
