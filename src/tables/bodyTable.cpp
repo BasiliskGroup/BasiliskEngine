@@ -24,7 +24,21 @@ void BodyTable::computeTransforms() {
 
         rmat[i] = { c, -s, s, c };
         mat[i] = { c * sx, -s * sy, s * sx, c * sy };
-        imat[i] = { c * isx, s * isy, -s * isx, c * isy };
+        // imat[i] = { c * isx, s * isy, -s * isx, c * isy };
+
+        imat[i] = {  c * isx,  s * isx, -s * isy,  c * isy };
+
+        // rotation-only matrix (clockwise positive)
+        // rmat[i] = { c,  s,
+        //            -s,  c };
+
+        // // local -> world : rotate (clockwise) then scale
+        // mat[i] = { c * sx,  s * sy,
+        //           -s * sx,  c * sy };
+
+        // // inverse: world -> local = inverse scale * transpose(rotation)
+        // imat[i] = { c * isx,  -s * isx,
+        //             s * isy,   c * isy };
 
         updated[i] = false;
     }
@@ -33,9 +47,6 @@ void BodyTable::computeTransforms() {
 void BodyTable::warmstartBodies(const float dt, const float gravity) {
     vec3 gravityVec = { 0, gravity, 0 };
     for (uint i = 0; i < size; i++) {
-
-        print("pos enter warm");
-        print(pos[i]);
 
         // Compute inertial position (Eq 2)
         inertial[i] = pos[i] + vel[i] * dt + gravityVec * (dt * dt) * (float) (mass[i] > 0);
@@ -48,12 +59,7 @@ void BodyTable::warmstartBodies(const float dt, const float gravity) {
 
         // Save initial position (x-) and compute warmstarted position (See original VBD paper)
         initial[i] = pos[i];
-
-        print("vel");
-        print(vel[i]);
-        print(pos[i]);
         pos[i] = initial[i] + vel[i] * dt + gravityVec * (accelWeight * dt * dt);
-        print(pos[i]);
     }
 }
 

@@ -17,6 +17,15 @@ class Collider;
 
 class Solver {
 private:
+    struct CollisionIndexPair {
+        uint bodyA;
+        uint bodyB;
+        Force* manifold = nullptr;
+
+        CollisionIndexPair(uint bodyA, uint bodyB) : bodyA(bodyA), bodyB(bodyB) {}
+        CollisionIndexPair(uint bodyA, uint bodyB, Force* manifold) : bodyA(bodyA), bodyB(bodyB), manifold(nullptr) {} // TODO change this to accepting manifold when we preserve them
+    };
+
     float gravity;      // Gravity
     int iterations;     // Solver iterations
 

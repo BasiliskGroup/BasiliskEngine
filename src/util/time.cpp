@@ -2,6 +2,13 @@
 
 std::chrono::time_point<std::chrono::high_resolution_clock> timeNow() { return std::chrono::high_resolution_clock::now(); }
 
+void printTimeNow() {
+    auto now = std::chrono::system_clock::now();
+    auto duration_since_epoch = now.time_since_epoch();
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration_since_epoch);
+    print((int) milliseconds.count());
+}
+
 void sleepS(uint seconds) { return std::this_thread::sleep_for(std::chrono::seconds(seconds)); }
 void sleepMS(uint milliseconds) { return std::this_thread::sleep_for(std::chrono::seconds(milliseconds)); }
 void sleepUS(uint microseconds) { return std::this_thread::sleep_for(std::chrono::microseconds(microseconds)); }

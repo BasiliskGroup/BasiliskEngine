@@ -1,9 +1,20 @@
 #include "solver/physics.h"
 
+#define GJK_PRINT false
+
 bool Solver::gjk(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint freeIndex) {
+
+    if (GJK_PRINT) print("\nNew GJK\n");
+    if (GJK_PRINT) print("positions");
+    if (GJK_PRINT) print(a.pos);
+    if (GJK_PRINT) print(b.pos);
+
     for (uint _ = 0; _ < GJK_ITERATIONS; ++_) {
         // get next direction or test simplex if full
         freeIndex = handleSimplex(a, b, pair, freeIndex);
+        if (GJK_PRINT) print("iteration: " + std::to_string(freeIndex));
+        if (GJK_PRINT) print("dir");
+        if (GJK_PRINT) print(pair.dir);
 
         // termination signal
         if (freeIndex == -1) {
@@ -12,15 +23,20 @@ bool Solver::gjk(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint freeI
 
         // get next support point
         addSupport(a, b, pair, freeIndex);
+        if (GJK_PRINT) print("sp");
+        if (GJK_PRINT) print(pair.minks[freeIndex]);
 
         // if the point we found didn't cross the origin, we are not colliding
         if (glm::dot(pair.minks[freeIndex], pair.dir) < COLLISION_MARGIN) {
+            if (GJK_PRINT) print("out");
+            if (GJK_PRINT) print(freeIndex);
             return false;
         }
 
         freeIndex++;
     }
     
+    if (GJK_PRINT) print("time out");
     return false;
 }
 
@@ -101,77 +117,47 @@ uint Solver::handle3(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
 void Solver::addSupport(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint insertIndex) {
     // direct search vector into local space
     vec2 dirA = a.imat *  pair.dir;
-    vec2 dirB = b.imat * (-pair.dir);
+    vec2 dirB = b.imat * -pair.dir;
 
-    getFar(a, dirA, a.simplex[insertIndex]);
-    getFar(b, dirB, b.simplex[insertIndex]);
+    vec2 localA;
+    vec2 localB;
+
+    getFar(a, dirA, localA);
+    getFar(b, dirB, localB);
 
     // Transform selected local vertices into world space
-    vec2 localA = a.simplex[insertIndex];
-    vec2 localB = b.simplex[insertIndex];
     vec2 worldA = a.pos + a.mat * localA;
     vec2 worldB = b.pos + b.mat * localB;
+
+    if (GJK_PRINT) print("matrices (CW positive)");
+    if (GJK_PRINT) print(a.mat);
+    if (GJK_PRINT) print(b.mat);
+    if (GJK_PRINT) print(a.imat);
+    if (GJK_PRINT) print(b.imat);
+
+    if (GJK_PRINT) print("worlds");
+    if (GJK_PRINT) print(worldA);
+    if (GJK_PRINT) print(worldB);
 
     // Compute Minkowski support point
     pair.minks[insertIndex] = worldA - worldB;
 }
 
-// TODO find the error in this hill climbing, not 100% accurate
-// uint Solver::getFar(const vec2* verts, uint length, const vec2& dir) {
-//     uint cur = 0;
-//     float here = glm::dot(dir, verts[0]);
-
-//     // select search direction
-//     uint end = length - 1;
-//     float roll = glm::dot(dir, verts[end]);
-//     float right = glm::dot(dir, verts[1]);
-
-//     // early out if the first index is at the top of the hill
-//     if (here > roll && here > right) {
-//         return cur;
-//     }
-    
-//     // prepare info for walk direction
-//     uint walk;
-//     if (roll > right) {
-//         walk = -1;
-//         cur = end;
-//         here = roll;
-//     } else {
-//         walk = 1;
-//         cur = 1;
-//         here = right;
-//     }
-
-//     // walk until we find a worse vertex
-//     uint nextIdx, nextDot;
-//     while (0 <= cur && cur <= end) {
-//         nextIdx = cur + walk;
-//         if (0 > nextIdx || nextIdx > end) {
-//             return cur; // we have hit the boundary and should leave
-//         }
-//         nextDot = glm::dot(dir, verts[nextIdx]);
-//         if (nextDot < here) {
-//             return cur;
-//         }
-//         cur = nextIdx;
-//         here = nextDot;
-//     }
-
-//     return cur;
-// }
-
 void Solver::getFar(const ColliderRow& row, const vec2& dir, vec2& simplexLocal) {
     uint farIndex = 0;
     float maxDot = glm::dot(row.start[0], dir);
 
-    for (uint i = 1; i < row.length; ++i) {
+    if (GJK_PRINT) print(dir);
+    
+    for (uint i = 0; i < row.length; ++i) {
         float d = glm::dot(row.start[i], dir);
+        if (GJK_PRINT) print("  vert[" + std::to_string(i) + "]: <" + std::to_string(row.start[i][0]) + ", " + std::to_string(row.start[i][1]) + "> dot: " + std::to_string(d));
         if (d > maxDot) {
             maxDot = d;
             farIndex = i;
         }
     }
-
-    simplexLocal = row.start[farIndex] * row.scale;
+    
+    if (GJK_PRINT) print("Selected vertex " + std::to_string(farIndex));
+    simplexLocal = row.start[farIndex];
 }

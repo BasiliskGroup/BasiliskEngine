@@ -136,7 +136,7 @@ void Rigid::precomputeRelations() {
             continue;
         }
 
-        relations.emplace_back(other->getIndex(), f->getType());
+        relations.emplace_back(other->getIndex(), f, f->getType());
     }
 }
 
@@ -144,14 +144,15 @@ void Rigid::precomputeRelations() {
 // Broad Collision
 // ----------------------
 
-ushort Rigid::constrainedTo(uint other) const {
+ForceType Rigid::constrainedTo(uint other, Force*& force) const {
     // check if this body is constrained to the other body
     for (const auto& rel : relations) {
-        if (rel.first == other) {
-            return rel.second;
+        if (rel.bodyB == other) {
+            force = rel.force;
+            return rel.type;
         }
     }
-    return -1;
+    return NULL_FORCE;
 }
 
 void Rigid::draw() {

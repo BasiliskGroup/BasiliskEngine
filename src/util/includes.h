@@ -83,15 +83,6 @@ using Mat3x3ROWS = std::array<mat3x3, ROWS>;
 using FloatROWS = std::array<float, ROWS>;
 
 // Mini structs
-struct CollisionIndexPair {
-    uint bodyA;
-    uint bodyB;
-    uint manifold = -1;
-
-    CollisionIndexPair(uint bodyA, uint bodyB) : bodyA(bodyA), bodyB(bodyB) {}
-    CollisionIndexPair(uint bodyA, uint bodyB, uint manifold) : bodyA(bodyA), bodyB(bodyB), manifold(manifold) {}
-};
-
 enum JType {
     JN,
     JT,

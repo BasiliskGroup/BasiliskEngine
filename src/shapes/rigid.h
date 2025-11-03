@@ -10,6 +10,13 @@ class BodyTable;
 class Node2D;
 
 class Rigid {
+public:
+    struct Relation {
+        uint bodyB;
+        Force* force;
+        ForceType type;
+    };
+
 private:
     Solver* solver;
     Force* forces;
@@ -19,7 +26,7 @@ private:
     Node2D* node;
 
     // used to cache relations on system graph
-    std::vector<std::pair<uint, ushort>> relations;
+    std::vector<Relation> relations;
 
     // for Table access
     uint index;
@@ -62,7 +69,7 @@ public:
 
     // determines if two objects are constrained (no collision needed)
     void precomputeRelations();
-    ushort constrainedTo(uint other) const;
+    ForceType constrainedTo(uint other, Force*& force) const;
     void draw();
 
 private:

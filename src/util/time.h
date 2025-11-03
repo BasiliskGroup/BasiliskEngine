@@ -2,10 +2,13 @@
 #define TIME_H
 
 #include "util/includes.h"
+#include "util/print.h"
 #include <chrono>
 #include <thread>
 
 std::chrono::time_point<std::chrono::high_resolution_clock> timeNow();
+
+void printTimeNow();
 
 void sleepS(uint seconds);
 void sleepMS(uint milliseconds);

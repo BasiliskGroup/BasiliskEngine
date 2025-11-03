@@ -13,7 +13,7 @@
 #define STICK_THRESH 0.02f
 
 // collision
-#define COLLISION_MARGIN 1e-4f
+#define COLLISION_MARGIN 1e-6f
 #define GJK_ITERATIONS 15
 #define EPA_ITERATIONS 15
 

@@ -37,7 +37,7 @@ public:
     Force*& getTwin()    { return twin; }
     Rigid*& getBodyA()   { return bodyA; }
     Rigid*& getBodyB()   { return bodyB; }
-    ushort getType();
+    ForceType getType();
 
     void markAsDeleted();
     void disable();

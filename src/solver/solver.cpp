@@ -1,6 +1,8 @@
 #include "solver/physics.h"
 #include "util/debug.h"
 
+#define PRINT_TIME false
+
 
 Solver::Solver() : forces(nullptr), bodies(nullptr) {
     // set default params
@@ -28,71 +30,99 @@ Solver::~Solver() {
 void Solver::step(float dt) {
     auto beforeStep = timeNow();
     compactBodies();
-    printDurationUS(beforeStep, timeNow(), "Body Compact:\t\t");
+    if (PRINT_TIME) printDurationUS(beforeStep, timeNow(), "Body Compact:\t\t");
 
     auto beforeTransform = timeNow();
     bodyTable->computeTransforms();
-    printDurationUS(beforeTransform, timeNow(), "Body Transform:\t\t");
+    if (PRINT_TIME) printDurationUS(beforeTransform, timeNow(), "Body Transform:\t\t");
 
     // NOTE bodies are compact after this point
 
-    // auto beforeBroad = timeNow();
-    // sphericalCollision(); // broad collision TODO replace with BVH
+    auto beforeBroad = timeNow();
+    sphericalCollision(); // broad collision TODO replace with BVH
     // std::cout << "Broad Pairs:\t\t" << collisionPairs.size() << std::endl;
-    // printDurationUS(beforeBroad, timeNow(), "Broad Collision:\t");
+    if (PRINT_TIME) printDurationUS(beforeBroad, timeNow(), "Broad Collision:\t");
 
-    // auto beforeNarrow = timeNow();
-    // narrowCollision(); // -> uncompacts manifolds
-    // printDurationUS(beforeNarrow, timeNow(), "Narrow Collision:\t");
+    // delete all manifolds TODO remove this when adding persistence
+    // Collect manifolds to delete
+    std::vector<Force*> toDelete;
+    Force* force = forces;
+    while (force != nullptr) {
+        if (force->getType() == MANIFOLD) {
+            toDelete.push_back(force);
+            // Skip twin if it's next in the list
+            Force* twin = force->getTwin();
+            if (twin != nullptr && force->getNext() == twin) {
+                force = twin->getNext();
+                continue;
+            }
+        }
+        force = force->getNext();
+    }
+
+    // Delete collected manifolds
+    for (Force* f : toDelete) {
+        delete f;
+    }
+
+    auto beforeNarrow = timeNow();
+    narrowCollision(); // -> uncompacts manifolds
+    if (PRINT_TIME) printDurationUS(beforeNarrow, timeNow(), "Narrow Collision:\t");
 
     // warmstart forces -> uncompacts forces
-    // auto beforeCompact = timeNow();
-    // compactForces();
-    // printDurationUS(beforeCompact, timeNow(), "Force Compact:\t\t");
+    auto beforeCompact = timeNow();
+    compactForces();
+    if (PRINT_TIME) printDurationUS(beforeCompact, timeNow(), "Force Compact:\t\t");
 
     // NOTE bodies and forces are compact after this point
 
-    // auto beforeManifoldWarm = timeNow();
-    // warmstartManifolds();
-    // printDurationUS(beforeManifoldWarm, timeNow(), "Manifold Warm:\t\t");
+    auto beforeManifoldWarm = timeNow();
+    warmstartManifolds();
+    if (PRINT_TIME) printDurationUS(beforeManifoldWarm, timeNow(), "Manifold Warm:\t\t");
 
-    // auto beforeForceWarm = timeNow();
-    // void warmstartForces();
-    // printDurationUS(beforeForceWarm, timeNow(), "Force Warm:\t\t");
+    auto beforeForceWarm = timeNow();
+    void warmstartForces();
+    if (PRINT_TIME) printDurationUS(beforeForceWarm, timeNow(), "Force Warm:\t\t");
 
     auto beforeBodyWarm = timeNow();
     warmstartBodies(dt);
-    // printDurationUS(beforeBodyWarm, timeNow(), "Body Warm:\t\t");
+    if (PRINT_TIME) printDurationUS(beforeBodyWarm, timeNow(), "Body Warm:\t\t");
 
     auto beforeMainPreload = timeNow();
     mainloopPreload();
-    // printDurationUS(beforeMainPreload, timeNow(), "Preload:\t\t");
+    if (PRINT_TIME) printDurationUS(beforeMainPreload, timeNow(), "Preload:\t\t");
 
-    // print("-----------------------------------------");
+    if (PRINT_TIME) print("-----------------------------------------");
 
     // main solver loop
     auto beforeMain = timeNow();
     for (ushort iter = 0; iter < iterations; iter++) {
         auto beforePrimal = timeNow();
         primalUpdate(dt);
-        // printPrimalDuration(beforePrimal, timeNow());
+        if (PRINT_TIME) printPrimalDuration(beforePrimal, timeNow());
 
         auto beforeDual = timeNow();
         dualUpdate(dt);
-        // printDualDuration(beforeDual, timeNow());
+        if (PRINT_TIME) printDualDuration(beforeDual, timeNow());
     }
-    // printDurationUS(beforeMain, timeNow(), "Main Loop:\t\t");
+    if (PRINT_TIME) printDurationUS(beforeMain, timeNow(), "Main Loop:\t\t");
 
     auto beforeVel = timeNow();
     updateVelocities(dt);
 
-    // printDurationUS(beforeVel, timeNow(), "Velocities:\t\t");
+    if (PRINT_TIME) printDurationUS(beforeVel, timeNow(), "Velocities:\t\t");
 
-    // print("------------------------------------------");
-    // printDurationUS(beforeStep, timeNow(), "Total: ");
-    // print("");
+    if (PRINT_TIME) print("------------------------------------------");
+    if (PRINT_TIME) printDurationUS(beforeStep, timeNow(), "Total: ");
+    if (PRINT_TIME) print("");
 
     bodyTable->writeToNodes();
+
+    uint forceCount = 0;
+    for (Force* force = forces; force != nullptr; force = force->getNext()) {
+        forceCount++;
+    }
+    print("Forces: " + std::to_string(forceCount) + ", " + std::to_string(forceTable->getSize()));
 }
 
 void Solver::compactBodies() {
@@ -142,15 +172,18 @@ void Solver::sphericalCollision() {
             uint i = bodyA->getIndex();
             uint j = bodyB->getIndex();
 
+            Force* manifold = nullptr;
+
             // ignore collision flag
-            if (bodyA->constrainedTo(j) == MANIFOLD) {
+            if (bodyA->constrainedTo(j, manifold) == IGNORE_COLLISION) {
                 continue;
             }
 
             dpos = pos[i] - pos[j];
             radsum = radii[i] + radii[j];
             if (radsum * radsum > glm::length2(dpos)) {
-                collisionPairs.emplace_back(i, j);
+                collisionPairs.emplace_back(i, j, manifold);
+                // print("broad collide" + std::to_string(dpos[0]) + " " + std::to_string(dpos[1]));
             }
         }
     }
@@ -162,6 +195,7 @@ void Solver::narrowCollision() {
     auto& bodyPointers = bodyTable->getBodies();
     auto& specialIndices = forceTable->getSpecial();
     auto& types = forceTable->getType();
+    auto& isA = forceTable->getIsA();
 
     // reserve space to perform all collisions 
     uint forceIndex, manifoldIndex;
@@ -197,7 +231,18 @@ void Solver::narrowCollision() {
         ushort frontIndex = epa(a, b, collisionPair);
         vec2 normal = collisionPair.polytope[frontIndex].normal;
 
-        manifoldNormals[manifoldIndex] = normal;
+        print(normal);
+
+        // TODO determine if we need this check
+        if (glm::length2(normal) < 1e-16f) {
+            forceTable->markAsDeleted(forceIndex + 0);
+            forceTable->markAsDeleted(forceIndex + 1);
+            forceIndex += 2;
+            manifoldIndex++;
+            continue;
+        }
+
+        manifoldNormals[manifoldIndex] = glm::normalize(normal);
 
         // determine object overlap
         sat(a, b, collisionPair);
@@ -208,6 +253,8 @@ void Solver::narrowCollision() {
         Manifold* bToA = new Manifold(this, bodyPointers[rowB], bodyPointers[rowA], forceIndex + 1); // B -> A
         forcePointers[forceIndex + 0] = aToB;
         forcePointers[forceIndex + 1] = bToA;
+        isA[forceIndex + 0] = true;
+        isA[forceIndex + 1] = false;
 
         // set twins to allow for proper deletion
         aToB->getTwin() = bToA;
@@ -225,7 +272,7 @@ void Solver::narrowCollision() {
         manifoldIndex++;
     }
 
-    std::cout << "Positive Narrow:\t" << count << std::endl;
+    // std::cout << "Positive Narrow:\t" << count << std::endl;
 }
 
 void Solver::reserveForcesForCollision(uint& forceIndex, uint& manifoldIndex) {
@@ -264,25 +311,26 @@ void Solver::warmstartManifolds() {
     auto& specials = forceTable->getSpecial();
     auto& bodyIndices = forceTable->getBodyIndex();
     auto& isA = forceTable->getIsA();
+    auto& rAWs = getManifoldTable()->getRAW();
+    auto& rBWs = getManifoldTable()->getRBW();
 
     for (uint i = 0; i < forceTable->getSize(); i++) {
         uint specialIndex = specials[i];
         uint bodyIndex = bodyIndices[i];
 
         if (isA[i]) {
-            rAs[specialIndex][0] = rmat[bodyIndex] * rAs[specialIndex][0];
-            rAs[specialIndex][1] = rmat[bodyIndex] * rAs[specialIndex][1];
+            rAWs[specialIndex][0] = rmat[bodyIndex] * rAs[specialIndex][0];
+            rAWs[specialIndex][1] = rmat[bodyIndex] * rAs[specialIndex][1];
         } else {
-            rBs[specialIndex][0] = rmat[bodyIndex] * rBs[specialIndex][0];
-            rBs[specialIndex][1] = rmat[bodyIndex] * rBs[specialIndex][1];
+            rBWs[specialIndex][0] = rmat[bodyIndex] * rBs[specialIndex][0];
+            rBWs[specialIndex][1] = rmat[bodyIndex] * rBs[specialIndex][1];
         }
     }
 
     auto& bases = getManifoldTable()->getBasis();
     auto& tangents = getManifoldTable()->getTangent();
     auto& normals = getManifoldTable()->getNormal();
-    auto& rAWs = getManifoldTable()->getRAW();
-    auto& rBWs = getManifoldTable()->getRBW();
+
     auto& C0s = getManifoldTable()->getC0();
     auto& Js = forceTable->getJ();
 
@@ -368,8 +416,6 @@ void Solver::primalUpdate(float dt) {
         for (Force* f = body->getForces(); f != nullptr; f = f->getNextA()) {
             uint forceIndex = f->getIndex();
 
-            throw std::runtime_error("force exists");
-
             computeConstraints(forceIndex, forceIndex + 1, MANIFOLD);
             computeDerivatives(forceIndex, forceIndex + 1, MANIFOLD);
 
@@ -419,8 +465,6 @@ void Solver::dualUpdate(float dt) {
 
     for (uint forceIndex = 0; forceIndex < forceTable->getSize(); forceIndex++) {
         computeConstraints(forceIndex, forceIndex + 1, MANIFOLD);
-
-        throw std::runtime_error("force exists");
 
         for (uint j = 0; j < MANIFOLD_ROWS; j++) {
             // Use lambda as 0 if it's not a hard constraint

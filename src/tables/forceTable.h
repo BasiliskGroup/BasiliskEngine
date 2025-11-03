@@ -24,7 +24,7 @@ private:
 
     std::vector<Force*> forces;
     std::vector<bool> toDelete;
-    std::vector<ushort> type;
+    std::vector<ForceType> type;
 
     std::vector<uint> specialIndex;
     std::vector<uint> bodyIndex;

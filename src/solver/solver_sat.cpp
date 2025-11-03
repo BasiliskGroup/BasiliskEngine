@@ -8,8 +8,10 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     int firstIndex    = -1;
     int secondIndex   = -1;
 
+    vec2 dir = a.imat * pair.dir;
+
     for (uint i = 0; i < a.length; i++) {
-        float depth = glm::dot(a.start[i], pair.dir);
+        float depth = glm::dot(a.start[i], dir);
 
         if (depth > firstDepth) {
             // shift current best to second
@@ -26,31 +28,36 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
 
     // select vertices to use
     vec2 rA1 = a.start[firstIndex];
-    vec2 rA2 = secondDepth - firstDepth > COLLISION_MARGIN ? a.start[secondIndex] : a.start[firstIndex];
+    vec2 rA2 = firstDepth - secondDepth < COLLISION_MARGIN ? a.start[secondIndex] : a.start[firstIndex];
 
     // write contact points to manifold index
     getManifoldTable()->getRA()[pair.manifoldIndex][0] = rA1 * a.scale;
     getManifoldTable()->getRA()[pair.manifoldIndex][1] = rA2 * a.scale;
 
+    print(rA1);
+    print(rA2);
+
     // ########################################################################################
 
     // select the deepest points 
-    firstDepth  = std::numeric_limits<float>::infinity();
-    secondDepth = std::numeric_limits<float>::infinity();
+    firstDepth  = -std::numeric_limits<float>::infinity();
+    secondDepth = -std::numeric_limits<float>::infinity();
     firstIndex  = -1;
     secondIndex = -1;
 
-    for (uint i = 0; i < b.length; i++) {
-        float depth = glm::dot(b.start[i], pair.dir);
+    dir = b.imat * -pair.dir;
 
-        if (depth < firstDepth) {
+    for (uint i = 0; i < b.length; i++) {
+        float depth = glm::dot(b.start[i], dir);
+
+        if (depth > firstDepth) {
             // shift current best to second
             secondDepth = firstDepth;
             secondIndex = firstIndex;
 
             firstDepth = depth;
             firstIndex = i;
-        } else if (depth < secondDepth) {
+        } else if (depth > secondDepth) {
             secondDepth = depth;
             secondIndex = i;
         }
@@ -58,7 +65,10 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
 
     // select vertices to use
     vec2 rB1 = b.start[firstIndex];
-    vec2 rB2 = secondDepth - firstDepth > COLLISION_MARGIN ? b.start[secondIndex] : b.start[firstIndex];
+    vec2 rB2 = firstDepth - secondDepth < COLLISION_MARGIN ? b.start[secondIndex] : b.start[firstIndex];
+
+    print(rB1);
+    print(rB2);
 
     // write contact points to manifold index
     getManifoldTable()->getRB()[pair.manifoldIndex][0] = rB1 * b.scale;

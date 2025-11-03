@@ -1,0 +1,44 @@
+// TODO find the error in this hill climbing, not 100% accurate
+// uint Solver::getFar(const vec2* verts, uint length, const vec2& dir) {
+//     uint cur = 0;
+//     float here = glm::dot(dir, verts[0]);
+
+//     // select search direction
+//     uint end = length - 1;
+//     float roll = glm::dot(dir, verts[end]);
+//     float right = glm::dot(dir, verts[1]);
+
+//     // early out if the first index is at the top of the hill
+//     if (here > roll && here > right) {
+//         return cur;
+//     }
+    
+//     // prepare info for walk direction
+//     uint walk;
+//     if (roll > right) {
+//         walk = -1;
+//         cur = end;
+//         here = roll;
+//     } else {
+//         walk = 1;
+//         cur = 1;
+//         here = right;
+//     }
+
+//     // walk until we find a worse vertex
+//     uint nextIdx, nextDot;
+//     while (0 <= cur && cur <= end) {
+//         nextIdx = cur + walk;
+//         if (0 > nextIdx || nextIdx > end) {
+//             return cur; // we have hit the boundary and should leave
+//         }
+//         nextDot = glm::dot(dir, verts[nextIdx]);
+//         if (nextDot < here) {
+//             return cur;
+//         }
+//         cur = nextIdx;
+//         here = nextDot;
+//     }
+
+//     return cur;
+// }

@@ -78,6 +78,14 @@
         "__node_handle": "cpp",
         "__tree": "cpp",
         "ios": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "__split_buffer": "cpp",
+        "__bit_reference": "cpp",
+        "__hash_table": "cpp",
+        "__verbose_abort": "cpp",
+        "execution": "cpp",
+        "print": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     }
 }

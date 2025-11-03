@@ -34,7 +34,7 @@ void Force::markAsDeleted() {
     solver->getForceTable()->markAsDeleted(index);
 }
 
-ushort Force::getType() {
+ForceType Force::getType() {
     return solver->getForceTable()->getType()[index];
 }
 
