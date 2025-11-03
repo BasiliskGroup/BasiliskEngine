@@ -5,35 +5,19 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ======================================================
-# Auto-copy all header files from src/ to include/basilisk
+# Copy basilisk.h to include/basilisk/ for public use
 # ======================================================
-
 set(BASILISK_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(BASILISK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/basilisk)
+
 file(MAKE_DIRECTORY ${BASILISK_INCLUDE_DIR})
 
-# Copy util/includes.h to include/basilisk/
+# Copy the main basilisk.h header
 configure_file(
-    ${BASILISK_SRC_DIR}/util/includes.h
-    ${BASILISK_INCLUDE_DIR}/includes.h
+    ${BASILISK_SRC_DIR}/basilisk.h
+    ${BASILISK_INCLUDE_DIR}/basilisk.h
     COPYONLY
 )
-
-# Copy util/print.h to include/basilisk/ (if you want it public too)
-configure_file(
-    ${BASILISK_SRC_DIR}/util/print.h
-    ${BASILISK_INCLUDE_DIR}/print.h
-    COPYONLY
-)
-
-# Copy constants.h if it exists in util/
-if(EXISTS ${BASILISK_SRC_DIR}/util/constants.h)
-    configure_file(
-        ${BASILISK_SRC_DIR}/util/constants.h
-        ${BASILISK_INCLUDE_DIR}/constants.h
-        COPYONLY
-    )
-endif()
 
 # ======================================================
 # Dependencies
@@ -41,14 +25,17 @@ endif()
 
 # glad
 add_library(glad STATIC include/glad/glad.c)
-target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(glad PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 
 # stb (header-only)
 add_library(stb INTERFACE)
-target_include_directories(stb INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(stb INTERFACE 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 
-# External deps (glm, glfw, assimp, xsimd)
-include(FetchContent)
+# External deps (glfw, glm, assimp)
 add_subdirectory(include)
 
 # ======================================================
@@ -59,17 +46,16 @@ file(GLOB_RECURSE ENGINE_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-# Remove test main.cpp (not part of the library)
+# Remove test main.cpp
 list(REMOVE_ITEM ENGINE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
 add_library(basilisk STATIC ${ENGINE_SRC})
 
-# Key change: expose both include/basilisk and src for headers
+# Both include/ AND src/ must be PUBLIC so basilisk.h can find internal headers
 target_include_directories(basilisk
     PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>  # Add this
-        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
 
 target_link_libraries(basilisk
@@ -81,11 +67,8 @@ target_link_libraries(basilisk
         stb
 )
 
-# AddressSanitizer (optional, only when building directly)
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
-    target_compile_options(basilisk PUBLIC -fsanitize=address -fno-omit-frame-pointer -g)
-    target_link_options(basilisk PUBLIC -fsanitize=address -fno-omit-frame-pointer)
-endif()
+# REMOVED: AddressSanitizer is no longer applied to the library
+# Users can enable it in their own projects if needed
 
 # ======================================================
 # Test executable (only when building as main project)
@@ -94,6 +77,12 @@ endif()
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     add_executable(engine ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
     target_link_libraries(engine PRIVATE basilisk)
+    
+    # Optional: Enable ASan for YOUR test executable only
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
+        target_compile_options(engine PRIVATE -fsanitize=address -fno-omit-frame-pointer -g)
+        target_link_options(engine PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+    endif()
 
     # Resource copying
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -102,7 +91,7 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 endif()
 
 # ======================================================
-# Documentation (Doxygen) - only when building as main project
+# Documentation (Doxygen)
 # ======================================================
 
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
