@@ -23,6 +23,7 @@ int main() {
 
     Engine* engine = new Engine(800, 800, "Basilisk");
     Scene2D* scene2D = new Scene2D(engine);
+    scene2D->getSolver()->setGravity(0);
 
     // Data for making node
     // Mesh* quad = new Mesh("models/quad.obj");
@@ -35,7 +36,7 @@ int main() {
     // physics
     Collider* squareCollider = new Collider(scene2D->getSolver(), {{-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}});
 
-    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=manTexture, .collider=squareCollider, .density=1, .velocity={1, 0, 0} });
+    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=manTexture, .collider=squareCollider, .density=1, .velocity={1, -4, 3} });
 
     // floor
     Node2D* floor = new Node2D(scene2D, { .position={0, -3}, .scale={1, 1}, .mesh=quad, .texture=manTexture, .collider=squareCollider, .density=-1 });
@@ -67,7 +68,6 @@ int main() {
                 RAW = manifoldTable->getRAW()[specialIndex];
                 RA = manifoldTable->getRA()[specialIndex];
             } else {
-                print("RBW");
                 RAW = manifoldTable->getRBW()[specialIndex];
                 RA = manifoldTable->getRB()[specialIndex];
             }
@@ -77,6 +77,8 @@ int main() {
                 contacts.push_back(new Node2D(scene2D, { .mesh=quad, .scale={0.1, 0.1}, .texture=manTexture, .position = RA[j] + vec2(body->getPos())}));
             }
         }
+
+        print(square->isTouching(floor));
 
         scene2D->update(1.0 / 600.0);
         scene2D->render();

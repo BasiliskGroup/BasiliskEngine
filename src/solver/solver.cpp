@@ -81,7 +81,7 @@ void Solver::step(float dt) {
     if (PRINT_TIME) printDurationUS(beforeManifoldWarm, timeNow(), "Manifold Warm:\t\t");
 
     auto beforeForceWarm = timeNow();
-    void warmstartForces();
+    warmstartForces();
     if (PRINT_TIME) printDurationUS(beforeForceWarm, timeNow(), "Force Warm:\t\t");
 
     auto beforeBodyWarm = timeNow();
@@ -122,7 +122,6 @@ void Solver::step(float dt) {
     for (Force* force = forces; force != nullptr; force = force->getNext()) {
         forceCount++;
     }
-    print("Forces: " + std::to_string(forceCount) + ", " + std::to_string(forceTable->getSize()));
 }
 
 void Solver::compactBodies() {
@@ -140,6 +139,10 @@ void Solver::compactBodies() {
         }
         bodyIndices[i] = inverseForceMap[bodyIndices[i]];
     }
+}
+
+void Solver::setGravity(float gravity) {
+    this->gravity = gravity;
 }
 
 void Solver::compactForces() {
@@ -183,7 +186,6 @@ void Solver::sphericalCollision() {
             radsum = radii[i] + radii[j];
             if (radsum * radsum > glm::length2(dpos)) {
                 collisionPairs.emplace_back(i, j, manifold);
-                // print("broad collide" + std::to_string(dpos[0]) + " " + std::to_string(dpos[1]));
             }
         }
     }
@@ -231,8 +233,6 @@ void Solver::narrowCollision() {
         ushort frontIndex = epa(a, b, collisionPair);
         vec2 normal = collisionPair.polytope[frontIndex].normal;
 
-        print(normal);
-
         // TODO determine if we need this check
         if (glm::length2(normal) < 1e-16f) {
             forceTable->markAsDeleted(forceIndex + 0);
@@ -242,7 +242,7 @@ void Solver::narrowCollision() {
             continue;
         }
 
-        manifoldNormals[manifoldIndex] = glm::normalize(normal);
+        manifoldNormals[manifoldIndex] = -glm::normalize(normal);
 
         // determine object overlap
         sat(a, b, collisionPair);
@@ -305,7 +305,7 @@ void Solver::warmstartManifolds() {
 
     // compute rW
     auto& pos = bodyTable->getPos();
-    auto& rmat = bodyTable->getRMat();
+    auto& mat = bodyTable->getMat();
     auto& rAs = getManifoldTable()->getRA();
     auto& rBs = getManifoldTable()->getRB();
     auto& specials = forceTable->getSpecial();
@@ -319,11 +319,11 @@ void Solver::warmstartManifolds() {
         uint bodyIndex = bodyIndices[i];
 
         if (isA[i]) {
-            rAWs[specialIndex][0] = rmat[bodyIndex] * rAs[specialIndex][0];
-            rAWs[specialIndex][1] = rmat[bodyIndex] * rAs[specialIndex][1];
+            rAWs[specialIndex][0] = mat[bodyIndex] * rAs[specialIndex][0];
+            rAWs[specialIndex][1] = mat[bodyIndex] * rAs[specialIndex][1];
         } else {
-            rBWs[specialIndex][0] = rmat[bodyIndex] * rBs[specialIndex][0];
-            rBWs[specialIndex][1] = rmat[bodyIndex] * rBs[specialIndex][1];
+            rBWs[specialIndex][0] = mat[bodyIndex] * rBs[specialIndex][0];
+            rBWs[specialIndex][1] = mat[bodyIndex] * rBs[specialIndex][1];
         }
     }
 
@@ -350,13 +350,23 @@ void Solver::warmstartManifolds() {
         // compute jacobians
         for (uint j = 0; j < 2; j++) {
             const vec2& rW = isA[i] ? rAWs[specialIndex][j] : rBWs[specialIndex][j];
+            float sign = 2 * isA[i] - 1;
+
+            if (PRINT_TIME) print("jacobian");
+            // print(rW);
+            // print(normal);
+            // print(tangent);
+            // print(cross(rW, normal));
+            // print(cross(rW, tangent));
 
             // Precompute the constraint and derivatives at C(x-), since we use a truncated Taylor series for contacts (Sec 4).
             // Note that we discard the second order term, since it is insignificant for contacts
-            Js[i][2 * j + JN] = vec3{ basis[0][0], basis[0][1], cross(rW, normal) };
-            Js[i][2 * j + JT] = vec3{ basis[1][0], basis[1][1], cross(rW, tangent) };
+            Js[i][2 * j + JN] = sign * vec3{ basis[0][0], basis[0][1], cross(rW, normal) };
+            Js[i][2 * j + JT] = sign * vec3{ basis[1][0], basis[1][1], cross(rW, tangent) };
 
-            C0s[specialIndex][j] += bases[specialIndex] * (xy(pos[bodyIndices[i]]) + rW) * (float) (2 * isA[i] - 1);
+            C0s[specialIndex][j] += sign * basis * (xy(pos[bodyIndices[i]]) + rW);
+
+            if (PRINT_TIME) print(C0s[specialIndex][j]);
         }
     }
 }
@@ -408,6 +418,9 @@ void Solver::primalUpdate(float dt) {
         lhs[b] = glm::diagonal3x3(vec3{ mass[b], mass[b], moment[b] } / (dt * dt));
         rhs[b] = lhs[b] * (pos[b] - inertial[b]);
 
+        if (PRINT_TIME) print(pos[b]);
+        if (PRINT_TIME) print(inertial[b]);
+
         if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");
         if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
 
@@ -426,10 +439,24 @@ void Solver::primalUpdate(float dt) {
                 // Compute the clamped force magnitude (Sec 3.2)
                 float f = glm::clamp(penalty[forceIndex][j] * C[forceIndex][j] + lambda + motor[forceIndex][j], fmin[forceIndex][j], fmax[forceIndex][j]);
 
+                if (j % 2 == JN) {
+                    if (PRINT_TIME) print("f");
+                    if (PRINT_TIME) print(penalty[forceIndex][j]);
+                    if (PRINT_TIME) print(C[forceIndex][j]);
+                    if (PRINT_TIME) print(f);
+                    if (PRINT_TIME) print(J[forceIndex][j]);
+                    if (PRINT_TIME) print(fmin[forceIndex][j]);
+                }
+                
                 // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
                 mat3x3 G = glm::diagonal3x3(vec3{ glm::length(H[forceIndex][j][0]), glm::length(H[forceIndex][j][1]), glm::length(H[forceIndex][j][2]) }) * abs(f);
 
                 // Accumulate force (Eq. 13) and hessian (Eq. 17)
+                if (PRINT_TIME) print("J");
+                if (PRINT_TIME) print(J[forceIndex][j]);
+                if (PRINT_TIME) print(f);
+                if (PRINT_TIME) print(penalty[forceIndex][j]);
+                if (PRINT_TIME) print(C[forceIndex][j]);
                 rhs[b] += J[forceIndex][j] * f;
                 lhs[b] += glm::outerProduct(J[forceIndex][j], J[forceIndex][j] * penalty[forceIndex][j]) + G;
             }
@@ -441,13 +468,15 @@ void Solver::primalUpdate(float dt) {
         if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
         if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");
         
-        // print("rhs");
-        // print(rhs[b]);
+        if (PRINT_TIME) print("rhs");
+        if (PRINT_TIME) print(rhs[b]);
 
-        // print("lhs");
-        // print(lhs[b]);
+        if (PRINT_TIME) print("lhs");
+        if (PRINT_TIME) print(lhs[b]);
         
         solve(lhs[b], x, rhs[b]);
+
+        if (PRINT_TIME) print(x);
 
         if (hasNaN(x)) throw std::runtime_error("x has NaN");
         
@@ -485,28 +514,37 @@ void Solver::dualUpdate(float dt) {
 }
 
 void Solver::computeConstraints(uint start, uint end, ushort type) {
-    auto& pos = bodyTable->getPos();
+    auto& pos =     bodyTable->getPos();
     auto& initial = bodyTable->getInitial();
-    auto& J = forceTable->getJ();
+    auto& J =            forceTable->getJ();
+    auto& fmax =         forceTable->getFmax();
+    auto& fmin =         forceTable->getFmin();
+    auto& C =            forceTable->getC();
+    auto& lambda =       forceTable->getLambda();
+    auto& specialIndex = forceTable->getSpecial();
     auto& friction = getManifoldTable()->getFriction();
-    auto& fmax = forceTable->getFmax();
-    auto& fmin = forceTable->getFmin();
-    auto& C = forceTable->getC();
-    auto& lambda = forceTable->getLambda();
-    auto& C0 = getManifoldTable()->getC0();
-    auto& cdA = getManifoldTable()->getCdA();
-    auto& cdB = getManifoldTable()->getCdB();
+    auto& C0 =       getManifoldTable()->getC0();
+    auto& cdA =      getManifoldTable()->getCdA();
+    auto& cdB =      getManifoldTable()->getCdB();
+    
 
     // other dp will already be loaded, only focus on self
     loadCdX(start, end);
 
     for (uint i = start; i < end; i++) {
+        uint special = specialIndex[i];
         for (uint j = 0; j < 2; j++) {
             // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
-            C[i][2 * j + JN] = C0[i][j].x * (1 - alpha) + cdA[i][2 * j + JN] + cdB[i][2 * j + JN];
-            C[i][2 * j + JT] = C0[i][j].y * (1 - alpha) + cdA[i][2 * j + JT] + cdB[i][2 * j + JT];
+            C[i][2 * j + JN] = C0[special][j].x * (1 - alpha) + cdA[special][2 * j + JN] + cdB[special][2 * j + JN];
+            C[i][2 * j + JT] = C0[special][j].y * (1 - alpha) + cdA[special][2 * j + JT] + cdB[special][2 * j + JT];
 
-            float frictionBound = abs(lambda[i][2 * j] * friction[i]);
+            // print("C");
+            // print(C0[special][j].x);
+            // print(cdA[special][2 * j + JN]);
+            // print(cdB[special][2 * j + JN]);
+            // print(C[i][2 * j + JN]);
+
+            float frictionBound = abs(lambda[i][2 * j] * friction[special]);
             fmax[i][2 * j + JT] = frictionBound;
             fmin[i][2 * j + JT] = frictionBound;
 
@@ -543,8 +581,14 @@ void Solver::loadCdX(uint start, uint end) {
         FloatROWS& cdX = isA[i] ? cdA[special] : cdB[special];
 
         for (ushort j = 0; j < 2; j++) {
+            // print("Cds nuts " + std::to_string(i));
+            // print(J[i][2 * j + JN]);
+            // print(pos[body] - initial[body]);
             cdX[2 * j + JN] = glm::dot(J[i][2 * j + JN], pos[body] - initial[body]);
             cdX[2 * j + JT] = glm::dot(J[i][2 * j + JT], pos[body] - initial[body]);
+
+            // print(cdX[2 * j + JN]);
+            // print(cdX[2 * j + JT]);
         }
     }
 }

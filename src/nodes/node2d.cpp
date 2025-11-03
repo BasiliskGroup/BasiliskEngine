@@ -130,3 +130,20 @@ void Node2D::setRigid(Node2D&& other) {
     this->rigid->setNode(this);
     other.rigid = nullptr;
 }
+
+ForceType Node2D::constrainedTo(Node2D* other){
+    if (other == nullptr || other->rigid == nullptr) {
+        return NULL_FORCE;
+    }
+
+    Force* dummy = nullptr;
+    return this->rigid->constrainedTo(other->rigid->getIndex(), dummy);
+}
+
+bool Node2D::isTouching(Node2D* other){
+    if (other == nullptr || other->rigid == nullptr) {
+        return false;
+    }
+
+    return constrainedTo(other) == MANIFOLD;
+}

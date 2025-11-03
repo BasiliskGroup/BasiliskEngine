@@ -37,22 +37,23 @@ public:
     void markAsDeleted(uint index);
     void warmstart(float alpha, float gamma);
     
-    auto& getIsA() { return isA; }
-    auto& getJ() { return J; }
-    auto& getH() { return H; }
-    auto& getC() { return C; }
-    auto& getFmax() { return fmax; }
-    auto& getFmin() { return fmin; }
-    auto& getLambda() { return lambda; }
-    auto& getStiffness() { return stiffness; }
-    auto& getPenalty() { return penalty; }
-    auto& getMotor() { return motor; }
-    auto& getToDelete() { return toDelete; }
-    auto& getBodyIndex() { return bodyIndex; }
-    auto& getSpecial() { return specialIndex; }
-    auto& getForces() { return forces; }
-    auto& getType() { return type; } 
-    ManifoldTable* getManifoldTable() { return manifoldTable; }
+    inline auto& getIsA() { return isA; }
+    inline auto& getJ() { return J; }
+    inline auto& getH() { return H; }
+    inline auto& getC() { return C; }
+    inline auto& getFmax() { return fmax; }
+    inline auto& getFmin() { return fmin; }
+    inline auto& getLambda() { return lambda; }
+    inline auto& getStiffness() { return stiffness; }
+    inline auto& getFracture() { return fracture; }
+    inline auto& getPenalty() { return penalty; }
+    inline auto& getMotor() { return motor; }
+    inline auto& getToDelete() { return toDelete; }
+    inline auto& getBodyIndex() { return bodyIndex; }
+    inline auto& getSpecial() { return specialIndex; }
+    inline auto& getForces() { return forces; }
+    inline auto& getType() { return type; } 
+    inline ManifoldTable* getManifoldTable() { return manifoldTable; }
 
     void reserveManifolds(uint numPairs, uint& forceIndex, uint& manifoldIndex);
     void resize(uint newCapacity) override;

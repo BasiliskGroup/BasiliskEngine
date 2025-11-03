@@ -51,6 +51,11 @@ public:
 
     Scene2D* getScene() { return (Scene2D*) scene; }
 
+    // collision exposure
+    ForceType constrainedTo(Node2D* other);
+    bool justCollided(Node2D* other);
+    bool isTouching(Node2D* other);
+
 private:
     void updateModel();
     void bindRigid(Params& params);

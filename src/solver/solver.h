@@ -109,6 +109,9 @@ public:
     void step(float dt);
     void draw();
 
+    // setters
+    void setGravity(float gravity);
+
     // linked list operations
     void insert(Rigid* rigid);
     void insert(Force* force);

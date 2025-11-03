@@ -34,10 +34,21 @@ void Force::markAsDeleted() {
     solver->getForceTable()->markAsDeleted(index);
 }
 
-ForceType Force::getType() {
-    return solver->getForceTable()->getType()[index];
-}
-
 void Force::disable() {
     // TODO disable force
 }
+
+ForceTable* Force::getTable() { return solver->getForceTable(); }
+
+Vec3ROWS& Force::J() { return getTable()->getJ()[index]; }
+Mat3x3ROWS& Force::H() { return getTable()->getH()[index]; }
+FloatROWS& Force::C() { return getTable()->getC()[index]; }
+FloatROWS& Force::motor() { return getTable()->getMotor()[index]; }
+FloatROWS& Force::stiffness() { return getTable()->getStiffness()[index]; }
+FloatROWS& Force::fracture() { return getTable()->getFracture()[index]; }
+FloatROWS& Force::fmax() { return getTable()->getFmax()[index]; }
+FloatROWS& Force::fmin() { return getTable()->getFmin()[index]; }
+FloatROWS& Force::penalty() { return getTable()->getPenalty()[index]; }
+FloatROWS& Force::lambda() { return getTable()->getLambda()[index]; }
+
+ForceType& Force::getType() { return getTable()->getType()[index]; }

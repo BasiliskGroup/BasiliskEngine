@@ -34,9 +34,6 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     getManifoldTable()->getRA()[pair.manifoldIndex][0] = rA1 * a.scale;
     getManifoldTable()->getRA()[pair.manifoldIndex][1] = rA2 * a.scale;
 
-    print(rA1);
-    print(rA2);
-
     // ########################################################################################
 
     // select the deepest points 
@@ -66,9 +63,6 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     // select vertices to use
     vec2 rB1 = b.start[firstIndex];
     vec2 rB2 = firstDepth - secondDepth < COLLISION_MARGIN ? b.start[secondIndex] : b.start[firstIndex];
-
-    print(rB1);
-    print(rB2);
 
     // write contact points to manifold index
     getManifoldTable()->getRB()[pair.manifoldIndex][0] = rB1 * b.scale;

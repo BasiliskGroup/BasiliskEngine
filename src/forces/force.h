@@ -1,6 +1,7 @@
 #ifndef FORCE_H
 #define FORCE_H
 
+
 class ForceTable;
 class Solver;
 class Rigid;
@@ -29,20 +30,37 @@ public:
     virtual ~Force();
 
     // getters 
-    Solver*& getSolver() { return solver; }
-    Force*& getNext()    { return next; }
-    Force*& getPrev()    { return prev; }
-    Force*& getNextA()   { return nextA; }
-    Force*& getPrevA()   { return prevA; }
-    Force*& getTwin()    { return twin; }
-    Rigid*& getBodyA()   { return bodyA; }
-    Rigid*& getBodyB()   { return bodyB; }
-    ForceType getType();
+    // pointers
+    inline Solver*& getSolver() { return solver; }
+    inline Force*& getNext()    { return next; }
+    inline Force*& getPrev()    { return prev; }
+    inline Force*& getNextA()   { return nextA; }
+    inline Force*& getPrevA()   { return prevA; }
+    inline Force*& getTwin()    { return twin; }
+    inline Rigid*& getBodyA()   { return bodyA; }
+    inline Rigid*& getBodyB()   { return bodyB; }
+
+    ForceTable* getTable();
+    
+    Vec3ROWS& J();
+    Mat3x3ROWS& H();
+    FloatROWS& C();
+    FloatROWS& motor();
+    FloatROWS& stiffness();
+    FloatROWS& fracture();
+    FloatROWS& fmax();
+    FloatROWS& fmin();
+    FloatROWS& penalty();
+    FloatROWS& lambda();
+
+    //table
+    ForceType& getType();
+    inline uint getIndex() { return index; }
 
     void markAsDeleted();
     void disable();
 
-    uint getIndex() { return index; }
+    // setters
     void setIndex(uint index) { this->index = index; }
 
     // number of jacobian rows (max = 4)
