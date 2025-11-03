@@ -9,95 +9,71 @@
 #include "shapes/rigid.h"
 
 int main() {
-    std::vector<float> quadData {
-        // Triangle 1
-        -0.8f, -0.8f, 0.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
+    // Solver* solver = new Solver();
+    
 
-        // Triangle 2
-        -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f, 0.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f, 1.0f,
-    };
+    // float dx = 5;
+    // float dr = 2 * 3.14;
+
+    // // create a list of rigids
+    // std::vector<Rigid*> objects;
+    // for (int i = 0; i < 100; i++) {
+    //     objects.push_back(new Rigid(solver, {uniform(-dx, dx), uniform(-dx, dx), uniform(0, dr)}, {1, 1}, 1, 0.4, {0, 0, 0}, cubeCollider));
+    // }
+
+    // for (int i = 0; i < 10; i++) {
+    //     solver->step(1.0 / 60.0);
+
+    //     // testing mid simulation body deletion
+    //     int deleteIndex = randrange(0, objects.size());
+    //     delete objects[deleteIndex];
+    //     objects.erase(objects.begin() + deleteIndex);
+    // }
+
+    // // delete collider
+    // delete cubeCollider;
+
+    // // deleting solver should always be last
+    // delete solver;
+    // return 0;
 
     Engine* engine = new Engine(800, 800, "Basilisk");
-    Scene2D* scene2D = new Scene2D(engine);
-    scene2D->getSolver()->setGravity(0);
+    Scene2D* scene = new Scene2D(engine);
 
     // Data for making node
-    // Mesh* quad = new Mesh("models/quad.obj");
     Mesh* quad = new Mesh("models/quad.obj");
-    Image* manImage = new Image("textures/man.png");
-    Image* pissImage = new Image("textures/piss.png");
-    Texture* manTexture = new Texture(manImage);
-    Texture* pissTexture = new Texture(pissImage);
-        
-    // physics
-    Collider* squareCollider = new Collider(scene2D->getSolver(), {{-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}, {0.5, 0.5}});
+    Image* image = new Image("textures/container.jpg");
+    Image* image2 = new Image("textures/floor_albedo.png");
+    Material* material = new Material({1.0, 1.0, 0.0}, image);
+    Material* material2 = new Material({1.0, 1.0, 0.0}, image2);
 
-    Node2D* square = new Node2D(scene2D, { .mesh=quad, .texture=manTexture, .collider=squareCollider, .density=1, .velocity={1, -4, 3} });
+    Node2D* square = new Node2D(scene, { .mesh=quad, .material=material});
+    Node2D* square2 = new Node2D(scene, { .mesh=quad, .material=material2, .position={3, 4}});
 
-    // floor
-    Node2D* floor = new Node2D(scene2D, { .position={0, -3}, .scale={1, 1}, .mesh=quad, .texture=manTexture, .collider=squareCollider, .density=-1 });
+    // TODO: Move these things to be automatic
+    // This needs to be moved into node render call
+    scene->getShader()->setUniform("uMaterialID", (int)scene->getEngine()->getResourceServer()->getMaterialServer()->get(material2));
 
-    // new Node2D(scene2D, { .mesh=quad, .scale={0.1, 0.1}, .texture=pissTexture});
-
-    std::vector<Node2D*> contacts;
-
+    // TODO: Figure out why needs to be rewritten 
+    engine->getResourceServer()->write(scene->getShader(), "textureArrays", "materials");
+    
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
-
-        // create new contact points
-        ForceTable* forceTable = scene2D->getSolver()->getForceTable();
-        ManifoldTable* manifoldTable = forceTable->getManifoldTable();
-
-        for (uint i = 0; i < forceTable->getSize(); i++) {
-            Force* force = forceTable->getForces()[i];
-            uint specialIndex = forceTable->getSpecial()[i];
-            Rigid* body = force->getBodyA();
-            bool isA = forceTable->getIsA()[i];
-
-            if (force->getType() != MANIFOLD) {
-                continue;
-            }
-
-            Vec2Pair RAW, RA;
-            if (isA) {
-                RAW = manifoldTable->getRAW()[specialIndex];
-                RA = manifoldTable->getRA()[specialIndex];
-            } else {
-                RAW = manifoldTable->getRBW()[specialIndex];
-                RA = manifoldTable->getRB()[specialIndex];
-            }
-
-            for (uint j = 0; j < 2; j++) {
-                contacts.push_back(new Node2D(scene2D, { .mesh=quad, .scale={0.1, 0.1}, .texture=pissTexture, .position = RAW[j] + vec2(body->getPos())}));
-                contacts.push_back(new Node2D(scene2D, { .mesh=quad, .scale={0.1, 0.1}, .texture=manTexture, .position = RA[j] + vec2(body->getPos())}));
-            }
-        }
-
-        print(square->isTouching(floor));
-
-        scene2D->update(1.0 / 600.0);
-        scene2D->render();
-
-        // clear previous contact points
-        for (uint i = 0; i < contacts.size(); i++) {
-            delete contacts[i];
-        }
-        contacts.clear();
+        
+        scene->update(1.0 / 300);
+        scene->render();
 
         engine->render();
     }
 
-    // Free memory allocations
-    delete manImage;
-    delete pissImage;
-    delete manTexture;
-    delete pissTexture;
+    delete material;
+    delete material2;
+    delete image;
+    delete image2;
+    delete square;
+    delete square2;
     delete quad;
-    delete scene2D;
+    delete scene;
     delete engine;
 }

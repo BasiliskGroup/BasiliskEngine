@@ -235,7 +235,7 @@ void Shader::bind(const char* name, Texture* texture, unsigned int slot) {
 void Shader::bind(const char* name, TextureArray* textureArray, unsigned int slot) {
     use();
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, textureArray->getID());
+    textureArray->bind();
     setUniform(name, (int)slot);
 }
 
@@ -249,7 +249,7 @@ void Shader::bind(const char* name, TextureArray* textureArray, unsigned int slo
 void Shader::bind(const char* name, TBO* tbo, unsigned int slot) {
     use();
     glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_BUFFER, tbo->getID());
+    glBindTexture(GL_TEXTURE_BUFFER, tbo->getTextureID());
     setUniform(name, (int)slot);
 }
 

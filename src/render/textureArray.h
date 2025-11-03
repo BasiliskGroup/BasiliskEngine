@@ -17,7 +17,7 @@ class TextureArray {
         void uploadImage(Image* image, unsigned int position);
         
     public:
-        TextureArray(unsigned int width, unsigned int height, std::vector<Image*> images={}, unsigned int capacity=0);
+        TextureArray(unsigned int width, unsigned int height, std::vector<Image*> images={}, unsigned int capacity=1);
         ~TextureArray();
 
         void bind();
@@ -27,6 +27,7 @@ class TextureArray {
         void setWrap(unsigned int wrap);
 
         unsigned int getID() { return id; }
+        unsigned int getSize() { return images.size(); }
 
 };
 

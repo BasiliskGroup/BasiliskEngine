@@ -3,15 +3,25 @@
 
 #include "util/includes.h"
 #include "render/material.h"
+#include "render/shader.h"
+#include "render/tbo.h"
+#include "resource/textureServer.h"
 
 class MaterialServer {
     private:
-        std::unordered_map<Material*, unsigned int>
+        TextureServer* textureServer;
+        TBO* tbo;
+
+        std::unordered_map<Material*, unsigned int> materialMapping;
 
     public:
-        MaterialServer();
+        MaterialServer(TextureServer* textureServer);
+        ~MaterialServer();
 
         unsigned int add(Material* material);
+        unsigned int get(Material* material);
+
+        void write(Shader* shader, std::string name, unsigned int startSlot = 0);
 };
 
 #endif

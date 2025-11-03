@@ -10,18 +10,18 @@
  * @param scene 
  * @param shader 
  * @param mesh 
- * @param texture 
+ * @param material 
  * @param position 
  * @param rotation 
  * @param scale 
  */
 template<typename Derived, typename P, typename R, typename S>
-VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
+VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Mesh* mesh, Material* material, P position, R rotation, S scale) : 
     scene(scene), 
     parent(scene->getRoot()), 
     shader(scene->getShader()), 
     mesh(mesh), 
-    texture(texture), 
+    material(material), 
     position(position), 
     rotation(rotation), 
     scale(scale) 
@@ -40,18 +40,18 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
  * @param parent 
  * @param shader 
  * @param mesh 
- * @param texture 
+ * @param material 
  * @param position 
  * @param rotation 
  * @param scale 
  */
 template<typename Derived, typename P, typename R, typename S>
-VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Mesh* mesh, Texture* texture, P position, R rotation, S scale) : 
+VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Mesh* mesh, Material* material, P position, R rotation, S scale) : 
     scene(parent->getScene()), 
     parent(parent), 
     shader(parent->getShader()), 
     mesh(mesh), 
-    texture(texture), 
+    material(material), 
     position(position), 
     rotation(rotation), 
     scale(scale) 
@@ -76,7 +76,7 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     parent(parent), 
     shader(nullptr), 
     mesh(nullptr), 
-    texture(nullptr), 
+    material(nullptr), 
     position(), // default
     rotation(), // default
     scale(), // default
@@ -104,7 +104,7 @@ VirtualNode<Derived,P,R,S>::VirtualNode(const VirtualNode& other) noexcept
       parent(other.parent),
       shader(other.shader),
       mesh(other.mesh),
-      texture(other.texture),
+      material(other.material),
       position(other.position),
       rotation(other.rotation),
       scale(other.scale),
@@ -152,7 +152,7 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
       parent(other.parent),
       shader(other.shader),
       mesh(other.mesh),
-      texture(other.texture),
+      material(other.material),
       vbo(other.vbo),
       ebo(other.ebo),
       vao(other.vao),
@@ -211,7 +211,7 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const Vi
     scene = other.scene;
     shader = other.shader;
     mesh = other.mesh;
-    texture = other.texture;
+    material = other.material;
     position = other.position;
     rotation = other.rotation;
     scale = other.scale;
@@ -266,7 +266,7 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
     parent = other.parent;
     shader = other.shader;
     mesh = other.mesh;
-    texture = other.texture;
+    material = other.material;
     position = std::move(other.position);
     rotation = std::move(other.rotation);
     scale = std::move(other.scale);
@@ -297,7 +297,6 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::render() {
-    shader->bind("uTexture", texture, 0);
     shader->setUniform("uModel", model);
     vao->render();
 }
