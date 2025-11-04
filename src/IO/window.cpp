@@ -83,7 +83,9 @@ bool confirmGLAD() {
 Window::Window(int width, int height, const char* title) {
     // Initialize GLFW with OpenGL
     enableX11();
-    glfwInit();
+    if (!glfwInit()) {
+        throw std::runtime_error("Failed to initialize GLFW");
+    }
     setGLVersion(3, 3);
 
     // Create the window and confirm proper initialization

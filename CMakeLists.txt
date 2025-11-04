@@ -18,12 +18,23 @@ option(BASILISK_BUILD_EXAMPLES "Build Basilisk examples" OFF)
 include(FetchContent)
 
 # ---- GLAD (OpenGL loader) ----
-FetchContent_Declare(
-    glad
-    GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-    GIT_TAG        master
-)
-FetchContent_MakeAvailable(glad)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/glad")
+    message(STATUS "Using local GLAD headers")
+    add_library(glad INTERFACE)
+    target_include_directories(glad INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+else()
+    if(NOT TARGET glad)
+        message(STATUS "Fetching GLAD from remote...")
+        FetchContent_Declare(
+            glad
+            GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+            GIT_TAG        master
+        )
+        FetchContent_MakeAvailable(glad)
+    endif()
+endif()
 
 # ---- GLM (header-only math) ----
 FetchContent_Declare(
@@ -38,12 +49,15 @@ add_library(glm_h INTERFACE)
 target_include_directories(glm_h INTERFACE ${glm_SOURCE_DIR})
 
 # ---- GLFW (window/input) ----
-FetchContent_Declare(
-    glfw
-    GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG        3.3.8
-)
-FetchContent_MakeAvailable(glfw)
+if(NOT TARGET glfw)
+    message(STATUS "Fetching GLFW...")
+    FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG        3.3.8
+    )
+    FetchContent_MakeAvailable(glfw)
+endif()
 
 # ---- STB (local header-only) ----
 add_library(stb INTERFACE)
@@ -88,11 +102,10 @@ target_include_directories(basilisk
 target_link_libraries(basilisk
     PUBLIC
         glfw
+        glad
         assimp
         glm_h
         stb
-    PRIVATE
-        glad
 )
 
 # ======================================================
