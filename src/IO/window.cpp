@@ -21,14 +21,14 @@ inline void windowResize(GLFWwindow* window, int width, int height) {
  *        Fixes the borderless window error on some linux devices. 
  * 
  */
-void enableX11() {
-    const char* sessionType = getenv("XDG_SESSION_TYPE");    
-    if (sessionType && std::string(sessionType) == "wayland") {
-        #if defined(__linux__)
-            glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-        #endif
-    }
-}
+// void enableX11() {
+//     const char* sessionType = getenv("XDG_SESSION_TYPE");    
+//     if (sessionType && std::string(sessionType) == "wayland") {
+//         #if defined(__linux__)
+//             glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+//         #endif
+//     }
+// }
 
 /**
  * @brief Sets the window hint for ther GL version.
@@ -86,7 +86,6 @@ bool confirmGLAD() {
  */
 Window::Window(int width, int height, const char* title) {
     // Initialize GLFW with OpenGL
-    enableX11();
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize GLFW");
     }
