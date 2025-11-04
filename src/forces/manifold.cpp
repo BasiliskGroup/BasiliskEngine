@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB, uint index) : Force(solver, bodyA, bodyB) {
     this->index = index;

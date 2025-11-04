@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 ushort Solver::epa(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     // deepcopy minkowski points into support points list

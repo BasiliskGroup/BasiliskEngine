@@ -1,5 +1,5 @@
-#include "scene/sceneRoute.h"
-#include "util/print.h"
+#include <basilisk/scene/sceneRoute.h>
+#include <basilisk/util/print.h>
 
 /**
  * @brief Construct a new Scene object. Exclusivly for 3D scenes. 

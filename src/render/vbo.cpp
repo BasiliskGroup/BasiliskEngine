@@ -1,4 +1,4 @@
-#include "render/vbo.h"
+#include <basilisk/render/vbo.h>
 
 /**
  * @brief Construct a new VBO from the data provided at the given pointer

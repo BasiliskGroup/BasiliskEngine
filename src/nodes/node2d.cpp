@@ -1,4 +1,4 @@
-#include "scene/sceneRoute.h"
+#include <basilisk/scene/sceneRoute.h>
 
 Node2D::Node2D(VirtualScene2D* scene, Params params)
     : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {

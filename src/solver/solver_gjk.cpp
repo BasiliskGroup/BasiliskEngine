@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 #define GJK_PRINT false
 

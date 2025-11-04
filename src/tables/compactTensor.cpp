@@ -1,4 +1,4 @@
-#include "tables/compactTensor.h"
+#include <basilisk/tables/compactTensor.h>
 
 /**
  * @brief 

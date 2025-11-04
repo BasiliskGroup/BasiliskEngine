@@ -1,4 +1,4 @@
-#include "material.h"
+#include <basilisk/render/material.h>
 
 /**
  * @brief Get the data of this Material as a struct

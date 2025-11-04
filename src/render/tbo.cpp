@@ -1,4 +1,4 @@
-#include "render/tbo.h"
+#include <basilisk/render/tbo.h>
 
 /**
  * @brief Construct a new TBO object. Can be used to store arbitray data on the GPU

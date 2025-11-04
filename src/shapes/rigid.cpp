@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 
 Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, Collider* collider) : 

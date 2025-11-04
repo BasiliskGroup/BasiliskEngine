@@ -1,4 +1,4 @@
-#include "camera/camera2d.h"
+#include <basilisk/camera/camera2d.h>
 
 /**
  * @brief Construct a new Camera 2D object

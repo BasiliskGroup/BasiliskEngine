@@ -1,4 +1,4 @@
-#include "render/vao.h"
+#include <basilisk/render/vao.h>
 
 /**
  * @brief Construct a new VAO object with a shader object, VBO, and optional EBO

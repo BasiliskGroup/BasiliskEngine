@@ -1,4 +1,4 @@
-#include "camera/camera.h"
+#include <basilisk/camera/camera.h>
 
 
 /**

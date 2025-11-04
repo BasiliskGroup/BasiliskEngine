@@ -1,5 +1,5 @@
-#include "tables/colliderFlat.h"
-#include "util/print.h"
+#include <basilisk/tables/colliderFlat.h>
+#include <basilisk/util/print.h>
 
 ColliderFlat::ColliderFlat(uint vertCapacity, uint colliderCapacity) {
     this->vertCapacity = vertCapacity;

@@ -1,5 +1,5 @@
-#include "solver/physics.h"
-#include "util/debug.h"
+#include <basilisk/solver/physics.h>
+#include <basilisk/util/debug.h>
 
 #define PRINT_TIME false
 

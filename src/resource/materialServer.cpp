@@ -1,4 +1,4 @@
-#include "resource/materialServer.h"
+#include <basilisk/resource/materialServer.h>
 
 MaterialServer::MaterialServer(TextureServer* textureServer): textureServer(textureServer) {
     tbo = new TBO(nullptr, 0, 1000);

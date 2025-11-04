@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 // TODO SAT, we are doing the dumb solution right now (Not SAT)
 void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {

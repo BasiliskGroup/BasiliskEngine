@@ -1,5 +1,5 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "render/image.h"
+#include <basilisk/render/image.h>
 
 /**
  * @brief Construct a new Image object from image file

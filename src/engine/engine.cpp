@@ -1,4 +1,4 @@
-#include "engine/engine.h"
+#include <basilisk/engine/engine.h>
 
 
 Engine::Engine(int width, int height, const char* title) {

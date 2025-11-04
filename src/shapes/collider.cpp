@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 Collider::Collider(Solver* solver, std::vector<vec2> verts) : solver(solver) {
     index = getColliderFlat()->insert(verts);

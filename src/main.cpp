@@ -1,12 +1,12 @@
 #include <basilisk/basilisk.h>
 
-#include "solver/physics.h"
-#include "util/random.h"
-#include "util/time.h"
-#include "forces/force.h"
-#include "tables/forceTable.h"
-#include "tables/manifoldTable.h"
-#include "shapes/rigid.h"
+#include <basilisk/solver/physics.h>
+#include <basilisk/util/random.h>
+#include <basilisk/util/time.h>
+#include <basilisk/forces/force.h>
+#include <basilisk/tables/forceTable.h>
+#include <basilisk/tables/manifoldTable.h>
+#include <basilisk/shapes/rigid.h>
 
 int main() {
     // Solver* solver = new Solver();

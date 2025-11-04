@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB) 
 : solver(solver), next(nullptr), bodyA(bodyA), bodyB(bodyB), nextA(nullptr), twin(nullptr), prev(nullptr), prevA(nullptr) {

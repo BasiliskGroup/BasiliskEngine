@@ -1,4 +1,4 @@
-#include "render/ebo.h"
+#include <basilisk/render/ebo.h>
 
 /**
  * @brief Construct a new EBO from the data provided at the given pointer

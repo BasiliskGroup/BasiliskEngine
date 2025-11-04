@@ -1,0 +1,21 @@
+#ifndef VIRTUAL_CAMERA_H
+#define VIRTUAL_CAMERA_H
+
+#include <basilisk/util/includes.h>
+#include <basilisk/engine/engine.h>
+#include <basilisk/render/shader.h>
+
+class VirtualCamera {
+    protected:
+        glm::mat4 view;
+        glm::mat4 projection;
+
+        virtual void updateProjection() = 0;
+        virtual void updateView() = 0;
+
+    public:
+        virtual void update() = 0;
+        virtual void use(Shader* shader) = 0;
+};
+
+#endif

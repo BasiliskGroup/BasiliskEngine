@@ -1,5 +1,5 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "render/textureArray.h"
+#include <basilisk/render/textureArray.h>
 
 /**
  * @brief Construct a new Texture Array object

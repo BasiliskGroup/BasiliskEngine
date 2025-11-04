@@ -1,4 +1,4 @@
-#include "solver/physics.h"
+#include <basilisk/solver/physics.h>
 
 void Solver::insert(Rigid* rigid){
     if (rigid == nullptr) {

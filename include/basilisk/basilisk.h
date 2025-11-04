@@ -1,12 +1,10 @@
 #ifndef BASILISK_H
 #define BASILISK_H
 
-// Utility headers
+// All headers are now in include/basilisk/ after copying
 #include "util/includes.h"
 #include "util/print.h"
 #include "util/constants.h"
-
-// Engine headers
 #include "engine/engine.h"
 #include "scene/scene.h"
 #include "scene/scene2d.h"

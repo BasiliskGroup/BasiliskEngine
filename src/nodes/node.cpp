@@ -1,4 +1,4 @@
-#include "scene/sceneRoute.h"
+#include <basilisk/scene/sceneRoute.h>
 
 Node::Node(VirtualScene3D* scene, Params params)
     : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale) {

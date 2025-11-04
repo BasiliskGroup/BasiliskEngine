@@ -1,6 +1,6 @@
-#include "tables/bodyTable.h"
-#include "scene/sceneRoute.h"
-#include "util/print.h"
+#include <basilisk/tables/bodyTable.h>
+#include <basilisk/scene/sceneRoute.h>
+#include <basilisk/util/print.h>
 
 
 BodyTable::BodyTable(uint capacity) {

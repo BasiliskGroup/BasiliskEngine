@@ -1,4 +1,4 @@
-#include "util/maths.h"
+#include <basilisk/util/maths.h>
 
 void tripleProduct(const vec2& a, const vec2& b, const vec2& c, vec2& o) {
     o = glm::dot(a, c) * b - glm::dot(a, b) * c;

@@ -1,4 +1,4 @@
-#include "resource/resourceServer.h"
+#include <basilisk/resource/resourceServer.h>
 
 ResourceServer::ResourceServer() {
     textureServer = new TextureServer();

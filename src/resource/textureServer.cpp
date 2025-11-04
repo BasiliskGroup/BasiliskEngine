@@ -1,4 +1,4 @@
-#include "resource/textureServer.h"
+#include <basilisk/resource/textureServer.h>
 
 /**
  * @brief Construct a new Texture Server object to maintin multiple texture arrays
