@@ -13,16 +13,16 @@ class ForceTable : public VirtualTable {
 private:
     ManifoldTable* manifoldTable;
 
-    std::vector<Vec3ROWS> J;
-    std::vector<Mat3x3ROWS> H;
-    std::vector<FloatROWS> C;
-    std::vector<FloatROWS> motor;
-    std::vector<FloatROWS> stiffness;
-    std::vector<FloatROWS> fracture;
-    std::vector<FloatROWS> fmax;
-    std::vector<FloatROWS> fmin;
-    std::vector<FloatROWS> penalty;
-    std::vector<FloatROWS> lambda;
+    std::vector<BskVec3ROWS> J;
+    std::vector<BskMat3x3ROWS> H;
+    std::vector<BskFloatROWS> C;
+    std::vector<BskFloatROWS> motor;
+    std::vector<BskFloatROWS> stiffness;
+    std::vector<BskFloatROWS> fracture;
+    std::vector<BskFloatROWS> fmax;
+    std::vector<BskFloatROWS> fmin;
+    std::vector<BskFloatROWS> penalty;
+    std::vector<BskFloatROWS> lambda;
 
     std::vector<Force*> forces;
     std::vector<bool> toDelete;

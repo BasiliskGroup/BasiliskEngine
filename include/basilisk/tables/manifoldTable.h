@@ -14,22 +14,22 @@ private:
 
     // xtensor
     std::vector<bool> toDelete;
-    std::vector<Vec2Pair> C0;
-    std::vector<Vec2Pair> rA;
-    std::vector<Vec2Pair> rB;
+    std::vector<BskVec2Pair> C0;
+    std::vector<BskVec2Pair> rA;
+    std::vector<BskVec2Pair> rB;
     std::vector<glm::vec2> normal;
     std::vector<float> friction;
     std::vector<bool> stick;
-    std::vector<Vec2Triplet> simplex;
+    std::vector<BskVec2Triplet> simplex;
     std::vector<uint> forceIndex;
 
     // arrays for holding extra compute space
     std::vector<glm::vec2> tangent;
     std::vector<glm::mat2x2> basis;
-    std::vector<Vec2Pair> rAW;
-    std::vector<Vec2Pair> rBW;
-    std::vector<FloatROWS> cdA;
-    std::vector<FloatROWS> cdB;
+    std::vector<BskVec2Pair> rAW;
+    std::vector<BskVec2Pair> rBW;
+    std::vector<BskFloatROWS> cdA;
+    std::vector<BskFloatROWS> cdB;
 
 public:
     ManifoldTable(ForceTable* forceTable, uint capacity);

@@ -337,7 +337,7 @@ void Solver::warmstartManifolds() {
 
     // set all C0 to zero
     for (uint i = 0; i < getManifoldTable()->getSize(); i++) {
-        C0s[i] = Vec2Pair(); // TODO check if this defaults to zero
+        C0s[i] = BskVec2Pair(); // TODO check if this defaults to zero
     }
 
     for (uint i = 0; i < forceTable->getSize(); i++) {
@@ -579,7 +579,7 @@ void Solver::loadCdX(uint start, uint end) {
         uint special = specialIndices[i];
         uint body = bodyIndices[i];
 
-        FloatROWS& cdX = isA[i] ? cdA[special] : cdB[special];
+        BskFloatROWS& cdX = isA[i] ? cdA[special] : cdB[special];
 
         for (ushort j = 0; j < 2; j++) {
             // print("Cds nuts " + std::to_string(i));

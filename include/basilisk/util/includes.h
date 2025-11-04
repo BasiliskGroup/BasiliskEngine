@@ -46,12 +46,12 @@
 namespace bsk::internal {
 
 // AoS types
-using Vec2Triplet = std::array<glm::vec2, 3>;
-using Vec2Pair = std::array<glm::vec2, 2>;
-using FloatPair = std::array<float, 2>;
-using Vec3ROWS = std::array<glm::vec3, ROWS>;
-using Mat3x3ROWS = std::array<glm::mat3x3, ROWS>;
-using FloatROWS = std::array<float, ROWS>;
+using BskVec2Triplet = std::array<glm::vec2, 3>;
+using BskVec2Pair = std::array<glm::vec2, 2>;
+using BskFloatPair = std::array<float, 2>;
+using BskVec3ROWS = std::array<glm::vec3, ROWS>;
+using BskMat3x3ROWS = std::array<glm::mat3x3, ROWS>;
+using BskFloatROWS = std::array<float, ROWS>;
 
 // Mini structs
 enum JType {

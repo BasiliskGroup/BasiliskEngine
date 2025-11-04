@@ -43,16 +43,16 @@ public:
 
     ForceTable* getTable();
     
-    Vec3ROWS& J();
-    Mat3x3ROWS& H();
-    FloatROWS& C();
-    FloatROWS& motor();
-    FloatROWS& stiffness();
-    FloatROWS& fracture();
-    FloatROWS& fmax();
-    FloatROWS& fmin();
-    FloatROWS& penalty();
-    FloatROWS& lambda();
+    BskVec3ROWS& J();
+    BskMat3x3ROWS& H();
+    BskFloatROWS& C();
+    BskFloatROWS& motor();
+    BskFloatROWS& stiffness();
+    BskFloatROWS& fracture();
+    BskFloatROWS& fmax();
+    BskFloatROWS& fmin();
+    BskFloatROWS& penalty();
+    BskFloatROWS& lambda();
 
     //table
     ForceType& getType();
