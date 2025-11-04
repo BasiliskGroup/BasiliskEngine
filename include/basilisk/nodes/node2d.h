@@ -45,6 +45,8 @@ public:
     Node2D& operator=(const Node2D& other) noexcept;
     Node2D& operator=(Node2D&& other) noexcept;
 
+    glm::vec3 getVelocity();
+
     void setPosition(glm::vec2 position);
     void setPosition(glm::vec3 position);
     void setRotation(float rotation);

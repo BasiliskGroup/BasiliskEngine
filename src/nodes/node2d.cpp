@@ -151,4 +151,8 @@ bool Node2D::isTouching(Node2D* other){
     return constrainedTo(other) == MANIFOLD;
 }
 
+glm::vec3 Node2D::getVelocity() {
+    return rigid->getVel();
+}
+
 }
