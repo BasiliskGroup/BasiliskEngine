@@ -17,15 +17,15 @@ private:
     std::vector<Vec2Pair> C0;
     std::vector<Vec2Pair> rA;
     std::vector<Vec2Pair> rB;
-    std::vector<vec2> normal;
+    std::vector<glm::vec2> normal;
     std::vector<float> friction;
     std::vector<bool> stick;
     std::vector<Vec2Triplet> simplex;
     std::vector<uint> forceIndex;
 
     // arrays for holding extra compute space
-    std::vector<vec2> tangent;
-    std::vector<mat2x2> basis;
+    std::vector<glm::vec2> tangent;
+    std::vector<glm::mat2x2> basis;
     std::vector<Vec2Pair> rAW;
     std::vector<Vec2Pair> rBW;
     std::vector<FloatROWS> cdA;
@@ -51,7 +51,7 @@ public:
     auto& getFriction() { return friction; }
     auto& getCdA() { return cdA; }
     auto& getCdB() { return cdB; }
-    vec2* getSimplexPtr(uint index) { return simplex[index].data(); }
+    glm::vec2* getSimplexPtr(uint index) { return simplex[index].data(); }
 
     uint reserve(uint numBodies);
     void resize(uint new_capacity) override;

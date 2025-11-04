@@ -63,13 +63,13 @@ void Node2D::updateModel() {
     model = glm::scale(model, glm::vec3(scale, 1.0f));
 }
 
-void Node2D::setPosition(vec2 position) {
+void Node2D::setPosition(glm::vec2 position) {
     this->rigid->setPosition({position.x, position.y, this->rotation});
     this->position = position;
     updateModel();
 }
 
-void Node2D::setPosition(vec3 position) {
+void Node2D::setPosition(glm::vec3 position) {
     this->rigid->setPosition(position);
     this->position = {position.x , position.y};
     this->rotation = position.z;
@@ -82,12 +82,12 @@ void Node2D::setRotation(float rotation) {
     updateModel();
 }
 
-void Node2D::setScale(vec2 scale) {
+void Node2D::setScale(glm::vec2 scale) {
     this->scale = scale;
     updateModel();
 }
 
-void Node2D::setVelocity(vec3 velocity) {
+void Node2D::setVelocity(glm::vec3 velocity) {
     this->rigid->setVelocity(velocity);
 }
 

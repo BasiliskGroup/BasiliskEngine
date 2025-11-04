@@ -15,20 +15,20 @@ private:
     // columns
     std::vector<Rigid*> bodies;
     std::vector<bool> toDelete;
-    std::vector<vec3> pos;
-    std::vector<vec3> initial;
-    std::vector<vec3> inertial;
-    std::vector<vec3> vel;
-    std::vector<vec3> prevVel;
-    std::vector<vec2> scale;
+    std::vector<glm::vec3> pos;
+    std::vector<glm::vec3> initial;
+    std::vector<glm::vec3> inertial;
+    std::vector<glm::vec3> vel;
+    std::vector<glm::vec3> prevVel;
+    std::vector<glm::vec2> scale;
     std::vector<float> friction;
     std::vector<float> mass;
     std::vector<float> moment;
     std::vector<float> radius;
     std::vector<uint> collider;
-    std::vector<mat2x2> mat;
-    std::vector<mat2x2> imat;
-    std::vector<mat2x2> rmat;
+    std::vector<glm::mat2x2> mat;
+    std::vector<glm::mat2x2> imat;
+    std::vector<glm::mat2x2> rmat;
     std::vector<bool> updated;
     std::vector<ushort> color;
     std::vector<ushort> degree;
@@ -39,8 +39,8 @@ private:
     std::vector<uint> inverseForceMap;
 
     // solving
-    std::vector<vec3> rhs;
-    std::vector<mat3x3> lhs;
+    std::vector<glm::vec3> rhs;
+    std::vector<glm::mat3x3> lhs;
 
 public:
     BodyTable(uint capacity);
@@ -77,7 +77,7 @@ public:
 
     void resize(uint newCapacity) override;
     void compact() override;
-    uint insert(Rigid* body, vec3 pos, vec3 vel, vec2 scale, float friction, float mass, float moment, uint collider, float radius);
+    uint insert(Rigid* body, glm::vec3 pos, glm::vec3 vel, glm::vec2 scale, float friction, float mass, float moment, uint collider, float radius);
 
     void writeToNodes();
 };

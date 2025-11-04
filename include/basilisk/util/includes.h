@@ -1,43 +1,32 @@
-#ifndef INCLUDES_H
-#define INCLUDES_H
+#ifndef BSK_INCLUDES_H
+#define BSK_INCLUDES_H
 
-// io
+// Standard library
 #include <iostream>
 #include <string>
-
-// errors
-#include <stdexcept>
-
-// standard data structures
 #include <array>
-#include <set>
-#include <tuple>
-#include <unordered_map>
 #include <vector>
+#include <unordered_map>
+#include <tuple>
 #include <stack>
-
-// helpful stuff
-#include <memory> // I forgor what this does but it was in the 3d version somewhere
-#include <optional> // check null returns (avoid using this)
-#include <utility> // for std::move and std::pair
+#include <set>
+#include <optional>
+#include <memory>
+#include <utility>
 #include <cmath>
 #include <algorithm>
-#include <functional>
 #include <numeric>
 #include <cstdint>
-#include <type_traits>
 #include <limits>
 #include <fstream>
 #include <sstream>
+#include <functional>
+#include <type_traits>
 
-// import glad and glfw
+// Third-party libraries
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-// import glm
 #include <glm/glm.hpp>
-
-// look for future changes to glm experimental
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_operation.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -45,14 +34,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// tbb
-
-
-// STB
 #include <stb/stb_image.h>
 #include <stb/stb_image_resize2.h>
 
-// Assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -61,27 +45,12 @@
 
 namespace bsk::internal {
 
-inline constexpr bool DEBUG_PRINT = true;
-inline constexpr bool DEBUG_LINEAR_PRINT = true;
-
-// shorthand names
-using vec2 = glm::vec2;
-using vec3 = glm::vec3;
-using vec4 = glm::vec4;
-using mat2x2 = glm::mat2x2;
-using mat3x3 = glm::mat3x3;
-using mat4x4 = glm::mat4x4;
-using quat = glm::quat;
-
-using uint = unsigned int;
-using ushort = unsigned short;
-
-// AoS Types
-using Vec2Triplet = std::array<vec2, 3>;
-using Vec2Pair = std::array<vec2, 2>;
+// AoS types
+using Vec2Triplet = std::array<glm::vec2, 3>;
+using Vec2Pair = std::array<glm::vec2, 2>;
 using FloatPair = std::array<float, 2>;
-using Vec3ROWS = std::array<vec3, ROWS>;
-using Mat3x3ROWS = std::array<mat3x3, ROWS>;
+using Vec3ROWS = std::array<glm::vec3, ROWS>;
+using Mat3x3ROWS = std::array<glm::mat3x3, ROWS>;
 using FloatROWS = std::array<float, ROWS>;
 
 // Mini structs
@@ -99,9 +68,9 @@ enum ForceType {
 };
 
 struct Vertex {
-    vec3 position;
-    vec2 uv;
-    vec3 normal;
+    glm::vec3 position;
+    glm::vec2 uv;
+    glm::vec3 normal;
 };
 
 }

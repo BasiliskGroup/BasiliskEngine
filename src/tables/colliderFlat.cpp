@@ -24,7 +24,7 @@ void ColliderFlat::compact() {
     toDelete.clear();
 }
 
-uint ColliderFlat::insert(std::vector<vec2> verts) {    
+uint ColliderFlat::insert(std::vector<glm::vec2> verts) {    
     // check to see if the vector is going to resize
     bool needsResize = this->verts.capacity() < verts.size() + vertSize;
     
@@ -46,7 +46,7 @@ uint ColliderFlat::insert(std::vector<vec2> verts) {
     float maxX = -INFINITY, maxY = -INFINITY;
     
     for (uint i = 0; i < verts.size(); ++i) {
-        vec2& v = verts[i];
+        glm::vec2& v = verts[i];
 
         if (v.x < minX) minX = v.x;
         if (v.y < minY) minY = v.y;

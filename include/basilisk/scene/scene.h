@@ -12,7 +12,7 @@ namespace bsk::internal {
 
 class Node;
 
-class Scene : public VirtualScene<Node, vec3, quat, vec3> {
+class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
     private:
         Camera* camera;
         Shader* shader;

@@ -16,7 +16,7 @@ private:
     uint index;
 
 public:
-    Collider(Solver* solver, std::vector<vec2> verts);
+    Collider(Solver* solver, std::vector<glm::vec2> verts);
     ~Collider();
 
     uint getIndex() { return index; }

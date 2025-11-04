@@ -2,14 +2,14 @@
 
 namespace bsk::internal {
 
-void tripleProduct(const vec2& a, const vec2& b, const vec2& c, vec2& o) {
+void tripleProduct(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, glm::vec2& o) {
     o = glm::dot(a, c) * b - glm::dot(a, b) * c;
 }
 
-void perpTowards(const vec2& v, const vec2& to, vec2& perp) {
+void perpTowards(const glm::vec2& v, const glm::vec2& to, glm::vec2& perp) {
     // Two possible perpendiculars
-    vec2 left  = vec2(-v.y,  v.x);
-    vec2 right = vec2( v.y, -v.x);
+    glm::vec2 left  = glm::vec2(-v.y,  v.x);
+    glm::vec2 right = glm::vec2( v.y, -v.x);
 
     // Pick whichever points more toward 'to'
     perp = (glm::dot(left, to) > glm::dot(right, to)) ? left : right;
@@ -23,15 +23,15 @@ void perpTowards(const vec2& v, const vec2& to, vec2& perp) {
  * @param mat 
  * @param v 
  */
-void transform(const vec2& pos, const mat2x2& mat, vec2& v) {
+void transform(const glm::vec2& pos, const glm::mat2x2& mat, glm::vec2& v) {
     v = mat * v + pos;
 }
 
-float cross(const vec2& a, const vec2& b) {
+float cross(const glm::vec2& a, const glm::vec2& b) {
     return a.x * b.y - a.y * b.x;
 }
 
-float triangleArea2(const vec2& a, const vec2& b, const vec2& c) {
+float triangleArea2(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
     return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
 }
 

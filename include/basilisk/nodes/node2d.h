@@ -9,9 +9,9 @@
 
 namespace bsk::internal {
 
-class Node2D : public VirtualNode<Node2D, vec2, float, vec2> {
+class Node2D : public VirtualNode<Node2D, glm::vec2, float, glm::vec2> {
 private:
-    using VirtualScene2D = VirtualScene<Node2D, vec2, float, vec2>;
+    using VirtualScene2D = VirtualScene<Node2D, glm::vec2, float, glm::vec2>;
 
     Rigid* rigid;
     float layer=0.0;
@@ -21,12 +21,12 @@ public:
         // graphics
         Mesh* mesh = nullptr;
         Material* material = nullptr;
-        vec2 position = { 0, 0 };
+        glm::vec2 position = { 0, 0 };
         float rotation = 0;
-        vec2 scale = { 1, 1 };
+        glm::vec2 scale = { 1, 1 };
         
         // both?
-        vec3 velocity = { 0, 0, 0 };
+        glm::vec3 velocity = { 0, 0, 0 };
 
         // physics
         Collider* collider = nullptr;
@@ -45,11 +45,11 @@ public:
     Node2D& operator=(const Node2D& other) noexcept;
     Node2D& operator=(Node2D&& other) noexcept;
 
-    void setPosition(vec2 position);
-    void setPosition(vec3 position);
+    void setPosition(glm::vec2 position);
+    void setPosition(glm::vec3 position);
     void setRotation(float rotation);
-    void setScale(vec2 scale);
-    void setVelocity(vec3 velocity);
+    void setScale(glm::vec2 scale);
+    void setVelocity(glm::vec3 velocity);
 
     Scene2D* getScene() { return (Scene2D*) scene; }
 

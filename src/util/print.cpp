@@ -26,23 +26,23 @@ void print(float f) {
     std::cout << f << std::endl;
 }
 
-void print(const vec2& vec) {
+void print(const glm::vec2& vec) {
     std::cout << "<" << vec.x << "\t" << vec.y << ">" << std::endl;
 }
 
-void print(const vec3& vec) {
+void print(const glm::vec3& vec) {
     std::cout << "<" << vec.x << "\t" << vec.y << "\t" << vec.z << ">" << std::endl;
 }
 
-void print(const quat& quat) {
+void print(const glm::quat& quat) {
     std::cout << "<" << quat.w << "\t" << quat.x << "\t" << quat.y << "\t" << quat.z << ">" << std::endl;
 }
 
-void print(const mat2x2& mat) {
+void print(const glm::mat2x2& mat) {
     for (int i = 0; i < 2; i++) print(mat[i]);
 }
 
-void print(const mat3x3& mat) {
+void print(const glm::mat3x3& mat) {
     for (int i = 0; i < 3; i++) print(mat[i]);
 }
 

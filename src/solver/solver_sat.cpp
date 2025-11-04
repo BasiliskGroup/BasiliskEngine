@@ -10,7 +10,7 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     int firstIndex    = -1;
     int secondIndex   = -1;
 
-    vec2 dir = a.imat * pair.dir;
+    glm::vec2 dir = a.imat * pair.dir;
 
     for (uint i = 0; i < a.length; i++) {
         float depth = glm::dot(a.start[i], dir);
@@ -29,8 +29,8 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     }
 
     // select vertices to use
-    vec2 rA1 = a.start[firstIndex];
-    vec2 rA2 = firstDepth - secondDepth < COLLISION_MARGIN ? a.start[secondIndex] : a.start[firstIndex];
+    glm::vec2 rA1 = a.start[firstIndex];
+    glm::vec2 rA2 = firstDepth - secondDepth < COLLISION_MARGIN ? a.start[secondIndex] : a.start[firstIndex];
 
     // write contact points to manifold index
     getManifoldTable()->getRA()[pair.manifoldIndex][0] = rA1 * a.scale;
@@ -63,23 +63,23 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     }
 
     // select vertices to use
-    vec2 rB1 = b.start[firstIndex];
-    vec2 rB2 = firstDepth - secondDepth < COLLISION_MARGIN ? b.start[secondIndex] : b.start[firstIndex];
+    glm::vec2 rB1 = b.start[firstIndex];
+    glm::vec2 rB2 = firstDepth - secondDepth < COLLISION_MARGIN ? b.start[secondIndex] : b.start[firstIndex];
 
     // write contact points to manifold index
     getManifoldTable()->getRB()[pair.manifoldIndex][0] = rB1 * b.scale;
     getManifoldTable()->getRB()[pair.manifoldIndex][1] = rB2 * b.scale;
 }
 
-void Solver::intersect(ColliderRow& a, ColliderRow& b, CollisionPair& pair, const vec2& mtv) {
+void Solver::intersect(ColliderRow& a, ColliderRow& b, CollisionPair& pair, const glm::vec2& mtv) {
 
 }
 
-void Solver::clampToEdge(const vec2& edge, vec2& toClamp) {
+void Solver::clampToEdge(const glm::vec2& edge, glm::vec2& toClamp) {
 
 }
 
-void Solver::dotEdgeIntersect(const vec2* verts, uint start, Dots dots, float thresh) {
+void Solver::dotEdgeIntersect(const glm::vec2* verts, uint start, Dots dots, float thresh) {
 
 }
 

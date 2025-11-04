@@ -49,20 +49,20 @@ private:
 
     // collision struct for hotloop caching
     struct ColliderRow {
-        vec2 pos;
-        vec2 scale;
-        mat2x2 mat;
-        mat2x2 imat;
-        vec2* start;
+        glm::vec2 pos;
+        glm::vec2 scale;
+        glm::mat2x2 mat;
+        glm::mat2x2 imat;
+        glm::vec2* start;
         uint length;
-        vec2* simplex;
+        glm::vec2* simplex;
         std::array<float, 4> dots; // TODO this needs to be at least the length of the collider
 
         ColliderRow() = default;
     };
 
     struct PolytopeFace {
-        vec2 normal;
+        glm::vec2 normal;
         float distance;
 
         // face vertices
@@ -70,13 +70,13 @@ private:
         ushort vb;
 
         PolytopeFace() = default;
-        PolytopeFace(ushort va, ushort vb, vec2 normal, float distance)
+        PolytopeFace(ushort va, ushort vb, glm::vec2 normal, float distance)
             : normal(normal), distance(distance), va(va), vb(vb) {}
     };
 
-    using Simplex = std::array<vec2, 3>;
+    using Simplex = std::array<glm::vec2, 3>;
     using SpSet = std::array<ushort, EPA_ITERATIONS + 3>;
-    using SpArray = std::array<vec2, EPA_ITERATIONS + 3>;
+    using SpArray = std::array<glm::vec2, EPA_ITERATIONS + 3>;
     using Polytope = std::array<PolytopeFace, EPA_ITERATIONS + 3>;
 
     struct CollisionPair {
@@ -85,7 +85,7 @@ private:
 
         // gjk
         Simplex minks;
-        vec2 dir;
+        glm::vec2 dir;
 
         // epa
         // we add 3 since we start with 3 faces
@@ -157,7 +157,7 @@ private:
     uint handle2(ColliderRow& a, ColliderRow& b, CollisionPair& pair);
     uint handle3(ColliderRow& a, ColliderRow& b, CollisionPair& pair);
     void addSupport(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint insertIndex);
-    void getFar(const ColliderRow& row, const vec2& dir, vec2& simplexLocal);
+    void getFar(const ColliderRow& row, const glm::vec2& dir, glm::vec2& simplexLocal);
 
     // epa helper methods
     ushort insertHorizon(SpSet& spSet, ushort spIndex, ushort setSize);
@@ -170,9 +170,9 @@ private:
     using Dots = std::array<float, 4>;
 
     // sat helper functions
-    void intersect(ColliderRow& a, ColliderRow& b, CollisionPair& pair, const vec2& mtv);
-    void clampToEdge(const vec2& edge, vec2& toClamp);
-    void dotEdgeIntersect(const vec2* verts, uint start, Dots dots, float thresh);
+    void intersect(ColliderRow& a, ColliderRow& b, CollisionPair& pair, const glm::vec2& mtv);
+    void clampToEdge(const glm::vec2& edge, glm::vec2& toClamp);
+    void dotEdgeIntersect(const glm::vec2* verts, uint start, Dots dots, float thresh);
 
     template <typename Compare> // std::greater_equal<int>()) // std::less_equal<int>()) // if (cmp(a, b))
     void findBounds(Dots dots, const float thresh, uint& begin, uint& end, Compare cmp);

@@ -5,7 +5,7 @@
 
 namespace bsk::internal {
 
-inline void solve(const mat3x3& A, vec3& x, const vec3& b) {
+inline void solve(const glm::mat3x3& A, glm::vec3& x, const glm::vec3& b) {
     // Compute LDL^T decomposition
     float D1 = A[0][0];
     float L21 = A[1][0] / A[0][0];

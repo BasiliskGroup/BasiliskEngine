@@ -199,18 +199,18 @@ void Solver::removeFace(Polytope& polytope, ushort index, ushort numFaces) {
  */
 void Solver::supportSpOnly(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint insertIndex) {
     // direct search vector into local space
-    vec2 dirA = a.imat *  pair.dir;
-    vec2 dirB = b.imat * (-pair.dir);
+    glm::vec2 dirA = a.imat *  pair.dir;
+    glm::vec2 dirB = b.imat * (-pair.dir);
 
     // Transform selected local vertices into world space
-    vec2 localA; 
-    vec2 localB;
+    glm::vec2 localA; 
+    glm::vec2 localB;
     getFar(a, dirA, localA);
     getFar(b, dirB, localB);
 
     // TODO replace these with a transform function
-    vec2 worldA = a.pos + a.mat * localA;
-    vec2 worldB = b.pos + b.mat * localB;
+    glm::vec2 worldA = a.pos + a.mat * localA;
+    glm::vec2 worldB = b.pos + b.mat * localB;
 
     // Compute Minkowski support point
     pair.sps[insertIndex] = worldA - worldB;
@@ -234,10 +234,10 @@ void Solver::buildFace(CollisionPair& pair, ushort indexA, ushort indexB, ushort
     // print(indexB);
     // print(indexA);
 
-    vec2 edge = pair.sps[indexB] - pair.sps[indexA];
+    glm::vec2 edge = pair.sps[indexB] - pair.sps[indexA];
 
     // TODO check if we need midpoint or could just use vertex a
-    vec2 normal = { -edge.y, edge.x };
+    glm::vec2 normal = { -edge.y, edge.x };
     if (glm::dot(pair.sps[indexA], normal) < 0) {
         normal *= -1.0f;
     }

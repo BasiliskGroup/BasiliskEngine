@@ -2,7 +2,7 @@
 
 namespace bsk::internal {
 
-Collider::Collider(Solver* solver, std::vector<vec2> verts) : solver(solver) {
+Collider::Collider(Solver* solver, std::vector<glm::vec2> verts) : solver(solver) {
     index = getColliderFlat()->insert(verts);
 }
 

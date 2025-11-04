@@ -168,7 +168,7 @@ void Solver::sphericalCollision() {
         body->precomputeRelations();
     }
 
-    vec2 dpos;
+    glm::vec2 dpos;
     float dy;
     float radsum;
     for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext()) {
@@ -232,7 +232,7 @@ void Solver::narrowCollision() {
         // determine collision normal
         count++;
         ushort frontIndex = epa(a, b, collisionPair);
-        vec2 normal = collisionPair.polytope[frontIndex].normal;
+        glm::vec2 normal = collisionPair.polytope[frontIndex].normal;
 
         // TODO determine if we need this check
         if (glm::length2(normal) < 1e-16f) {
@@ -344,13 +344,13 @@ void Solver::warmstartManifolds() {
         uint specialIndex = specials[i];
         uint bodyIndex = bodyIndices[i];
 
-        const mat2x2& basis = bases[specialIndex];
-        const vec2& normal = normals[specialIndex];
-        const vec2& tangent = tangents[specialIndex];
+        const glm::mat2x2& basis = bases[specialIndex];
+        const glm::vec2& normal = normals[specialIndex];
+        const glm::vec2& tangent = tangents[specialIndex];
 
         // compute jacobians
         for (uint j = 0; j < 2; j++) {
-            const vec2& rW = isA[i] ? rAWs[specialIndex][j] : rBWs[specialIndex][j];
+            const glm::vec2& rW = isA[i] ? rAWs[specialIndex][j] : rBWs[specialIndex][j];
             float sign = 2 * isA[i] - 1;
 
             if (PRINT_TIME) print("jacobian");
@@ -362,8 +362,8 @@ void Solver::warmstartManifolds() {
 
             // Precompute the constraint and derivatives at C(x-), since we use a truncated Taylor series for contacts (Sec 4).
             // Note that we discard the second order term, since it is insignificant for contacts
-            Js[i][2 * j + JN] = sign * vec3{ basis[0][0], basis[0][1], cross(rW, normal) };
-            Js[i][2 * j + JT] = sign * vec3{ basis[1][0], basis[1][1], cross(rW, tangent) };
+            Js[i][2 * j + JN] = sign * glm::vec3{ basis[0][0], basis[0][1], cross(rW, normal) };
+            Js[i][2 * j + JT] = sign * glm::vec3{ basis[1][0], basis[1][1], cross(rW, tangent) };
 
             C0s[specialIndex][j] += sign * basis * (xy(pos[bodyIndices[i]]) + rW);
 
@@ -416,7 +416,7 @@ void Solver::primalUpdate(float dt) {
         if (hasNaN(inertial[b])) throw std::runtime_error("inertial has NaN");
         if (hasNaN(pos[b])) throw std::runtime_error("pos has NaN");
 
-        lhs[b] = glm::diagonal3x3(vec3{ mass[b], mass[b], moment[b] } / (dt * dt));
+        lhs[b] = glm::diagonal3x3(glm::vec3{ mass[b], mass[b], moment[b] } / (dt * dt));
         rhs[b] = lhs[b] * (pos[b] - inertial[b]);
 
         if (PRINT_TIME) print(pos[b]);
@@ -450,7 +450,7 @@ void Solver::primalUpdate(float dt) {
                 }
                 
                 // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
-                mat3x3 G = glm::diagonal3x3(vec3{ glm::length(H[forceIndex][j][0]), glm::length(H[forceIndex][j][1]), glm::length(H[forceIndex][j][2]) }) * abs(f);
+                glm::mat3x3 G = glm::diagonal3x3(glm::vec3{ glm::length(H[forceIndex][j][0]), glm::length(H[forceIndex][j][1]), glm::length(H[forceIndex][j][2]) }) * abs(f);
 
                 // Accumulate force (Eq. 13) and hessian (Eq. 17)
                 if (PRINT_TIME) print("J");
@@ -464,7 +464,7 @@ void Solver::primalUpdate(float dt) {
         }
 
         // Solve the SPD linear system using LDL and apply the update (Eq. 4)
-        vec3 x = vec3(0);
+        glm::vec3 x = glm::vec3(0);
 
         if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
         if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");

@@ -23,17 +23,17 @@ void Node::updateModel() {
     model = glm::scale(model, scale);
 }
 
-void Node::setPosition(vec3 position) {
+void Node::setPosition(glm::vec3 position) {
     this->position = position;
     updateModel();
 }
 
-void Node::setRotation(quat rotation) {
+void Node::setRotation(glm::quat rotation) {
     this->rotation = rotation;
     updateModel();
 }
 
-void Node::setScale(vec3 scale) {
+void Node::setScale(glm::vec3 scale) {
     this->scale = scale;
     updateModel();
 }

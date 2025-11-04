@@ -8,7 +8,7 @@ namespace bsk::internal {
  * 
  * @param engine Pointer to the parent object
  */
-Scene::Scene(Engine* engine) : VirtualScene<Node, vec3, quat, vec3>(), engine(engine) {
+Scene::Scene(Engine* engine) : VirtualScene<Node, glm::vec3, glm::quat, glm::vec3>(), engine(engine) {
     camera = new Camera(engine);
     shader = new Shader("shaders/default.vert", "shaders/default.frag");
     engine->getResourceServer()->write(shader, "textureArrays", "materials");

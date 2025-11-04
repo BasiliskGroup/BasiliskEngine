@@ -37,8 +37,8 @@ private:
     float density;
 
 public:
-    Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, Collider* collider);
-    Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, uint collider);
+    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider);
+    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider);
     ~Rigid();
 
     // list management
@@ -55,16 +55,16 @@ public:
     Node2D* getNode() { return node; }
     uint getIndex() { return index; }
 
-    vec3 getPos();
-    vec2 getScale();
+    glm::vec3 getPos();
+    glm::vec2 getScale();
     float getDensity();
     float getFriction();
-    vec3 getVel();
+    glm::vec3 getVel();
     uint getColliderIndex();
 
     // setters
-    void setPosition(const vec3& pos);
-    void setVelocity(const vec3& vel);
+    void setPosition(const glm::vec3& pos);
+    void setVelocity(const glm::vec3& vel);
 
     void setIndex(uint index) { this->index = index; }
     void setNode(Node2D* node) {this->node = node; }

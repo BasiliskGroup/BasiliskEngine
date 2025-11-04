@@ -49,8 +49,8 @@ void ForceTable::reserveManifolds(uint numPairs, uint& forceIndex, uint& manifol
         toDelete[i] = false;
 
         for (uint j = 0; j < MANIFOLD_ROWS; j++) {
-            J[i][j] = vec3(0);
-            H[i][j] = mat3x3(0);
+            J[i][j] = glm::vec3(0);
+            H[i][j] = glm::mat3x3(0);
             C[i][j]     = 0.0f;
             motor[i][j] = 0.0f;
             stiffness[i][j] =  std::numeric_limits<float>::infinity();

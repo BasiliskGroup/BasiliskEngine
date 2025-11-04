@@ -2,7 +2,7 @@
 
 namespace bsk::internal {
 
-Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, Collider* collider) : 
+Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider) : 
     solver(solver), 
     node(node), 
     forces(nullptr), 
@@ -22,7 +22,7 @@ Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, 
     index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider->getIndex(), radius);
 }   
 
-Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, uint collider) : 
+Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider) : 
     solver(solver), 
     node(node), 
     forces(nullptr), 
@@ -60,11 +60,11 @@ BodyTable* Rigid::getBodyTable() {
     return solver->getBodyTable();
 }
 
-vec3 Rigid::getPos() {
+glm::vec3 Rigid::getPos() {
     return getBodyTable()->getPos()[index];
 }
 
-vec2 Rigid::getScale() {
+glm::vec2 Rigid::getScale() {
     return getBodyTable()->getScale()[index];
 }
 
@@ -76,7 +76,7 @@ float Rigid::getFriction() {
     return getBodyTable()->getFriction()[index];
 }
 
-vec3 Rigid::getVel() {
+glm::vec3 Rigid::getVel() {
     return getBodyTable()->getVel()[index];
 }
 
@@ -170,11 +170,11 @@ void Rigid::clear() {
 // --------------------
 // setters
 // --------------------
-void Rigid::setPosition(const vec3& pos) {
+void Rigid::setPosition(const glm::vec3& pos) {
     getBodyTable()->getPos()[index] = pos;
 }
 
-void Rigid::setVelocity(const vec3& vel) {
+void Rigid::setVelocity(const glm::vec3& vel) {
     getBodyTable()->getVel()[index] = vel;
 }
 

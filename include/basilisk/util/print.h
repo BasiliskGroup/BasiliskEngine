@@ -11,11 +11,11 @@ void print(int n);
 void print(long l);
 void print(uint n);
 void print(float f);
-void print(const vec2& vec);
-void print(const vec3& vec);
-void print(const quat& quat);
-void print(const mat2x2& mat);
-void print(const mat3x3& mat);
+void print(const glm::vec2& vec);
+void print(const glm::vec3& vec);
+void print(const glm::quat& quat);
+void print(const glm::mat2x2& mat);
+void print(const glm::mat3x3& mat);
 
 }
 

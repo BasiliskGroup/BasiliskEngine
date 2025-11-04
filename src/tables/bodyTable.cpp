@@ -46,14 +46,14 @@ void BodyTable::computeTransforms() {
 }
 
 void BodyTable::warmstartBodies(const float dt, const float gravity) {
-    vec3 gravityVec = { 0, gravity, 0 };
+    glm::vec3 gravityVec = { 0, gravity, 0 };
     for (uint i = 0; i < size; i++) {
 
         // Compute inertial position (Eq 2)
         inertial[i] = pos[i] + vel[i] * dt + gravityVec * (dt * dt) * (float) (mass[i] > 0);
 
         // Adaptive warmstart (See original VBD paper) TODO
-        vec3 accel = (vel[i] - prevVel[i]) / dt;
+        glm::vec3 accel = (vel[i] - prevVel[i]) / dt;
         float accelExt = accel.y * glm::sign(gravity);
         float accelWeight = glm::clamp(accelExt / abs(gravity), 0.0f, 1.0f);
         accelWeight = std::isfinite(accelWeight) ? accelWeight : 0.0f;
@@ -125,7 +125,7 @@ void BodyTable::compact() {
     }
 }
 
-uint BodyTable::insert(Rigid* body, vec3 pos, vec3 vel, vec2 scale, float friction, float mass, float moment, uint collider, float radius) {
+uint BodyTable::insert(Rigid* body, glm::vec3 pos, glm::vec3 vel, glm::vec2 scale, float friction, float mass, float moment, uint collider, float radius) {
     if (size == capacity) {
         resize(capacity * 2);
     }
@@ -155,7 +155,7 @@ void BodyTable::markAsDeleted(uint index) {
 void BodyTable::writeToNodes() {
     for (uint i = 0; i < size; i++) {
         Node2D* node = bodies[i]->getNode();
-        vec3& pos = this->pos[i];
+        glm::vec3& pos = this->pos[i];
 
         // print((long) node);
         // print(pos);

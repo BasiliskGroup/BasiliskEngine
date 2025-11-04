@@ -70,8 +70,8 @@ uint Solver::handle1(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
 }
 
 uint Solver::handle2(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
-    vec2 CB = pair.minks[1] - pair.minks[0];
-    vec2 CO =               - pair.minks[0];
+    glm::vec2 CB = pair.minks[1] - pair.minks[0];
+    glm::vec2 CO =               - pair.minks[0];
     tripleProduct(CB, CO, CB, pair.dir);
 
     if (glm::length2(pair.dir) < COLLISION_MARGIN) {
@@ -83,12 +83,12 @@ uint Solver::handle2(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
 }
 
 uint Solver::handle3(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
-    vec2 AB = pair.minks[1] - pair.minks[2];
-    vec2 AC = pair.minks[0] - pair.minks[2];
-    vec2 AO =               - pair.minks[2];
-    vec2 CO =               - pair.minks[0];
+    glm::vec2 AB = pair.minks[1] - pair.minks[2];
+    glm::vec2 AC = pair.minks[0] - pair.minks[2];
+    glm::vec2 AO =               - pair.minks[2];
+    glm::vec2 CO =               - pair.minks[0];
 
-    vec2 perp;
+    glm::vec2 perp;
     perpTowards(AB, CO, perp);
     if (glm::dot(perp, AO) > -COLLISION_MARGIN) {
         // remove 0
@@ -100,7 +100,7 @@ uint Solver::handle3(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
         return 2;
     }
 
-    vec2 BO = -pair.minks[1];
+    glm::vec2 BO = -pair.minks[1];
     perpTowards(AC, BO, perp);
     if (glm::dot(perp, AO) > -COLLISION_MARGIN) {
         // remove 1
@@ -118,18 +118,18 @@ uint Solver::handle3(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
 
 void Solver::addSupport(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint insertIndex) {
     // direct search vector into local space
-    vec2 dirA = a.imat *  pair.dir;
-    vec2 dirB = b.imat * -pair.dir;
+    glm::vec2 dirA = a.imat *  pair.dir;
+    glm::vec2 dirB = b.imat * -pair.dir;
 
-    vec2 localA;
-    vec2 localB;
+    glm::vec2 localA;
+    glm::vec2 localB;
 
     getFar(a, dirA, localA);
     getFar(b, dirB, localB);
 
     // Transform selected local vertices into world space
-    vec2 worldA = a.pos + a.mat * localA;
-    vec2 worldB = b.pos + b.mat * localB;
+    glm::vec2 worldA = a.pos + a.mat * localA;
+    glm::vec2 worldB = b.pos + b.mat * localB;
 
     if (GJK_PRINT) print("matrices (CW positive)");
     if (GJK_PRINT) print(a.mat);
@@ -145,7 +145,7 @@ void Solver::addSupport(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uin
     pair.minks[insertIndex] = worldA - worldB;
 }
 
-void Solver::getFar(const ColliderRow& row, const vec2& dir, vec2& simplexLocal) {
+void Solver::getFar(const ColliderRow& row, const glm::vec2& dir, glm::vec2& simplexLocal) {
     uint farIndex = 0;
     float maxDot = glm::dot(row.start[0], dir);
 
