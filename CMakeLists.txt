@@ -33,6 +33,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
+# Create INTERFACE target for GLM
+add_library(glm_h INTERFACE)
+target_include_directories(glm_h INTERFACE ${glm_SOURCE_DIR})
+
 # ---- GLFW (window/input) ----
 FetchContent_Declare(
     glfw
@@ -54,7 +58,6 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/assimp/assimp.git
     GIT_TAG        v6.0.2
 )
-# Disable tests/tools to avoid unnecessary build
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(assimp)
@@ -65,10 +68,7 @@ FetchContent_MakeAvailable(assimp)
 file(GLOB_RECURSE BASILISK_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
-
-# Remove main.cpp if present
 list(REMOVE_ITEM BASILISK_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
-
 add_library(basilisk STATIC ${BASILISK_SOURCES})
 
 # ======================================================
@@ -76,20 +76,23 @@ add_library(basilisk STATIC ${BASILISK_SOURCES})
 # ======================================================
 target_include_directories(basilisk
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  # for downstream users
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
     PRIVATE
-        ${glm_SOURCE_DIR}                                       # needed to build Basilisk
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/stb>
 )
 
 # ======================================================
-# Link compiled dependencies (PRIVATE)
+# Link dependencies
 # ======================================================
 target_link_libraries(basilisk
     PUBLIC
-        glad
         glfw
         assimp
+        glm_h
+        stb
+    PRIVATE
+        glad
 )
 
 # ======================================================
