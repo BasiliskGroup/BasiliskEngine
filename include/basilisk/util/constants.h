@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef BSK_CONSTANTS_H
+#define BSK_CONSTANTS_H
 
 namespace bsk::internal {
     inline constexpr unsigned int ROWS = 4;
