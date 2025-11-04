@@ -300,9 +300,23 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::render() {
     shader->setUniform("uModel", model);
-    int materialID = scene->getEngine()->getResourceServer()->getMaterialServer()->get(material);
+    int materialID = getEngine()->getResourceServer()->getMaterialServer()->get(material);
     shader->setUniform("uMaterialID", materialID);
     vao->render();
+}
+
+/**
+ * @brief 
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @return Engine* 
+ */
+template<typename Derived, typename P, typename R, typename S>
+Engine* VirtualNode<Derived, P, R, S>::getEngine() {
+    return scene->getEngine();
 }
 
 /**

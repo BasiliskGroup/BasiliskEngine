@@ -11,6 +11,8 @@
 
 namespace bsk::internal {
 
+class Engine;
+
 template<typename NodeType, typename P, typename R, typename S>
 class VirtualScene;
 
@@ -88,6 +90,7 @@ public:
     Derived* getParent() const { return parent; }
     Shader* getShader() { return shader; }
     Material* getMaterial() { return material; }
+    Engine* getEngine();
 
     // node hierarchy
     const std::vector<Derived*>& getChildren() { return children; }
