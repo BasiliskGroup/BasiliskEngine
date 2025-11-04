@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/BasiliskTargets.cmake")
+
+# Users must provide glm/glfw externally if needed
+find_package(glm REQUIRED)
+find_package(glfw REQUIRED)

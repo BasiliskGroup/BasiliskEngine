@@ -1,99 +1,134 @@
-cmake_minimum_required(VERSION 3.14)
-project(Basilisk)
+cmake_minimum_required(VERSION 3.20)
+project(BasiliskEngine LANGUAGES CXX)
 
+# ======================================================
+# Build options
+# ======================================================
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+option(BASILISK_BUILD_DOCS "Build API documentation" OFF)
+option(BASILISK_BUILD_TESTS "Build Basilisk tests" OFF)
+option(BASILISK_BUILD_EXAMPLES "Build Basilisk examples" OFF)
 
 # ======================================================
-# Dependencies
+# External dependencies via FetchContent
 # ======================================================
+include(FetchContent)
 
-# glad
-add_library(glad STATIC include/glad/glad.c)
-target_include_directories(glad PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+# ---- GLAD (OpenGL loader) ----
+FetchContent_Declare(
+    glad
+    GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+    GIT_TAG        master
 )
+FetchContent_MakeAvailable(glad)
 
-# stb (header-only)
+# ---- GLM (header-only math) ----
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG        1.0.1
+)
+FetchContent_MakeAvailable(glm)
+
+# ---- GLFW (window/input) ----
+FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw.git
+    GIT_TAG        3.3.8
+)
+FetchContent_MakeAvailable(glfw)
+
+# ---- STB (local header-only) ----
 add_library(stb INTERFACE)
-target_include_directories(stb INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+target_include_directories(stb
+    INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/stb>
 )
 
-# External deps (glfw, glm, assimp)
-add_subdirectory(include)
+# ---- Assimp (3D model loading) ----
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG        v6.0.2
+)
+# Disable tests/tools to avoid unnecessary build
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(assimp)
 
 # ======================================================
-# Library target (Basilisk)
+# Basilisk sources
 # ======================================================
-
-# Collect all .cpp source files
-file(GLOB_RECURSE ENGINE_SRC
+file(GLOB_RECURSE BASILISK_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-# Remove test main.cpp if it exists
-list(REMOVE_ITEM ENGINE_SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+# Remove main.cpp if present
+list(REMOVE_ITEM BASILISK_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
-add_library(basilisk STATIC ${ENGINE_SRC})
+add_library(basilisk STATIC ${BASILISK_SOURCES})
 
-# Only public include directory now — all headers live under include/basilisk/
+# ======================================================
+# Include directories for Basilisk
+# ======================================================
 target_include_directories(basilisk
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  # for downstream users
+    PRIVATE
+        ${glm_SOURCE_DIR}                                       # needed to build Basilisk
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/stb>
 )
 
+# ======================================================
+# Link compiled dependencies (PRIVATE)
+# ======================================================
 target_link_libraries(basilisk
-    PUBLIC
+    PRIVATE
         glad
         glfw
-        glm
         assimp
-        stb
 )
 
 # ======================================================
-# Example / test executable
+# Compiler warnings
 # ======================================================
+# if(MSVC)
+#     target_compile_options(basilisk PRIVATE /W4 /permissive-)
+# else()
+#     target_compile_options(basilisk PRIVATE -Wall -Wextra -Wpedantic)
+# endif()
 
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    add_executable(engine ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-    target_link_libraries(engine PRIVATE basilisk)
+# ======================================================
+# Optional docs/tests/examples
+# ======================================================
+if(BASILISK_BUILD_DOCS)
+    find_package(Doxygen 1.9.8)
+    if(DOXYGEN_FOUND)
+        add_subdirectory(docs)
+    else()
+        message(WARNING "Doxygen not found, skipping docs")
+    endif()
+endif()
 
-    # Copy resources for runtime
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if(BASILISK_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(BASILISK_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 # ======================================================
-# Install rules (optional, good for packaging / FetchContent)
+# Summary
 # ======================================================
-
-install(TARGETS basilisk
-    EXPORT BasiliskTargets
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-install(DIRECTORY include/ DESTINATION include)
-
-install(EXPORT BasiliskTargets
-    FILE BasiliskTargets.cmake
-    NAMESPACE Basilisk::
-    DESTINATION lib/cmake/Basilisk
-)
-
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/BasiliskConfigVersion.cmake"
-    VERSION 1.0.0
-    COMPATIBILITY SameMajorVersion
-)
-
-install(FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/BasiliskConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/BasiliskConfigVersion.cmake"
-    DESTINATION lib/cmake/Basilisk
-)
+message(STATUS "")
+message(STATUS "================= Basilisk Configuration =================")
+message(STATUS "  C++ Standard:          ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Build Docs:            ${BASILISK_BUILD_DOCS}")
+message(STATUS "  Build Tests:           ${BASILISK_BUILD_TESTS}")
+message(STATUS "  Build Examples:        ${BASILISK_BUILD_EXAMPLES}")
+message(STATUS "==========================================================")

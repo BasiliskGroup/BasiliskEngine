@@ -22,7 +22,9 @@ inline void windowResize(GLFWwindow* window, int width, int height) {
 void enableX11() {
     const char* sessionType = getenv("XDG_SESSION_TYPE");    
     if (sessionType && std::string(sessionType) == "wayland") {
-        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+        #if defined(__linux__)
+            glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+        #endif
     }
 }
 
