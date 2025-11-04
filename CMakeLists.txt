@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(BasiliskEngine LANGUAGES CXX)
+project(BasiliskEngine LANGUAGES C CXX)
 
 # ======================================================
 # Build options
@@ -18,22 +18,26 @@ option(BASILISK_BUILD_EXAMPLES "Build Basilisk examples" OFF)
 include(FetchContent)
 
 # ---- GLAD (OpenGL loader) ----
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/include/glad")
-    message(STATUS "Using local GLAD headers")
-    add_library(glad INTERFACE)
-    target_include_directories(glad INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/glad)
+if(EXISTS "${GLAD_DIR}/glad.c")
+    message(STATUS "Using local GLAD source")
+    add_library(glad STATIC
+        ${GLAD_DIR}/glad.c
     )
+    target_include_directories(glad
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+    target_compile_definitions(glad PRIVATE GLAD_GLAPI_EXPORT)
 else()
-    if(NOT TARGET glad)
-        message(STATUS "Fetching GLAD from remote...")
-        FetchContent_Declare(
-            glad
-            GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-            GIT_TAG        master
-        )
-        FetchContent_MakeAvailable(glad)
-    endif()
+    message(STATUS "Fetching GLAD from remote...")
+    FetchContent_Declare(
+        glad
+        GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+        GIT_TAG        master
+    )
+    FetchContent_MakeAvailable(glad)
 endif()
 
 # ---- GLM (header-only math) ----
@@ -44,7 +48,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
-# Create INTERFACE target for GLM
 add_library(glm_h INTERFACE)
 target_include_directories(glm_h INTERFACE ${glm_SOURCE_DIR})
 
@@ -99,24 +102,17 @@ target_include_directories(basilisk
 # ======================================================
 # Link dependencies
 # ======================================================
+find_package(OpenGL REQUIRED)
+
 target_link_libraries(basilisk
     PUBLIC
         glfw
         glad
-        ${OPENGL_LIBRARIES}
+        OpenGL::GL
         assimp
         glm_h
         stb
 )
-
-# ======================================================
-# Compiler warnings
-# ======================================================
-# if(MSVC)
-#     target_compile_options(basilisk PRIVATE /W4 /permissive-)
-# else()
-#     target_compile_options(basilisk PRIVATE -Wall -Wextra -Wpedantic)
-# endif()
 
 # ======================================================
 # Optional docs/tests/examples
