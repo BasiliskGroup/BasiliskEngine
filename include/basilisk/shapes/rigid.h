@@ -1,5 +1,5 @@
-#ifndef RIGID_H
-#define RIGID_H
+#ifndef BSK_RIGID_H
+#define BSK_RIGID_H
 
 namespace bsk::internal {
 

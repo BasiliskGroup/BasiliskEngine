@@ -1,5 +1,5 @@
-#ifndef ERASE_CHUNKS_H
-#define ERASE_CHUNKS_H
+#ifndef BSK_ERASE_CHUNKS_H
+#define BSK_ERASE_CHUNKS_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/shapes/collider.h>

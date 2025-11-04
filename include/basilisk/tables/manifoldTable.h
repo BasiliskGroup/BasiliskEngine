@@ -1,5 +1,5 @@
-#ifndef MANIFOLD_TABLE_H
-#define MANIFOLD_TABLE_H
+#ifndef BSK_MANIFOLD_TABLE_H
+#define BSK_MANIFOLD_TABLE_H
 
 #include <basilisk/tables/virtualTable.h>
 

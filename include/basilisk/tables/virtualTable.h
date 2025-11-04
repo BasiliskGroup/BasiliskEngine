@@ -1,5 +1,5 @@
-#ifndef VIRTUAL_TABLE_H
-#define VIRTUAL_TABLE_H
+#ifndef BSK_VIRTUAL_TABLE_H
+#define BSK_VIRTUAL_TABLE_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/tables/eraseChunks.h>

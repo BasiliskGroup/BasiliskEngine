@@ -1,5 +1,5 @@
-#ifndef RESOURCE_SERVER_H
-#define RESOURCE_SERVER_H
+#ifndef BSK_RESOURCE_SERVER_H
+#define BSK_RESOURCE_SERVER_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/render/shader.h>

@@ -1,5 +1,5 @@
-#ifndef RANDOM_H
-#define RANDOM_H
+#ifndef BSK_RANDOM_H
+#define BSK_RANDOM_H
 
 #include <random>
 #include <basilisk/util/includes.h>

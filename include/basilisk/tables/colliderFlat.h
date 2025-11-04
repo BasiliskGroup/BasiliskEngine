@@ -1,5 +1,5 @@
-#ifndef COLLIDER_FLAT_H
-#define COLLIDER_FLAT_H
+#ifndef BSK_COLLIDER_FLAT_H
+#define BSK_COLLIDER_FLAT_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/tables/virtualTable.h>

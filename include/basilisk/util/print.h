@@ -1,5 +1,5 @@
-#ifndef PRINT_H
-#define PRINT_H
+#ifndef BSK_PRINT_H
+#define BSK_PRINT_H
 
 #include <basilisk/util/includes.h>
 

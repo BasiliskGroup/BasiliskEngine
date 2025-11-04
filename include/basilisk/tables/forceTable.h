@@ -1,5 +1,5 @@
-#ifndef FORCE_TABLE_H
-#define FORCE_TABLE_H
+#ifndef BSK_FORCE_TABLE_H
+#define BSK_FORCE_TABLE_H
 
 #include <basilisk/tables/virtualTable.h>
 

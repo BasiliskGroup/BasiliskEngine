@@ -1,5 +1,5 @@
-#ifndef COLLIDER_H
-#define COLLIDER_H
+#ifndef BSK_COLLIDER_H
+#define BSK_COLLIDER_H
 
 #include <basilisk/util/includes.h>
 

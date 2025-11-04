@@ -1,5 +1,5 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef BSK_TEXTURE_H
+#define BSK_TEXTURE_H
 
 #include <basilisk/render/image.h>
 

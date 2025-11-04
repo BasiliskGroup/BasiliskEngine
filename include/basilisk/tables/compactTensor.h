@@ -1,5 +1,5 @@
-#ifndef COMPACT_TENSOR_H
-#define COMPACT_TENSOR_H
+#ifndef BSK_COMPACT_TENSOR_H
+#define BSK_COMPACT_TENSOR_H
 
 #include <basilisk/util/includes.h>
 

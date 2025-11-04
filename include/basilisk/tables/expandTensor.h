@@ -1,5 +1,5 @@
-#ifndef EXPAND_TENSOR_H
-#define EXPAND_TENSOR_H
+#ifndef BSK_EXPAND_TENSOR_H
+#define BSK_EXPAND_TENSOR_H
 
 #include <basilisk/util/includes.h>
 

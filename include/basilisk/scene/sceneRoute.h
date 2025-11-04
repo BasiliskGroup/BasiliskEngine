@@ -1,5 +1,5 @@
-#ifndef SCENE_ROUTE_H
-#define SCENE_ROUTE_H
+#ifndef BSK_SCENE_ROUTE_H
+#define BSK_SCENE_ROUTE_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/scene/virtualScene.h>

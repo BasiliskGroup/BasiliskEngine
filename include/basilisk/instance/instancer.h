@@ -1,5 +1,5 @@
-#ifndef INSTANCER_H
-#define INSTANCER_H
+#ifndef BSK_INSTANCER_H
+#define BSK_INSTANCER_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/render/shader.h>

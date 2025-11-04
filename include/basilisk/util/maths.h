@@ -1,5 +1,5 @@
-#ifndef MATHS_H
-#define MATHS_H
+#ifndef BSK_MATHS_H
+#define BSK_MATHS_H
 
 #include <basilisk/util/includes.h>
 

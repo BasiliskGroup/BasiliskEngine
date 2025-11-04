@@ -1,5 +1,5 @@
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef BSK_SHADER_H
+#define BSK_SHADER_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/render/texture.h>

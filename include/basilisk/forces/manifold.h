@@ -1,5 +1,5 @@
-#ifndef MANIFOLD_H
-#define MANIFOLD_H
+#ifndef BSK_MANIFOLD_H
+#define BSK_MANIFOLD_H
 
 #include <basilisk/forces/force.h>
 

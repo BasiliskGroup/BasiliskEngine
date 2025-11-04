@@ -1,5 +1,5 @@
-#ifndef SOLVER_H
-#define SOLVER_H
+#ifndef BSK_SOLVER_H
+#define BSK_SOLVER_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/util/maths.h>

@@ -1,5 +1,5 @@
-#ifndef VIRTUAL_SCENE_H
-#define VIRTUAL_SCENE_H
+#ifndef BSK_VIRTUAL_SCENE_H
+#define BSK_VIRTUAL_SCENE_H
 
 #include <basilisk/render/shader.h>
 #include <basilisk/resource/resourceServer.h>

@@ -1,5 +1,5 @@
-#ifndef EBO_H
-#define EBO_H
+#ifndef BSK_EBO_H
+#define BSK_EBO_H
 
 #include <basilisk/util/includes.h>
 

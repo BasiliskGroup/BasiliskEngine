@@ -1,5 +1,5 @@
-#ifndef CAMERA_2D_H
-#define CAMERA_2D_H
+#ifndef BSK_CAMERA_2D_H
+#define BSK_CAMERA_2D_H
 
 
 #include <basilisk/util/includes.h>

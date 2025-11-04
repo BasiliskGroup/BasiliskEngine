@@ -1,5 +1,5 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef BSK_WINDOW_H
+#define BSK_WINDOW_H
 
 #include <basilisk/util/includes.h>
 

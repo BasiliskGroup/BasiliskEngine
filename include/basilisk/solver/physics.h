@@ -1,5 +1,5 @@
-#ifndef PHYSICS_H
-#define PHYSICS_H
+#ifndef BSK_PHYSICS_H
+#define BSK_PHYSICS_H
 
 // NOTE this is the main shared header file for all main classes in the engine
 

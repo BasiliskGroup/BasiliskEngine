@@ -1,5 +1,5 @@
-#ifndef BASILISK_H
-#define BASILISK_H
+#ifndef BSK_BASILISK_H
+#define BSK_BASILISK_H
 
 // All headers are now in include/basilisk/ after copying
 #include "util/includes.h"

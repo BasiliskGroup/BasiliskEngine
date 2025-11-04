@@ -1,5 +1,5 @@
-#ifndef TIME_H
-#define TIME_H
+#ifndef BSK_TIME_H
+#define BSK_TIME_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/util/print.h>

@@ -1,5 +1,5 @@
-#ifndef TEXTURE_ARRAY_H
-#define TEXTURE_ARRAY_H
+#ifndef BSK_TEXTURE_ARRAY_H
+#define BSK_TEXTURE_ARRAY_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/render/image.h>

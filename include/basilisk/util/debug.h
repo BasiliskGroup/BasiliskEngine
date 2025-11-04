@@ -1,3 +1,6 @@
+#ifndef BSK_DEBUG_H
+#define BSK_DEBUG_H
+
 #include <glm/glm.hpp>
 #include <cmath> // for std::isnan
 
@@ -21,3 +24,5 @@ bool hasNaN(const T& value) {
 }
 
 }
+
+#endif

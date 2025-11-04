@@ -1,5 +1,5 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef BSK_MATERIAL_H
+#define BSK_MATERIAL_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/render/image.h>

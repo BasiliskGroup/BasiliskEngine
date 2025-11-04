@@ -1,5 +1,5 @@
-#ifndef INSTANCE_HANDLER_H
-#define INSTANCE_HANDLER_H
+#ifndef BSK_INSTANCE_HANDLER_H
+#define BSK_INSTANCE_HANDLER_H
 
 #include <basilisk/instance/instancer.h>
 #include <basilisk/render/shader.h>

@@ -1,5 +1,5 @@
-#ifndef LINALG_H
-#define LINALG_H
+#ifndef BSK_LINALG_H
+#define BSK_LINALG_H
 
 #include <basilisk/util/includes.h>
 

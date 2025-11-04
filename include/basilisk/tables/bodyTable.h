@@ -1,5 +1,5 @@
-#ifndef BODY_TABLE_H
-#define BODY_TABLE_H
+#ifndef BSK_BODY_TABLE_H
+#define BSK_BODY_TABLE_H
 
 #include <basilisk/tables/virtualTable.h>
 #include <basilisk/util/print.h>

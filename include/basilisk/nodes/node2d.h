@@ -1,5 +1,5 @@
-#ifndef ENTITY2D_H
-#define ENTITY2D_H
+#ifndef BSK_NODE2D_H
+#define BSK_NODE2D_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/nodes/virtualNode.h>

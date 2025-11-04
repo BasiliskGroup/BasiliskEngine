@@ -1,5 +1,5 @@
-#ifndef ENGINE_H
-#define ENGINE_H
+#ifndef BSK_ENGINE_H
+#define BSK_ENGINE_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/IO/window.h>

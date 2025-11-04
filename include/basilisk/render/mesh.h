@@ -1,5 +1,5 @@
-#ifndef MESH_H
-#define MESH_H
+#ifndef BSK_MESH_H
+#define BSK_MESH_H
 
 #include <basilisk/util/includes.h>
 

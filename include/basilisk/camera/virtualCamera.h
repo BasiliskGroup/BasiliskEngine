@@ -1,5 +1,5 @@
-#ifndef VIRTUAL_CAMERA_H
-#define VIRTUAL_CAMERA_H
+#ifndef BSK_VIRTUAL_CAMERA_H
+#define BSK_VIRTUAL_CAMERA_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/engine/engine.h>

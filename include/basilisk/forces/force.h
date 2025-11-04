@@ -1,5 +1,5 @@
-#ifndef FORCE_H
-#define FORCE_H
+#ifndef BSK_FORCE_H
+#define BSK_FORCE_H
 
 namespace bsk::internal {
 

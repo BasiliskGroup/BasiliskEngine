@@ -1,5 +1,5 @@
-#ifndef MOUSE_H
-#define MOUSE_H
+#ifndef BSK_MOUSE_H
+#define BSK_MOUSE_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/IO/window.h>

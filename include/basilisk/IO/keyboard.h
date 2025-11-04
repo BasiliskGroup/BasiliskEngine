@@ -1,5 +1,5 @@
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
+#ifndef BSK_KEYBOARD_H
+#define BSK_KEYBOARD_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/IO/window.h>

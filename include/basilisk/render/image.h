@@ -1,5 +1,5 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#ifndef BSK_IMAGE_H
+#define BSK_IMAGE_H
 
 #include <basilisk/util/includes.h>
 

@@ -1,5 +1,5 @@
-#ifndef SCENE2D_H
-#define SCENE2D_H
+#ifndef BSK_SCENE2D_H
+#define BSK_SCENE2D_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/engine/engine.h>

@@ -1,5 +1,5 @@
-#ifndef MATERIAL_SERVER_H
-#define MATERIAL_SERVER_H
+#ifndef BSK_MATERIAL_SERVER_H
+#define BSK_MATERIAL_SERVER_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/render/material.h>
