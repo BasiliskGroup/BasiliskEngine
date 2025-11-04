@@ -86,7 +86,7 @@ target_include_directories(basilisk
 # Link compiled dependencies (PRIVATE)
 # ======================================================
 target_link_libraries(basilisk
-    PRIVATE
+    PUBLIC
         glad
         glfw
         assimp
