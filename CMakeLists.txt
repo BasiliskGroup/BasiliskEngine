@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(BASILISK_BUILD_DOCS "Build API documentation" OFF)
-option(BASILISK_BUILD_TESTS "Build Basilisk tests" OFF)
-option(BASILISK_BUILD_EXAMPLES "Build Basilisk examples" OFF)
 
 # ======================================================
 # External dependencies via FetchContent
@@ -115,6 +113,33 @@ target_link_libraries(basilisk
 )
 
 # ======================================================
+# Test executable (engine)
+# ======================================================
+set(BASILISK_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+if(EXISTS ${BASILISK_MAIN})
+    add_executable(engine ${BASILISK_MAIN})
+
+    target_link_libraries(engine
+        PRIVATE
+            basilisk
+    )
+
+    target_include_directories(engine
+        PRIVATE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+
+    set_target_properties(engine PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
+    message(STATUS "Added test executable: engine")
+else()
+    message(WARNING "main.cpp not found — skipping engine build.")
+endif()
+
+# ======================================================
 # Optional docs/tests/examples
 # ======================================================
 if(BASILISK_BUILD_DOCS)
@@ -126,15 +151,6 @@ if(BASILISK_BUILD_DOCS)
     endif()
 endif()
 
-if(BASILISK_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
-
-if(BASILISK_BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif()
-
 # ======================================================
 # Summary
 # ======================================================
@@ -142,6 +158,4 @@ message(STATUS "")
 message(STATUS "================= Basilisk Configuration =================")
 message(STATUS "  C++ Standard:          ${CMAKE_CXX_STANDARD}")
 message(STATUS "  Build Docs:            ${BASILISK_BUILD_DOCS}")
-message(STATUS "  Build Tests:           ${BASILISK_BUILD_TESTS}")
-message(STATUS "  Build Examples:        ${BASILISK_BUILD_EXAMPLES}")
 message(STATUS "==========================================================")
