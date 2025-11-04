@@ -103,6 +103,7 @@ target_link_libraries(basilisk
     PUBLIC
         glfw
         glad
+        ${OPENGL_LIBRARIES}
         assimp
         glm_h
         stb
