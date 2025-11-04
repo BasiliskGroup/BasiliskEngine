@@ -1,5 +1,7 @@
 #include <basilisk/tables/compactTensor.h>
 
+namespace bsk::internal {
+
 /**
  * @brief 
  * 
@@ -16,4 +18,6 @@ uint numValid(const std::vector<bool>& toDelete, const uint size) {
     }
 
     return count;
+}
+
 }

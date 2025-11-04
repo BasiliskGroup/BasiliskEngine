@@ -1,6 +1,7 @@
 #ifndef FORCE_H
 #define FORCE_H
 
+namespace bsk::internal {
 
 class ForceTable;
 class Solver;
@@ -69,6 +70,8 @@ public:
 
     // NOTE initialization and computations will be done in the ForceTable for bulk operations
 };
+
+}
 
 // --------------------------------------------- //
 //         TODO add springs and joints           //

@@ -5,6 +5,8 @@
 #include <basilisk/render/shader.h>
 #include <basilisk/scene/node.h>
 
+namespace bsk::internal {
+
 template <typename T>
 class InstanceHandler<T> {
     private:
@@ -17,6 +19,8 @@ class InstanceHandler<T> {
         ~InstanceHandler();
 
         void add(Node* node);
+}
+
 }
 
 #endif

@@ -1,5 +1,7 @@
 #include <basilisk/scene/sceneRoute.h>
 
+namespace bsk::internal {
+
 Node::Node(VirtualScene3D* scene, Params params)
     : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale) {
     updateModel();
@@ -34,4 +36,6 @@ void Node::setRotation(quat rotation) {
 void Node::setScale(vec3 scale) {
     this->scale = scale;
     updateModel();
+}
+
 }

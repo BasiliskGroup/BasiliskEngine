@@ -3,6 +3,8 @@
 
 #include <basilisk/forces/force.h>
 
+namespace bsk::internal {
+
 class Manifold : public Force {
 private:
 
@@ -16,5 +18,7 @@ public:
     int rows() const override { return 4; }
     void draw() const override;
 };
+
+}
 
 #endif

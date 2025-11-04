@@ -1,5 +1,7 @@
 #include <basilisk/solver/physics.h>
 
+namespace bsk::internal {
+
 // TODO SAT, we are doing the dumb solution right now (Not SAT)
 void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     // select the deepest points 
@@ -92,4 +94,6 @@ void Solver::findBounds(Dots dots, const float thresh, uint& begin, uint& end, C
 template <typename Compare>
 void Solver::findExtremes(Dots dots, uint& begin, uint& end, Compare cmp) {
     
+}
+
 }

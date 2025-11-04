@@ -8,6 +8,8 @@
 #include <basilisk/camera/camera.h>
 #include <basilisk/render/shader.h>
 
+namespace bsk::internal {
+
 class Node;
 
 class Scene : public VirtualScene<Node, vec3, quat, vec3> {
@@ -29,5 +31,7 @@ class Scene : public VirtualScene<Node, vec3, quat, vec3> {
         inline Camera* getCamera() { return camera; }
         inline Engine* getEngine() { return engine; }
 };
+
+}
 
 #endif

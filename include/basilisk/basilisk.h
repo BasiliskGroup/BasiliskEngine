@@ -27,26 +27,26 @@
 #include "camera/camera2d.h"
 
 namespace bsk {
-    using Engine = ::Engine;
-    using Scene = ::Scene;
-    using Scene2D = ::Scene2D;
-    using Window = ::Window;
-    using Mouse = ::Mouse;
-    using Keyboard = ::Keyboard;
-    using Node = ::Node;
-    using Node2D = ::Node2D;
-    using Mesh = ::Mesh;
-    using Texture = ::Texture;
-    using Image = ::Image;
-    using Shader = ::Shader;
-    using Material = ::Material;
-    using VAO = ::VAO;
-    using VBO = ::VBO;
-    using EBO = ::EBO;
-    using TBO = ::TBO;
-    using Camera = ::Camera;
-    using Camera2D = ::Camera2D;
-    using MaterialServer = ::MaterialServer;
+    using Engine = internal::Engine;
+    using Scene = internal::Scene;
+    using Scene2D = internal::Scene2D;
+    using Window = internal::Window;
+    using Mouse = internal::Mouse;
+    using Keyboard = internal::Keyboard;
+    using Node = internal::Node;
+    using Node2D = internal::Node2D;
+    using Mesh = internal::Mesh;
+    using Texture = internal::Texture;
+    using Image = internal::Image;
+    using Shader = internal::Shader;
+    using Material = internal::Material;
+    using VAO = internal::VAO;
+    using VBO = internal::VBO;
+    using EBO = internal::EBO;
+    using TBO = internal::TBO;
+    using Camera = internal::Camera;
+    using Camera2D = internal::Camera2D;
+    using MaterialServer = internal::MaterialServer;
 }
 
 #endif // BASILISK_H

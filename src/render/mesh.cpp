@@ -1,5 +1,7 @@
 #include <basilisk/render/mesh.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Mesh object from a model
  * 
@@ -49,4 +51,6 @@ Mesh::Mesh(const std::string modelPath, bool generateUV, bool generateNormals) {
     }
 
     importer.FreeScene();
+}
+
 }

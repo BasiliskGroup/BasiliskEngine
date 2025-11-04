@@ -6,6 +6,8 @@
 #include <chrono>
 #include <thread>
 
+namespace bsk::internal {
+
 std::chrono::time_point<std::chrono::high_resolution_clock> timeNow();
 
 void printTimeNow();
@@ -19,5 +21,7 @@ void printDurationUS(std::chrono::time_point<std::chrono::high_resolution_clock>
 void printPrimalDuration(std::chrono::time_point<std::chrono::high_resolution_clock> t1, std::chrono::time_point<std::chrono::high_resolution_clock> t2);
 
 void printDualDuration(std::chrono::time_point<std::chrono::high_resolution_clock> t1, std::chrono::time_point<std::chrono::high_resolution_clock> t2);
+
+}
 
 #endif

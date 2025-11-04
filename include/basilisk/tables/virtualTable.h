@@ -6,6 +6,8 @@
 #include <basilisk/tables/expandTensor.h>
 #include <basilisk/tables/compactTensor.h>
 
+namespace bsk::internal {
+
 class VirtualTable {
 protected:
     uint size = 0;
@@ -18,5 +20,7 @@ public:
     uint getSize() { return size; }
     uint getCapacity() { return capacity; } 
 };
+
+}
 
 #endif

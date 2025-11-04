@@ -1,5 +1,7 @@
 #include <basilisk/util/print.h>
 
+namespace bsk::internal {
+
 void print(std::string str) {
     std::cout << str << std::endl;
 }
@@ -42,4 +44,6 @@ void print(const mat2x2& mat) {
 
 void print(const mat3x3& mat) {
     for (int i = 0; i < 3; i++) print(mat[i]);
+}
+
 }

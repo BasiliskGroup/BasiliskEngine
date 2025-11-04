@@ -6,6 +6,8 @@
 #include <basilisk/resource/textureServer.h>
 #include <basilisk/resource/materialServer.h>
 
+namespace bsk::internal {
+
 class ResourceServer {
     private:
         TextureServer* textureServer;
@@ -20,5 +22,7 @@ class ResourceServer {
         inline TextureServer* getTextureServer() const { return textureServer; }
         inline MaterialServer* getMaterialServer() const { return materialServer; }
 };
+
+}
 
 #endif

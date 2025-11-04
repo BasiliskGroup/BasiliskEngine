@@ -7,6 +7,7 @@
 #include <basilisk/render/shader.h>
 #include <basilisk/engine/engine.h>
 
+namespace bsk::internal {
 
 class Camera2D : public VirtualCamera{
     private:
@@ -26,6 +27,8 @@ class Camera2D : public VirtualCamera{
 
         void setPosition(glm::vec2 position) { this->position = position; }
 };
+
+}
 
 
 #endif

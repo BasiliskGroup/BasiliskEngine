@@ -4,6 +4,7 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/render/image.h>
 
+namespace bsk::internal {
 
 struct MaterialData {
     glm::vec3 color;
@@ -105,5 +106,7 @@ class Material {
 
         MaterialData getData();
 };
+
+}
 
 #endif

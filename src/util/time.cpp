@@ -1,5 +1,7 @@
 #include <basilisk/util/time.h>
 
+namespace bsk::internal {
+
 std::chrono::time_point<std::chrono::high_resolution_clock> timeNow() { return std::chrono::high_resolution_clock::now(); }
 
 void printTimeNow() {
@@ -26,4 +28,6 @@ void printPrimalDuration(std::chrono::time_point<std::chrono::high_resolution_cl
 void printDualDuration(std::chrono::time_point<std::chrono::high_resolution_clock> t1, std::chrono::time_point<std::chrono::high_resolution_clock> t2) {
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1);
     std::cout << "Dual:\t" << duration.count() << "us" << std::endl;
+}
+
 }

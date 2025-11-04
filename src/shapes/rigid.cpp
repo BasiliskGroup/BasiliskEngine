@@ -1,5 +1,6 @@
 #include <basilisk/solver/physics.h>
 
+namespace bsk::internal {
 
 Rigid::Rigid(Solver* solver, Node2D* node, vec3 pos, vec2 scale, float density, float friction, vec3 vel, Collider* collider) : 
     solver(solver), 
@@ -175,4 +176,6 @@ void Rigid::setPosition(const vec3& pos) {
 
 void Rigid::setVelocity(const vec3& vel) {
     getBodyTable()->getVel()[index] = vel;
+}
+
 }

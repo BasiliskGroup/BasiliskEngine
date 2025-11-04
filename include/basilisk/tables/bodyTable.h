@@ -5,6 +5,8 @@
 #include <basilisk/util/print.h>
 #include <basilisk/shapes/rigid.h>
 
+namespace bsk::internal {
+
 class Rigid;
 
 // NOTE we do not need copy or move constructor as we will only have one of these
@@ -79,5 +81,7 @@ public:
 
     void writeToNodes();
 };
+
+}
 
 #endif

@@ -1,6 +1,8 @@
 #include <basilisk/scene/sceneRoute.h>
 #include <basilisk/util/print.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Scene object. Exclusivly for 3D scenes. 
  * 
@@ -40,4 +42,6 @@ void Scene::render() {
         Node* node = *it;
         node->render();
     }
+}
+
 }

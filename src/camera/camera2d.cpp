@@ -1,5 +1,7 @@
 #include <basilisk/camera/camera2d.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Camera 2D object
  * 
@@ -61,4 +63,6 @@ void Camera2D::updateView() {
     view = glm::mat4(1.0f);
     glm::vec2 translation(viewScale.x / 2.0 - position.x, viewScale.y / 2.0 + position.y);
     view = glm::translate(view, glm::vec3(translation, 0.0f));
+}
+
 }

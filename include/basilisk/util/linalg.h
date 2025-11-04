@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 inline void solve(const mat3x3& A, vec3& x, const vec3& b) {
     // Compute LDL^T decomposition
     float D1 = A[0][0];
@@ -26,6 +28,8 @@ inline void solve(const mat3x3& A, vec3& x, const vec3& b) {
     x[2] = z3;
     x[1] = z2 - L32 * x[2];
     x[0] = z1 - L21 * x[1] - L31 * x[2];
+}
+
 }
 
 #endif

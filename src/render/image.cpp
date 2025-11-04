@@ -1,6 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <basilisk/render/image.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Image object from image file
  * 
@@ -19,4 +21,6 @@ Image::Image(std::string file) {
  */
 Image::~Image() {
     stbi_image_free(data);
+}
+
 }

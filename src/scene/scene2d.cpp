@@ -1,5 +1,6 @@
 #include <basilisk/scene/sceneRoute.h>
 
+namespace bsk::internal {
 
 /**
  * @brief Construct a new Scene2D object. Exclusivly for 2D scenes. 
@@ -49,4 +50,6 @@ void Scene2D::render() {
         Node2D* node = *it;
         node->render();
     }
+}
+
 }

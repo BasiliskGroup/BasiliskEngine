@@ -59,8 +59,10 @@
 
 #include <basilisk/util/constants.h>
 
-#define DEBUG_PRINT true
-#define DEBUG_LINEAR_PRINT false
+namespace bsk::internal {
+
+inline constexpr bool DEBUG_PRINT = true;
+inline constexpr bool DEBUG_LINEAR_PRINT = true;
 
 // shorthand names
 using vec2 = glm::vec2;
@@ -101,5 +103,7 @@ struct Vertex {
     vec2 uv;
     vec3 normal;
 };
+
+}
 
 #endif

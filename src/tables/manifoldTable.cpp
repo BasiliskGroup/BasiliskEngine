@@ -1,6 +1,7 @@
 #include <basilisk/tables/forceRoute.h>
 #include <basilisk/util/print.h>
 
+namespace bsk::internal {
 
 ManifoldTable::ManifoldTable(ForceTable* forceTable, uint capacity) : forceTable(forceTable) {
     resize(capacity);
@@ -76,4 +77,6 @@ void ManifoldTable::warmstart() {
 
 void ManifoldTable::remove(uint index) {
     toDelete[index] = true;
+}
+
 }

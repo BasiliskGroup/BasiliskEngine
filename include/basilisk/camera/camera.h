@@ -7,6 +7,7 @@
 #include <basilisk/render/shader.h>
 #include <basilisk/engine/engine.h>
 
+namespace bsk::internal {
 
 class Camera : public VirtualCamera {
     private:
@@ -57,5 +58,7 @@ class Camera : public VirtualCamera {
         void setNear(float near) { this->near = near; updateProjection();}
         void setFar(float far) { this->far = far; updateProjection();}
 };
+
+}
 
 #endif

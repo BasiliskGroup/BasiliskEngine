@@ -3,6 +3,8 @@
 
 #include <basilisk/render/image.h>
 
+namespace bsk::internal {
+
 class Texture {
     private:
         unsigned int id;
@@ -17,5 +19,7 @@ class Texture {
 
         unsigned int getID() { return id; }
 };
+
+}
 
 #endif

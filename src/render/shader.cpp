@@ -1,5 +1,7 @@
 #include <basilisk/render/shader.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Get the component count of an OpenGL type. Not an exhaustive function, only valid for BOOL, INT, and FLOAT type. 
  * 
@@ -304,4 +306,6 @@ void Shader::setUniform(const char* name, int value) {
 void Shader::setUniform(const char* name, glm::mat4 value) { 
     use();
     glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));  
+}
+
 }

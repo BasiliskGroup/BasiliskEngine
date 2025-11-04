@@ -5,6 +5,8 @@
 #include <basilisk/resource/resourceServer.h>
 #include <basilisk/engine/engine.h>
 
+namespace bsk::internal {
+
 template<typename NodeType, typename position_type, typename rotation_type, typename scale_type>
 class VirtualScene {
 protected:
@@ -30,5 +32,7 @@ protected:
         }
     }
 };
+
+}
 
 #endif

@@ -3,6 +3,7 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
 
 class TBO {
     private:
@@ -34,5 +35,7 @@ class TBO {
     private:
         void resize();
 };
+
+}
 
 #endif

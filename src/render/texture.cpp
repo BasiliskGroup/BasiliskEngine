@@ -1,5 +1,7 @@
 #include <basilisk/render/texture.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Texture object from an existing Image object
  * 
@@ -58,4 +60,6 @@ void Texture::setWrap(unsigned int wrap) {
     // Set wrap
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
+}
+
 }

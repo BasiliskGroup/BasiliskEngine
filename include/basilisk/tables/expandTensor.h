@@ -3,9 +3,13 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 template <typename... T>
 void expandTensors(const uint newCapacity, std::vector<T>&... tensors) {
     ( tensors.resize(newCapacity), ... );
+}
+
 }
 
 #endif

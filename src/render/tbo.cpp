@@ -1,5 +1,7 @@
 #include <basilisk/render/tbo.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new TBO object. Can be used to store arbitray data on the GPU
  * 
@@ -109,4 +111,6 @@ void TBO::resize() {
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
     glBindBuffer(GL_COPY_READ_BUFFER, 0);
     glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+}
+
 }

@@ -1,6 +1,7 @@
 #include <basilisk/tables/forceRoute.h>
 #include <basilisk/util/print.h>
 
+namespace bsk::internal {
 
 ForceTable::ForceTable(uint capacity) {
     resize(capacity);
@@ -116,4 +117,6 @@ void ForceTable::compact() {
 int ForceTable::insert() {
     // Skipped as requested - you'll handle the special cases
     return 0;
+}
+
 }

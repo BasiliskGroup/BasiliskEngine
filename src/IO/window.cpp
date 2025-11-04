@@ -1,5 +1,7 @@
 #include <basilisk/IO/window.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Callback for window resize. 
  *        Sets to the framebuffer size for mac compatibility. 
@@ -146,4 +148,6 @@ void Window::clear(float r, float g, float b, float a) {
 Window::~Window() {
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
 }

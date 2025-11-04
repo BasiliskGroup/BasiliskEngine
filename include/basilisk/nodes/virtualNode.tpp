@@ -1,5 +1,7 @@
 #include <basilisk/scene/sceneRoute.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Virtual Node< Derived,  P,  R,  S>:: Virtual Node object
  * 
@@ -384,4 +386,6 @@ void VirtualNode<Derived, P, R, S>::createBuffers() {
         ebo = new EBO(mesh->getIndices());
         vao = new VAO(shader, vbo, ebo);
     }
+}
+
 }

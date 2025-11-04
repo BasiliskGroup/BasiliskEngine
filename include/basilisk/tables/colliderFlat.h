@@ -5,6 +5,8 @@
 #include <basilisk/tables/virtualTable.h>
 #include <basilisk/tables/eraseChunks.h>
 
+namespace bsk::internal {
+
 class ColliderFlat {
 private:
     uint vertSize = 0;
@@ -44,5 +46,7 @@ public:
     uint insert(std::vector<vec2> verts);
     void remove(uint colliderIndex);
 };
+
+}
 
 #endif 

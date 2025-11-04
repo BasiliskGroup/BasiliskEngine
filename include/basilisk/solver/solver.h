@@ -10,6 +10,8 @@
 #include <basilisk/tables/forceRoute.h>
 #include <basilisk/tables/colliderFlat.h>
 
+namespace bsk::internal {
+
 class Rigid;
 class Force;
 class Manifold;
@@ -178,5 +180,7 @@ private:
     template <typename Compare>
     void findExtremes(Dots dots, uint& begin, uint& end, Compare cmp);
 };
+
+}
 
 #endif

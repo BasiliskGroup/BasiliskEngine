@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 template <typename... T>
 void compactTensors(const std::vector<bool>& toDelete, uint size, std::vector<T>&... tensors)
 {
@@ -20,5 +22,7 @@ void compactTensors(const std::vector<bool>& toDelete, uint size, std::vector<T>
 }
 
 uint numValid(const std::vector<bool>& toDelete, const uint size);
+
+}
 
 #endif

@@ -3,6 +3,8 @@
 
 #include <basilisk/tables/virtualTable.h>
 
+namespace bsk::internal {
+
 class ForceTable;
 
 // NOTE we do not need copy or move constructor as we will only have one of these
@@ -56,5 +58,7 @@ public:
     void compact() override;
     void remove(uint index);
 };
+
+}
 
 #endif

@@ -7,6 +7,8 @@
 #include <basilisk/render/tbo.h>
 #include <basilisk/resource/textureServer.h>
 
+namespace bsk::internal {
+
 class MaterialServer {
     private:
         TextureServer* textureServer;
@@ -23,5 +25,7 @@ class MaterialServer {
 
         void write(Shader* shader, std::string name, unsigned int startSlot = 0);
 };
+
+}
 
 #endif

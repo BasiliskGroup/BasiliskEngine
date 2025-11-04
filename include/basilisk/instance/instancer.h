@@ -8,6 +8,8 @@
 #include <basilisk/render/ebo.h>
 #include <basilisk/render/mesh.h>
 
+namespace bsk::internal {
+
 template <typename T>
 class Instancer {
     private:
@@ -34,6 +36,8 @@ class Instancer {
 
         void render();
 };
+
+}
 
 #include <basilisk/instancer.tpp>
 

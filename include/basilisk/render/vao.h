@@ -6,6 +6,8 @@
 #include <basilisk/render/ebo.h>
 #include <basilisk/render/shader.h>
 
+namespace bsk::internal {
+
 class VAO {
     private:
         unsigned int ID;
@@ -26,5 +28,7 @@ class VAO {
         void bindBuffer(VBO* buffer, std::vector<std::string> attribs, unsigned int divisor=0);
         void bindBuffer(VBO* buffer, EBO* indices, std::vector<std::string> attribs, unsigned int divisor=0);
 };
+
+}
 
 #endif

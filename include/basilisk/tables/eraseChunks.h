@@ -4,6 +4,8 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/shapes/collider.h>
 
+namespace bsk::internal {
+
 /**
  * @brief 
  * 
@@ -84,6 +86,8 @@ void eraseChunks(
     }
 
     colliders.swap(newColliders);
+}
+
 }
 
 #endif

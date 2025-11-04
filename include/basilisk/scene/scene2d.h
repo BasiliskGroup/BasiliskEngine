@@ -9,6 +9,8 @@
 #include <basilisk/render/shader.h>
 #include <basilisk/solver/solver.h>
 
+namespace bsk::internal {
+
 class Node2D;
 
 class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
@@ -32,5 +34,7 @@ class Scene2D : public VirtualScene<Node2D, vec2, float, vec2> {
         inline Engine* getEngine() { return engine; }
         inline Solver* getSolver() { return solver; }
 };
+
+}
 
 #endif

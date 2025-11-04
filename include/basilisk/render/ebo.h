@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 class EBO {
     private:
         unsigned int ID;
@@ -24,5 +26,7 @@ class EBO {
         void write(const std::vector<T>& data, unsigned int offset=0);
 
 };
+
+}
 
 #endif

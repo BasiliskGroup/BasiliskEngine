@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 class Solver;
 class ColliderFlat;
 
@@ -22,5 +24,7 @@ public:
 
     ColliderFlat* getColliderFlat();
 };
+
+}
 
 #endif

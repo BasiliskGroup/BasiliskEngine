@@ -5,6 +5,8 @@
 #include <basilisk/nodes/virtualNode.h>
 #include <basilisk/scene/scene.h>
 
+namespace bsk::internal {
+
 class Node : public VirtualNode<Node, vec3, quat, vec3> {
     private:
         using VirtualScene3D = VirtualScene<Node, vec3, quat, vec3>;
@@ -38,5 +40,7 @@ class Node : public VirtualNode<Node, vec3, quat, vec3> {
     private:
         void updateModel();
 };
+
+}
 
 #endif

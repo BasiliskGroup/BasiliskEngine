@@ -5,6 +5,8 @@
 #include <basilisk/engine/engine.h>
 #include <basilisk/render/shader.h>
 
+namespace bsk::internal {
+
 class VirtualCamera {
     protected:
         glm::mat4 view;
@@ -17,5 +19,7 @@ class VirtualCamera {
         virtual void update() = 0;
         virtual void use(Shader* shader) = 0;
 };
+
+}
 
 #endif

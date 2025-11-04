@@ -4,6 +4,8 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/IO/window.h>
 
+namespace bsk::internal {
+
 class Mouse {
     private:
         Window* window;
@@ -38,5 +40,7 @@ class Mouse {
         void setVisible();
         void setHidden();
 };
+
+}
 
 #endif

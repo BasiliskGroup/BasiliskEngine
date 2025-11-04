@@ -1,5 +1,7 @@
 #include <basilisk/IO/mouse.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Update the state of the mouse and store previous state
  * 
@@ -43,4 +45,6 @@ void Mouse::setVisible() {
  */
 void Mouse::setHidden() {
     glfwSetInputMode(window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
+
 }

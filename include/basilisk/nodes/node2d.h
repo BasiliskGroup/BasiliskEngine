@@ -7,6 +7,8 @@
 #include <basilisk/shapes/rigid.h>
 #include <basilisk/scene/scene2d.h>
 
+namespace bsk::internal {
+
 class Node2D : public VirtualNode<Node2D, vec2, float, vec2> {
 private:
     using VirtualScene2D = VirtualScene<Node2D, vec2, float, vec2>;
@@ -64,5 +66,7 @@ private:
     void setRigid(Node2D&& other);
     
 };
+
+}
 
 #endif

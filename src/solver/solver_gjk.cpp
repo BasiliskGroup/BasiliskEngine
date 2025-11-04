@@ -1,6 +1,8 @@
 #include <basilisk/solver/physics.h>
 
-#define GJK_PRINT false
+namespace bsk::internal {
+
+inline constexpr bool GJK_PRINT = false;
 
 bool Solver::gjk(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint freeIndex) {
 
@@ -160,4 +162,6 @@ void Solver::getFar(const ColliderRow& row, const vec2& dir, vec2& simplexLocal)
     
     if (GJK_PRINT) print("Selected vertex " + std::to_string(farIndex));
     simplexLocal = row.start[farIndex];
+}
+
 }

@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 class Image {
     private:
         unsigned char* data;
@@ -18,5 +20,7 @@ class Image {
         int getWidth() { return width; }
         int getHeight() {return height; }
 };
+
+}
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef RIGID_H
 #define RIGID_H
 
+namespace bsk::internal {
+
 class Solver;
 class Force;
 class Collider;
@@ -76,5 +78,7 @@ private:
     void clear();
 
 };
+
+}
 
 #endif

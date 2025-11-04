@@ -1,5 +1,7 @@
 #include <basilisk/render/vao.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new VAO object with a shader object, VBO, and optional EBO
  * 
@@ -150,4 +152,6 @@ void VAO::render(unsigned int instanceCount) {
             glDrawArrays(GL_TRIANGLES, 0, vertexCount);
         }
     }
+}
+
 }

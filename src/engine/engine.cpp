@@ -1,5 +1,6 @@
 #include <basilisk/engine/engine.h>
 
+namespace bsk::internal {
 
 Engine::Engine(int width, int height, const char* title) {
     window = new Window(width, height, title);
@@ -34,4 +35,6 @@ void Engine::update() {
 
 void Engine::render() {
     window->render();
+}
+
 }

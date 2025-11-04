@@ -6,6 +6,8 @@
 #include <basilisk/render/textureArray.h>
 #include <basilisk/render/shader.h>
 
+namespace bsk::internal {
+
 class TextureServer {
     private:
         std::vector<unsigned int> sizeBuckets;
@@ -25,5 +27,7 @@ class TextureServer {
 
         void write(Shader* shader, std::string name, unsigned int startSlot = 0);
 };
+
+}
 
 #endif

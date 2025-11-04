@@ -4,6 +4,8 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/render/image.h>
 
+namespace bsk::internal {
+
 class TextureArray {
     private:
         unsigned int id;
@@ -30,5 +32,7 @@ class TextureArray {
         unsigned int getSize() { return images.size(); }
 
 };
+
+}
 
 #endif

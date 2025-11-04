@@ -4,6 +4,8 @@
 #include <random>
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 float uniform(float min, float max) {
     static std::mt19937 rng(std::random_device{}());  // Seed the random engine once
     std::uniform_real_distribution<float> dist(min, max);
@@ -32,6 +34,8 @@ int randint() {
     static std::mt19937 rng(std::random_device{}());  // Seed once
     std::uniform_int_distribution<int> dist(0, std::numeric_limits<int>::max());
     return dist(rng);
+}
+
 }
 
 #endif

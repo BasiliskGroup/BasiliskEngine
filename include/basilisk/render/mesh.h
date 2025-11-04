@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 class Mesh {
     private:
         std::vector<float> vertices;
@@ -19,5 +21,7 @@ class Mesh {
         std::vector<float>& getVertices() { return vertices; }
         std::vector<unsigned int>& getIndices() { return indices; }
 };
+
+}
 
 #endif

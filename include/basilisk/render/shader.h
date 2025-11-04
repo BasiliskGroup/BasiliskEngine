@@ -6,6 +6,8 @@
 #include <basilisk/render/textureArray.h>
 #include <basilisk/render/tbo.h>
 
+namespace bsk::internal {
+
 // GLint location, GLint count, unsigned int dataType, unsigned int stride, unsigned int offset
 struct Attribute {
     std::string name;
@@ -44,5 +46,7 @@ class Shader {
 
         unsigned int getID() { return ID; }
 };
+
+}
 
 #endif

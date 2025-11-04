@@ -8,6 +8,8 @@
 #include <basilisk/tables/manifoldTable.h>
 #include <basilisk/shapes/rigid.h>
 
+using namespace bsk;
+
 int main() {
     // Solver* solver = new Solver();
     

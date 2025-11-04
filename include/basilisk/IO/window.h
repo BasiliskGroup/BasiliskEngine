@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 
+namespace bsk::internal {
+
 class Window {
     private:
         GLFWwindow* window;
@@ -21,5 +23,7 @@ class Window {
 
         GLFWwindow* getWindow() { return window; }
 };
+
+}
 
 #endif

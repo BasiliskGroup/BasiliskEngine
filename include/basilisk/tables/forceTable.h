@@ -3,6 +3,8 @@
 
 #include <basilisk/tables/virtualTable.h>
 
+namespace bsk::internal {
+
 class ManifoldTable;
 class Force;
 
@@ -60,5 +62,7 @@ public:
     void compact() override;
     int insert();
 };
+
+}
 
 #endif

@@ -1,6 +1,8 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <basilisk/render/textureArray.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Texture Array object
  * 
@@ -129,4 +131,6 @@ void TextureArray::setWrap(unsigned int wrap) {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, wrap);	
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, wrap);
     unbind();
+}
+
 }

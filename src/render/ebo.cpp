@@ -1,5 +1,7 @@
 #include <basilisk/render/ebo.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new EBO from the data provided at the given pointer
  *
@@ -78,4 +80,6 @@ void EBO::write(const void* data, unsigned int size, unsigned int offset) {
 template<typename T>
 void EBO::write(const std::vector<T>& data, unsigned int offset) {
     write(data.data(), data.size() * sizeof(T), offset);
+}
+
 }

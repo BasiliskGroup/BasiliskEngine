@@ -1,5 +1,7 @@
 #include <basilisk/solver/physics.h>
 
+namespace bsk::internal {
+
 void Solver::insert(Rigid* rigid){
     if (rigid == nullptr) {
         return;
@@ -102,4 +104,6 @@ void Solver::clear() {
     bodyTable = nullptr;
     forceTable = nullptr;
     colliderFlat = nullptr;
+}
+
 }

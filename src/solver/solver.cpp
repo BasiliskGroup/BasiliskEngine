@@ -1,8 +1,9 @@
 #include <basilisk/solver/physics.h>
 #include <basilisk/util/debug.h>
 
-#define PRINT_TIME false
+namespace bsk::internal {
 
+inline constexpr bool PRINT_TIME = false;
 
 Solver::Solver() : forces(nullptr), bodies(nullptr) {
     // set default params
@@ -595,4 +596,6 @@ void Solver::loadCdX(uint start, uint end) {
 
 void Solver::draw() {
     // TODO draw everything
+}
+
 }

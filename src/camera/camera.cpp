@@ -1,5 +1,6 @@
 #include <basilisk/camera/camera.h>
 
+namespace bsk::internal {
 
 /**
  * @brief Construct a new Camera object
@@ -87,4 +88,6 @@ void Camera::moveForward(float distance) {
 
 void Camera::moveUp(float distance) {
     position.y += distance;
+}
+
 }

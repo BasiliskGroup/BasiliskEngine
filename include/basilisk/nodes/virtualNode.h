@@ -9,6 +9,8 @@
 #include <basilisk/render/shader.h>
 #include <basilisk/render/material.h>
 
+namespace bsk::internal {
+
 template<typename NodeType, typename P, typename R, typename S>
 class VirtualScene;
 
@@ -102,6 +104,8 @@ private:
     void clear();
     void createBuffers();
 };
+
+}
 
 #include <basilisk/nodes/virtualNode.tpp>
 

@@ -4,6 +4,8 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/IO/window.h>
 
+namespace bsk::internal {
+
 class Keyboard {
     private:
         Window* window;
@@ -13,5 +15,7 @@ class Keyboard {
 
         bool getPressed(unsigned int keyCode);
 };
+
+}
 
 #endif

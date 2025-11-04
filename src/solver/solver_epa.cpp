@@ -1,5 +1,7 @@
 #include <basilisk/solver/physics.h>
 
+namespace bsk::internal {
+
 ushort Solver::epa(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     // deepcopy minkowski points into support points list
     std::copy(pair.minks.begin(), pair.minks.end(), pair.sps.begin());
@@ -242,4 +244,6 @@ void Solver::buildFace(CollisionPair& pair, ushort indexA, ushort indexB, ushort
 
     face.normal = glm::normalize(normal);
     face.distance = glm::dot(face.normal, pair.sps[indexA]);
+}
+
 }

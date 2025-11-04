@@ -1,6 +1,8 @@
 #include <glm/glm.hpp>
 #include <cmath> // for std::isnan
 
+namespace bsk::internal {
+
 // Generic function to detect NaNs in any glm type
 template <typename T>
 bool hasNaN(const T& value) {
@@ -16,4 +18,6 @@ bool hasNaN(const T& value) {
         }
         return false;
     }
+}
+
 }

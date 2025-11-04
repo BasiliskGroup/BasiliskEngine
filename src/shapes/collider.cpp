@@ -1,5 +1,7 @@
 #include <basilisk/solver/physics.h>
 
+namespace bsk::internal {
+
 Collider::Collider(Solver* solver, std::vector<vec2> verts) : solver(solver) {
     index = getColliderFlat()->insert(verts);
 }
@@ -11,4 +13,6 @@ Collider::~Collider() {
 
 ColliderFlat* Collider::getColliderFlat() {
     return solver->getColliderFlat();
+}
+
 }

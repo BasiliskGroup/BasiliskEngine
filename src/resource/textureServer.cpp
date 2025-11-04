@@ -1,5 +1,7 @@
 #include <basilisk/resource/textureServer.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new Texture Server object to maintin multiple texture arrays
  * 
@@ -97,4 +99,6 @@ void TextureServer::write(Shader* shader, std::string name, unsigned int startSl
         shader->bind((name + "[" + std::to_string(slot) + "].array").c_str(), array, startSlot + slot);
         slot++;
     }
+}
+
 }

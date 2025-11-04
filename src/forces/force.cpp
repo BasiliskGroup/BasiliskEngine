@@ -1,5 +1,7 @@
 #include <basilisk/solver/physics.h>
 
+namespace bsk::internal {
+
 Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB) 
 : solver(solver), next(nullptr), bodyA(bodyA), bodyB(bodyB), nextA(nullptr), twin(nullptr), prev(nullptr), prevA(nullptr) {
     solver->insert(this);
@@ -52,3 +54,5 @@ FloatROWS& Force::penalty() { return getTable()->getPenalty()[index]; }
 FloatROWS& Force::lambda() { return getTable()->getLambda()[index]; }
 
 ForceType& Force::getType() { return getTable()->getType()[index]; }
+
+}

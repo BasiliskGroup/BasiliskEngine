@@ -1,5 +1,7 @@
 #include <basilisk/instance/instancer.h>
 
+namespace bsk::internal {
+
 /**
   * @brief Construct a new Instancer object with given template type.
   *        Template type should be per instance data, either as a single value or as a struct. 
@@ -109,4 +111,6 @@ void Instancer<T>::add(T objectData) {
 template <typename T>
 void Instancer<T>::render() {
     vao->render(size);
+}
+
 }

@@ -1,5 +1,7 @@
 #include <basilisk/render/vbo.h>
 
+namespace bsk::internal {
+
 /**
  * @brief Construct a new VBO from the data provided at the given pointer
  *
@@ -78,4 +80,6 @@ void VBO::write(const void* data, unsigned int size, unsigned int offset) {
 template<typename T>
 void VBO::write(const std::vector<T>& data, unsigned int offset) {
     write(data.data(), data.size() * sizeof(T), offset);
+}
+
 }

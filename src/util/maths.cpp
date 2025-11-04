@@ -1,5 +1,7 @@
 #include <basilisk/util/maths.h>
 
+namespace bsk::internal {
+
 void tripleProduct(const vec2& a, const vec2& b, const vec2& c, vec2& o) {
     o = glm::dot(a, c) * b - glm::dot(a, b) * c;
 }
@@ -31,4 +33,6 @@ float cross(const vec2& a, const vec2& b) {
 
 float triangleArea2(const vec2& a, const vec2& b, const vec2& c) {
     return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+}
+
 }

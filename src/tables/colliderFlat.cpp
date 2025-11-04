@@ -1,6 +1,8 @@
 #include <basilisk/tables/colliderFlat.h>
 #include <basilisk/util/print.h>
 
+namespace bsk::internal {
+
 ColliderFlat::ColliderFlat(uint vertCapacity, uint colliderCapacity) {
     this->vertCapacity = vertCapacity;
     this->colliderCapacity = colliderCapacity;
@@ -85,4 +87,6 @@ void ColliderFlat::refreshPointers() {
 void ColliderFlat::remove(uint colliderIndex) {
     toDelete.push_back(colliderIndex);
     colliders.erase(colliderIndex);
+}
+
 }

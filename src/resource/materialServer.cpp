@@ -1,5 +1,7 @@
 #include <basilisk/resource/materialServer.h>
 
+namespace bsk::internal {
+
 MaterialServer::MaterialServer(TextureServer* textureServer): textureServer(textureServer) {
     tbo = new TBO(nullptr, 0, 1000);
 }
@@ -56,4 +58,6 @@ unsigned int MaterialServer::add(Material* material) {
 
 void MaterialServer::write(Shader* shader, std::string name, unsigned int slot) {
     shader->bind(name.c_str(), tbo, slot);
+}
+
 }

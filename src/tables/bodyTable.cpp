@@ -2,6 +2,7 @@
 #include <basilisk/scene/sceneRoute.h>
 #include <basilisk/util/print.h>
 
+namespace bsk::internal {
 
 BodyTable::BodyTable(uint capacity) {
     resize(capacity);
@@ -163,4 +164,6 @@ void BodyTable::writeToNodes() {
 
         node->setPosition(pos);
     }
+}
+
 }

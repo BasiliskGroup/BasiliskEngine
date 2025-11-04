@@ -7,6 +7,7 @@
 #include <basilisk/IO/mouse.h>
 #include <basilisk/resource/resourceServer.h>
 
+namespace bsk::internal {
 
 class Engine {
     private:
@@ -30,5 +31,7 @@ class Engine {
         inline Keyboard* getKeyboard() const { return keyboard; }
         inline ResourceServer* getResourceServer() const { return resourceServer; }
 };
+
+}
 
 #endif
