@@ -17,7 +17,9 @@ int main() {
     // Data for making node
     Mesh* quad = new Mesh("models/quad.obj");
     Image* image = new Image("textures/man.png");
+    Image* containerImage = new Image("textures/container.jpg");
     Material* material1 = new Material({1.0, 1.0, 0.0}, image);
+    Material* material2 = new Material({1.0, 1.0, 0.0}, containerImage);
 
     // create "paper"
     std::vector<glm::vec2> vertices = {
@@ -34,7 +36,10 @@ int main() {
     }
         
     // normal nodes
-    Node2D* square = new Node2D(scene2D, { .mesh=quad, .material=material1 });
+    Node2D* square = new Node2D(scene2D, { .mesh=quad, .material=material2 });
+
+    // TODO: Figure out why needs to be rewritten 
+    engine->getResourceServer()->write(scene2D->getShader(), "textureArrays", "materials");
 
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
@@ -48,7 +53,9 @@ int main() {
 
     // Free memory allocations
     delete image;
+    delete containerImage;
     delete material1;
+    delete material2;
     delete quad;
     delete scene2D;
     delete engine;
