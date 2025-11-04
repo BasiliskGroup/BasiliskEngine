@@ -10,10 +10,11 @@ namespace bsk::internal {
 template<typename NodeType, typename position_type, typename rotation_type, typename scale_type>
 class VirtualScene {
 protected:
+    Engine* engine = nullptr;
     NodeType* root = nullptr;
     
 public:
-    VirtualScene() {
+    VirtualScene(Engine* engine) : engine(engine) {
         root = new NodeType(this, nullptr); // parent = nullptr
     }
 
@@ -21,7 +22,9 @@ public:
         clear();
     }
 
+    inline Engine* getEngine() { return engine; }
     inline NodeType* getRoot() const { return root; }
+    
     virtual Shader* getShader() = 0;
 
 protected:

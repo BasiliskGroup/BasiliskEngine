@@ -16,7 +16,6 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
     private:
         Camera* camera;
         Shader* shader;
-        Engine* engine;
 
     public:
         Scene(Engine* engine);
@@ -29,7 +28,6 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
 
         inline Shader* getShader() { return shader; }
         inline Camera* getCamera() { return camera; }
-        inline Engine* getEngine() { return engine; }
 };
 
 }

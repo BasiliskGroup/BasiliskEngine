@@ -18,7 +18,6 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         Camera2D* camera;
         Shader* shader;
         Solver* solver;
-        Engine* engine;
 
     public:
         Scene2D(Engine* engine);
@@ -31,7 +30,6 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
 
         inline Shader* getShader() { return shader; }
         inline Camera2D* getCamera() { return camera; }
-        inline Engine* getEngine() { return engine; }
         inline Solver* getSolver() { return solver; }
 };
 

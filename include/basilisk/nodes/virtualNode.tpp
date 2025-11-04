@@ -300,6 +300,7 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::render() {
     shader->setUniform("uModel", model);
+    scene->getEngine();
     vao->render();
 }
 
