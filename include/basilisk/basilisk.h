@@ -26,15 +26,35 @@
 #include "camera/camera.h"
 #include "camera/camera2d.h"
 
+#include "shapes/collider.h"
+#include "shapes/rigid.h"
+#include "solver/solver.h"
+#include "forces/force.h"
+#include "forces/manifold.h"
+
 namespace bsk {
+    // render
     using Engine = internal::Engine;
     using Scene = internal::Scene;
     using Scene2D = internal::Scene2D;
+
+    // io
     using Window = internal::Window;
     using Mouse = internal::Mouse;
     using Keyboard = internal::Keyboard;
+
+    // node
     using Node = internal::Node;
     using Node2D = internal::Node2D;
+
+    // physics
+    using Collider = internal::Collider;
+    using Rigid = internal::Rigid;
+    using Solver = internal::Solver;
+    using Force = internal::Force;
+    using Manifold = internal::Manifold;
+
+    // render
     using Mesh = internal::Mesh;
     using Texture = internal::Texture;
     using Image = internal::Image;
