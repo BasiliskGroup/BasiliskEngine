@@ -1,34 +1,17 @@
 #ifndef BSK_CAMERA_2D_H
 #define BSK_CAMERA_2D_H
 
-
-#include <basilisk/util/includes.h>
-#include <basilisk/camera/virtualCamera.h>
-#include <basilisk/render/shader.h>
-#include <basilisk/engine/engine.h>
+#include <basilisk/camera/staticCamera2d.h>
 
 namespace bsk::internal {
 
-class Camera2D : public VirtualCamera{
-    private:
-        Engine* engine;
-
-        glm::vec2 position;
-        glm::vec2 viewScale;
-
-        void updateProjection();
-        void updateView();
-
+class Camera2D : public StaticCamera2D {
     public:
-        Camera2D(Engine* engine, glm::vec2 position = {0.0f, 0.0f});
+        Camera2D(Engine* engine, glm::vec2 position = {0.0f, 0.0f}) : StaticCamera2D(engine, position) {}
 
-        void update();
-        void use(Shader* shader);
-
-        void setPosition(glm::vec2 position) { this->position = position; }
+        void update() override;
 };
 
-}
-
+};
 
 #endif

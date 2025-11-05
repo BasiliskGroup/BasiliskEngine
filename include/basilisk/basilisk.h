@@ -23,6 +23,8 @@
 #include "render/tbo.h"
 #include "render/material.h"
 #include "resource/materialServer.h"
+#include "camera/staticCamera.h"
+#include "camera/staticCamera2d.h"
 #include "camera/camera.h"
 #include "camera/camera2d.h"
 
@@ -44,6 +46,8 @@ namespace bsk {
     using VBO = internal::VBO;
     using EBO = internal::EBO;
     using TBO = internal::TBO;
+    using StaticCamera = internal::StaticCamera;
+    using StaticCamera2D = internal::StaticCamera2D;
     using Camera = internal::Camera;
     using Camera2D = internal::Camera2D;
     using MaterialServer = internal::MaterialServer;

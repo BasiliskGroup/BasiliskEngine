@@ -21,6 +21,10 @@ int main() {
     Material* material1 = new Material({1.0, 1.0, 0.0}, image);
     Material* material2 = new Material({1.0, 1.0, 0.0}, containerImage);
 
+    // Use Static Cam
+    StaticCamera2D* camera = new StaticCamera2D(engine);
+    scene2D->setCamera(camera);
+
     // create "paper"
     std::vector<glm::vec2> vertices = {
         {100, 100}, {400, 100}, {400, 300}, {100, 300},
@@ -54,6 +58,7 @@ int main() {
     // Free memory allocations
     delete image;
     delete containerImage;
+    delete camera;
     delete material1;
     delete material2;
     delete quad;

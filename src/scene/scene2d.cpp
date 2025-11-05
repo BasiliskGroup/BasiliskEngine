@@ -9,6 +9,7 @@ namespace bsk::internal {
  */
 Scene2D::Scene2D(Engine* engine) : VirtualScene(engine) {
     camera = new Camera2D(engine);
+    internalCamera = camera;
     shader = new Shader("shaders/instance2D.vert", "shaders/instance2D.frag");
     solver = new Solver();
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
@@ -21,7 +22,7 @@ Scene2D::Scene2D(Engine* engine) : VirtualScene(engine) {
 Scene2D::~Scene2D() {
     VirtualScene::clear();
 
-    delete camera; camera = nullptr;
+    delete internalCamera; internalCamera = nullptr;
     delete shader; shader = nullptr;
     delete solver; solver = nullptr;
 }

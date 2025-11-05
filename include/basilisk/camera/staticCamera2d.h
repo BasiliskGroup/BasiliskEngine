@@ -1,0 +1,34 @@
+#ifndef BSK_STATIC_CAMERA_2D_H
+#define BSK_STATIC_CAMERA_2D_H
+
+
+#include <basilisk/util/includes.h>
+#include <basilisk/camera/virtualCamera.h>
+#include <basilisk/render/shader.h>
+#include <basilisk/engine/engine.h>
+
+namespace bsk::internal {
+
+class StaticCamera2D : public VirtualCamera{
+    protected:
+        Engine* engine;
+
+        glm::vec2 position;
+        glm::vec2 viewScale;
+
+        void updateProjection();
+        void updateView();
+
+    public:
+        StaticCamera2D(Engine* engine, glm::vec2 position = {0.0f, 0.0f});
+
+        void update();
+        void use(Shader* shader);
+
+        void setPosition(glm::vec2 position) { this->position = position; }
+};
+
+}
+
+
+#endif

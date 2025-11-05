@@ -3,19 +3,9 @@
 namespace bsk::internal {
 
 /**
- * @brief Construct a new Camera object
+ * @brief 
  * 
- * @param position 
- * @param pitch 
- * @param yaw 
  */
-Camera::Camera(Engine* engine, glm::vec3 position, float pitch, float yaw): 
-    engine(engine), position(position), pitch(pitch), yaw(yaw) 
-{
-    updateView();
-    updateProjection();
-}
-
 void Camera::update() {
 
     // Get mouse and keyboard from engine
@@ -43,41 +33,6 @@ void Camera::update() {
     updateView();
 }
 
-/**
- * @brief 
- * 
- */
-void Camera::updateView() {
-    forward = {
-        cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
-        sin(glm::radians(pitch)),
-        sin(glm::radians(yaw)) * cos(glm::radians(pitch))
-    };
-    right = glm::normalize(glm::cross(worldUp, forward));
-    up = glm::cross(forward, right);
-
-    view = glm::lookAt(position, position + forward, up);
-}
-
-/**
- * @brief Update the projection matrix based on current parameters
- * 
- */
-void Camera::updateProjection() {
-    projection = glm::perspective(fov, aspect, near, far);
-}
-
-/**
- * @brief Write the view and projection matrices to the given shader.
- *        Assumes uniform names are 'uView' and 'uProjection'
- * 
- * @param shader 
- */
-void Camera::use(Shader* shader) {
-    shader->setUniform("uView", view);
-    shader->setUniform("uProjection", projection);
-}
-
 void Camera::moveSide(float distance) {
     position -= right * distance;
 }
@@ -90,4 +45,4 @@ void Camera::moveUp(float distance) {
     position.y += distance;
 }
 
-}
+};

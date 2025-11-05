@@ -10,6 +10,7 @@ namespace bsk::internal {
  */
 Scene::Scene(Engine* engine) : VirtualScene(engine) {
     camera = new Camera(engine);
+    internalCamera = camera;
     shader = new Shader("shaders/default.vert", "shaders/default.frag");
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
 }
@@ -19,7 +20,7 @@ Scene::Scene(Engine* engine) : VirtualScene(engine) {
  * 
  */
 Scene::~Scene() {
-    delete camera;
+    delete internalCamera; internalCamera = nullptr;
     delete shader;
 }
 

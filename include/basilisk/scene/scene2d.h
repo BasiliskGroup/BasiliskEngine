@@ -15,7 +15,8 @@ class Node2D;
 
 class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
     private:
-        Camera2D* camera;
+        StaticCamera2D* camera;
+        StaticCamera2D* internalCamera;
         Shader* shader;
         Solver* solver;
 
@@ -26,10 +27,10 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         void update(float dt);
         void render();
 
-        void setCamera(Camera2D* camera) { this->camera = camera; }
+        void setCamera(StaticCamera2D* camera) { this->camera = camera; }
 
         inline Shader* getShader() { return shader; }
-        inline Camera2D* getCamera() { return camera; }
+        inline StaticCamera2D* getCamera() { return camera; }
         inline Solver* getSolver() { return solver; }
 };
 

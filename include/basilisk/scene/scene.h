@@ -14,7 +14,8 @@ class Node;
 
 class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
     private:
-        Camera* camera;
+        StaticCamera* camera;
+        StaticCamera* internalCamera;
         Shader* shader;
 
     public:
@@ -24,10 +25,10 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         void update();
         void render();
 
-        void setCamera(Camera* camera) { this->camera = camera; }
+        void setCamera(StaticCamera* camera) { this->camera = camera; }
 
         inline Shader* getShader() { return shader; }
-        inline Camera* getCamera() { return camera; }
+        inline StaticCamera* getCamera() { return camera; }
 };
 
 }
