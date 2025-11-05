@@ -21,6 +21,10 @@ int main() {
     Material* material1 = new Material({1.0, 1.0, 0.0}, image);
     Material* material2 = new Material({1.0, 1.0, 0.0}, containerImage);
 
+    // physics
+    new Collider(scene2D->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
+    new Collider(scene2D->getSolver(), {{0.5, 0.5}, {-1, 1}, {-0.5, -0.5}, {0.5, -0.5}});
+
     // Use Static Cam
     StaticCamera2D* camera = new StaticCamera2D(engine);
     scene2D->setCamera(camera);

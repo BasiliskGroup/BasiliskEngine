@@ -3,16 +3,16 @@
 namespace bsk::internal {
 
 Collider::Collider(Solver* solver, std::vector<glm::vec2> verts) : solver(solver) {
-    index = getColliderFlat()->insert(verts);
+    index = getColliderTable()->insert(this, verts);
 }
 
 Collider::~Collider() {
     // remove self from ColliderFlat
-    getColliderFlat()->remove(index);
+    getColliderTable()->markAsDeleted(index);
 }
 
-ColliderFlat* Collider::getColliderFlat() {
-    return solver->getColliderFlat();
+ColliderTable* Collider::getColliderTable() {
+    return solver->getColliderTable();
 }
 
 }

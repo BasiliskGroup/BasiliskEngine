@@ -25,21 +25,7 @@ void BodyTable::computeTransforms() {
 
         rmat[i] = { c, -s, s, c };
         mat[i] = { c * sx, -s * sy, s * sx, c * sy };
-        // imat[i] = { c * isx, s * isy, -s * isx, c * isy };
-
         imat[i] = {  c * isx,  s * isx, -s * isy,  c * isy };
-
-        // rotation-only matrix (clockwise positive)
-        // rmat[i] = { c,  s,
-        //            -s,  c };
-
-        // // local -> world : rotate (clockwise) then scale
-        // mat[i] = { c * sx,  s * sy,
-        //           -s * sx,  c * sy };
-
-        // // inverse: world -> local = inverse scale * transpose(rotation)
-        // imat[i] = { c * isx,  -s * isx,
-        //             s * isy,   c * isy };
 
         updated[i] = false;
     }
@@ -156,12 +142,6 @@ void BodyTable::writeToNodes() {
     for (uint i = 0; i < size; i++) {
         Node2D* node = bodies[i]->getNode();
         glm::vec3& pos = this->pos[i];
-
-        // print((long) node);
-        // print(pos);
-        // print(vel[i]);
-        // print("");
-
         node->setPosition(pos);
     }
 }

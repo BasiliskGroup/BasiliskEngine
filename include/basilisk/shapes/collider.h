@@ -6,7 +6,7 @@
 namespace bsk::internal {
 
 class Solver;
-class ColliderFlat;
+class ColliderTable;
 
 class Collider {
 private:
@@ -22,7 +22,7 @@ public:
     uint getIndex() { return index; }
     void setIndex(uint index) { this->index = index; }
 
-    ColliderFlat* getColliderFlat();
+    ColliderTable* getColliderTable();
 };
 
 }

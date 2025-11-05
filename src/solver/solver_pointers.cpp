@@ -96,14 +96,14 @@ void Solver::clear() {
 
     delete bodyTable;
     delete forceTable;
-    delete colliderFlat;
+    delete colliderTable;
 
     // set everything to nullptr for clean practice
     bodies = nullptr;
     forces = nullptr;
     bodyTable = nullptr;
     forceTable = nullptr;
-    colliderFlat = nullptr;
+    colliderTable = nullptr;
 }
 
 }

@@ -8,7 +8,7 @@
 
 #include <basilisk/tables/bodyTable.h>
 #include <basilisk/tables/forceRoute.h>
-#include <basilisk/tables/colliderFlat.h>
+#include <basilisk/tables/colliderTable.h>
 
 namespace bsk::internal {
 
@@ -42,7 +42,7 @@ private:
     // Tables
     ForceTable* forceTable;
     BodyTable* bodyTable;
-    ColliderFlat* colliderFlat;
+    ColliderTable* colliderTable;
 
     // broad collision detection
     std::vector<CollisionIndexPair> collisionPairs;
@@ -105,7 +105,7 @@ public:
     Rigid*& getBodies() { return bodies; }
     ForceTable* getForceTable() { return forceTable; }
     BodyTable*  getBodyTable()  { return bodyTable; }
-    ColliderFlat*  getColliderFlat()  { return colliderFlat; }
+    ColliderTable*  getColliderTable()  { return colliderTable; }
     ManifoldTable* getManifoldTable() { return forceTable->getManifoldTable(); } 
 
     void step(float dt);
