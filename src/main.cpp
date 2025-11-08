@@ -1,13 +1,5 @@
 #include <basilisk/basilisk.h>
 
-#include <basilisk/solver/physics.h>
-#include <basilisk/util/random.h>
-#include <basilisk/util/time.h>
-#include <basilisk/forces/force.h>
-#include <basilisk/tables/forceTable.h>
-#include <basilisk/tables/manifoldTable.h>
-#include <basilisk/shapes/rigid.h>
-
 using namespace bsk;
 
 int main() {
@@ -16,6 +8,8 @@ int main() {
 
     // Data for making node
     Mesh* quad = new Mesh("models/quad.obj");
+    Mesh* quad2 = new Mesh("models/quad2.obj");
+
     Image* image = new Image("textures/man.png");
     Image* containerImage = new Image("textures/container.jpg");
     Material* material1 = new Material({1.0, 1.0, 0.0}, image);
@@ -50,13 +44,23 @@ int main() {
     engine->getResourceServer()->write(scene2D->getShader(), "textureArrays", "materials");
 
     // Main loop continues as long as the window is open
+    int i = 0;
     while (engine->isRunning()) {
         engine->update();
+
+        if (i % 3 == 0) {
+            square->setMesh(quad2);
+        } else {
+            square->setMesh(quad);
+        }
+        
 
         scene2D->update(1 / 60);
         scene2D->render();
 
         engine->render();
+
+        i++;
     }
 
     // Free memory allocations

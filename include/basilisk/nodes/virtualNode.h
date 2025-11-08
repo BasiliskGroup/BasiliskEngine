@@ -82,6 +82,7 @@ public:
     virtual void setPosition(P position) {};
     virtual void setRotation(R rotation) {};
     virtual void setScale(S scale) {};
+    void setMesh(Mesh* mesh);
 
     P getPosition() const { return position; }
     R getRotation() const { return rotation; }
@@ -106,6 +107,7 @@ private:
     // helper functions to avoid copying code
     void clear();
     void createBuffers();
+    void deleteBuffers();
 };
 
 }
