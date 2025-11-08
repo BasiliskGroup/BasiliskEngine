@@ -91,6 +91,7 @@ public:
     Derived* getParent() const { return parent; }
     Shader* getShader() { return shader; }
     Material* getMaterial() { return material; }
+    Mesh* getMesh() { return mesh; }
     Engine* getEngine();
 
     // node hierarchy
