@@ -52,6 +52,7 @@ public:
     void setRotation(float rotation);
     void setScale(glm::vec2 scale);
     void setVelocity(glm::vec3 velocity);
+    void setLayer(float layer) { this->layer = layer; }
 
     Scene2D* getScene() { return (Scene2D*) scene; }
 
