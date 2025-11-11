@@ -24,7 +24,7 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         Scene2D(Engine* engine);
         ~Scene2D();
 
-        void update(float dt);
+        void update();
         void render();
 
         void setCamera(StaticCamera2D* camera) { this->camera = camera; }

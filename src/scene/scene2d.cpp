@@ -31,9 +31,9 @@ Scene2D::~Scene2D() {
  * @brief Update the scene (camera updates)
  * 
  */
-void Scene2D::update(float dt) {
+void Scene2D::update() {
     // physics
-    solver->step(dt);
+    solver->step(1 / 60);
 
     // camera
     camera->update();

@@ -300,8 +300,13 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::render() {
     shader->setUniform("uModel", model);
-    int materialID = getEngine()->getResourceServer()->getMaterialServer()->get(material);
-    shader->setUniform("uMaterialID", materialID);
+    if (material) {
+        int materialID = getEngine()->getResourceServer()->getMaterialServer()->get(material);
+        shader->setUniform("uMaterialID", materialID);
+    }
+    else {
+        shader->setUniform("uMaterialID", 0);
+    }
     vao->render();
 }
 
