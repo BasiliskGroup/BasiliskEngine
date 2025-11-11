@@ -18,6 +18,7 @@ int main() {
     bsk::Node* square = new bsk::Node(scene, { .mesh=quad, .material=nullptr });
 
     // Main loop continues as long as the window is open
+    int i = 0;
     while (engine->isRunning()) {
         engine->update();
 
@@ -25,6 +26,8 @@ int main() {
         scene->render();
 
         engine->render();
+
+        i++;
     }
 
     // Free memory allocations

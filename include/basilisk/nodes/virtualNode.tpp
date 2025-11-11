@@ -377,9 +377,7 @@ void VirtualNode<Derived, P, R, S>::clear() {
     }
 
     // delete buffers
-    if (vao) { delete vao; vao = nullptr; }
-    if (vbo) { delete vbo; vbo = nullptr; }
-    if (ebo) { delete ebo; ebo = nullptr; }
+    deleteBuffers();
 
     // remove from parent
     if (parent != nullptr) {
@@ -407,6 +405,20 @@ void VirtualNode<Derived, P, R, S>::createBuffers() {
         ebo = new EBO(mesh->getIndices());
         vao = new VAO(shader, vbo, ebo);
     }
+}
+
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::deleteBuffers() {
+    if (vao) { delete vao; vao = nullptr; }
+    if (vbo) { delete vbo; vbo = nullptr; }
+    if (ebo) { delete ebo; ebo = nullptr; }
+}
+
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::setMesh(Mesh* mesh) {
+    this->mesh = mesh;
+    deleteBuffers();
+    createBuffers();
 }
 
 }
