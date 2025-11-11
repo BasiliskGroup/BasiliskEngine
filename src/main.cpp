@@ -5,17 +5,17 @@ int main() {
     bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk");
 
     // Create a blank 2D scene
-    bsk::Scene* scene = new bsk::Scene(engine);
+    bsk::Scene2D* scene = new bsk::Scene2D(engine);
 
     // Load assets from file
-    bsk::Mesh* quad = new bsk::Mesh("models/cube.obj");
+    bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
     bsk::Image* image = new bsk::Image("textures/container.jpg");
 
     // // Create a material from image
-    // bsk::Material* material = new bsk::Material({1, 1, 1}, image);
+    bsk::Material* material = new bsk::Material({1, 1, 1}, image);
 
     // normal nodes
-    bsk::Node* square = new bsk::Node(scene, { .mesh=quad, .material=nullptr });
+    bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material });
 
     // Main loop continues as long as the window is open
     int i = 0;
@@ -31,9 +31,9 @@ int main() {
     }
 
     // Free memory allocations
-    // delete image;
-    // delete material;
-    // delete quad;
-    // delete scene;
-    // delete engine;
+    delete image;
+    delete material;
+    delete quad;
+    delete scene;
+    delete engine;
 }
