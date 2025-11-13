@@ -112,6 +112,11 @@ target_link_libraries(basilisk
         stb
 )
 
+# Windows-specific: Fix parallel compilation PDB conflicts
+if(MSVC)
+    target_compile_options(basilisk PRIVATE /FS)
+endif()
+
 # ======================================================
 # Test executable (engine)
 # ======================================================

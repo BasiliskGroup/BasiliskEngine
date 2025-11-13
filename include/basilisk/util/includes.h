@@ -45,6 +45,10 @@
 
 namespace bsk::internal {
 
+// Type aliases for cross-platform compatibility
+using uint = unsigned int;
+using ushort = unsigned short;
+
 // AoS types
 using BskVec2Triplet = std::array<glm::vec2, 3>;
 using BskVec2Pair = std::array<glm::vec2, 2>;
