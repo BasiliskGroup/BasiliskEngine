@@ -83,6 +83,7 @@ public:
     virtual void setRotation(R rotation) {};
     virtual void setScale(S scale) {};
     void setMesh(Mesh* mesh);
+    void setScene(VirtualScene<Derived, P, R, S>* scene);
 
     P getPosition() const { return position; }
     R getRotation() const { return rotation; }
