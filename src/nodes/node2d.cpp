@@ -64,20 +64,20 @@ void Node2D::updateModel() {
 }
 
 void Node2D::setPosition(glm::vec2 position) {
-    this->rigid->setPosition({position.x, position.y, this->rotation});
+    if (this->rigid) this->rigid->setPosition({position.x, position.y, this->rotation});
     this->position = position;
     updateModel();
 }
 
 void Node2D::setPosition(glm::vec3 position) {
-    this->rigid->setPosition(position);
+    if (this->rigid) this->rigid->setPosition(position);
     this->position = {position.x , position.y};
     this->rotation = position.z;
     updateModel();
 }
 
 void Node2D::setRotation(float rotation) {
-    this->rigid->setPosition({this->position.x, this->position.y, rotation});
+    if (this->rigid) this->rigid->setPosition({this->position.x, this->position.y, rotation});
     this->rotation = rotation;
     updateModel();
 }
@@ -88,7 +88,7 @@ void Node2D::setScale(glm::vec2 scale) {
 }
 
 void Node2D::setVelocity(glm::vec3 velocity) {
-    this->rigid->setVelocity(velocity);
+    if (this->rigid) this->rigid->setVelocity(velocity);
 }
 
 void Node2D::bindRigid(Params& params) {
