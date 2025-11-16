@@ -122,7 +122,7 @@ void Solver::step(float dt) {
         glm::vec3 accel = (body->getVel() - body->getPrevVel()) / dt;
         float accelExt = accel.y * (gravity > 0 ? 1 : -1);
         float accelWeight = glm::clamp(accelExt / abs(gravity), 0.0f, 1.0f);
-        if (std::isinf(accelWeight)) accelWeight = 0.0f;
+        if (std::isinf(accelWeight) || gravity == 0) accelWeight = 0.0f;
 
         // std::cout << "  accelWeight: " << accelWeight << ", accelExt: " << accelExt << std::endl;
 
