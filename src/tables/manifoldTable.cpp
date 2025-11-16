@@ -71,7 +71,10 @@ void ManifoldTable::warmstart() {
     // operate only on the first 'size' rows
     for (size_t i = 0; i < size; ++i) {
         tangent[i] = { -normal[i].y, normal[i].x };
-        basis[i] = { normal[i], tangent[i] }; // TODO check this constructor
+        basis[i] = glm::mat2x2(
+            normal[i].x, normal[i].y,      // First row = normal
+            tangent[i].x, tangent[i].y     // Second row = tangent
+        );
     }
 }
 

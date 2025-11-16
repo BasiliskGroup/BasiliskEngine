@@ -8,7 +8,7 @@ class Solver;
 class Rigid;
 
 class Force {
-private:
+protected:
     Solver* solver;
     Force* next; // next in solver list
     Force* prev; // prev in solver list
@@ -19,8 +19,6 @@ private:
 
     Rigid* bodyA;
     Rigid* bodyB;
-
-protected:
 
     // for table access
     uint index;
@@ -54,6 +52,10 @@ public:
     BskFloatROWS& penalty();
     BskFloatROWS& lambda();
 
+    uint& getSpecialIndex();
+    uint& getBodyIndex();
+    bool isA();
+
     //table
     ForceType& getType();
     inline uint getIndex() { return index; }
@@ -69,6 +71,9 @@ public:
     virtual void draw() const {};
 
     // NOTE initialization and computations will be done in the ForceTable for bulk operations
+    virtual void initialize() = 0;
+    virtual void computeConstraint(float alpha) = 0;
+    virtual void computeDerivatives(Rigid* body) = 0;
 };
 
 }

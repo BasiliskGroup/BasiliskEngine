@@ -55,4 +55,8 @@ BskFloatROWS& Force::lambda() { return getTable()->getLambda()[index]; }
 
 ForceType& Force::getType() { return getTable()->getType()[index]; }
 
+uint& Force::getSpecialIndex() { return getTable()->getSpecial()[index]; }
+uint& Force::getBodyIndex() { return getTable()->getBodyIndex()[index]; }
+bool Force::isA() { return getTable()->getIsA()[index]; }
+
 }

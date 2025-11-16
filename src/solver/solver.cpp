@@ -4,6 +4,8 @@
 namespace bsk::internal {
 
 inline constexpr bool PRINT_TIME = false;
+inline constexpr bool DEBUG_MANIFOLD = true;
+inline constexpr bool DEBUG_PRIMAL = true;
 
 Solver::Solver() : forces(nullptr), bodies(nullptr) {
     // set default params
@@ -30,7 +32,7 @@ Solver::~Solver() {
  */
 void Solver::step(float dt) {
     auto beforeStep = timeNow();
-    compactBodies();
+    // compactBodies();
     if (PRINT_TIME) printDurationUS(beforeStep, timeNow(), "Body Compact:\t\t");
 
     auto beforeTransform = timeNow();
@@ -41,7 +43,7 @@ void Solver::step(float dt) {
 
     auto beforeBroad = timeNow();
     sphericalCollision(); // broad collision TODO replace with BVH
-    // std::cout << "Broad Pairs:\t\t" << collisionPairs.size() << std::endl;
+    // // std::cout << "Broad Pairs:\t\t" << collisionPairs.size() << std::endl;
     if (PRINT_TIME) printDurationUS(beforeBroad, timeNow(), "Broad Collision:\t");
 
     // delete all manifolds TODO remove this when adding persistence
@@ -75,54 +77,166 @@ void Solver::step(float dt) {
     compactForces();
     if (PRINT_TIME) printDurationUS(beforeCompact, timeNow(), "Force Compact:\t\t");
 
-    // NOTE bodies and forces are compact after this point
+    // std::cout << "=== WARMSTART MANIFOLDS ===" << std::endl;
+    for (Force* force = forces; force != nullptr; force = force->getNext()) {
+        // std::cout << "Force: " << force << std::endl;
+        
+        // Debug print manifold data (similar to old version)
+        if (force->getType() == MANIFOLD) {
+            Manifold* m = static_cast<Manifold*>(force);
+            // std::cout << "Manifold (bodyA=" << m->getBodyA() << ", bodyB=" << m->getBodyB() << ")" << std::endl;
+            // std::cout << "  numContacts: " << 2 << std::endl;
+            
+            for (int c = 0; c < 2; c++) {
+                // std::cout << "  Contact " << c << ":" << std::endl;
+                // std::cout << "    normal: " << m->getNormal().x << ", " << m->getNormal().y << std::endl;
+                // std::cout << "    rA: " << m->getRA()[c].x << ", " << m->getRA()[c].y << std::endl;
+                // std::cout << "    rB: " << m->getRB()[c].x << ", " << m->getRB()[c].y << std::endl;
+                // std::cout << "    JAn: " << m->J()[2 * c + JN].x << ", " << m->J()[2 * c + JN].y << ", " << m->J()[2 * c + JN].z << std::endl;
+                // std::cout << "    JAt: " << m->J()[2 * c + JT].x << ", " << m->J()[2 * c + JT].y << ", " << m->J()[2 * c + JT].z << std::endl;
+                // std::cout << "    C0: " << m->getC0()[c].x << ", " << m->getC0()[c].y << std::endl;
+            }
+        }
+        
+        // all manifolds here are valid
+        force->initialize();
+        
+        for (uint i = 0; i < force->rows(); i++) {
+            force->lambda()[i] = force->lambda()[i] * alpha * gamma;
+            force->penalty()[i] = glm::clamp(force->penalty()[i] * gamma, PENALTY_MIN, PENALTY_MAX);
+            force->penalty()[i] = glm::min(force->penalty()[i], force->stiffness()[i]);
+        }
+    }
 
-    auto beforeManifoldWarm = timeNow();
-    warmstartManifolds();
-    if (PRINT_TIME) printDurationUS(beforeManifoldWarm, timeNow(), "Manifold Warm:\t\t");
+    // warmstart bodies
+    // std::cout << "=== WARMSTART BODIES ===" << std::endl;
+    for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
+        // std::cout << "Body: " << body << std::endl;
+        // std::cout << "  mass: " << body->getMass() << ", moment: " << body->getMoment() << std::endl;
+        
+        // not clamping rotation bc I'm not a coward
+        body->getInertial() = body->getPos() + body->getVel() * dt;
+        if (body->getMass() > 0) body->getInertial() += glm::vec3(0, gravity, 0) * (dt * dt);
 
-    auto beforeForceWarm = timeNow();
-    warmstartForces();
-    if (PRINT_TIME) printDurationUS(beforeForceWarm, timeNow(), "Force Warm:\t\t");
+        // Adaptive warmstart (See original VBD paper)
+        glm::vec3 accel = (body->getVel() - body->getPrevVel()) / dt;
+        float accelExt = accel.y * (gravity > 0 ? 1 : -1);
+        float accelWeight = glm::clamp(accelExt / abs(gravity), 0.0f, 1.0f);
+        if (std::isinf(accelWeight)) accelWeight = 0.0f;
 
-    auto beforeBodyWarm = timeNow();
-    warmstartBodies(dt);
-    if (PRINT_TIME) printDurationUS(beforeBodyWarm, timeNow(), "Body Warm:\t\t");
+        // std::cout << "  accelWeight: " << accelWeight << ", accelExt: " << accelExt << std::endl;
 
-    auto beforeMainPreload = timeNow();
-    mainloopPreload();
-    if (PRINT_TIME) printDurationUS(beforeMainPreload, timeNow(), "Preload:\t\t");
-
-    if (PRINT_TIME) print("-----------------------------------------");
+        // Save initial position (x-) and compute warmstarted position (See original VBD paper)
+        body->getInitial() = body->getPos();
+        body->getPos() = body->getPos() + body->getVel() * dt + glm::vec3(0, gravity, 0) * (accelWeight * dt * dt);
+        
+        // std::cout << "  pos: " << body->getPos().x << ", " << body->getPos().y << ", " << body->getPos().z << std::endl;
+        // std::cout << "  inertial: " << body->getInertial().x << ", " << body->getInertial().y << ", " << body->getInertial().z << std::endl;
+    }
 
     // main solver loop
-    auto beforeMain = timeNow();
-    for (ushort iter = 0; iter < iterations; iter++) {
-        auto beforePrimal = timeNow();
-        primalUpdate(dt);
-        if (PRINT_TIME) printPrimalDuration(beforePrimal, timeNow());
+    for (uint it = 0; it < iterations; it++) {
+        // std::cout << "=== ITERATION " << it << " ===" << std::endl;
+        
+        // PRIMAL UPDATE
+        for (Rigid* body = bodies; body != 0; body = body->getNext()) {
+            if (body->getMass() < 0) continue;
 
-        auto beforeDual = timeNow();
-        dualUpdate(dt);
-        if (PRINT_TIME) printDualDuration(beforeDual, timeNow());
+            glm::mat3x3 M = glm::diagonal3x3(glm::vec3{ body->getMass(), body->getMass(), body->getMoment() });
+            glm::mat3x3 lhs = M / (dt * dt);
+            glm::vec3 rhs = M / (dt * dt) * (body->getPos() - body->getInertial());
+
+            // std::cout << "Body " << body << ":" << std::endl;
+            // std::cout << "  pos: " << body->getPos().x << ", " << body->getPos().y << ", " << body->getPos().z << std::endl;
+            // std::cout << "  inertial: " << body->getInertial().x << ", " << body->getInertial().y << ", " << body->getInertial().z << std::endl;
+            // std::cout << "  initial rhs: " << rhs.x << ", " << rhs.y << ", " << rhs.z << std::endl;
+
+            int forceCount = 0;
+            // Iterate over all forces acting on the body
+            for (Force* force = body->getForces(); force != nullptr; force = force->getNextA()) {
+                // Compute constraint and its derivatives
+                force->computeConstraint(alpha);
+                force->computeDerivatives(body);
+
+                for (uint i = 0; i < force->rows(); i++) {
+                    // Use lambda as 0 if it's not a hard constraint
+                    float lambda = std::isinf(force->stiffness()[i]) ? force->lambda()[i] : 0.0f;
+
+                    // Compute the clamped force magnitude (Sec 3.2)
+                    float f = glm::clamp(force->penalty()[i] * force->C()[i] + lambda, force->fmin()[i], force->fmax()[i]);
+
+                    // std::cout << "  Force " << force << " row " << i << ":" << std::endl;
+                    // std::cout << "    C: " << force->C()[i] << std::endl;
+                    // std::cout << "    penalty: " << force->penalty()[i] << std::endl;
+                    // std::cout << "    lambda: " << lambda << std::endl;
+                    // std::cout << "    fmin: " << force->fmin()[i] << ", fmax: " << force->fmax()[i] << std::endl;
+                    // std::cout << "    force: " << f << std::endl;
+                    // std::cout << "    J: " << force->J()[i].x << ", " << force->J()[i].y << ", " << force->J()[i].z << std::endl;
+
+                    // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
+                    glm::mat3x3 G = glm::diagonal3x3(glm::vec3(
+                        glm::length(force->H()[i][0]), 
+                        glm::length(force->H()[i][1]), 
+                        glm::length(force->H()[i][2])
+                    )) * abs(f);  // IMPORTANT: Should multiply by abs(f)!
+
+                    // Accumulate force (Eq. 13) and hessian (Eq. 17)
+                    rhs += force->J()[i] * f;
+                    lhs += outerProduct(force->J()[i], force->J()[i] * force->penalty()[i]) + G;
+                    
+                    // std::cout << "    rhs after: " << rhs.x << ", " << rhs.y << ", " << rhs.z << std::endl;
+                    forceCount++;
+                }   
+            }
+
+            glm::vec3 x;
+            solve(lhs, x, rhs);
+            
+            // std::cout << "  Final rhs: " << rhs.x << ", " << rhs.y << ", " << rhs.z << std::endl;
+            // std::cout << "  Correction: " << x.x << ", " << x.y << ", " << x.z << std::endl;
+            // std::cout << "  Total forces processed: " << forceCount << std::endl;
+            
+            body->getPos() -= x;
+        }
+
+        // DUAL UPDATE
+        for (Force* force = forces; force != nullptr; force = force->getNext()) {
+            force->computeConstraint(alpha);
+
+            for (uint i = 0; i < force->rows(); i++) {
+                // Use lambda as 0 if it's not a hard constraint
+                float lambda = std::isinf(force->stiffness()[i]) ? force->lambda()[i] : 0.0f;
+
+                // Update lambda (Eq 11)
+                force->lambda()[i] = glm::clamp(force->penalty()[i] * force->C()[i] + lambda, force->fmin()[i], force->fmax()[i]);
+
+                // TODO add fracture
+
+                // update penalty
+                if (force->lambda()[i] > force->fmin()[i] && force->lambda()[i] < force->fmax()[i]) {
+                    force->penalty()[i] = glm::min(force->penalty()[i] + beta * abs(force->C()[i]), glm::min(PENALTY_MAX, force->stiffness()[i]));
+                }
+            }
+        }
+        
+        // Update velocities at the end of second-to-last iteration
+        if (it == iterations - 1) {
+            // std::cout << "=== UPDATING VELOCITIES ===" << std::endl;
+            for (Rigid* body = bodies; body != 0; body = body->getNext()) {
+                body->getPrevVel() = body->getVel();
+                if (body->getMass() > 0) {
+                    body->getVel() = (body->getPos() - body->getInitial()) / dt;
+                    // std::cout << "Body " << body << " new velocity: " << body->getVel().x << ", " << body->getVel().y << ", " << body->getVel().z << std::endl;
+                }
+            }
+        }
     }
-    if (PRINT_TIME) printDurationUS(beforeMain, timeNow(), "Main Loop:\t\t");
 
     auto beforeVel = timeNow();
-    updateVelocities(dt);
-
+    // updateVelocities(dt);  // This might be redundant now!
     if (PRINT_TIME) printDurationUS(beforeVel, timeNow(), "Velocities:\t\t");
 
-    if (PRINT_TIME) print("------------------------------------------");
-    if (PRINT_TIME) printDurationUS(beforeStep, timeNow(), "Total: ");
-    if (PRINT_TIME) print("");
-
     bodyTable->writeToNodes();
-
-    uint forceCount = 0;
-    for (Force* force = forces; force != nullptr; force = force->getNext()) {
-        forceCount++;
-    }
 }
 
 void Solver::compactBodies() {
@@ -243,7 +357,10 @@ void Solver::narrowCollision() {
             continue;
         }
 
-        manifoldNormals[manifoldIndex] = -glm::normalize(normal);
+        manifoldNormals[manifoldIndex] = glm::normalize(normal);
+        if (glm::dot(normal, b.pos - a.pos) > 0) {
+            manifoldNormals[manifoldIndex] *= -1;
+        }
 
         // determine object overlap
         sat(a, b, collisionPair);
@@ -273,7 +390,7 @@ void Solver::narrowCollision() {
         manifoldIndex++;
     }
 
-    // std::cout << "Positive Narrow:\t" << count << std::endl;
+    // // std::cout << "Positive Narrow:\t" << count << std::endl;
 }
 
 void Solver::reserveForcesForCollision(uint& forceIndex, uint& manifoldIndex) {
@@ -301,10 +418,8 @@ void Solver::initColliderRow(uint row, uint manifoldIndex, ColliderRow& collider
 }
 
 void Solver::warmstartManifolds() {
-    // manifolds compute tangent and basis
     getManifoldTable()->warmstart();
 
-    // compute rW
     auto& pos = bodyTable->getPos();
     auto& mat = bodyTable->getMat();
     auto& rAs = getManifoldTable()->getRA();
@@ -331,14 +446,15 @@ void Solver::warmstartManifolds() {
     auto& bases = getManifoldTable()->getBasis();
     auto& tangents = getManifoldTable()->getTangent();
     auto& normals = getManifoldTable()->getNormal();
-
     auto& C0s = getManifoldTable()->getC0();
     auto& Js = forceTable->getJ();
 
-    // set all C0 to zero
+    // Set all C0 to zero
     for (uint i = 0; i < getManifoldTable()->getSize(); i++) {
-        C0s[i] = BskVec2Pair(); // TODO check if this defaults to zero
+        C0s[i] = BskVec2Pair();
     }
+
+    if (DEBUG_MANIFOLD) print("=== WARMSTART MANIFOLDS ===");
 
     for (uint i = 0; i < forceTable->getSize(); i++) {
         uint specialIndex = specials[i];
@@ -348,26 +464,38 @@ void Solver::warmstartManifolds() {
         const glm::vec2& normal = normals[specialIndex];
         const glm::vec2& tangent = tangents[specialIndex];
 
-        // compute jacobians
+        if (DEBUG_MANIFOLD) {
+            print("Force " + std::to_string(i) + " (body " + std::to_string(bodyIndex) + ", " + 
+                  (isA[i] ? "A" : "B") + ", manifold " + std::to_string(specialIndex) + ")");
+            print("  normal: " + std::to_string(normal.x) + ", " + std::to_string(normal.y));
+            print("  tangent: " + std::to_string(tangent.x) + ", " + std::to_string(tangent.y));
+            print("  basis[0]: " + std::to_string(basis[0][0]) + ", " + std::to_string(basis[0][1]));
+            print("  basis[1]: " + std::to_string(basis[1][0]) + ", " + std::to_string(basis[1][1]));
+        }
+
         for (uint j = 0; j < 2; j++) {
             const glm::vec2& rW = isA[i] ? rAWs[specialIndex][j] : rBWs[specialIndex][j];
-            float sign = 2 * isA[i] - 1;
+            float sign = 2 * isA[i] - 1; // TODO check if this negation is correct
 
-            if (PRINT_TIME) print("jacobian");
-            // print(rW);
-            // print(normal);
-            // print(tangent);
-            // print(cross(rW, normal));
-            // print(cross(rW, tangent));
-
-            // Precompute the constraint and derivatives at C(x-), since we use a truncated Taylor series for contacts (Sec 4).
-            // Note that we discard the second order term, since it is insignificant for contacts
             Js[i][2 * j + JN] = sign * glm::vec3{ basis[0][0], basis[0][1], cross(rW, normal) };
             Js[i][2 * j + JT] = sign * glm::vec3{ basis[1][0], basis[1][1], cross(rW, tangent) };
 
-            C0s[specialIndex][j] += sign * basis * (xy(pos[bodyIndices[i]]) + rW);
+            glm::vec2 rcont = sign * basis * (xy(pos[bodyIndex]) + rW);
+            C0s[specialIndex][j] += rcont;
 
-            if (PRINT_TIME) print(C0s[specialIndex][j]);
+            if (DEBUG_MANIFOLD) {
+                print("  Contact " + std::to_string(j) + ":");
+                print("    rW: " + std::to_string(rW.x) + ", " + std::to_string(rW.y));
+                print("    sign: " + std::to_string(sign));
+                print("    J_normal: " + std::to_string(Js[i][2*j+JN].x) + ", " + 
+                      std::to_string(Js[i][2*j+JN].y) + ", " + std::to_string(Js[i][2*j+JN].z));
+                print("    J_tangent: " + std::to_string(Js[i][2*j+JT].x) + ", " + 
+                      std::to_string(Js[i][2*j+JT].y) + ", " + std::to_string(Js[i][2*j+JT].z));
+                print("    C0 accumulated: " + std::to_string(C0s[specialIndex][j].x) + ", " + 
+                      std::to_string(C0s[specialIndex][j].y));
+                print("    rcont: " + std::to_string(rcont.x) + ", " + 
+                          std::to_string(rcont.y));
+            }
         }
     }
 }
@@ -401,86 +529,65 @@ void Solver::primalUpdate(float dt) {
     auto& stiffness = forceTable->getStiffness();
     auto& penalty = forceTable->getPenalty();
     auto& C = forceTable->getC();
-    auto& motor = forceTable->getMotor();
     auto& fmax = forceTable->getFmax();
     auto& fmin = forceTable->getFmin();
-    auto& H = forceTable->getH();
     auto& J = forceTable->getJ();
 
     for (uint b = 0; b < bodyTable->getSize(); b++) {
-        // this is our falg for immovable objects
-        if (mass[b] <= 0) {
-            continue;
-        }
-
-        if (hasNaN(inertial[b])) throw std::runtime_error("inertial has NaN");
-        if (hasNaN(pos[b])) throw std::runtime_error("pos has NaN");
+        if (mass[b] <= 0) continue;
 
         lhs[b] = glm::diagonal3x3(glm::vec3{ mass[b], mass[b], moment[b] } / (dt * dt));
         rhs[b] = lhs[b] * (pos[b] - inertial[b]);
 
-        if (PRINT_TIME) print(pos[b]);
-        if (PRINT_TIME) print(inertial[b]);
+        if (DEBUG_PRIMAL) {
+            print("Body " + std::to_string(b) + ":");
+            print("  pos: " + std::to_string(pos[b].x) + ", " + std::to_string(pos[b].y) + ", " + std::to_string(pos[b].z));
+            print("  inertial: " + std::to_string(inertial[b].x) + ", " + std::to_string(inertial[b].y) + ", " + std::to_string(inertial[b].z));
+            print("  initial rhs: " + std::to_string(rhs[b].x) + ", " + std::to_string(rhs[b].y) + ", " + std::to_string(rhs[b].z));
+        }
 
-        if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");
-        if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
-
-        // TODO replace this with known counting sort
         Rigid* body = bodyPtrs[b];
+        int forceCount = 0;
         for (Force* f = body->getForces(); f != nullptr; f = f->getNextA()) {
             uint forceIndex = f->getIndex();
-
             computeConstraints(forceIndex, forceIndex + 1, MANIFOLD);
-            computeDerivatives(forceIndex, forceIndex + 1, MANIFOLD);
 
             for (uint j = 0; j < MANIFOLD_ROWS; j++) {
-                // Use lambda as 0 if it's not a hard constraint
                 float lambda = glm::isinf(stiffness[forceIndex][j]) ? lambdas[forceIndex][j] : 0.0f;
+                float force = glm::clamp(penalty[forceIndex][j] * C[forceIndex][j] + lambda, 
+                                        fmin[forceIndex][j], fmax[forceIndex][j]);
 
-                // Compute the clamped force magnitude (Sec 3.2)
-                float f = glm::clamp(penalty[forceIndex][j] * C[forceIndex][j] + lambda + motor[forceIndex][j], fmin[forceIndex][j], fmax[forceIndex][j]);
-
-                if (j % 2 == JN) {
-                    if (PRINT_TIME) print("f");
-                    if (PRINT_TIME) print(penalty[forceIndex][j]);
-                    if (PRINT_TIME) print(C[forceIndex][j]);
-                    if (PRINT_TIME) print(f);
-                    if (PRINT_TIME) print(J[forceIndex][j]);
-                    if (PRINT_TIME) print(fmin[forceIndex][j]);
+                if (DEBUG_PRIMAL) {
+                    print("  Force " + std::to_string(forceIndex) + " row " + std::to_string(j) + ":");
+                    print("    C: " + std::to_string(C[forceIndex][j]));
+                    print("    penalty: " + std::to_string(penalty[forceIndex][j]));
+                    print("    lambda: " + std::to_string(lambda));
+                    print("    fmin: " + std::to_string(fmin[forceIndex][j]) + ", fmax: " + std::to_string(fmax[forceIndex][j]));
+                    print("    force: " + std::to_string(force));
+                    print("    J: " + std::to_string(J[forceIndex][j].x) + ", " + 
+                          std::to_string(J[forceIndex][j].y) + ", " + std::to_string(J[forceIndex][j].z));
                 }
-                
-                // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
-                glm::mat3x3 G = glm::diagonal3x3(glm::vec3{ glm::length(H[forceIndex][j][0]), glm::length(H[forceIndex][j][1]), glm::length(H[forceIndex][j][2]) }) * abs(f);
 
-                // Accumulate force (Eq. 13) and hessian (Eq. 17)
-                if (PRINT_TIME) print("J");
-                if (PRINT_TIME) print(J[forceIndex][j]);
-                if (PRINT_TIME) print(f);
-                if (PRINT_TIME) print(penalty[forceIndex][j]);
-                if (PRINT_TIME) print(C[forceIndex][j]);
-                rhs[b] += J[forceIndex][j] * f;
-                lhs[b] += glm::outerProduct(J[forceIndex][j], J[forceIndex][j] * penalty[forceIndex][j]) + G;
+                rhs[b] += J[forceIndex][j] * force;
+                lhs[b] += glm::outerProduct(J[forceIndex][j], J[forceIndex][j] * penalty[forceIndex][j]);
+                
+                if (DEBUG_PRIMAL) {
+                    print("    rhs after: " + std::to_string(rhs[b].x) + ", " + 
+                          std::to_string(rhs[b].y) + ", " + std::to_string(rhs[b].z));
+                }
+                forceCount++;
             }
         }
 
-        // Solve the SPD linear system using LDL and apply the update (Eq. 4)
         glm::vec3 x = glm::vec3(0);
-
-        if (hasNaN(rhs[b])) throw std::runtime_error("rhs has NaN");
-        if (hasNaN(lhs[b])) throw std::runtime_error("lhs has NaN");
-        
-        if (PRINT_TIME) print("rhs");
-        if (PRINT_TIME) print(rhs[b]);
-
-        if (PRINT_TIME) print("lhs");
-        if (PRINT_TIME) print(lhs[b]);
-        
         solve(lhs[b], x, rhs[b]);
 
-        if (PRINT_TIME) print(x);
+        if (DEBUG_PRIMAL) {
+            print("  Final rhs: " + std::to_string(rhs[b].x) + ", " + std::to_string(rhs[b].y) + ", " + std::to_string(rhs[b].z));
+            print("  Correction: " + std::to_string(x.x) + ", " + std::to_string(x.y) + ", " + std::to_string(x.z));
+            print("  Total forces processed: " + std::to_string(forceCount));
+        }
 
-        if (hasNaN(x)) throw std::runtime_error("x has NaN");
-        
         pos[b] -= x;
     }
 }
@@ -527,7 +634,7 @@ void Solver::computeConstraints(uint start, uint end, ushort type) {
     auto& C0 =       getManifoldTable()->getC0();
     auto& cdA =      getManifoldTable()->getCdA();
     auto& cdB =      getManifoldTable()->getCdB();
-    
+
 
     // other dp will already be loaded, only focus on self
     loadCdX(start, end);
@@ -539,15 +646,15 @@ void Solver::computeConstraints(uint start, uint end, ushort type) {
             C[i][2 * j + JN] = C0[special][j].x * (1 - alpha) + cdA[special][2 * j + JN] + cdB[special][2 * j + JN];
             C[i][2 * j + JT] = C0[special][j].y * (1 - alpha) + cdA[special][2 * j + JT] + cdB[special][2 * j + JT];
 
-            // print("C");
-            // print(C0[special][j].x);
-            // print(cdA[special][2 * j + JN]);
-            // print(cdB[special][2 * j + JN]);
-            // print(C[i][2 * j + JN]);
+            print("Computing C");
+            print(cdA[special][2 * j + JN]);
+            print(cdB[special][2 * j + JN]);
+            print(cdA[special][2 * j + JT]);
+            print(cdB[special][2 * j + JT]);
 
             float frictionBound = abs(lambda[i][2 * j] * friction[special]);
             fmax[i][2 * j + JT] = frictionBound;
-            fmin[i][2 * j + JT] = frictionBound;
+            fmin[i][2 * j + JT] = -frictionBound;
 
             // TODO add force stick
         }
@@ -585,6 +692,15 @@ void Solver::loadCdX(uint start, uint end) {
             // print("Cds nuts " + std::to_string(i));
             // print(J[i][2 * j + JN]);
             // print(pos[body] - initial[body]);
+
+            if (isA[i]) print("cdA");
+            else print("cdB");
+
+            glm::vec2 dpX = pos[body] - initial[body];
+
+            print(std::to_string(J[i][2 * j + JN].x) + " " + std::to_string(J[i][2 * j + JN].y) + " " + std::to_string(dpX.x) + " " + std::to_string(dpX.y));
+            print(std::to_string(J[i][2 * j + JT].x) + " " + std::to_string(J[i][2 * j + JT].y) + " " + std::to_string(dpX.x) + " " + std::to_string(dpX.y));
+
             cdX[2 * j + JN] = glm::dot(J[i][2 * j + JN], pos[body] - initial[body]);
             cdX[2 * j + JT] = glm::dot(J[i][2 * j + JT], pos[body] - initial[body]);
 

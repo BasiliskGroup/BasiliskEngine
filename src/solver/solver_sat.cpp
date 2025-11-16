@@ -67,8 +67,8 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
     glm::vec2 rB2 = firstDepth - secondDepth < COLLISION_MARGIN ? b.start[secondIndex] : b.start[firstIndex];
 
     // write contact points to manifold index
-    getManifoldTable()->getRB()[pair.manifoldIndex][0] = rB1 * b.scale;
-    getManifoldTable()->getRB()[pair.manifoldIndex][1] = rB2 * b.scale;
+    getManifoldTable()->getRB()[pair.manifoldIndex][1] = rB1 * b.scale;
+    getManifoldTable()->getRB()[pair.manifoldIndex][0] = rB2 * b.scale;
 }
 
 void Solver::intersect(ColliderRow& a, ColliderRow& b, CollisionPair& pair, const glm::vec2& mtv) {

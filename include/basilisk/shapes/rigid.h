@@ -55,11 +55,24 @@ public:
     Node2D* getNode() { return node; }
     uint getIndex() { return index; }
 
-    glm::vec3 getPos();
-    glm::vec2 getScale();
-    float getDensity();
-    float getFriction();
-    glm::vec3 getVel();
+    glm::vec3& getPos();
+    glm::vec3& getInitial();
+    glm::vec3& getInertial();
+    glm::vec3& getVel();
+    glm::vec3& getPrevVel();
+    glm::vec2& getScale();
+    float& getFriction();
+    float& getMass();
+    float& getMoment();
+    float& getRadius();
+    uint& getCollider();
+    glm::mat2x2& getMat();
+    glm::mat2x2& getIMat();
+    glm::mat2x2& getRMat();
+    bool getUpdated();
+
+    float getDensity() { return density; }
+    
     uint getColliderIndex();
 
     // setters

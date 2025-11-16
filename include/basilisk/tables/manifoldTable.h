@@ -46,6 +46,7 @@ public:
     auto& getRAW() { return rAW; } 
     auto& getRBW() { return rBW; }
     auto& getC0() { return C0; }
+    auto& getStick() { return stick; }
     auto& getForceIndex() { return forceIndex; }
     auto& getSimplex() { return simplex; }
     auto& getFriction() { return friction; }

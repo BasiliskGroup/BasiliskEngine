@@ -60,25 +60,7 @@ BodyTable* Rigid::getBodyTable() {
     return solver->getBodyTable();
 }
 
-glm::vec3 Rigid::getPos() {
-    return getBodyTable()->getPos()[index];
-}
 
-glm::vec2 Rigid::getScale() {
-    return getBodyTable()->getScale()[index];
-}
-
-float Rigid::getDensity() {
-    return density;
-}
-
-float Rigid::getFriction() {
-    return getBodyTable()->getFriction()[index];
-}
-
-glm::vec3 Rigid::getVel() {
-    return getBodyTable()->getVel()[index];
-}
 
 uint Rigid::getColliderIndex() {
     return getBodyTable()->getCollider()[index];
@@ -178,4 +160,21 @@ void Rigid::setVelocity(const glm::vec3& vel) {
     getBodyTable()->getVel()[index] = vel;
 }
 
+glm::vec3& Rigid::getPos() { return getBodyTable()->getPos()[index]; }
+glm::vec3& Rigid::getInitial() { return getBodyTable()->getInitial()[index]; }
+glm::vec3& Rigid::getInertial() { return getBodyTable()->getInertial()[index]; }
+glm::vec3& Rigid::getVel() { return getBodyTable()->getVel()[index]; }
+glm::vec3& Rigid::getPrevVel() { return getBodyTable()->getPrevVel()[index]; }
+glm::vec2& Rigid::getScale() { return getBodyTable()->getScale()[index]; }
+float& Rigid::getFriction() { return getBodyTable()->getFriction()[index]; }
+float& Rigid::getMass() { return getBodyTable()->getMass()[index]; }
+float& Rigid::getMoment() { return getBodyTable()->getMoment()[index]; }
+float& Rigid::getRadius() { return getBodyTable()->getRadius()[index]; }
+uint& Rigid::getCollider() { return getBodyTable()->getCollider()[index]; }
+glm::mat2x2& Rigid::getMat() { return getBodyTable()->getMat()[index]; }
+glm::mat2x2& Rigid::getIMat() { return getBodyTable()->getIMat()[index]; }
+glm::mat2x2& Rigid::getRMat() { return getBodyTable()->getRMat()[index]; }
+bool Rigid::getUpdated() { return getBodyTable()->getUpdated()[index]; }
+
 }
+
