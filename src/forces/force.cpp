@@ -8,30 +8,27 @@ Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB) :
     bodyA(bodyA), 
     bodyB(bodyB), 
     nextA(nullptr), 
-    twin(nullptr), 
+    nextB(nullptr), 
     prev(nullptr), 
-    prevA(nullptr),
-    type(NULL_FORCE)
+    prevA(nullptr), 
+    prevB(nullptr) 
 {
     solver->insert(this);
-    bodyA->insert(this);    
+    bodyA->insert(this);
+    if (bodyB) {
+        bodyB->insert(this);
+    }
 }
 
 Force::~Force()
 {
     solver->remove(this);
     bodyA->remove(this);
-
-    // delete the twin if it has not already been deleted, force twins must exist in pairs
-    if (twin != nullptr) {
-
-        // need to mark twin->this as nullptr so twin doesn't call this delete
-        twin->twin = nullptr;
-        delete twin;
+    if (bodyB) {
+        bodyB->remove(this);
     }
 
     // clean up pointers
-    // TODO check if these are alraedy cleared by remove functions
     bodyA = nullptr;
     bodyB = nullptr;
     solver = nullptr;

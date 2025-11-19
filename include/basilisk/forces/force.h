@@ -12,10 +12,10 @@ protected:
     Solver* solver;
     Force* next; // next in solver list
     Force* prev; // prev in solver list
-    Force* nextA; // next in body list
-    Force* prevA; // prev in body list
-
-    Force* twin; // points to twin force
+    Force* nextA; // next in bodyA list
+    Force* prevA; // prev in bodyA list
+    Force* nextB; // next in bodyB list
+    Force* prevB; // prev in bodyB list
 
     Rigid* bodyA;
     Rigid* bodyB;
@@ -49,7 +49,8 @@ public:
     inline Force*& getPrev()    { return prev; }
     inline Force*& getNextA()   { return nextA; }
     inline Force*& getPrevA()   { return prevA; }
-    inline Force*& getTwin()    { return twin; }
+    inline Force*& getNextB()   { return nextB; }
+    inline Force*& getPrevB()   { return prevB; }
     inline Rigid*& getBodyA()   { return bodyA; }
     inline Rigid*& getBodyB()   { return bodyB; }
 

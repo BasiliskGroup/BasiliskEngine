@@ -27,11 +27,9 @@ int main() {
     // normal nodes
     
     bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, -3}, .rotation=0, .scale={9, 1},  .collider=quadCollider, .density=-1 });
-    bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, -1}, .scale={1, 1}, .rotation=1.2, .collider=quadCollider });
 
-    // bsk::Node2D* goofyGuy = new bsk::Node2D(voidScene, { .mesh=quad, .material=material, .position={3, 3} });
-    // // goofyGuy->setScene(scene);
-    // square->add(goofyGuy);
+    for (int i = 0; i < 10; i++)
+        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .scale={1, 1}, .rotation=1.2, .collider=quadCollider });
 
     std::vector<bsk::Node2D*> contactNodes;
 
@@ -43,17 +41,24 @@ int main() {
 
         for (bsk::Force* force = scene->getSolver()->getForces(); force != nullptr; force = force->getNext()) {
             bsk::Manifold* manifold = (bsk::Manifold*) force;
-            bsk::Rigid* body = manifold->getBodyA();
-            glm::vec2 pos = body->getPos();
 
             for (int i = 0; i < 2; i++) {
-                // glm::vec2 r = body->getRMat() * (manifold->isA() ? manifold->getRA()[i] : manifold->getRB()[i]);
-                glm::vec2 r = manifold->getIsA() ? manifold->getRAW()[i] : manifold->getRBW()[i];
-                r += pos;
+                glm::vec2 rAW = manifold->getBodyA()->getRMat() * manifold->getRA()[i];
+                glm::vec2 rBW = manifold->getBodyB()->getRMat() * manifold->getRB()[i];
 
-                bsk::Node2D* node = new bsk::Node2D(scene, { .mesh=quad, .material= manifold->getIsA() ? material2 : material3, .position=r, .scale={0.125, 0.125} });
-                node->setLayer(0.9);
-                contactNodes.push_back(node);
+                // glm::vec2 rAW = manifold->getRAW()[i];
+                // glm::vec2 rBW = manifold->getRBW()[i];
+
+                rAW += glm::vec2(manifold->getBodyA()->getPos());
+                rBW += glm::vec2(manifold->getBodyB()->getPos());
+
+                bsk::Node2D* nodeA = new bsk::Node2D(scene, { .mesh=quad, .material=material2, .position=rAW, .scale={0.125, 0.125} });
+                nodeA->setLayer(0.9);
+                contactNodes.push_back(nodeA);
+
+                bsk::Node2D* nodeB = new bsk::Node2D(scene, { .mesh=quad, .material=material3, .position=rBW, .scale={0.125, 0.125} });
+                nodeB->setLayer(0.9);
+                contactNodes.push_back(nodeB);
             }
         }
 

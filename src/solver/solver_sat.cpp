@@ -90,10 +90,10 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair)
         glm::vec2 ca = a.imat * (cworld - a.pos);
         glm::vec2 cb = b.imat * (cworld - b.pos);
 
-        pair.manifoldA->getRA()[0] = ca * a.scale;
-        pair.manifoldA->getRA()[1] = ca * a.scale;
-        pair.manifoldB->getRB()[0] = cb * b.scale;
-        pair.manifoldB->getRB()[1] = cb * b.scale;
+        pair.manifold->getRA()[0] = ca * a.scale;
+        pair.manifold->getRA()[1] = ca * a.scale;
+        pair.manifold->getRB()[0] = cb * b.scale;
+        pair.manifold->getRB()[1] = cb * b.scale;
         return;
     }
 
@@ -141,15 +141,11 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair)
     glm::vec2 b0 = worldToScaledLocal(b, Bpts[0]);
     glm::vec2 b1 = worldToScaledLocal(b, Bpts[1]);
 
-    print("writing to manifolds");
-
     // Your code stored RA[0], RA[1] and RB[1], RB[0]
-    pair.manifoldA->getRA()[0] = a0 * a.scale;
-    pair.manifoldA->getRA()[1] = a1 * a.scale;
-    pair.manifoldB->getRB()[0] = b0 * b.scale;
-    pair.manifoldB->getRB()[1] = b1 * b.scale;
-
-    print("done writing");
+    pair.manifold->getRA()[0] = a0 * a.scale;
+    pair.manifold->getRA()[1] = a1 * a.scale;
+    pair.manifold->getRB()[0] = b0 * b.scale;
+    pair.manifold->getRB()[1] = b1 * b.scale;
 }
 
 

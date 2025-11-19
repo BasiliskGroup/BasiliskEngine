@@ -54,6 +54,7 @@ using BskVec2Triplet = std::array<glm::vec2, 3>;
 using BskVec2Pair = std::array<glm::vec2, 2>;
 using BskFloatPair = std::array<float, 2>;
 using BskVec3ROWS = std::array<glm::vec3, ROWS>;
+using BskVec3Pair = std::array<glm::vec3, 2>;
 using BskMat3x3ROWS = std::array<glm::mat3x3, ROWS>;
 using BskFloatROWS = std::array<float, ROWS>;
 

@@ -11,23 +11,11 @@ private:
     // tracking the SoA
     uint contactIndex;
 
-    struct Contact {
-        glm::vec2 rA;
-        glm::vec2 rB;
-        glm::vec2 normal;
-
-        glm::vec3 JAn, JBn, JAt, JBt;
-        glm::vec2 C0;
-        bool stick;
-    };
-
-    std::array<Contact, 2> contacts;
-
-
     // TEMPORARY
     BskVec2Pair C0;
     BskVec2Pair rA;
     BskVec2Pair rB;
+    BskVec3Pair JAn, JBn, JAt, JBt;
     glm::vec2 normal;
     float friction;
     bool stick;

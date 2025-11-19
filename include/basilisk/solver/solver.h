@@ -80,8 +80,7 @@ private:
     using Polytope = std::array<PolytopeFace, EPA_ITERATIONS + 3>;
 
     struct CollisionPair {
-        Manifold* manifoldA;
-        Manifold* manifoldB;
+        Manifold* manifold;
 
         // gjk
         Simplex minks;
