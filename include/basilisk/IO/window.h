@@ -10,6 +10,8 @@ class Window {
         GLFWwindow* window;
         int width;
         int height;
+        double deltaTime;
+        double previousTime;
 
     public:
         Window(int width, int height, const char* title);
@@ -24,6 +26,7 @@ class Window {
         GLFWwindow* getWindow() { return window; }
         int getWidth() { return width; }
         int getHeight() { return height; }
+        double getDeltaTime() { return deltaTime; }
 };
 
 }

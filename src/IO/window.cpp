@@ -114,6 +114,10 @@ Window::Window(int width, int height, const char* title) {
     glViewport(0, 0, fbWidth, fbHeight);
     this->width = fbWidth;
     this->height = fbHeight;
+
+    // Delta time config
+    previousTime = 0;
+    deltaTime = 0;
 }
 
 /**
@@ -123,7 +127,14 @@ Window::Window(int width, int height, const char* title) {
  * @return false 
  */
 bool Window::isRunning() {
+    // Update delta time
+    double currentTime = glfwGetTime();
+    deltaTime = currentTime - previousTime;
+    previousTime = currentTime;
+
+    // Update the events
     glfwPollEvents();
+
     return !glfwWindowShouldClose(window);
 }
 

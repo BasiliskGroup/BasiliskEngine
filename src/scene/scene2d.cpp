@@ -33,7 +33,7 @@ Scene2D::~Scene2D() {
  */
 void Scene2D::update() {
     // physics
-    solver->step(1.0 / 60);
+    solver->step(engine->getDeltaTime());
 
     // camera
     camera->update();

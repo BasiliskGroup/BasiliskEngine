@@ -16,8 +16,6 @@ class Engine {
         Mouse* mouse;
         ResourceServer* resourceServer;
 
-        double deltaTime;
-
     public:
         Engine(int width, int height, const char* title);
         ~Engine();
@@ -30,6 +28,7 @@ class Engine {
         inline Mouse* getMouse() const { return mouse; }
         inline Keyboard* getKeyboard() const { return keyboard; }
         inline ResourceServer* getResourceServer() const { return resourceServer; }
+        inline double getDeltaTime() { return window->getDeltaTime(); }
 };
 
 }
