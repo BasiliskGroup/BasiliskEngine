@@ -3,6 +3,7 @@
 
 #include <basilisk/util/includes.h>
 #include <basilisk/IO/window.h>
+#include <basilisk/camera/staticCamera2d.h>
 
 namespace bsk::internal {
 
@@ -36,11 +37,14 @@ class Mouse {
         double getRelativeX() { return x - previousX; }
         double getRelativeY() { return y - previousY; }
 
+        double getWorldX(StaticCamera2D* camera);
+        double getWorldY(StaticCamera2D* camera);
+
         void setGrab();
         void setVisible();
         void setHidden();
 };
 
-}
+};
 
 #endif

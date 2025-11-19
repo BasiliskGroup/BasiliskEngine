@@ -5,9 +5,10 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/camera/virtualCamera.h>
 #include <basilisk/render/shader.h>
-#include <basilisk/engine/engine.h>
 
 namespace bsk::internal {
+
+class Engine;
 
 class StaticCamera2D : public VirtualCamera{
     protected:
@@ -26,9 +27,19 @@ class StaticCamera2D : public VirtualCamera{
         void use(Shader* shader);
 
         void setPosition(glm::vec2 position) { this->position = position; }
+        void setX(double x) { position.x = x; }
+        void setY(double y) { position.y = y; }
+
+        glm::vec2 getPosition() { return position; }
+        double getX() { return position.x; }
+        double getY() { return position.y; }
+
+        glm::vec2 getViewScale() { return viewScale; }
+        double getViewWidth() { return viewScale.x; }
+        double getViewHeight() { return viewScale.y; }
 };
 
-}
+};
 
 
 #endif

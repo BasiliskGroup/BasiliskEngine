@@ -112,6 +112,8 @@ Window::Window(int width, int height, const char* title) {
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
     glViewport(0, 0, fbWidth, fbHeight);
+    this->width = fbWidth;
+    this->height = fbHeight;
 }
 
 /**

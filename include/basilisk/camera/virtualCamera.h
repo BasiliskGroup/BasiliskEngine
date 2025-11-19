@@ -2,7 +2,6 @@
 #define BSK_VIRTUAL_CAMERA_H
 
 #include <basilisk/util/includes.h>
-#include <basilisk/engine/engine.h>
 #include <basilisk/render/shader.h>
 
 namespace bsk::internal {

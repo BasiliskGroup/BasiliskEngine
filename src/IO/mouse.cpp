@@ -47,4 +47,16 @@ void Mouse::setHidden() {
     glfwSetInputMode(window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
 
+
+double Mouse::getWorldX(StaticCamera2D* camera) {
+    double tileWidth = (double)window->getWidth() / camera->getViewWidth();
+    return camera->getX() + getX() / tileWidth - camera->getViewWidth() / 2;
 }
+
+
+double Mouse::getWorldY(StaticCamera2D* camera) {
+    double tileHeight = (double)window->getHeight() / camera->getViewHeight();
+    return camera->getY() - getY() / tileHeight + camera->getViewHeight() / 2;
+}
+
+};

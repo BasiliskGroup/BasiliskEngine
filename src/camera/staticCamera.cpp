@@ -1,4 +1,5 @@
 #include <basilisk/camera/staticCamera.h>
+#include <basilisk/engine/engine.h>
 
 namespace bsk::internal {
 

@@ -25,6 +25,8 @@ int main() {
         scene->update();
         scene->render();
 
+        std::cout << engine->getMouse()->getWorldX(scene->getCamera()) << ", " << engine->getMouse()->getWorldY(scene->getCamera()) << std::endl;
+
         engine->render();
 
         i++;
