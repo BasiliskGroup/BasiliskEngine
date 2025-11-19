@@ -31,7 +31,7 @@ public:
     BskFloatROWS& getCdA();
     BskFloatROWS& getCdB();
 
-    int rows() const override { return 4; }
+    int rows() const override { return MANIFOLD_ROWS; }
     void draw() const override;
 
     void initialize() override;

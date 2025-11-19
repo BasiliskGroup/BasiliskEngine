@@ -59,8 +59,8 @@ using BskFloatROWS = std::array<float, ROWS>;
 
 // Mini structs
 enum JType {
-    JN,
-    JT,
+    JN = 0,
+    JT = 1,
 };
 
 enum ForceType {

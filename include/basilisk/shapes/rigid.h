@@ -15,7 +15,7 @@ class Rigid {
 public:
     struct Relation {
         uint bodyB;
-        Force* force;
+        Force* force; // shared pointer, do not delete
         ForceType type;
     };
 

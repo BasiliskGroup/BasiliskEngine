@@ -9,6 +9,9 @@ Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB)
 
     // TODO set default params
     // Probably flag Table to set columns
+
+    // TODO this will break things
+    
 }
 
 Force::~Force()

@@ -57,6 +57,8 @@ void BodyTable::updateVelocities(float dt) {
         prevVel[i] = vel[i];
         if (mass[i] > 0) {
             vel[i] = invdt * (pos[i] - initial[i]);
+
+            std::cout << "Updated Velocity: " << vel[i].x << ", " << vel[i].y << std::endl;
         }
     }
 }
