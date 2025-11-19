@@ -71,7 +71,7 @@ ushort Solver::epa(ColliderRow& a, ColliderRow& b, CollisionPair& pair) {
         // }
 
         if (setSize != 2) {
-            print("Polytope horizon error");
+            // print("Polytope horizon error");
             return polytopeFront(pair.polytope, numFaces);
             // throw std::runtime_error("EPA could not find horizon vertices");
         }
