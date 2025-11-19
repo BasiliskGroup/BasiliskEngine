@@ -8,18 +8,28 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     forces(nullptr), 
     next(nullptr), 
     prev(nullptr), 
-    density(density) 
+    density(density),
+    relations(),
+    index(-1),
+    pos(pos),
+    initial(pos),
+    inertial(pos),
+    vel(vel),
+    prevVel(vel),
+    scale(scale),
+    friction(friction),
+    collider(collider->getIndex())
 {
     // Add to linked list
     solver->insert(this);
 
     // compute intermediate values
-    float volume = 1; // replace with collider volume
-    float mass = scale.x * scale.y * density * volume; 
-    float moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
-    float radius = glm::length(scale * 0.5f);
+    float volume = scale.x * scale.y; // TODO replace this with actual collider volume
+    mass = scale.x * scale.y * density * volume; 
+    moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
+    radius = glm::length(scale * 0.5f);
 
-    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider->getIndex(), radius);
+    computeTransforms();
 }   
 
 Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider) : 
@@ -28,29 +38,38 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     forces(nullptr), 
     next(nullptr), 
     prev(nullptr), 
-    density(density) 
+    density(density),
+    relations(),
+    index(-1),
+    pos(pos),
+    initial(pos),
+    inertial(pos),
+    vel(vel),
+    prevVel(vel),
+    scale(scale),
+    friction(friction),
+    collider(collider)
 {
     // Add to linked list
     solver->insert(this);
 
     // compute intermediate values
-    float volume = 1; // replace with collider volume
-    float mass = scale.x * scale.y * density * volume; 
-    float moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
-    float radius = glm::length(scale * 0.5f);
+    float volume = scale.x * scale.y; // TODO replace this with actual collider volume
+    mass = scale.x * scale.y * density * volume; 
+    moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
+    radius = glm::length(scale * 0.5f);
 
-    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider, radius);
+    computeTransforms();
 }   
 
 Rigid::~Rigid() {
     // remove from Table
-    solver->getBodyTable()->markAsDeleted(index);
     solver->remove(this);
 
     // delete all forces
     Force* curForce = forces;
     while (curForce) {
-        Force* nextForce = curForce->getNextA();
+        Force* nextForce = (curForce->getBodyA() == this) ? curForce->getNextA() : curForce->getNextB();
         delete curForce;
         curForce = nextForce;
     }
@@ -59,8 +78,6 @@ Rigid::~Rigid() {
 BodyTable* Rigid::getBodyTable() {
     return solver->getBodyTable();
 }
-
-
 
 uint Rigid::getColliderIndex() {
     return getBodyTable()->getCollider()[index];
@@ -75,34 +92,78 @@ void Rigid::insert(Force* force){
         return;
     }
 
-    force->getNextA() = forces;
-    force->getPrevA() = nullptr;
-    force->getBodyA() = this; // NOTE this may not be needed
+    // Determine if this body is bodyA or bodyB
+    if (force->getBodyA() == this) {
+        // This is bodyA
+        force->getNextA() = forces;
+        force->getPrevA() = nullptr;
 
-    if (forces) {
-        forces->getPrevA() = force;
+        if (forces) {
+            // Update the prev pointer of the old head
+            if (forces->getBodyA() == this) {
+                forces->getPrevA() = force;
+            } else {
+                forces->getPrevB() = force;
+            }
+        }
+    } else {
+        // This is bodyB
+        force->getNextB() = forces;
+        force->getPrevB() = nullptr;
+
+        if (forces) {
+            // Update the prev pointer of the old head
+            if (forces->getBodyA() == this) {
+                forces->getPrevA() = force;
+            } else {
+                forces->getPrevB() = force;
+            }
+        }
     }
 
     forces = force;
 }
 
 void Rigid::remove(Force* force){
-    if (force == nullptr || force->getBodyA() != this) {
+    if (force == nullptr) {
         return;
     }
 
-    if (force->getPrevA()) {
-        force->getPrevA()->getNextA() = force->getNextA();
+    // Determine if this body is bodyA or bodyB
+    bool isBodyA = (force->getBodyA() == this);
+
+    Force* prev = isBodyA ? force->getPrevA() : force->getPrevB();
+    Force* next = isBodyA ? force->getNextA() : force->getNextB();
+
+    if (prev) {
+        // Update prev's next pointer
+        if (prev->getBodyA() == this) {
+            prev->getNextA() = next;
+        } else {
+            prev->getNextB() = next;
+        }
     } else {
-        forces = force->getNextA();
+        // This was the head of the list
+        forces = next;
     }
 
-    if (force->getNextA()) {
-        force->getNextA()->getPrevA() = force->getPrevA();
+    if (next) {
+        // Update next's prev pointer
+        if (next->getBodyA() == this) {
+            next->getPrevA() = prev;
+        } else {
+            next->getPrevB() = prev;
+        }
     }
 
-    force->getPrevA() = nullptr;
-    force->getNextA() = nullptr;
+    // Clear this force's pointers
+    if (isBodyA) {
+        force->getPrevA() = nullptr;
+        force->getNextA() = nullptr;
+    } else {
+        force->getPrevB() = nullptr;
+        force->getNextB() = nullptr;
+    }
 }
 
 // ----------------------
@@ -113,8 +174,8 @@ void Rigid::precomputeRelations() {
     relations.clear();
 
     uint i = 0;
-    for (Force* f = forces; f != nullptr; f = f->getNextA()) {
-        Rigid* other = f->getBodyB();
+    for (Force* f = forces; f != nullptr; f = (f->getBodyA() == this) ? f->getNextA() : f->getNextB()) {
+        Rigid* other = (f->getBodyA() == this) ? f->getBodyB() : f->getBodyA();
         if (other == nullptr) {
             continue;
         }
@@ -153,28 +214,27 @@ void Rigid::clear() {
 // setters
 // --------------------
 void Rigid::setPosition(const glm::vec3& pos) {
-    getBodyTable()->getPos()[index] = pos;
+    this->pos = pos;
 }
 
 void Rigid::setVelocity(const glm::vec3& vel) {
-    getBodyTable()->getVel()[index] = vel;
+    this->vel = vel;
 }
 
-glm::vec3& Rigid::getPos() { return getBodyTable()->getPos()[index]; }
-glm::vec3& Rigid::getInitial() { return getBodyTable()->getInitial()[index]; }
-glm::vec3& Rigid::getInertial() { return getBodyTable()->getInertial()[index]; }
-glm::vec3& Rigid::getVel() { return getBodyTable()->getVel()[index]; }
-glm::vec3& Rigid::getPrevVel() { return getBodyTable()->getPrevVel()[index]; }
-glm::vec2& Rigid::getScale() { return getBodyTable()->getScale()[index]; }
-float& Rigid::getFriction() { return getBodyTable()->getFriction()[index]; }
-float& Rigid::getMass() { return getBodyTable()->getMass()[index]; }
-float& Rigid::getMoment() { return getBodyTable()->getMoment()[index]; }
-float& Rigid::getRadius() { return getBodyTable()->getRadius()[index]; }
-uint& Rigid::getCollider() { return getBodyTable()->getCollider()[index]; }
-glm::mat2x2& Rigid::getMat() { return getBodyTable()->getMat()[index]; }
-glm::mat2x2& Rigid::getIMat() { return getBodyTable()->getIMat()[index]; }
-glm::mat2x2& Rigid::getRMat() { return getBodyTable()->getRMat()[index]; }
-bool Rigid::getUpdated() { return getBodyTable()->getUpdated()[index]; }
+void Rigid::computeTransforms() {
+    float angle = pos.z;
+    float sx = scale.x, sy = scale.y;
+    float isx = 1 / sx, isy = 1 / sy;
+
+    float c = cos(angle);
+    float s = sin(angle);
+
+    rMat = { c, -s, s, c };
+    mat = { c * sx, -s * sy, s * sx, c * sy };
+    iMat = {  c * isx,  s * isx, -s * isy,  c * isy };
+
+    updated = false;
+}
 
 }
 

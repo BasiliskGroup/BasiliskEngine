@@ -52,28 +52,28 @@ public:
 
     void markAsDeleted(uint index);
 
-    auto& getBodies() { return bodies; }
-    auto& getPos() { return pos; }
-    auto& getInitial() { return initial; }
-    auto& getInertial() { return inertial; }
-    auto& getVel() { return vel; }
-    auto& getPrevVel() { return prevVel; }
-    auto& getScale() { return scale; }
-    auto& getFriction() { return friction; }
-    auto& getMass() { return mass; }
-    auto& getMoment() { return moment; }
-    auto& getRadius() { return radius; }
-    auto& getCollider() { return collider; }
-    auto& getMat() { return mat; }
-    auto& getIMat() { return imat; }
-    auto& getRMat() { return rmat; }
-    auto& getUpdated() { return updated; }
-    auto& getColor() { return color; }
-    auto& getDegree() { return degree; }
-    auto& getSatur() { return satur; }
-    auto& getRHS() { return rhs; }
-    auto& getLHS() { return lhs; }
-    auto& getInverseForceMap() { return inverseForceMap; }
+    inline auto& getBodies() { return bodies; }
+    inline auto& getPos() { return pos; }
+    inline auto& getInitial() { return initial; }
+    inline auto& getInertial() { return inertial; }
+    inline auto& getVel() { return vel; }
+    inline auto& getPrevVel() { return prevVel; }
+    inline auto& getScale() { return scale; }
+    inline auto& getFriction() { return friction; }
+    inline auto& getMass() { return mass; }
+    inline auto& getMoment() { return moment; }
+    inline auto& getRadius() { return radius; }
+    inline auto& getCollider() { return collider; }
+    inline auto& getMat() { return mat; }
+    inline auto& getIMat() { return imat; }
+    inline auto& getRMat() { return rmat; }
+    inline auto& getUpdated() { return updated; }
+    inline auto& getColor() { return color; }
+    inline auto& getDegree() { return degree; }
+    inline auto& getSatur() { return satur; }
+    inline auto& getRHS() { return rhs; }
+    inline auto& getLHS() { return lhs; }
+    inline auto& getInverseForceMap() { return inverseForceMap; }
 
     void resize(uint newCapacity) override;
     void compact() override;

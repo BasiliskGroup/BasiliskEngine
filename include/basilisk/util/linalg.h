@@ -5,14 +5,14 @@
 
 namespace bsk::internal {
 
-inline void solve(const glm::mat3x3& A, glm::vec3& x, const glm::vec3& b) {
+inline void solve(const glm::mat3x3& a, glm::vec3& x, const glm::vec3& b) {
     // Compute LDL^T decomposition
-    float D1 = A[0][0];
-    float L21 = A[1][0] / A[0][0];
-    float L31 = A[2][0] / A[0][0];
-    float D2 = A[1][1] - L21 * L21 * D1;
-    float L32 = (A[2][1] - L21 * L31 * D1) / D2;
-    float D3 = A[2][2] - (L31 * L31 * D1 + L32 * L32 * D2);
+    float D1 = a[0][0];
+    float L21 = a[1][0] / a[0][0];
+    float L31 = a[2][0] / a[0][0];
+    float D2 = a[1][1] - L21 * L21 * D1;
+    float L32 = (a[2][1] - L21 * L31 * D1) / D2;
+    float D3 = a[2][2] - (L31 * L31 * D1 + L32 * L32 * D2);
 
     // Forward substitution: Solve Ly = b
     float y1 = b.x;
