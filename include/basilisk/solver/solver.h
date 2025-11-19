@@ -20,12 +20,12 @@ class Collider;
 class Solver {
 private:
     struct CollisionIndexPair {
-        uint bodyA;
-        uint bodyB;
+        Rigid* bodyA;
+        Rigid* bodyB;
         Force* manifold = nullptr;
 
-        CollisionIndexPair(uint bodyA, uint bodyB) : bodyA(bodyA), bodyB(bodyB) {}
-        CollisionIndexPair(uint bodyA, uint bodyB, Force* manifold) : bodyA(bodyA), bodyB(bodyB), manifold(nullptr) {} // TODO change this to accepting manifold when we preserve them
+        CollisionIndexPair(Rigid* bodyA, Rigid* bodyB) : bodyA(bodyA), bodyB(bodyB) {}
+        CollisionIndexPair(Rigid* bodyA, Rigid* bodyB, Force* manifold) : bodyA(bodyA), bodyB(bodyB), manifold(nullptr) {} // TODO change this to accepting manifold when we preserve them
     };
 
     float gravity;      // Gravity
@@ -55,7 +55,7 @@ private:
         glm::mat2x2 imat;
         glm::vec2* start;
         uint length;
-        glm::vec2* simplex;
+        std::array<glm::vec2, 3> simplex;
         std::array<float, 4> dots; // TODO this needs to be at least the length of the collider
 
         ColliderRow() = default;
@@ -80,8 +80,7 @@ private:
     using Polytope = std::array<PolytopeFace, EPA_ITERATIONS + 3>;
 
     struct CollisionPair {
-        uint forceIndex;
-        uint manifoldIndex;
+        Manifold* manifold;
 
         // gjk
         Simplex minks;
@@ -149,6 +148,7 @@ private:
     void sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair);
 
     void initColliderRow(uint row, uint manifoldIndex, ColliderRow& colliderRow);
+    void initColliderRow(Rigid* body, ColliderRow& colliderRow);
 
     // gjk methods helper functions
     uint handleSimplex(ColliderRow& a, ColliderRow& b, CollisionPair& pair, uint freeIndex);

@@ -421,4 +421,12 @@ void VirtualNode<Derived, P, R, S>::setMesh(Mesh* mesh) {
     createBuffers();
 }
 
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::setScene(VirtualScene<Derived, P, R, S>* scene) {
+    this->scene = scene;
+    scene->getRoot()->add(asNode());
+    this->deleteBuffers();
+    this->createBuffers();
+}
+
 }

@@ -8,22 +8,34 @@ class Solver;
 class Rigid;
 
 class Force {
-private:
+protected:
     Solver* solver;
     Force* next; // next in solver list
     Force* prev; // prev in solver list
-    Force* nextA; // next in body list
-    Force* prevA; // prev in body list
-
-    Force* twin; // points to twin force
+    Force* nextA; // next in bodyA list
+    Force* prevA; // prev in bodyA list
+    Force* nextB; // next in bodyB list
+    Force* prevB; // prev in bodyB list
 
     Rigid* bodyA;
     Rigid* bodyB;
 
-protected:
-
     // for table access
     uint index;
+
+    // TEMP, restore tables
+    BskVec3ROWS J;
+    BskMat3x3ROWS H;
+    BskFloatROWS C;
+    BskFloatROWS motor;
+    BskFloatROWS stiffness;
+    BskFloatROWS fracture;
+    BskFloatROWS fmax;
+    BskFloatROWS fmin;
+    BskFloatROWS penalty;
+    BskFloatROWS lambda;
+    ForceType type;
+    bool isA;
 
 public:
     Force(Solver* solver, Rigid* bodyA, Rigid* bodyB);
@@ -37,22 +49,24 @@ public:
     inline Force*& getPrev()    { return prev; }
     inline Force*& getNextA()   { return nextA; }
     inline Force*& getPrevA()   { return prevA; }
-    inline Force*& getTwin()    { return twin; }
+    inline Force*& getNextB()   { return nextB; }
+    inline Force*& getPrevB()   { return prevB; }
     inline Rigid*& getBodyA()   { return bodyA; }
     inline Rigid*& getBodyB()   { return bodyB; }
 
     ForceTable* getTable();
     
-    BskVec3ROWS& J();
-    BskMat3x3ROWS& H();
-    BskFloatROWS& C();
-    BskFloatROWS& motor();
-    BskFloatROWS& stiffness();
-    BskFloatROWS& fracture();
-    BskFloatROWS& fmax();
-    BskFloatROWS& fmin();
-    BskFloatROWS& penalty();
-    BskFloatROWS& lambda();
+    BskVec3ROWS& getJ() { return J; }
+    BskMat3x3ROWS& getH() { return H; }
+    BskFloatROWS& getC() { return C; }
+    BskFloatROWS& getMotor() { return motor; }
+    BskFloatROWS& getStiffness() { return stiffness; }
+    BskFloatROWS& getFracture() { return fracture; }
+    BskFloatROWS& getFmax() { return fmax; }
+    BskFloatROWS& getFmin() { return fmin; }
+    BskFloatROWS& getPenalty() { return penalty; }
+    BskFloatROWS& getLambda() { return lambda; }
+    bool& getIsA() { return isA; }
 
     //table
     ForceType& getType();
@@ -69,6 +83,9 @@ public:
     virtual void draw() const {};
 
     // NOTE initialization and computations will be done in the ForceTable for bulk operations
+    virtual void initialize() = 0;
+    virtual void computeConstraint(float alpha) = 0;
+    virtual void computeDerivatives(Rigid* body) = 0;
 };
 
 }
