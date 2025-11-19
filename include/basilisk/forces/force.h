@@ -23,6 +23,20 @@ protected:
     // for table access
     uint index;
 
+    // TEMP, restore tables
+    BskVec3ROWS J;
+    BskMat3x3ROWS H;
+    BskFloatROWS C;
+    BskFloatROWS motor;
+    BskFloatROWS stiffness;
+    BskFloatROWS fracture;
+    BskFloatROWS fmax;
+    BskFloatROWS fmin;
+    BskFloatROWS penalty;
+    BskFloatROWS lambda;
+    ForceType type;
+    bool isA;
+
 public:
     Force(Solver* solver, Rigid* bodyA, Rigid* bodyB);
     Force() = default;
@@ -41,20 +55,17 @@ public:
 
     ForceTable* getTable();
     
-    BskVec3ROWS& J();
-    BskMat3x3ROWS& H();
-    BskFloatROWS& C();
-    BskFloatROWS& motor();
-    BskFloatROWS& stiffness();
-    BskFloatROWS& fracture();
-    BskFloatROWS& fmax();
-    BskFloatROWS& fmin();
-    BskFloatROWS& penalty();
-    BskFloatROWS& lambda();
-
-    uint& getSpecialIndex();
-    uint& getBodyIndex();
-    bool isA();
+    BskVec3ROWS& getJ() { return J; }
+    BskMat3x3ROWS& getH() { return H; }
+    BskFloatROWS& getC() { return C; }
+    BskFloatROWS& getMotor() { return motor; }
+    BskFloatROWS& getStiffness() { return stiffness; }
+    BskFloatROWS& getFracture() { return fracture; }
+    BskFloatROWS& getFmax() { return fmax; }
+    BskFloatROWS& getFmin() { return fmin; }
+    BskFloatROWS& getPenalty() { return penalty; }
+    BskFloatROWS& getLambda() { return lambda; }
+    bool& getIsA() { return isA; }
 
     //table
     ForceType& getType();

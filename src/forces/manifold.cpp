@@ -3,23 +3,23 @@
 namespace bsk::internal {
 
 Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB, uint index) : Force(solver, bodyA, bodyB) {
-    this->index = index;
-
     for (uint i = 0; i < MANIFOLD_ROWS; i++) {
-        J()[i] = { 0, 0, 0 };
-        H()[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        C()[i] = 0.0f;
-        stiffness()[i] = std::numeric_limits<float>::infinity();
-        fmax()[i] = std::numeric_limits<float>::infinity();
-        fmin()[i] = -std::numeric_limits<float>::infinity();
-        fracture()[i] = std::numeric_limits<float>::infinity();
+        getJ()[i] = { 0, 0, 0 };
+        getH()[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        getC()[i] = 0.0f;
+        getStiffness()[i] = std::numeric_limits<float>::infinity();
+        getFmax()[i] = std::numeric_limits<float>::infinity();
+        getFmin()[i] = -std::numeric_limits<float>::infinity();
+        getFracture()[i] = std::numeric_limits<float>::infinity();
 
-        penalty()[i] = 0.0f;
-        lambda()[i] = 0.0f;
+        getPenalty()[i] = 0.0f;
+        getLambda()[i] = 0.0f;
     }
 
-    fmax()[0] = fmax()[2] = 0.0f;
-    fmin()[0] = fmin()[2] = -std::numeric_limits<float>::infinity();
+    getFmax()[0] = getFmax()[2] = 0.0f;
+    getFmin()[0] = getFmin()[2] = -std::numeric_limits<float>::infinity();
+
+    type = MANIFOLD;
 }
 
 Manifold::~Manifold() {
@@ -30,36 +30,35 @@ void Manifold::draw() const {
 
 }
 
-BskVec2Pair& Manifold::getC0() { return this->getTable()->getManifoldTable()->getC0()[getSpecialIndex()]; }
-BskVec2Pair& Manifold::getRA() { return this->getTable()->getManifoldTable()->getRA()[getSpecialIndex()]; } // explicit body
-BskVec2Pair& Manifold::getRB() { return this->getTable()->getManifoldTable()->getRB()[getSpecialIndex()]; }
-glm::vec2& Manifold::getNormal() { return this->getTable()->getManifoldTable()->getNormal()[getSpecialIndex()]; }
-float& Manifold::getFriction() { return this->getTable()->getManifoldTable()->getFriction()[getSpecialIndex()]; }
-bool Manifold::getStick() { return this->getTable()->getManifoldTable()->getStick()[getSpecialIndex()]; }
-BskVec2Triplet& Manifold::getSimplex() { return this->getTable()->getManifoldTable()->getSimplex()[getSpecialIndex()]; }
-uint& Manifold::getForceIndex() { return this->getTable()->getManifoldTable()->getForceIndex()[getSpecialIndex()]; }
+// BskVec2Pair& Manifold::getC0() { return this->getTable()->getManifoldTable()->getC0()[getSpecialIndex()]; }
+// BskVec2Pair& Manifold::getRA() { return this->getTable()->getManifoldTable()->getRA()[getSpecialIndex()]; } // explicit body
+// BskVec2Pair& Manifold::getRB() { return this->getTable()->getManifoldTable()->getRB()[getSpecialIndex()]; }
+// glm::vec2& Manifold::getNormal() { return this->getTable()->getManifoldTable()->getNormal()[getSpecialIndex()]; }
+// float& Manifold::getFriction() { return this->getTable()->getManifoldTable()->getFriction()[getSpecialIndex()]; }
+// bool Manifold::getStick() { return this->getTable()->getManifoldTable()->getStick()[getSpecialIndex()]; }
+// BskVec2Triplet& Manifold::getSimplex() { return this->getTable()->getManifoldTable()->getSimplex()[getSpecialIndex()]; }
+// uint& Manifold::getForceIndex() { return this->getTable()->getManifoldTable()->getForceIndex()[getSpecialIndex()]; }
 
-glm::vec2& Manifold::getTangent() { return this->getTable()->getManifoldTable()->getTangent()[getSpecialIndex()]; }
-glm::mat2x2& Manifold::getBasis() { return this->getTable()->getManifoldTable()->getBasis()[getSpecialIndex()]; }
+// glm::vec2& Manifold::getTangent() { return this->getTable()->getManifoldTable()->getTangent()[getSpecialIndex()]; }
+// glm::mat2x2& Manifold::getBasis() { return this->getTable()->getManifoldTable()->getBasis()[getSpecialIndex()]; }
 
-BskVec2Pair& Manifold::getRAW() { return this->getTable()->getManifoldTable()->getRAW()[getSpecialIndex()]; } // explicit body
-BskVec2Pair& Manifold::getRBW() { return this->getTable()->getManifoldTable()->getRBW()[getSpecialIndex()]; }
-BskFloatROWS& Manifold::getCdA() { return this->getTable()->getManifoldTable()->getCdA()[getSpecialIndex()]; } // explicit body
-BskFloatROWS& Manifold::getCdB() { return this->getTable()->getManifoldTable()->getCdB()[getSpecialIndex()]; }
+// BskVec2Pair& Manifold::getRAW() { return this->getTable()->getManifoldTable()->getRAW()[getSpecialIndex()]; } // explicit body
+// BskVec2Pair& Manifold::getRBW() { return this->getTable()->getManifoldTable()->getRBW()[getSpecialIndex()]; }
+// BskFloatROWS& Manifold::getCdA() { return this->getTable()->getManifoldTable()->getCdA()[getSpecialIndex()]; } // explicit body
+// BskFloatROWS& Manifold::getCdB() { return this->getTable()->getManifoldTable()->getCdB()[getSpecialIndex()]; }
 
 void Manifold::initialize() {
     std::cout << "\n=== MANIFOLD INITIALIZE ===\n";
-    std::cout << "Force index: " << index << ", Special index: " << getSpecialIndex() << "\n";
-    std::cout << "isA: " << (isA() ? "true" : "false") << "\n";
+    std::cout << "isA: " << (getIsA() ? "true" : "false") << "\n";
     std::cout << "bodyA: " << bodyA->getIndex() << ", bodyB: " << bodyB->getIndex() << "\n";
     
     getFriction() = sqrt(bodyA->getFriction() * bodyB->getFriction());
     std::cout << "Friction: " << getFriction() << " (bodyA: " << bodyA->getFriction() << ", bodyB: " << bodyB->getFriction() << ")\n";
 
-    Rigid* realBodyA = isA() ? bodyA : bodyB;
-    Rigid* realBodyB = isA() ? bodyB : bodyA;
-    auto& realJA = isA() ? J() : twin->J();
-    auto& realJB = isA() ? twin->J() : J();
+    Rigid* realBodyA = getIsA() ? bodyA : bodyB;
+    Rigid* realBodyB = getIsA() ? bodyB : bodyA;
+    auto& realJA = getIsA() ? getJ() : twin->getJ();
+    auto& realJB = getIsA() ? twin->getJ() : getJ();
 
     std::cout << "realBodyA: " << realBodyA->getIndex() << ", realBodyB: " << realBodyB->getIndex() << "\n";
 
@@ -105,12 +104,11 @@ void Manifold::initialize() {
 
 void Manifold::computeConstraint(float alpha) {
     std::cout << "\n=== MANIFOLD COMPUTE CONSTRAINT ===\n";
-    std::cout << "Force index: " << index << ", Special index: " << getSpecialIndex() << "\n";
     std::cout << "alpha: " << alpha << "\n";
     std::cout << "bodyA: " << bodyA->getIndex() << ", bodyB: " << bodyB->getIndex() << "\n";
     
-    auto& JOther = twin->J();
-    auto& COther = twin->C();
+    auto& JOther = twin->getJ();
+    auto& COther = twin->getC();
 
     for (uint i = 0; i < 2; i++) {
         glm::vec3 dpA = bodyA->getPos() - bodyA->getInitial();
@@ -124,40 +122,40 @@ void Manifold::computeConstraint(float alpha) {
         std::cout << "  bodyB initial: (" << bodyB->getInitial().x << ", " << bodyB->getInitial().y << ", " << bodyB->getInitial().z << ")\n";
         std::cout << "  dpB: (" << dpB.x << ", " << dpB.y << ", " << dpB.z << ")\n";
         
-        float dotJdpA_N = glm::dot(J()[2 * i + JN], dpA);
+        float dotJdpA_N = glm::dot(getJ()[2 * i + JN], dpA);
         float dotJOtherdpB_N = glm::dot(JOther[2 * i + JN], dpB);
 
-        std::cout << "  J_N: (" << J()[2*i+JN].x << ", " << J()[2*i+JN].y << ", " << J()[2*i+JN].z << ")\n";
+        std::cout << "  J_N: (" << getJ()[2*i+JN].x << ", " << getJ()[2*i+JN].y << ", " << getJ()[2*i+JN].z << ")\n";
         std::cout << "  JOther_N: (" << JOther[2*i+JN].x << ", " << JOther[2*i+JN].y << ", " << JOther[2*i+JN].z << ")\n";
         std::cout << "  dot(J_N, dpA): " << dotJdpA_N << "\n";
         std::cout << "  dot(JOther_N, dpB): " << dotJOtherdpB_N << "\n";
         std::cout << "  C0.x: " << getC0()[i].x << "\n";
 
-        C()[2 * i + JN] = COther[2 * i + JN] = getC0()[i].x * (1 - alpha) + dotJdpA_N + dotJOtherdpB_N;
+        getC()[2 * i + JN] = COther[2 * i + JN] = getC0()[i].x * (1 - alpha) + dotJdpA_N + dotJOtherdpB_N;
         
-        std::cout << "  C_normal [" << (2*i+JN) << "]: " << C()[2*i+JN] << "\n";
+        std::cout << "  C_normal [" << (2*i+JN) << "]: " << getC()[2*i+JN] << "\n";
         
-        float dotJdpA_T = glm::dot(J()[2 * i + JT], dpA);
+        float dotJdpA_T = glm::dot(getJ()[2 * i + JT], dpA);
         float dotJOtherdpB_T = glm::dot(JOther[2 * i + JT], dpB);
         
-        std::cout << "  J_T: (" << J()[2*i+JT].x << ", " << J()[2*i+JT].y << ", " << J()[2*i+JT].z << ")\n";
+        std::cout << "  J_T: (" << getJ()[2*i+JT].x << ", " << getJ()[2*i+JT].y << ", " << getJ()[2*i+JT].z << ")\n";
         std::cout << "  JOther_T: (" << JOther[2*i+JT].x << ", " << JOther[2*i+JT].y << ", " << JOther[2*i+JT].z << ")\n";
         std::cout << "  dot(J_T, dpA): " << dotJdpA_T << "\n";
         std::cout << "  dot(JOther_T, dpB): " << dotJOtherdpB_T << "\n";
         std::cout << "  C0.y: " << getC0()[i].y << "\n";
         
-        C()[2 * i + JT] = COther[2 * i + JT] = getC0()[i].y * (1 - alpha) + dotJdpA_T + dotJOtherdpB_T;
+        getC()[2 * i + JT] = COther[2 * i + JT] = getC0()[i].y * (1 - alpha) + dotJdpA_T + dotJOtherdpB_T;
         
-        std::cout << "  C_tangent [" << (2*i+JT) << "]: " << C()[2*i+JT] << "\n";
+        std::cout << "  C_tangent [" << (2*i+JT) << "]: " << getC()[2*i+JT] << "\n";
 
-        float frictionBound = abs(lambda()[2 * i + JN]) * getFriction();
-        fmax()[2 * i + JT] =  frictionBound;
-        fmin()[2 * i + JT] = -frictionBound;
+        float frictionBound = abs(getLambda()[2 * i + JN]) * getFriction();
+        getFmax()[2 * i + JT] =  frictionBound;
+        getFmin()[2 * i + JT] = -frictionBound;
         
-        std::cout << "  lambda_normal: " << lambda()[2*i+JN] << "\n";
+        std::cout << "  lambda_normal: " << getLambda()[2*i+JN] << "\n";
         std::cout << "  friction: " << getFriction() << "\n";
         std::cout << "  frictionBound: " << frictionBound << "\n";
-        std::cout << "  fmin[tangent]: " << fmin()[2*i+JT] << ", fmax[tangent]: " << fmax()[2*i+JT] << "\n";
+        std::cout << "  fmin[tangent]: " << getFmin()[2*i+JT] << ", fmax[tangent]: " << getFmax()[2*i+JT] << "\n";
     }
 }
 

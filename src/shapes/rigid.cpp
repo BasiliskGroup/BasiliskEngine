@@ -8,18 +8,30 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     forces(nullptr), 
     next(nullptr), 
     prev(nullptr), 
-    density(density) 
+    density(density),
+    relations(),
+    index(-1),
+    pos(pos),
+    initial(pos),
+    inertial(pos),
+    vel(vel),
+    prevVel(vel),
+    scale(scale),
+    friction(friction),
+    collider(collider->getIndex())
 {
     // Add to linked list
     solver->insert(this);
 
     // compute intermediate values
-    float volume = 1; // replace with collider volume
-    float mass = scale.x * scale.y * density * volume; 
-    float moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
-    float radius = glm::length(scale * 0.5f);
+    float volume = scale.x * scale.y; // TODO replace this with actual collider volume
+    mass = scale.x * scale.y * density * volume; 
+    moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
+    radius = glm::length(scale * 0.5f);
 
-    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider->getIndex(), radius);
+    computeTransforms();
+
+    // index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider->getIndex(), radius);
 }   
 
 Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider) : 
@@ -28,23 +40,32 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     forces(nullptr), 
     next(nullptr), 
     prev(nullptr), 
-    density(density) 
+    density(density),
+    relations(),
+    index(-1),
+    pos(pos),
+    initial(pos),
+    inertial(pos),
+    vel(vel),
+    prevVel(vel),
+    scale(scale),
+    friction(friction),
+    collider(collider)
 {
     // Add to linked list
     solver->insert(this);
 
     // compute intermediate values
-    float volume = 1; // replace with collider volume
-    float mass = scale.x * scale.y * density * volume; 
-    float moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
-    float radius = glm::length(scale * 0.5f);
+    float volume = scale.x * scale.y; // TODO replace this with actual collider volume
+    mass = scale.x * scale.y * density * volume; 
+    moment = mass * glm::dot(scale, scale) / 12.0f; // TODO replace with collider moment
+    radius = glm::length(scale * 0.5f);
 
-    index = solver->getBodyTable()->insert(this, pos, vel, scale, friction, mass, moment, collider, radius);
+    computeTransforms();
 }   
 
 Rigid::~Rigid() {
     // remove from Table
-    solver->getBodyTable()->markAsDeleted(index);
     solver->remove(this);
 
     // delete all forces
@@ -59,8 +80,6 @@ Rigid::~Rigid() {
 BodyTable* Rigid::getBodyTable() {
     return solver->getBodyTable();
 }
-
-
 
 uint Rigid::getColliderIndex() {
     return getBodyTable()->getCollider()[index];
@@ -153,28 +172,43 @@ void Rigid::clear() {
 // setters
 // --------------------
 void Rigid::setPosition(const glm::vec3& pos) {
-    getBodyTable()->getPos()[index] = pos;
+    this->pos = pos;
 }
 
 void Rigid::setVelocity(const glm::vec3& vel) {
-    getBodyTable()->getVel()[index] = vel;
+    this->vel = vel;
 }
 
-glm::vec3& Rigid::getPos() { return getBodyTable()->getPos()[index]; }
-glm::vec3& Rigid::getInitial() { return getBodyTable()->getInitial()[index]; }
-glm::vec3& Rigid::getInertial() { return getBodyTable()->getInertial()[index]; }
-glm::vec3& Rigid::getVel() { return getBodyTable()->getVel()[index]; }
-glm::vec3& Rigid::getPrevVel() { return getBodyTable()->getPrevVel()[index]; }
-glm::vec2& Rigid::getScale() { return getBodyTable()->getScale()[index]; }
-float& Rigid::getFriction() { return getBodyTable()->getFriction()[index]; }
-float& Rigid::getMass() { return getBodyTable()->getMass()[index]; }
-float& Rigid::getMoment() { return getBodyTable()->getMoment()[index]; }
-float& Rigid::getRadius() { return getBodyTable()->getRadius()[index]; }
-uint& Rigid::getCollider() { return getBodyTable()->getCollider()[index]; }
-glm::mat2x2& Rigid::getMat() { return getBodyTable()->getMat()[index]; }
-glm::mat2x2& Rigid::getIMat() { return getBodyTable()->getIMat()[index]; }
-glm::mat2x2& Rigid::getRMat() { return getBodyTable()->getRMat()[index]; }
-bool Rigid::getUpdated() { return getBodyTable()->getUpdated()[index]; }
+void Rigid::computeTransforms() {
+    float angle = pos.z;
+    float sx = scale.x, sy = scale.y;
+    float isx = 1 / sx, isy = 1 / sy;
+
+    float c = cos(angle);
+    float s = sin(angle);
+
+    rMat = { c, -s, s, c };
+    mat = { c * sx, -s * sy, s * sx, c * sy };
+    iMat = {  c * isx,  s * isx, -s * isy,  c * isy };
+
+    updated = false;
+}
+
+// glm::vec3& Rigid::getPos() { return getBodyTable()->getPos()[index]; }
+// glm::vec3& Rigid::getInitial() { return getBodyTable()->getInitial()[index]; }
+// glm::vec3& Rigid::getInertial() { return getBodyTable()->getInertial()[index]; }
+// glm::vec3& Rigid::getVel() { return getBodyTable()->getVel()[index]; }
+// glm::vec3& Rigid::getPrevVel() { return getBodyTable()->getPrevVel()[index]; }
+// glm::vec2& Rigid::getScale() { return getBodyTable()->getScale()[index]; }
+// float& Rigid::getFriction() { return getBodyTable()->getFriction()[index]; }
+// float& Rigid::getMass() { return getBodyTable()->getMass()[index]; }
+// float& Rigid::getMoment() { return getBodyTable()->getMoment()[index]; }
+// float& Rigid::getRadius() { return getBodyTable()->getRadius()[index]; }
+// uint& Rigid::getCollider() { return getBodyTable()->getCollider()[index]; }
+// glm::mat2x2& Rigid::getMat() { return getBodyTable()->getMat()[index]; }
+// glm::mat2x2& Rigid::getIMat() { return getBodyTable()->getIMat()[index]; }
+// glm::mat2x2& Rigid::getRMat() { return getBodyTable()->getRMat()[index]; }
+// bool Rigid::getUpdated() { return getBodyTable()->getUpdated()[index]; }
 
 }
 

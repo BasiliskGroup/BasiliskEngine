@@ -36,6 +36,23 @@ private:
     // stored for copy/move constructor
     float density;
 
+    // TEMPORARY
+    glm::vec3 pos;
+    glm::vec3 initial;
+    glm::vec3 inertial;
+    glm::vec3 vel;
+    glm::vec3 prevVel;
+    glm::vec2 scale;
+    float friction;
+    float mass;
+    float moment;
+    float radius;
+    uint collider;
+    glm::mat2x2 mat;
+    glm::mat2x2 iMat;
+    glm::mat2x2 rMat;
+    bool updated;
+
 public:
     Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider);
     Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider);
@@ -55,21 +72,22 @@ public:
     Node2D* getNode() { return node; }
     uint getIndex() { return index; }
 
-    glm::vec3& getPos();
-    glm::vec3& getInitial();
-    glm::vec3& getInertial();
-    glm::vec3& getVel();
-    glm::vec3& getPrevVel();
-    glm::vec2& getScale();
-    float& getFriction();
-    float& getMass();
-    float& getMoment();
-    float& getRadius();
-    uint& getCollider();
-    glm::mat2x2& getMat();
-    glm::mat2x2& getIMat();
-    glm::mat2x2& getRMat();
-    bool getUpdated();
+    glm::vec3& getPos() { return pos; }
+    glm::vec3& getInitial() { return initial; }
+    glm::vec3& getInertial() { return inertial; }
+    glm::vec3& getVel() { return vel; }
+    glm::vec3& getPrevVel() { return prevVel; }
+    glm::vec2& getScale() { return scale; }
+    float& getFriction() { return friction; }
+    float& getMass() { return mass; }
+    float& getMoment() { return moment; }
+    float& getRadius() { return radius; }
+    uint& getCollider() { return collider; }
+    glm::mat2x2& getMat() { return mat; }
+    glm::mat2x2& getIMat() { return iMat; }
+    glm::mat2x2& getRMat() { return rMat; }
+    bool& getUpdated() { return updated; }
+
 
     float getDensity() { return density; }
     
@@ -86,6 +104,9 @@ public:
     void precomputeRelations();
     ForceType constrainedTo(uint other, Force*& force) const;
     void draw();
+
+    // TEMPORARY
+    void computeTransforms();
 
 private:
     void clear();
