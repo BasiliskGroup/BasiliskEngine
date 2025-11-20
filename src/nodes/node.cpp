@@ -5,11 +5,13 @@ namespace bsk::internal {
 Node::Node(VirtualScene3D* scene, Params params)
     : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale) {
     updateModel();
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
 }
 
 Node::Node(Node* parent, Params params)
     : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale) {
     updateModel();
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
 }
 
 Node::Node(VirtualScene3D* scene, Node* parent) : VirtualNode(scene, parent) {}

@@ -11,7 +11,7 @@ namespace bsk::internal {
 Scene::Scene(Engine* engine) : VirtualScene(engine) {
     camera = new Camera(engine);
     internalCamera = camera;
-    shader = new Shader("shaders/default.vert", "shaders/default.frag");
+    shader = new Shader("shaders/instance.vert", "shaders/instance.frag");
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
 }
 
