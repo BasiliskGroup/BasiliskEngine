@@ -155,8 +155,18 @@ void Window::render() {
  * @param a Alpha component
  */
 void Window::clear(float r, float g, float b, float a) {
+    use();
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/**
+ * @brief Use the window for render calls. Bind framebuffer to 0. 
+ * 
+ */
+void Window::use() {
+    glViewport(0, 0, width, height);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); 
 }
 
 /**

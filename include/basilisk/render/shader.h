@@ -5,6 +5,7 @@
 #include <basilisk/render/texture.h>
 #include <basilisk/render/textureArray.h>
 #include <basilisk/render/tbo.h>
+#include <basilisk/render/fbo.h>
 
 namespace bsk::internal {
 
@@ -34,6 +35,7 @@ class Shader {
         void bind(const char* name, Texture* texture, unsigned int slot);
         void bind(const char* name, TextureArray* textureArray, unsigned int slot);
         void bind(const char* name, TBO* tbo, unsigned int slot);
+        void bind(const char* name, FBO* fbo, unsigned int slot);
 
         int getUniformLocation(const char* name);
         unsigned int getStride() { return stride; }

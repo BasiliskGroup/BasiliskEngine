@@ -256,6 +256,20 @@ void Shader::bind(const char* name, TBO* tbo, unsigned int slot) {
 }
 
 /**
+ * @brief Binds a fbo color attachment to the shader
+ * 
+ * @param name Name of the uniform samplerBuffer on the shader
+ * @param fbo Pointer to the FBO object
+ * @param slot Slot to bind the tbo [0-15]
+ */
+void Shader::bind(const char* name, FBO* fbo, unsigned int slot) {
+    use();
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, fbo->getTextureID());
+    setUniform(name, (int)slot);   
+}
+
+/**
  * @brief Get the location of a uniform on this shader. 
  * 
  * @param name C-String name of the uniform 

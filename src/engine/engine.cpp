@@ -20,7 +20,7 @@ Engine::~Engine() {
 
 
 void Engine::update() {
-    window->clear(0.2, 0.3, 0.3, 1.0);
+    window->clear(0.1, 0.1, 0.1, 1.0);
 
     // Mouse Updates
     mouse->update();
@@ -34,7 +34,12 @@ void Engine::update() {
 
 
 void Engine::render() {
+    window->use();
     window->render();
+}
+
+void Engine::useContext() {
+    window->use();
 }
 
 }

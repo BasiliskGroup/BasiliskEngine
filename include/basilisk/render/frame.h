@@ -1,0 +1,36 @@
+#ifndef BSK_FRAME_H
+#define BSK_FRAME_H
+
+#include <basilisk/util/includes.h>
+
+#include <basilisk/render/shader.h>
+#include <basilisk/render/vbo.h>
+#include <basilisk/render/ebo.h>
+#include <basilisk/render/vao.h>
+#include <basilisk/render/fbo.h>
+
+namespace bsk::internal {
+
+class Frame {
+    private:
+        Shader* shader;
+        VBO* vbo;
+        EBO* ebo;
+        VAO* vao;
+        FBO* fbo;
+
+        unsigned int width;
+        unsigned int height;
+
+    public:
+        Frame(unsigned int width, unsigned int height);
+        ~Frame();
+
+        void use();
+        void clear(float r=0.0, float g=0.0, float b=0.0, float a=1.0);
+        void render();
+};
+
+}
+
+#endif

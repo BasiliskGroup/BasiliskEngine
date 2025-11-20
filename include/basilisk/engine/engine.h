@@ -23,6 +23,7 @@ class Engine {
         bool isRunning() { return window->isRunning(); }
         void update();
         void render();
+        void useContext();
         
         inline GLFWwindow* getWindow() const { return window->getWindow(); }
         inline Mouse* getMouse() const { return mouse; }

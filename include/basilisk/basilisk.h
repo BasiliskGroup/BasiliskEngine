@@ -21,6 +21,8 @@
 #include "render/vbo.h"
 #include "render/ebo.h"
 #include "render/tbo.h"
+#include "render/fbo.h"
+#include "render/frame.h"
 #include "render/material.h"
 #include "resource/materialServer.h"
 #include "camera/staticCamera.h"
@@ -71,6 +73,8 @@ namespace bsk {
     using Camera = internal::Camera;
     using Camera2D = internal::Camera2D;
     using MaterialServer = internal::MaterialServer;
+    using FBO = internal::FBO;
+    using Frame = internal::Frame;
 }
 
 #endif // BASILISK_H
