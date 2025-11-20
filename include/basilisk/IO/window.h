@@ -17,7 +17,7 @@ class Window {
         Window(int width, int height, const char* title);
         ~Window();
 
-        void resize(GLFWwindow* window, int width, int height);
+        static void windowResize(GLFWwindow* window, int width, int height);
 
         bool isRunning();
         void render();

@@ -10,25 +10,21 @@ namespace bsk::internal {
  * @param width 
  * @param height 
  */
-inline void windowResize(GLFWwindow* window, int width, int height) {
+void Window::windowResize(GLFWwindow* window, int width, int height) {
+    Window* self = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+
     glViewport(0, 0, fbWidth, fbHeight);
+
+    if (self) {
+        self->width  = fbWidth;
+        self->height = fbHeight;
+    }
 }
 
-/**
- * @brief Enables X11 window if the user is on Wayland. 
- *        Fixes the borderless window error on some linux devices. 
- * 
- */
-// void enableX11() {
-//     const char* sessionType = getenv("XDG_SESSION_TYPE");    
-//     if (sessionType && std::string(sessionType) == "wayland") {
-//         #if defined(__linux__)
-//             glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-//         #endif
-//     }
-// }
+
 
 /**
  * @brief Sets the window hint for ther GL version.
@@ -84,7 +80,7 @@ bool confirmGLAD() {
  * @param height The initial height of the window in pixels
  * @param title 
  */
-Window::Window(int width, int height, const char* title) {
+Window::Window(int width, int height, const char* title): width(width), height(height) {
     // Initialize GLFW with OpenGL
     if (!glfwInit()) {
         throw std::runtime_error("Failed to initialize GLFW");
@@ -106,14 +102,13 @@ Window::Window(int width, int height, const char* title) {
 
     // Set the resize callback
     glViewport(0, 0, width, height);
-    glfwSetFramebufferSizeCallback(window, windowResize);
+    glfwSetWindowUserPointer(window, this);
+    glfwSetFramebufferSizeCallback(window, Window::windowResize);
 
     // Fix mac
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
     glViewport(0, 0, fbWidth, fbHeight);
-    this->width = fbWidth;
-    this->height = fbHeight;
 
     // Delta time config
     previousTime = 0;

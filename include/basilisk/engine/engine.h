@@ -25,7 +25,7 @@ class Engine {
         void render();
         void useContext();
         
-        inline GLFWwindow* getWindow() const { return window->getWindow(); }
+        inline Window* getWindow() const { return window; }
         inline Mouse* getMouse() const { return mouse; }
         inline Keyboard* getKeyboard() const { return keyboard; }
         inline ResourceServer* getResourceServer() const { return resourceServer; }
