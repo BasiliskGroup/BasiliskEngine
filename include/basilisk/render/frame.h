@@ -3,16 +3,20 @@
 
 #include <basilisk/util/includes.h>
 
+#include <basilisk/engine/engine.h>
 #include <basilisk/render/shader.h>
 #include <basilisk/render/vbo.h>
 #include <basilisk/render/ebo.h>
 #include <basilisk/render/vao.h>
 #include <basilisk/render/fbo.h>
 
+
 namespace bsk::internal {
 
 class Frame {
     private:
+        Engine* engine;
+
         Shader* shader;
         VBO* vbo;
         EBO* ebo;
@@ -21,14 +25,16 @@ class Frame {
 
         unsigned int width;
         unsigned int height;
+        float aspectRatio;
 
     public:
-        Frame(unsigned int width, unsigned int height);
+        Frame(Engine* engine, unsigned int width, unsigned int height);
         ~Frame();
 
         void use();
         void clear(float r=0.0, float g=0.0, float b=0.0, float a=1.0);
         void render();
+        void render(int x, int y, int width, int height);
 };
 
 }

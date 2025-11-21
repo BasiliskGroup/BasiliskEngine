@@ -33,7 +33,7 @@ int main() {
 
     std::vector<bsk::Node2D*> contactNodes;
 
-    bsk::Frame* frame = new bsk::Frame(800, 800);
+    bsk::Frame* frame = new bsk::Frame(engine, 800, 800);
 
     // Main loop continues as long as the window is open
     int i = 0;

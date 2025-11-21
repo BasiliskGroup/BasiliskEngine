@@ -9,7 +9,7 @@ namespace bsk::internal {
  * @param width Width of the FBO in pixels
  * @param height Height of the FBO in pixels
  */
-Frame::Frame(unsigned int width, unsigned int height): width(width), height(height) {
+Frame::Frame(Engine* engine, unsigned int width, unsigned int height): engine(engine), width(width), height(height), aspectRatio((float)width / (float)height) {
 
     // Load simple shader for rendering a quad wuth texture
     shader = new Shader("shaders/frame.vert", "shaders/frame.frag");
@@ -57,12 +57,64 @@ void Frame::use() {
 }
 
 /**
- * @brief Render the contents of this frame to screen or currently bounod FBO
+ * @brief Render the contents of this frame to screen or currently bound FBO
  * 
  */
 void Frame::render() {
+
+    // Get the current viewport
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // Get the screen dimensions from the engine
+    int screenWidth  = engine->getWindow()->getWidth();
+    int screenHeight = engine->getWindow()->getHeight();
+    float screenAspectRatio = (float)screenWidth / (float)screenHeight;
+
+    // Set the render rect based on screen size and this frame's aspect ratio
+    int x, y, width, height;
+    if (aspectRatio > screenAspectRatio) { // frame is wider than screen
+        width = screenWidth;
+        height = width / aspectRatio;
+        x = 0;
+        y = (screenHeight - height) / 2;
+    }
+    else { // screen is wider than frame
+        height = screenHeight;
+        width = height * aspectRatio;
+        x = (screenWidth - width) / 2;
+        y = 0;
+    }
+
+    // Update the viewport and render
+    glViewport(x, y, width, height);
     shader->use();
     vao->render();
+
+    // Reset viewport to previous dimensions
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+}
+
+/**
+ * @brief Render the contents of this frame to screen or currently bound FBO at the specified location
+ * 
+ * @param x 
+ * @param y 
+ * @param width 
+ * @param height 
+ */
+void Frame::render(int x, int y, int width, int height) {
+    // Get the current viewport
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // Update the viewport and render
+    glViewport(x, y, width, height);
+    shader->use();
+    vao->render();
+
+    // Reset viewport to previous dimensions
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
 void Frame::clear(float r, float g, float b, float a) {
