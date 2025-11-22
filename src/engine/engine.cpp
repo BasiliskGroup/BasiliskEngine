@@ -4,7 +4,7 @@ namespace bsk::internal {
 
 Engine::Engine(int width, int height, const char* title) {
     window = new Window(width, height, title);
-    mouse = new Mouse(window);
+    mouse = new Mouse(this);
     keyboard = new Keyboard(window);
     frame = new Frame(this, width, height);
     resourceServer = new ResourceServer();

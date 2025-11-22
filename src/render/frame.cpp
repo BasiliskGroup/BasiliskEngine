@@ -122,4 +122,38 @@ void Frame::clear(float r, float g, float b, float a) {
     fbo->clear(r, g, b, a);
 }
 
+unsigned int Frame::getRenderWidth() {
+    // Get the screen dimensions from the engine
+    int screenWidth  = engine->getWindow()->getWidth();
+    int screenHeight = engine->getWindow()->getHeight();
+    float screenAspectRatio = (float)screenWidth / (float)screenHeight;
+
+    // Set the render rect based on screen size and this frame's aspect ratio
+    int x, y, width, height;
+    if (aspectRatio > screenAspectRatio) { // frame is wider than screen
+        return screenWidth;
+    }
+    else {
+        return screenHeight * aspectRatio;
+    }
+}
+
+unsigned int Frame::getRenderHeight() {
+    // Get the screen dimensions from the engine
+    int screenWidth  = engine->getWindow()->getWidth();
+    int screenHeight = engine->getWindow()->getHeight();
+    float screenAspectRatio = (float)screenWidth / (float)screenHeight;
+
+    // Set the render rect based on screen size and this frame's aspect ratio
+    int x, y, width, height;
+    if (aspectRatio > screenAspectRatio) { // frame is wider than screen
+        return screenWidth / aspectRatio;
+    }
+    else { // screen is wider than frame
+        return screenHeight;
+    }
+
+}
+
+
 }

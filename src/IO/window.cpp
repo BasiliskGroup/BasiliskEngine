@@ -19,12 +19,12 @@ void Window::windowResize(GLFWwindow* window, int width, int height) {
 
     int xsize, ysize;
     glfwGetWindowSize(window, &xsize, &ysize);
-
     
-
     if (self) {
         self->width  = xsize;
         self->height = ysize;
+        self->windowScaleX = (float)fbWidth / xsize;
+        self->windowScaleY = (float)fbHeight / ysize;
     }
 }
 
@@ -105,14 +105,14 @@ Window::Window(int width, int height, const char* title): width(width), height(h
     glEnable(GL_MULTISAMPLE);
 
     // Set the resize callback
-    // glViewport(0, 0, width, height);
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, Window::windowResize);
 
-    // Fix mac
+    // Inital resize
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-    glViewport(0, 0, fbWidth, fbHeight);
+    windowResize(window, fbWidth, fbHeight);
+    use();
 
     // Delta time config
     previousTime = 0;

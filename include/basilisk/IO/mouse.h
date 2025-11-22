@@ -7,8 +7,11 @@
 
 namespace bsk::internal {
 
+class Engine;
+
 class Mouse {
     private:
+        Engine* engine;
         Window* window;
         double x, y;
         double previousX, previousY;
@@ -19,7 +22,7 @@ class Mouse {
         bool previousRight;
     
     public:
-        Mouse(Window* window): window(window), x(400), y(300), previousX(400), previousY(300) {}
+        Mouse(Engine* engine);
         
         void update();
 
@@ -31,8 +34,8 @@ class Mouse {
         bool getMiddleDown() { return middle; }
         bool getRightDown()  { return right; }
 
-        double getX() { return x; }
-        double getY() { return y; }
+        double getX();
+        double getY();
 
         double getRelativeX() { return x - previousX; }
         double getRelativeY() { return y - previousY; }

@@ -1,6 +1,10 @@
 #include <basilisk/IO/mouse.h>
+#include <basilisk/engine/engine.h>
+
 
 namespace bsk::internal {
+
+Mouse::Mouse(Engine* engine): engine(engine), window(engine->getWindow()), x(0), y(0), previousX(0), previousY(0) {}
 
 /**
  * @brief Update the state of the mouse and store previous state
@@ -22,6 +26,9 @@ void Mouse::update() {
     middle = glfwGetMouseButton(window->getWindow(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
     right = glfwGetMouseButton(window->getWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 }
+
+double Mouse::getX() { return x * engine->getWindow()->getWindowScaleX(); }
+double Mouse::getY() { return y * engine->getWindow()->getWindowScaleY(); }
 
 /**
  * @brief Grabs the mouse and hides it
@@ -49,15 +56,14 @@ void Mouse::setHidden() {
 
 
 double Mouse::getWorldX(StaticCamera2D* camera) {
-    std::cout << "Window Width: " << window->getWidth() << " | View Width: " << camera->getViewWidth() << " | Mouse X: " << getX() << std::endl;
-    double tileWidth = (double)window->getWidth() / camera->getViewWidth();
-    return camera->getX() + getX() / tileWidth - camera->getViewWidth() / 2;
+    double tileWidth = (double)engine->getFrame()->getRenderWidth() / camera->getViewWidth();
+    return camera->getX() + (getX() - window->getWidth() / 2) / tileWidth;
 }
 
 
 double Mouse::getWorldY(StaticCamera2D* camera) {
-    double tileHeight = (double)window->getHeight() / camera->getViewHeight();
-    return camera->getY() - getY() / tileHeight + camera->getViewHeight() / 2;
+    double tileHeight = (double)engine->getFrame()->getRenderHeight() / camera->getViewHeight();
+    return camera->getY() + (window->getHeight() / 2 - getY()) / tileHeight;
 }
 
 };
