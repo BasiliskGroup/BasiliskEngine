@@ -57,13 +57,13 @@ void Mouse::setHidden() {
 
 double Mouse::getWorldX(StaticCamera2D* camera) {
     double tileWidth = (double)engine->getFrame()->getRenderWidth() / camera->getViewWidth();
-    return camera->getX() + (getX() - window->getWidth() / 2) / tileWidth;
+    return camera->getX() + (getX() - window->getWidth() * engine->getWindow()->getWindowScaleX() / 2) / tileWidth;
 }
 
 
 double Mouse::getWorldY(StaticCamera2D* camera) {
     double tileHeight = (double)engine->getFrame()->getRenderHeight() / camera->getViewHeight();
-    return camera->getY() + (window->getHeight() / 2 - getY()) / tileHeight;
+    return camera->getY() + (window->getHeight() * engine->getWindow()->getWindowScaleY() / 2 - getY()) / tileHeight;
 }
 
 };
