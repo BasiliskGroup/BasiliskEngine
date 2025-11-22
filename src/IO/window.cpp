@@ -19,8 +19,8 @@ void Window::windowResize(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, fbWidth, fbHeight);
 
     if (self) {
-        self->width  = fbWidth;
-        self->height = fbHeight;
+        self->width  = width;
+        self->height = height;
     }
 }
 
