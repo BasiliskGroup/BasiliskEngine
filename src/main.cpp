@@ -65,6 +65,8 @@ int main() {
         engine->update();
         scene->update();
 
+        std::cout << engine->getMouse()->getWorldX(scene->getCamera()) << std::endl;
+
         // Render the scene to the frame
         scene->render();
         engine->render();

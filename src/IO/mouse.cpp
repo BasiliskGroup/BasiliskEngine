@@ -49,6 +49,7 @@ void Mouse::setHidden() {
 
 
 double Mouse::getWorldX(StaticCamera2D* camera) {
+    std::cout << "Window Width: " << window->getWidth() << " | View Width: " << camera->getViewWidth() << " | Mouse X: " << getX() << std::endl;
     double tileWidth = (double)window->getWidth() / camera->getViewWidth();
     return camera->getX() + getX() / tileWidth - camera->getViewWidth() / 2;
 }
