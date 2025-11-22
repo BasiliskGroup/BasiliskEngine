@@ -33,8 +33,6 @@ int main() {
 
     std::vector<bsk::Node2D*> contactNodes;
 
-    bsk::Frame* frame = new bsk::Frame(engine, 800, 800);
-
     // Main loop continues as long as the window is open
     int i = 0;
     while (engine->isRunning()) {
@@ -68,15 +66,7 @@ int main() {
         scene->update();
 
         // Render the scene to the frame
-        frame->use();
-        frame->clear();
         scene->render();
-        
-        // Render the frame to the engine screen 
-        engine->useContext();
-        frame->render();
-
-        // Render the window
         engine->render();
 
         for (bsk::Node2D* node : contactNodes) {
@@ -97,7 +87,6 @@ int main() {
     delete material2;
     delete material3;
     delete quad;
-    delete frame;
     delete scene;
     delete voidScene;
     delete engine;

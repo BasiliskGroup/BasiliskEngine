@@ -2,6 +2,7 @@
 
 namespace bsk::internal {
 
+
 /**
  * @brief Get the component count of an OpenGL type. Not an exhaustive function, only valid for BOOL, INT, and FLOAT type. 
  * 
@@ -75,9 +76,9 @@ std::string loadFile(const char* path) {
     // Attempt to load the file and read to string
     try {
         file.open(path);
-        std::stringstream vertexStream, fragmentStream;
-        vertexStream << file.rdbuf();
-        content = vertexStream.str();
+        std::stringstream ss;
+        ss << file.rdbuf();
+        content = ss.str();
         file.close();
     }
     catch (std::ifstream::failure e) {
@@ -214,6 +215,29 @@ void Shader::use() {
 }
 
 /**
+ * @brief General method for binding a texture target and id to a slot
+ * 
+ * @param texID 
+ * @param target 
+ * @param slot 
+ */
+void Shader::bindTextureToSlot(const char* name, GLuint texID, GLenum target, unsigned int slot) {
+    use();
+
+    auto it = slotBindings.find(slot);
+
+    // If not bound or different, bind it
+    if (it == slotBindings.end() || it->second.id != texID || it->second.target != target) {
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(target, texID);
+
+        slotBindings[slot] = { texID, target };
+
+        setUniform(name, (int)slot);
+    }
+}
+
+/**
  * @brief Binds a texture to the shader
  * 
  * @param name Name of the texture on the shader
@@ -221,10 +245,7 @@ void Shader::use() {
  * @param slot Slot to bind the texutre to [0-15]
  */
 void Shader::bind(const char* name, Texture* texture, unsigned int slot) {
-    use();
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, texture->getID());
-    setUniform(name, (int)slot);   
+    bindTextureToSlot(name, texture->getID(), GL_TEXTURE_2D, slot);
 }
 
 /**
@@ -235,10 +256,7 @@ void Shader::bind(const char* name, Texture* texture, unsigned int slot) {
  * @param slot Slot to bind the texutre to [0-15]
  */
 void Shader::bind(const char* name, TextureArray* textureArray, unsigned int slot) {
-    use();
-    glActiveTexture(GL_TEXTURE0 + slot);
-    textureArray->bind();
-    setUniform(name, (int)slot);
+    bindTextureToSlot(name, textureArray->getID(), GL_TEXTURE_2D_ARRAY, slot);
 }
 
 /**
@@ -249,10 +267,7 @@ void Shader::bind(const char* name, TextureArray* textureArray, unsigned int slo
  * @param slot Slot to bind the tbo [0-15]
  */
 void Shader::bind(const char* name, TBO* tbo, unsigned int slot) {
-    use();
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_BUFFER, tbo->getTextureID());
-    setUniform(name, (int)slot);
+    bindTextureToSlot(name, tbo->getTextureID(), GL_TEXTURE_BUFFER, slot);
 }
 
 /**
@@ -263,10 +278,7 @@ void Shader::bind(const char* name, TBO* tbo, unsigned int slot) {
  * @param slot Slot to bind the tbo [0-15]
  */
 void Shader::bind(const char* name, FBO* fbo, unsigned int slot) {
-    use();
-    glActiveTexture(GL_TEXTURE0 + slot);
-    glBindTexture(GL_TEXTURE_2D, fbo->getTextureID());
-    setUniform(name, (int)slot);   
+    bindTextureToSlot(name, fbo->getTextureID(), GL_TEXTURE_2D, slot);
 }
 
 /**

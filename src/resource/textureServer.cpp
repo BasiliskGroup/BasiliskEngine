@@ -10,7 +10,6 @@ namespace bsk::internal {
 TextureServer::TextureServer(std::vector<unsigned int> sizeBuckets): sizeBuckets(sizeBuckets) {
     for (unsigned int size : sizeBuckets) {
         TextureArray* array = new TextureArray(size, size);
-        std::cout << "Adding Array : " << size << std::endl;
         textureArrays.push_back(array);
     }
 }

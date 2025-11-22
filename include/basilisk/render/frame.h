@@ -2,8 +2,6 @@
 #define BSK_FRAME_H
 
 #include <basilisk/util/includes.h>
-
-#include <basilisk/engine/engine.h>
 #include <basilisk/render/shader.h>
 #include <basilisk/render/vbo.h>
 #include <basilisk/render/ebo.h>
@@ -12,6 +10,8 @@
 
 
 namespace bsk::internal {
+
+class Engine;
 
 class Frame {
     private:

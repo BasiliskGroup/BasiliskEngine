@@ -9,6 +9,12 @@
 
 namespace bsk::internal {
 
+// Used to store slot binding information
+struct BoundTexture {
+    GLuint id;
+    GLenum target;
+};
+
 // GLint location, GLint count, unsigned int dataType, unsigned int stride, unsigned int offset
 struct Attribute {
     std::string name;
@@ -23,8 +29,11 @@ class Shader {
         unsigned int ID;
         unsigned int stride;
         std::vector<Attribute> attributes;
+        std::unordered_map<unsigned int, BoundTexture> slotBindings;
 
         void loadAttributes();
+
+        void bindTextureToSlot(const char* name, GLuint texID, GLenum target, unsigned int slot);
 
     public:
         Shader(const char* vertexPath, const char* fragmentPath);

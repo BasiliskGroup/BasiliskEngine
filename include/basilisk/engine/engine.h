@@ -6,6 +6,7 @@
 #include <basilisk/IO/keyboard.h>
 #include <basilisk/IO/mouse.h>
 #include <basilisk/resource/resourceServer.h>
+#include <basilisk/render/frame.h>
 
 namespace bsk::internal {
 
@@ -14,6 +15,8 @@ class Engine {
         Window* window;
         Keyboard* keyboard;
         Mouse* mouse;
+
+        Frame* frame;
         ResourceServer* resourceServer;
 
     public:
@@ -28,6 +31,7 @@ class Engine {
         inline Window* getWindow() const { return window; }
         inline Mouse* getMouse() const { return mouse; }
         inline Keyboard* getKeyboard() const { return keyboard; }
+        inline Frame* getFrame() const { return frame; }
         inline ResourceServer* getResourceServer() const { return resourceServer; }
         inline double getDeltaTime() { return window->getDeltaTime(); }
 };

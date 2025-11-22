@@ -67,7 +67,6 @@ void TBO::unbind() {
  * @param offset The location in bytes to start writing
  */
 void TBO::write(const void* data, unsigned int size, unsigned int offset) {
-    std::cout << "Write: " << size << " " << offset << std::endl;
     // Update the capacity if needed
     if (size + offset > capacity) {
         resize();

@@ -1,4 +1,5 @@
 #include <basilisk/render/frame.h>
+#include <basilisk/engine/engine.h>
 
 
 namespace bsk::internal {
@@ -33,7 +34,6 @@ Frame::Frame(Engine* engine, unsigned int width, unsigned int height): engine(en
 
     // Create an FBO as a render target and sampler
     fbo = new FBO(width, height, 4);
-    shader->bind("uTexture", fbo, 4);
 }
 
 /**
@@ -53,6 +53,7 @@ Frame::~Frame() {
  * 
  */
 void Frame::use() {
+    shader->bind("uTexture", fbo, 4);
     fbo->bind();
 }
 

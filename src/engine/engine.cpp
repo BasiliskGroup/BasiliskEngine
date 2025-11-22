@@ -6,6 +6,7 @@ Engine::Engine(int width, int height, const char* title) {
     window = new Window(width, height, title);
     mouse = new Mouse(window);
     keyboard = new Keyboard(window);
+    frame = new Frame(this, width, height);
     resourceServer = new ResourceServer();
 
     mouse->setGrab();
@@ -15,12 +16,14 @@ Engine::~Engine() {
     delete mouse;
     delete keyboard;
     delete resourceServer;
+    delete frame;
     delete window;
 }
 
 
 void Engine::update() {
-    window->clear(0.1, 0.1, 0.1, 1.0);
+    frame->use();
+    frame->clear();
 
     // Mouse Updates
     mouse->update();
@@ -35,6 +38,8 @@ void Engine::update() {
 
 void Engine::render() {
     window->use();
+    window->clear(0.1, 0.1, 0.1, 1.0);
+    frame->render();
     window->render();
 }
 
