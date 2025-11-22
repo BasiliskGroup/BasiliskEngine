@@ -76,9 +76,9 @@ std::string loadFile(const char* path) {
     // Attempt to load the file and read to string
     try {
         file.open(path);
-        std::stringstream ss;
-        ss << file.rdbuf();
-        content = ss.str();
+        std::stringstream vertexStream, fragmentStream;
+        vertexStream << file.rdbuf();
+        content = vertexStream.str();
         file.close();
     }
     catch (std::ifstream::failure e) {
