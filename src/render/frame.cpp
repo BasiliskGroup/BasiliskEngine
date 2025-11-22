@@ -68,8 +68,8 @@ void Frame::render() {
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     // Get the screen dimensions from the engine
-    int screenWidth  = engine->getWindow()->getWidth();
-    int screenHeight = engine->getWindow()->getHeight();
+    int screenWidth  = engine->getWindow()->getWidth() * engine->getWindow()->getWindowScaleX();
+    int screenHeight = engine->getWindow()->getHeight() * engine->getWindow()->getWindowScaleY();
     float screenAspectRatio = (float)screenWidth / (float)screenHeight;
 
     // Set the render rect based on screen size and this frame's aspect ratio
@@ -124,8 +124,8 @@ void Frame::clear(float r, float g, float b, float a) {
 
 unsigned int Frame::getRenderWidth() {
     // Get the screen dimensions from the engine
-    int screenWidth  = engine->getWindow()->getWidth();
-    int screenHeight = engine->getWindow()->getHeight();
+    int screenWidth  = engine->getWindow()->getWidth() * engine->getWindow()->getWindowScaleX();
+    int screenHeight = engine->getWindow()->getHeight() * engine->getWindow()->getWindowScaleY();
     float screenAspectRatio = (float)screenWidth / (float)screenHeight;
 
     // Set the render rect based on screen size and this frame's aspect ratio
@@ -140,8 +140,8 @@ unsigned int Frame::getRenderWidth() {
 
 unsigned int Frame::getRenderHeight() {
     // Get the screen dimensions from the engine
-    int screenWidth  = engine->getWindow()->getWidth();
-    int screenHeight = engine->getWindow()->getHeight();
+    int screenWidth  = engine->getWindow()->getWidth() * engine->getWindow()->getWindowScaleX();
+    int screenHeight = engine->getWindow()->getHeight() * engine->getWindow()->getWindowScaleY();
     float screenAspectRatio = (float)screenWidth / (float)screenHeight;
 
     // Set the render rect based on screen size and this frame's aspect ratio
@@ -154,6 +154,5 @@ unsigned int Frame::getRenderHeight() {
     }
 
 }
-
 
 }
