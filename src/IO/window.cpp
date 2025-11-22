@@ -15,12 +15,16 @@ void Window::windowResize(GLFWwindow* window, int width, int height) {
 
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-
     glViewport(0, 0, fbWidth, fbHeight);
 
+    int xsize, ysize;
+    glfwGetWindowSize(window, &xsize, &ysize);
+
+    
+
     if (self) {
-        self->width  = width;
-        self->height = height;
+        self->width  = xsize;
+        self->height = ysize;
     }
 }
 
@@ -101,7 +105,7 @@ Window::Window(int width, int height, const char* title): width(width), height(h
     glEnable(GL_MULTISAMPLE);
 
     // Set the resize callback
-    glViewport(0, 0, width, height);
+    // glViewport(0, 0, width, height);
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, Window::windowResize);
 
