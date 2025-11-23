@@ -103,6 +103,9 @@ Window::Window(int width, int height, const char* title): width(width), height(h
     // glEnable(GL_CULL_FACE);
     // Antialiasing 
     glEnable(GL_MULTISAMPLE);
+    // Blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 
     // Set the resize callback
     glfwSetWindowUserPointer(window, this);

@@ -14,7 +14,7 @@ int main() {
 
     // Load assets from file
     bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
-    bsk::Image* image = new bsk::Image("textures/container.jpg");
+    bsk::Image* image = new bsk::Image("textures/knight.png");
     bsk::Image* image2 = new bsk::Image("textures/piss.png");
     bsk::Image* image3 = new bsk::Image("textures/man.png");
 
@@ -66,8 +66,6 @@ int main() {
 
         engine->update();
         scene->update();
-
-        // Render the scene to the frame
         scene->render();
         engine->render();
 
