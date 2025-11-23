@@ -1,4 +1,5 @@
 #include <basilisk/camera/staticCamera2d.h>
+#include <basilisk/engine/engine.h>
 
 namespace bsk::internal {
 
@@ -8,7 +9,17 @@ namespace bsk::internal {
  * @param position Starting position of the camera
  */
 StaticCamera2D::StaticCamera2D(Engine* engine, glm::vec2 position): engine(engine), position(position) {
-    viewScale = glm::vec2(10.0f, 10.0f);
+    float scale = 10.0f;
+    float xScale, yScale;
+    if (engine->getFrame()->getHeight() > engine->getFrame()->getWidth()) {
+        xScale = scale;
+        yScale = scale * engine->getFrame()->getHeight() / engine->getFrame()->getWidth();
+    }
+    else {
+        xScale = scale * engine->getFrame()->getWidth() / engine->getFrame()->getHeight();
+        yScale = scale;
+    }
+    viewScale = glm::vec2(xScale, yScale);
     updateProjection();
     updateView();
 }

@@ -4,7 +4,7 @@
 
 int main() {
     // Make a Basilisk Engine instance 
-    bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk");
+    bsk::Engine* engine = new bsk::Engine(400, 800, "Basilisk");
 
     // Create a blank 2D scene
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
