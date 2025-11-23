@@ -341,6 +341,17 @@ void VirtualNode<Derived, P, R, S>::add(Derived* child) {
 }
 
 /**
+ * @brief Set the Material object
+ * 
+ * @param material 
+ */
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::setMaterial(Material* material) { 
+    this->material = material; 
+    getEngine()->getResourceServer()->getMaterialServer()->add(material); 
+}
+
+/**
  * @brief Safely removes a Vurtual from the children subtree
  * 
  * @tparam Derived 
