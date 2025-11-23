@@ -4,11 +4,13 @@
 
 int main() {
     // Make a Basilisk Engine instance 
-    bsk::Engine* engine = new bsk::Engine(400, 800, "Basilisk");
+    bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk");
 
     // Create a blank 2D scene
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
     bsk::Scene2D* voidScene = new bsk::Scene2D(engine);
+
+    scene->getCamera()->setScale(8.0);
 
     // Load assets from file
     bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");

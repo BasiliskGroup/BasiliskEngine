@@ -9,16 +9,7 @@ namespace bsk::internal {
  * @param position Starting position of the camera
  */
 StaticCamera2D::StaticCamera2D(Engine* engine, glm::vec2 position, float scale): engine(engine), position(position) {
-    float xScale, yScale;
-    if (engine->getFrame()->getHeight() > engine->getFrame()->getWidth()) {
-        xScale = scale;
-        yScale = scale * engine->getFrame()->getHeight() / engine->getFrame()->getWidth();
-    }
-    else {
-        xScale = scale * engine->getFrame()->getWidth() / engine->getFrame()->getHeight();
-        yScale = scale;
-    }
-    viewScale = glm::vec2(xScale, yScale);
+    setScale(scale);
     updateProjection();
     updateView();
 }
@@ -40,6 +31,20 @@ void StaticCamera2D::use(Shader* shader) {
  */
 void StaticCamera2D::update() {
     updateView();
+}
+
+void StaticCamera2D::setScale(float scale) {
+    float xScale, yScale;
+    if (engine->getFrame()->getHeight() > engine->getFrame()->getWidth()) {
+        xScale = scale;
+        yScale = scale * engine->getFrame()->getHeight() / engine->getFrame()->getWidth();
+    }
+    else {
+        xScale = scale * engine->getFrame()->getWidth() / engine->getFrame()->getHeight();
+        yScale = scale;
+    }
+    viewScale = glm::vec2(xScale, yScale);
+    updateProjection();
 }
 
 /**
