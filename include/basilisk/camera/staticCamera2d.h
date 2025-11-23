@@ -21,7 +21,7 @@ class StaticCamera2D : public VirtualCamera{
         void updateView();
 
     public:
-        StaticCamera2D(Engine* engine, glm::vec2 position = {0.0f, 0.0f});
+        StaticCamera2D(Engine* engine, glm::vec2 position = {0.0f, 0.0f}, float scale=10.0f);
 
         void update();
         void use(Shader* shader);

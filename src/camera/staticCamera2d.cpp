@@ -8,8 +8,7 @@ namespace bsk::internal {
  * 
  * @param position Starting position of the camera
  */
-StaticCamera2D::StaticCamera2D(Engine* engine, glm::vec2 position): engine(engine), position(position) {
-    float scale = 10.0f;
+StaticCamera2D::StaticCamera2D(Engine* engine, glm::vec2 position, float scale): engine(engine), position(position) {
     float xScale, yScale;
     if (engine->getFrame()->getHeight() > engine->getFrame()->getWidth()) {
         xScale = scale;
