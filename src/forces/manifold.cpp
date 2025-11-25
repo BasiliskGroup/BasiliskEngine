@@ -48,9 +48,9 @@ void Manifold::initialize() {
         getRBW()[i] = bodyB->getRMat() * getRB()[i];
 
         JAn[i] = glm::vec3{ getNormal().x, getNormal().y, cross(getRAW()[i], getNormal()) };
-        JAt[i] = glm::vec3{ getTangent().y, getTangent().y, cross(getRAW()[i], getTangent()) };
+        JAt[i] = glm::vec3{ getTangent().x, getTangent().y, cross(getRAW()[i], getTangent()) };
         JBn[i] = glm::vec3{ -getNormal().x, -getNormal().y, -cross(getRBW()[i], getNormal()) };
-        JBt[i] = glm::vec3{ -getTangent().y, -getTangent().y, -cross(getRBW()[i], getTangent()) };
+        JBt[i] = glm::vec3{ -getTangent().x, -getTangent().y, -cross(getRBW()[i], getTangent()) };
 
         glm::vec2 posA = glm::vec2(bodyA->getPos());
         glm::vec2 posB = glm::vec2(bodyB->getPos());
