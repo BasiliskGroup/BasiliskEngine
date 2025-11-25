@@ -227,14 +227,14 @@ void Rigid::computeTransforms() {
     float isx = 1 / sx, isy = 1 / sy;
 
     float c = cos(angle);
-    float s = sin(angle);
+    float s = -sin(angle); // to align with weird screen space coordinate systems. 
 
     rMat = { c, -s, s, c };
     mat = { c * sx, -s * sy, s * sx, c * sy };
     iMat = {
-    c * isx,   s * isy,
-   -s * isx,   c * isy
-};
+        c * isx,   s * isy,
+    -s * isx,   c * isy
+    };
 
     updated = false;
 }

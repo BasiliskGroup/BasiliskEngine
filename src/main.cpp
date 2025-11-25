@@ -29,8 +29,10 @@ int main() {
     // normal nodes
     bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, -3}, .rotation=0, .scale={9, 1},  .collider=quadCollider, .density=-1 });
 
-    for (int i = 0; i < 10; i++)
-        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=0, .scale={1, 1}, .collider=quadCollider });
+    for (int i = 0; i < 10; i++) {
+        float r = 0.1 * i;
+        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=r, .scale={1, 1}, .collider=quadCollider });
+    }
 
     std::vector<bsk::Node2D*> contactNodes;
 

@@ -59,7 +59,7 @@ Node2D& Node2D::operator=(Node2D&& other) noexcept {
 void Node2D::updateModel() {
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(position.x, -position.y, layer));
-    model = glm::rotate(model, rotation, glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::rotate(model, -rotation, glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::scale(model, glm::vec3(scale, 1.0f));
 }
 
