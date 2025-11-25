@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(BasiliskEngine LANGUAGES C CXX)
 
 # ======================================================
-# Build options
+# Build settings
 # ======================================================
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,12 +10,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(BASILISK_BUILD_DOCS "Build API documentation" OFF)
 
-# ======================================================
-# External dependencies via FetchContent
-# ======================================================
 include(FetchContent)
 
-# ---- GLAD (OpenGL loader) ----
+# ======================================================
+# GLAD
+# ======================================================
 set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/glad)
 if(EXISTS "${GLAD_DIR}/glad.c")
     message(STATUS "Using local GLAD source")
@@ -33,72 +32,101 @@ else()
     FetchContent_Declare(
         glad
         GIT_REPOSITORY https://github.com/Dav1dde/glad.git
-        GIT_TAG        master
+        GIT_TAG master
     )
     FetchContent_MakeAvailable(glad)
 endif()
 
-# ---- GLM (header-only math) ----
+# ======================================================
+# GLM (header-only)
+# ======================================================
 FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG        1.0.1
+    GIT_TAG 1.0.1
 )
 FetchContent_MakeAvailable(glm)
 
 add_library(glm_h INTERFACE)
 target_include_directories(glm_h INTERFACE ${glm_SOURCE_DIR})
 
-# ---- GLFW (window/input) ----
+# ======================================================
+# GLFW
+# ======================================================
 if(NOT TARGET glfw)
     message(STATUS "Fetching GLFW...")
     FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG        3.3.8
+        GIT_TAG 3.3.8
     )
     FetchContent_MakeAvailable(glfw)
 endif()
 
-# ---- STB (local header-only) ----
+# ======================================================
+# STB (header-only)
+# ======================================================
 add_library(stb INTERFACE)
-target_include_directories(stb
-    INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/stb>
+target_include_directories(stb INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/stb
 )
 
-# ---- Assimp (3D model loading) ----
+# ======================================================
+# Assimp
+# ======================================================
 FetchContent_Declare(
     assimp
     GIT_REPOSITORY https://github.com/assimp/assimp.git
-    GIT_TAG        v6.0.2
+    GIT_TAG v6.0.2
 )
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(assimp)
 
 # ======================================================
-# Basilisk sources
+# Clipper2 (static library the same way CrumpleQuest does)
+# ======================================================
+FetchContent_Declare(
+    clipper2
+    GIT_REPOSITORY https://github.com/AngusJohnson/Clipper2.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(clipper2)
+
+file(GLOB CLIPPER2_SOURCES
+    ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/src/*.cpp
+)
+
+add_library(clipper2 STATIC ${CLIPPER2_SOURCES})
+
+target_include_directories(clipper2 PUBLIC
+    ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/include
+)
+
+target_compile_features(clipper2 PUBLIC cxx_std_20)
+
+# ======================================================
+# Basilisk Engine Sources
 # ======================================================
 file(GLOB_RECURSE BASILISK_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
+
+# Remove main.cpp since engine executable builds it
 list(REMOVE_ITEM BASILISK_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+
 add_library(basilisk STATIC ${BASILISK_SOURCES})
 
-# ======================================================
-# Include directories for Basilisk
-# ======================================================
 target_include_directories(basilisk
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/internal>
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/internal
 )
 
 # ======================================================
-# Link dependencies
+# Link Dependencies to Basilisk
 # ======================================================
 find_package(OpenGL REQUIRED)
 
@@ -110,39 +138,39 @@ target_link_libraries(basilisk
         assimp
         glm_h
         stb
+        clipper2
 )
 
-# Windows-specific: Fix parallel compilation PDB conflicts
 if(MSVC)
     target_compile_options(basilisk PRIVATE /FS)
 endif()
 
 # ======================================================
-# Test executable (engine)
+# Engine executable
 # ======================================================
 set(BASILISK_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 
 if(EXISTS ${BASILISK_MAIN})
     add_executable(engine ${BASILISK_MAIN})
 
+    target_include_directories(engine PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+
     target_link_libraries(engine
         PRIVATE
             basilisk
-    )
-
-    target_include_directories(engine
-        PRIVATE
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            clipper2
     )
 
     set_target_properties(engine PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
-    # Resource copying
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    # Copy resources
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models   DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
     message(STATUS "Added test executable: engine")
 else()
@@ -150,9 +178,8 @@ else()
 endif()
 
 # ======================================================
-# AddressSanitizer (Debug)
+# AddressSanitizer
 # ======================================================
-
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
     target_compile_options(engine PRIVATE
         -fsanitize=address
@@ -163,13 +190,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
         -fsanitize=address
         -fno-omit-frame-pointer
     )
-
-    # Optional: also detect memory leaks
     set(ENV{ASAN_OPTIONS} "detect_leaks=1:halt_on_error=0:verbosity=1")
 endif()
 
 # ======================================================
-# Optional docs/tests/examples
+# Optional Docs
 # ======================================================
 if(BASILISK_BUILD_DOCS)
     find_package(Doxygen 1.9.8)

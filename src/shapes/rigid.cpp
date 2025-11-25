@@ -231,7 +231,10 @@ void Rigid::computeTransforms() {
 
     rMat = { c, -s, s, c };
     mat = { c * sx, -s * sy, s * sx, c * sy };
-    iMat = {  c * isx,  s * isx, -s * isy,  c * isy };
+    iMat = {
+    c * isx,   s * isy,
+   -s * isx,   c * isy
+};
 
     updated = false;
 }
