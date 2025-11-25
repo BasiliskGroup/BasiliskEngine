@@ -27,11 +27,10 @@ int main() {
     bsk::Collider* quadCollider = new bsk::Collider(scene->getSolver(), {{0.5f, 0.5f}, {-0.5f, 0.5f}, {-0.5f, -0.5f}, {0.5f, -0.5f}});
 
     // normal nodes
-    
     bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, -3}, .rotation=0, .scale={9, 1},  .collider=quadCollider, .density=-1 });
 
     for (int i = 0; i < 10; i++)
-        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=1.2, .scale={1, 1}, .collider=quadCollider });
+        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=0, .scale={1, 1}, .collider=quadCollider });
 
     std::vector<bsk::Node2D*> contactNodes;
 
