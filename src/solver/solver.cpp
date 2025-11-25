@@ -9,7 +9,7 @@ inline constexpr bool DEBUG_PRIMAL = true;
 
 Solver::Solver() : forces(nullptr), bodies(nullptr) {
     // set default params
-    gravity = -1.0f;
+    gravity = -10.0f;
     iterations = 20;
     beta = 100000.0f;
     alpha = 0.99f;
