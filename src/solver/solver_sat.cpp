@@ -8,13 +8,13 @@ namespace bsk::internal {
 void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair)
 {
     // Convert model->world (already in your file)
-    auto toWorld = [&](const ColliderRow& row, const glm::vec2& v_model_scaled) {
-        return row.mat * (v_model_scaled) + row.pos;
+    auto toWorld = [&](const ColliderRow& row, const glm::vec2& v) {
+        return row.mat * v + row.pos;
     };
 
     // Convert world -> collider local scaled (already in your file)
     auto worldToScaledLocal = [&](const ColliderRow& row, const glm::vec2& pw) {
-        return row.imat * (pw - row.pos);
+        return row.imat * (pw - row.pos) * row.scale;
     };
 
     // Build world-space polygons for A and B (CCW assumption)
@@ -109,10 +109,10 @@ void Solver::sat(ColliderRow& a, ColliderRow& b, CollisionPair& pair)
     glm::vec2 b1 = worldToScaledLocal(b, Bpts[1]);
 
     // Store into manifold
-    pair.manifold->getRA()[0] = a0 * a.scale;
-    pair.manifold->getRA()[1] = a1 * a.scale;
-    pair.manifold->getRB()[0] = b0 * b.scale;
-    pair.manifold->getRB()[1] = b1 * b.scale;
+    pair.manifold->getRA()[0] = a0;
+    pair.manifold->getRA()[1] = a1;
+    pair.manifold->getRB()[0] = b0;
+    pair.manifold->getRB()[1] = b1;
 }
 
 void Solver::intersect(ColliderRow& a, ColliderRow& b, CollisionPair& pair, const glm::vec2& mtv) {
