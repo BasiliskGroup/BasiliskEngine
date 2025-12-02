@@ -2,14 +2,18 @@
 
 namespace bsk::internal {
 
-Engine::Engine(int width, int height, const char* title) {
+Engine::Engine(int width, int height, const char* title, bool autoMouseGrab) {
     window = new Window(width, height, title);
     mouse = new Mouse(this);
     keyboard = new Keyboard(window);
     frame = new Frame(this, width, height);
     resourceServer = new ResourceServer();
 
-    mouse->setGrab();
+    this->autoMouseGrab = autoMouseGrab;
+
+    if (autoMouseGrab) {
+        mouse->setGrab();
+    }
 }
 
 Engine::~Engine() {
@@ -27,11 +31,14 @@ void Engine::update() {
 
     // Mouse Updates
     mouse->update();
-    if (keyboard->getPressed(GLFW_KEY_ESCAPE)) {
-        mouse->setVisible();
-    }
-    if (mouse->getClicked()) {
-        mouse->setGrab();
+    // Auto mouse grab if enabled
+    if (autoMouseGrab) {
+        if (keyboard->getPressed(GLFW_KEY_ESCAPE)) {
+            mouse->setVisible();
+        }
+        if (mouse->getClicked()) {
+            mouse->setGrab();
+        }
     }
 }
 
