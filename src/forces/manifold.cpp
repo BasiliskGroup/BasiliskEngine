@@ -47,10 +47,29 @@ void Manifold::initialize() {
         getRAW()[i] = bodyA->getRMat() * getRA()[i];
         getRBW()[i] = bodyB->getRMat() * getRB()[i];
 
-        JAn[i] = glm::vec3{ getNormal().x, getNormal().y, cross(getRAW()[i], getNormal()) };
-        JAt[i] = glm::vec3{ getTangent().x, getTangent().y, cross(getRAW()[i], getTangent()) };
-        JBn[i] = glm::vec3{ -getNormal().x, -getNormal().y, -cross(getRBW()[i], getNormal()) };
-        JBt[i] = glm::vec3{ -getTangent().x, -getTangent().y, -cross(getRBW()[i], getTangent()) };
+        JAn[i] = glm::vec3{ 
+            bodyA->getManifoldMask().x * getNormal().x, 
+            bodyA->getManifoldMask().y * getNormal().y, 
+            bodyA->getManifoldMask().z * cross(getRAW()[i], getNormal()) 
+        };
+
+        JAt[i] = glm::vec3{ 
+            bodyA->getManifoldMask().x * getTangent().x, 
+            bodyA->getManifoldMask().y * getTangent().y, 
+            bodyA->getManifoldMask().z * cross(getRAW()[i], getTangent()) 
+        };
+
+        JBn[i] = glm::vec3{ 
+            bodyB->getManifoldMask().x * -getNormal().x, 
+            bodyB->getManifoldMask().y * -getNormal().y, 
+            bodyB->getManifoldMask().z * -cross(getRBW()[i], getNormal()) 
+        };
+
+        JBt[i] = glm::vec3{ 
+            bodyB->getManifoldMask().x * -getTangent().x, 
+            bodyB->getManifoldMask().y * -getTangent().y, 
+            bodyB->getManifoldMask().z * -cross(getRBW()[i], getTangent()) 
+        };
 
         glm::vec2 posA = glm::vec2(bodyA->getPos());
         glm::vec2 posB = glm::vec2(bodyB->getPos());
