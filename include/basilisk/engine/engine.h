@@ -28,6 +28,7 @@ class Engine {
         void update();
         void render();
         void useContext();
+        void setResolution(unsigned int width, unsigned int height);
         
         inline Window* getWindow() const { return window; }
         inline Mouse* getMouse() const { return mouse; }
