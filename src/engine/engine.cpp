@@ -8,9 +8,12 @@ Engine::Engine(int width, int height, const char* title, bool autoMouseGrab) {
     keyboard = new Keyboard(window);
     frame = new Frame(this, width, height);
     resourceServer = new ResourceServer();
-    autoMouseGrab = autoMouseGrab;
 
-    mouse->setGrab();
+    this->autoMouseGrab = autoMouseGrab;
+
+    if (autoMouseGrab) {
+        mouse->setGrab();
+    }
 }
 
 Engine::~Engine() {
