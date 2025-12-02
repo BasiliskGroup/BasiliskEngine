@@ -53,8 +53,10 @@ public:
     void setScale(glm::vec2 scale);
     void setVelocity(glm::vec3 velocity);
     void setLayer(float layer) { this->layer = layer; updateModel(); }
+    void setManifoldMask(bool x, bool y, bool z) { rigid->setManifoldMask(x, y, z); }
 
     Scene2D* getScene() { return (Scene2D*) scene; }
+    glm::bvec3 getManifoldMask() { return rigid->getManifoldMask(); }
 
     // collision exposure
     ForceType constrainedTo(Node2D* other);
@@ -67,7 +69,6 @@ private:
     void clear();
     void setRigid(const Node2D& other);
     void setRigid(Node2D&& other);
-    
 };
 
 }
