@@ -25,13 +25,13 @@ public:
         glm::vec2 position = { 0, 0 };
         float rotation = 0;
         glm::vec2 scale = { 1, 1 };
-        glm::vec2 colliderScale = { 1, 1 };
         
         // both?
         glm::vec3 velocity = { 0, 0, 0 };
 
         // physics
         Collider* collider = nullptr;
+        glm::vec2 colliderScale = { 1, 1 };
         float density = 1;
         float friction = 0.4;
     };
