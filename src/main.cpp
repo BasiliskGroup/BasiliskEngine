@@ -31,7 +31,7 @@ int main() {
 
     for (int i = 0; i < 10; i++) {
         float r = 0.25 * i;
-        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=r, .scale={1.5, 0.5}, .collider=quadCollider });
+        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=r, .scale={1.5, 0.5}, .collider=quadCollider, .colliderScale={ 0.5, 0.5 } });
         if (i % 2) square->setManifoldMask(1, 1, 0);
     }
 

@@ -3,14 +3,14 @@
 namespace bsk::internal {
 
 Node2D::Node2D(VirtualScene2D* scene, Params params)
-    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
+    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr), colliderScale(params.colliderScale) {
     updateModel();
     bindRigid(params);
     getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
 }
 
 Node2D::Node2D(Node2D* parent, Params params)
-    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
+    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr), colliderScale(params.colliderScale) {
     updateModel();
     bindRigid(params);
     getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
@@ -18,12 +18,12 @@ Node2D::Node2D(Node2D* parent, Params params)
 
 Node2D::Node2D(VirtualScene2D* scene, Node2D* parent) : VirtualNode(scene, parent), rigid(nullptr) {}
 
-Node2D::Node2D(const Node2D& other) noexcept : VirtualNode(other), rigid(nullptr) {
+Node2D::Node2D(const Node2D& other) noexcept : VirtualNode(other), rigid(nullptr), colliderScale(other.colliderScale) {
     if (this == &other) return;
     setRigid(other);
 }
 
-Node2D::Node2D(Node2D&& other) noexcept : VirtualNode(std::move(other)), rigid(nullptr) {
+Node2D::Node2D(Node2D&& other) noexcept : VirtualNode(std::move(other)), rigid(nullptr), colliderScale(other.colliderScale) {
     if (this == &other) return;
     setRigid(std::move(other));
 }
@@ -83,6 +83,7 @@ void Node2D::setRotation(float rotation) {
 }
 
 void Node2D::setScale(glm::vec2 scale) {
+    if (this->rigid) this->rigid->setScale(colliderScale * scale);
     this->scale = scale;
     updateModel();
 }
@@ -95,7 +96,7 @@ void Node2D::bindRigid(Params& params) {
     if (params.collider == nullptr) return;
     if (rigid) delete rigid;
 
-    rigid = new Rigid(getScene()->getSolver(), this, { this->position, this->rotation }, scale, params.density, params.friction, params.velocity, params.collider);
+    rigid = new Rigid(getScene()->getSolver(), this, { this->position, this->rotation }, scale * colliderScale, params.density, params.friction, params.velocity, params.collider);
 }
 
 void Node2D::clear() {
@@ -118,7 +119,8 @@ void Node2D::setRigid(const Node2D& other) {
         solver, 
         this, 
         { other.position, other.rotation }, 
-        other.scale, other.rigid->getDensity(), 
+        other.scale * other.colliderScale, 
+        other.rigid->getDensity(), 
         other.rigid->getFriction(), 
         other.rigid->getVel(), 
         other.rigid->getColliderIndex()

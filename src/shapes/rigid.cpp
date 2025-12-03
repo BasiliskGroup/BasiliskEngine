@@ -221,6 +221,10 @@ void Rigid::setVelocity(const glm::vec3& vel) {
     this->vel = vel;
 }
 
+void Rigid::setScale(const glm::vec2& scale) {
+    this->scale = scale;
+}
+
 void Rigid::computeTransforms() {
     float angle = pos.z;
     float sx = scale.x, sy = scale.y;

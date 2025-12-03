@@ -99,6 +99,7 @@ public:
     // setters
     void setPosition(const glm::vec3& pos);
     void setVelocity(const glm::vec3& vel);
+    void setScale(const glm::vec2& scale);
 
     void setIndex(uint index) { this->index = index; }
     void setNode(Node2D* node) { this->node = node; }
