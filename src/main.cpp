@@ -75,6 +75,16 @@ int main() {
             }
         }
 
+        if (engine->getKeyboard()->getPressed(GLFW_KEY_1)) {
+            engine->setResolution(100, 100);
+        }
+        if (engine->getKeyboard()->getPressed(GLFW_KEY_2)) {
+            engine->setResolution(800, 800);
+        }
+        if (engine->getKeyboard()->getPressed(GLFW_KEY_3)) {
+            engine->setResolution(1600, 1600);
+        }
+
         engine->update();
         scene->update();
         scene->render();

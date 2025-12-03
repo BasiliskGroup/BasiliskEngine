@@ -54,4 +54,9 @@ void Engine::useContext() {
     window->use();
 }
 
+void Engine::setResolution(unsigned int width, unsigned int height) {
+    delete frame;
+    frame = new Frame(this, width, height);
+}
+
 }
