@@ -15,6 +15,7 @@ private:
 
     Rigid* rigid;
     float layer=0.0;
+    glm::vec2 colliderScale;
 
 public:
     struct Params {
@@ -30,6 +31,7 @@ public:
 
         // physics
         Collider* collider = nullptr;
+        glm::vec2 colliderScale = { 1, 1 };
         float density = 1;
         float friction = 0.4;
     };
