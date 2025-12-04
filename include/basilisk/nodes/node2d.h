@@ -47,8 +47,6 @@ public:
     Node2D& operator=(const Node2D& other) noexcept;
     Node2D& operator=(Node2D&& other) noexcept;
 
-    glm::vec3 getVelocity();
-
     void setPosition(glm::vec2 position);
     void setPosition(glm::vec3 position);
     void setRotation(float rotation);
@@ -59,6 +57,10 @@ public:
 
     Scene2D* getScene() { return (Scene2D*) scene; }
     glm::bvec3 getManifoldMask() { return rigid->getManifoldMask(); }
+    glm::vec2 getColliderScale() { return colliderScale; }
+    glm::vec3 getVelocity();
+    float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
+    float getLayer() { return layer; }
 
     // collision exposure
     ForceType constrainedTo(Node2D* other);
