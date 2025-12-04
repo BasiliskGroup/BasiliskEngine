@@ -15,6 +15,13 @@ Scene::Scene(Engine* engine) : VirtualScene(engine) {
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
 }
 
+Scene::Scene(Engine* engine, Shader* shader) : VirtualScene(engine) {
+    camera = new Camera(engine);
+    internalCamera = camera;
+    this->shader = shader;
+    engine->getResourceServer()->write(shader, "textureArrays", "materials");
+}
+
 /**
  * @brief Destroy the Scene object. Deletes scene camera and shader.
  * 

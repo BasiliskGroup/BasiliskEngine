@@ -20,6 +20,7 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
 
     public:
         Scene(Engine* engine);
+        Scene(Engine* engine, Shader* shader);
         ~Scene();
 
         void update();
