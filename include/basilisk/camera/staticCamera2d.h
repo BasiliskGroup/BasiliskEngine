@@ -30,8 +30,8 @@ class StaticCamera2D : public VirtualCamera{
         void setX(double x) { position.x = x; }
         void setY(double y) { position.y = y; }
         void setScale(float scale);
-        void setScale(float xScale, float yScale) { viewScale = {xScale, yScale}; }
-        void setScale(glm::vec2 viewScale) { this->viewScale = viewScale; }
+        void setScale(float xScale, float yScale) { viewScale = {xScale, yScale}; updateProjection(); }
+        void setScale(glm::vec2 viewScale) { this->viewScale = viewScale; updateProjection(); }
 
         glm::vec2 getPosition() { return position; }
         double getX() { return position.x; }
