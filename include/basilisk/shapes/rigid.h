@@ -54,7 +54,7 @@ private:
     bool updated;
 
     // manifold control
-    glm::bvec3 manifoldMask = glm::bvec3(true);
+    glm::vec3 manifoldMask = glm::vec3(1.0f);
 
 public:
     Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider);
@@ -103,7 +103,7 @@ public:
 
     void setIndex(uint index) { this->index = index; }
     void setNode(Node2D* node) { this->node = node; }
-    void setManifoldMask(bool x, bool y, bool z) { this->manifoldMask = { x, y, z }; }
+    void setManifoldMask(float x, float y, float z) { this->manifoldMask = { x, y, z }; }
 
     // determines if two objects are constrained (no collision needed)
     void precomputeRelations();

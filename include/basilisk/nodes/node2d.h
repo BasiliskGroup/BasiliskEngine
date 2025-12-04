@@ -53,10 +53,10 @@ public:
     void setScale(glm::vec2 scale);
     void setVelocity(glm::vec3 velocity);
     void setLayer(float layer) { this->layer = layer; updateModel(); }
-    void setManifoldMask(bool x, bool y, bool z) { rigid->setManifoldMask(x, y, z); }
+    void setManifoldMask(float x, float y, float z) { rigid->setManifoldMask(x, y, z); }
 
     Scene2D* getScene() { return (Scene2D*) scene; }
-    glm::bvec3 getManifoldMask() { return rigid->getManifoldMask(); }
+    glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
     glm::vec2 getColliderScale() { return colliderScale; }
     glm::vec3 getVelocity();
     float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
