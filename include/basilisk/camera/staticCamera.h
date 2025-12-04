@@ -39,8 +39,8 @@ class StaticCamera : public VirtualCamera {
 
         glm::vec3 getPosition() { return position; }
         float getX() { return position.x; }
-        float getZ() { return position.y; }
-        float getY() { return position.z; }
+        float getY() { return position.y; }
+        float getZ() { return position.z; }
         float getYaw() { return yaw; }
         float getPitch() { return pitch; }
 
