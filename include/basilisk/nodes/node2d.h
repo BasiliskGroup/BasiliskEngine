@@ -34,6 +34,7 @@ public:
         glm::vec2 colliderScale = { 1, 1 };
         float density = 1;
         float friction = 0.4;
+        std::vector<std::string> collisionIgnoreGroups = {};
     };
 
     Node2D(VirtualScene2D* scene, Params params);

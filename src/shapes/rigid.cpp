@@ -2,7 +2,7 @@
 
 namespace bsk::internal {
 
-Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider) : 
+Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider, std::vector<std::string> collisionIgnoreGroups) : 
     solver(solver), 
     node(node), 
     forces(nullptr), 
@@ -18,7 +18,8 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     prevVel(vel),
     scale(scale),
     friction(friction),
-    collider(collider->getIndex())
+    collider(collider->getIndex()),
+    collisionIgnoreGroups(collisionIgnoreGroups)
 {
     // Add to linked list
     solver->insert(this);
@@ -32,7 +33,7 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     computeTransforms();
 }   
 
-Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider) : 
+Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider, std::vector<std::string> collisionIgnoreGroups) : 
     solver(solver), 
     node(node), 
     forces(nullptr), 
@@ -48,7 +49,8 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     prevVel(vel),
     scale(scale),
     friction(friction),
-    collider(collider)
+    collider(collider),
+    collisionIgnoreGroups(collisionIgnoreGroups)
 {
     // Add to linked list
     solver->insert(this);

@@ -55,10 +55,11 @@ private:
 
     // manifold control
     glm::vec3 manifoldMask = glm::vec3(1.0f);
+    std::vector<std::string> collisionIgnoreGroups;
 
 public:
-    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider);
-    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider);
+    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider, std::vector<std::string> collisionIgnoreGroups = {});
+    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider, std::vector<std::string> collisionIgnoreGroups = {});
     ~Rigid();
 
     // list management
@@ -93,6 +94,7 @@ public:
 
     float getDensity() { return density; }
     glm::bvec3 getManifoldMask() { return manifoldMask; }
+    std::vector<std::string> getCollisionIgnoreGroups() { return collisionIgnoreGroups; }
     
     uint getColliderIndex();
 
@@ -104,6 +106,7 @@ public:
     void setIndex(uint index) { this->index = index; }
     void setNode(Node2D* node) { this->node = node; }
     void setManifoldMask(float x, float y, float z) { this->manifoldMask = { x, y, z }; }
+    void setCollisionIgnoreGroups(std::vector<std::string> collisionIgnoreGroups) { this->collisionIgnoreGroups = collisionIgnoreGroups; }
 
     // determines if two objects are constrained (no collision needed)
     void precomputeRelations();

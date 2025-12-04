@@ -96,7 +96,7 @@ void Node2D::bindRigid(Params& params) {
     if (params.collider == nullptr) return;
     if (rigid) delete rigid;
 
-    rigid = new Rigid(getScene()->getSolver(), this, { this->position, this->rotation }, scale * colliderScale, params.density, params.friction, params.velocity, params.collider);
+    rigid = new Rigid(getScene()->getSolver(), this, { this->position, this->rotation }, scale * colliderScale, params.density, params.friction, params.velocity, params.collider, params.collisionIgnoreGroups);
 }
 
 void Node2D::clear() {
@@ -123,7 +123,8 @@ void Node2D::setRigid(const Node2D& other) {
         other.rigid->getDensity(), 
         other.rigid->getFriction(), 
         other.rigid->getVel(), 
-        other.rigid->getColliderIndex()
+        other.rigid->getColliderIndex(),
+        other.rigid->getCollisionIgnoreGroups()
     );
 }
 

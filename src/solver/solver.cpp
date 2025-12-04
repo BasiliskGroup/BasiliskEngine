@@ -189,6 +189,26 @@ void Solver::sphericalCollision() {
                 continue;
             }
 
+            // check collision ignore groups // TODO switch to using ignore collision flags
+            bool match = false;
+            for (const std::string& groupA : bodyA->getCollisionIgnoreGroups()) {
+
+                for (const std::string& groupB : bodyB->getCollisionIgnoreGroups()) {
+                    if (groupA != groupB) continue;
+                    match = true;
+                    break;
+                }
+
+                if (match) {
+                    break;
+                }
+                
+            }
+
+            if (match) {
+                continue;
+            }
+
             dpos = bodyA->getPos() - bodyB->getPos();
             radsum = bodyA->getRadius() + bodyB->getRadius();
             if (radsum * radsum > glm::length2(dpos)) {
