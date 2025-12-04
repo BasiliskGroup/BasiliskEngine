@@ -35,6 +35,7 @@ class Frame {
         void clear(float r=0.0, float g=0.0, float b=0.0, float a=1.0);
         void render();
         void render(int x, int y, int width, int height);
+        FBO* getFBO() { return fbo; }
 
         inline unsigned int getWidth() { return width; }
         inline unsigned int getHeight() { return height; }
