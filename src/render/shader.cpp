@@ -226,15 +226,23 @@ void Shader::bindTextureToSlot(const char* name, GLuint texID, GLenum target, un
 
     auto it = slotBindings.find(slot);
 
-    // If not bound or different, bind it
-    if (it == slotBindings.end() || it->second.id != texID || it->second.target != target) {
-        glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(target, texID);
+    // TODO: Implement this logic to work globally, probably with static attributes
+    // // If not bound or different, bind it
+    // if (it == slotBindings.end() || it->second.id != texID || it->second.target != target) {
+    //     glActiveTexture(GL_TEXTURE0 + slot);
+    //     glBindTexture(target, texID);
 
-        slotBindings[slot] = { texID, target };
+    //     slotBindings[slot] = { texID, target };
 
-        setUniform(name, (int)slot);
-    }
+    //     setUniform(name, (int)slot);
+    // }
+
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(target, texID);
+
+    slotBindings[slot] = { texID, target };
+
+    setUniform(name, (int)slot);
 }
 
 /**
