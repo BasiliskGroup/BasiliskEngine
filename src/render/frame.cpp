@@ -53,7 +53,6 @@ Frame::~Frame() {
  * 
  */
 void Frame::use() {
-    shader->bind("uTexture", fbo, 4);
     fbo->bind();
 }
 
@@ -90,6 +89,7 @@ void Frame::render() {
     // Update the viewport and render
     glViewport(x, y, width, height);
     shader->use();
+    shader->bind("uTexture", fbo, 4);
     vao->render();
 
     // Reset viewport to previous dimensions
@@ -112,6 +112,7 @@ void Frame::render(int x, int y, int width, int height) {
     // Update the viewport and render
     glViewport(x, y, width, height);
     shader->use();
+    shader->bind("uTexture", fbo, 4);
     vao->render();
 
     // Reset viewport to previous dimensions
