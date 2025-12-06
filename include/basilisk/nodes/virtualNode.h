@@ -72,7 +72,7 @@ public:
     VirtualNode(Derived* parent, Mesh* mesh, Material* material, P position, R rotation, S scale);
     VirtualNode(const VirtualNode& other) noexcept;
     VirtualNode(VirtualNode&& other) noexcept;
-    ~VirtualNode();
+    virtual ~VirtualNode();
 
     VirtualNode& operator=(const VirtualNode& other) noexcept;
     VirtualNode& operator=(VirtualNode&& other) noexcept;

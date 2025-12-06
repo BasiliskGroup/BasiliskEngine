@@ -202,7 +202,8 @@ void Shader::loadAttributes() {
  * @brief Destroy the Shader object
  * 
  */
-Shader::~Shader() { 
+Shader::~Shader() {
+    slotBindings.clear();
     glDeleteProgram(ID);
 }
 
