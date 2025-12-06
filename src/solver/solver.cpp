@@ -184,6 +184,8 @@ void Solver::sphericalCollision() {
 
             Force* manifold = nullptr;
 
+            if (bodyA->getMass() < 0 && bodyB->getMass() < 0) continue;
+
             // ignore collision flag
             if (bodyA->constrainedTo(j, manifold) == IGNORE_COLLISION || (abs(bodyA->getPos().x - bodyB->getPos().x) < 1e-10f && abs(bodyA->getPos().y - bodyB->getPos().y) < 1e-10f)) {
                 continue;
