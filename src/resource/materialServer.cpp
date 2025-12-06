@@ -3,7 +3,7 @@
 namespace bsk::internal {
 
 MaterialServer::MaterialServer(TextureServer* textureServer): textureServer(textureServer) {
-    tbo = new TBO(nullptr, 0, 10000);
+    tbo = new TBO(nullptr, 0, 20000);
 }
 
 MaterialServer::~MaterialServer() {
