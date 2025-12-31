@@ -14,22 +14,19 @@
 namespace bsk::internal {
 
 Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB)
-    : solver(solver), bodyA(bodyA), bodyB(bodyB), nextA(0), nextB(0)
+    : solver(solver), bodyA(bodyA), bodyB(bodyB), next(nullptr), nextA(nullptr), nextB(nullptr), prev(nullptr), prevA(nullptr), prevB(nullptr)
 {
     // Add to solver linked list
-    next = solver->forces;
-    solver->forces = this;
+    solver->insert(this);
 
     // Add to body linked lists
     if (bodyA)
     {
-        nextA = bodyA->forces;
-        bodyA->forces = this;
+        bodyA->insert(this);
     }
     if (bodyB)
     {
-        nextB = bodyB->forces;
-        bodyB->forces = this;
+        bodyB->insert(this);
     }
 
     // Set some reasonable defaults
@@ -52,27 +49,23 @@ Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB)
 Force::~Force()
 {
     // Remove from solver linked list
-    Force** p = &solver->forces;
-    while (*p != this)
-        p = &(*p)->next;
-    *p = next;
+    solver->remove(this);
 
     // Remove from body linked lists
     if (bodyA)
     {
-        p = &bodyA->forces;
-        while (*p != this)
-            p = (*p)->bodyA == bodyA ? &(*p)->nextA : &(*p)->nextB;
-        *p = nextA;
+        bodyA->remove(this);
     }
 
     if (bodyB)
     {
-        p = &bodyB->forces;
-        while (*p != this)
-            p = (*p)->bodyA == bodyB ? &(*p)->nextA : &(*p)->nextB;
-        *p = nextB;
+        bodyB->remove(this);
     }
+
+    // Clean up pointers
+    bodyA = nullptr;
+    bodyB = nullptr;
+    solver = nullptr;
 }
 
 void Force::disable()

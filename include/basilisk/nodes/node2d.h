@@ -55,6 +55,7 @@ public:
 
     Scene2D* getScene() { return (Scene2D*) scene; }
     // glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
+    Rigid* getRigid() { return rigid; }
     glm::vec3 getVelocity();
     // float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
     float getLayer() { return layer; }

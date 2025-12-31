@@ -37,6 +37,7 @@ struct Rigid
     Node2D* node;
     Force* forces;
     Rigid* next;
+    Rigid* prev;
     glm::vec3 position;
     glm::vec3 initial;
     glm::vec3 inertial;
@@ -52,6 +53,10 @@ struct Rigid
     ~Rigid();
 
     bool constrainedTo(Rigid* other) const;
+    
+    // Linked list management
+    void insert(Force* force);
+    void remove(Force* force);
     
     // Setters
     void setPosition(const glm::vec3& pos);
@@ -78,6 +83,9 @@ struct Force
     Force* nextA;
     Force* nextB;
     Force* next;
+    Force* prev;
+    Force* prevA;
+    Force* prevB;
 
     glm::vec3 J[MAX_ROWS];
     glm::mat3 H[MAX_ROWS];
@@ -222,6 +230,12 @@ struct Solver
 
     Solver();
     ~Solver();
+
+    // Linked list management
+    void insert(Rigid* body);
+    void remove(Rigid* body);
+    void insert(Force* force);
+    void remove(Force* force);
 
     Rigid* pick(glm::vec2 at, glm::vec2& local);
     void clear();

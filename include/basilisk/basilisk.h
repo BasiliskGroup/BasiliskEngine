@@ -52,6 +52,8 @@ namespace bsk {
     using Solver = internal::Solver;
     using Force = internal::Force;
     using Manifold = internal::Manifold;
+    using Joint = internal::Joint;
+    using Spring = internal::Spring;
 
     // render
     using Mesh = internal::Mesh;

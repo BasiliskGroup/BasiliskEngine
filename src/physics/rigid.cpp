@@ -15,11 +15,10 @@
 namespace bsk::internal {
 
 Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity)
-    : solver(solver), node(node), forces(0), next(0), position(position), velocity(velocity), prevVelocity(velocity), size(size), friction(friction)
+    : solver(solver), node(node), forces(nullptr), next(nullptr), prev(nullptr), position(position), velocity(velocity), prevVelocity(velocity), size(size), friction(friction)
 {
     // Add to linked list
-    next = solver->bodies;
-    solver->bodies = this;
+    solver->insert(this);
 
     // Compute mass properties and bounding radius
     mass = size.x * size.y * density;
@@ -31,19 +30,132 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 position, glm::vec2 size, f
 Rigid::~Rigid()
 {
     // Remove from linked list
-    Rigid** p = &solver->bodies;
-    while (*p != this)
-        p = &(*p)->next;
-    *p = next;
+    solver->remove(this);
+
+    // Delete all forces
+    Force* curForce = forces;
+    while (curForce)
+    {
+        Force* nextForce = (curForce->bodyA == this) ? curForce->nextA : curForce->nextB;
+        delete curForce;
+        curForce = nextForce;
+    }
 }
 
 bool Rigid::constrainedTo(Rigid* other) const
 {
     // Check if this body is constrained to the other body
-    for (Force* f = forces; f != 0; f = f->next)
+    for (Force* f = forces; f != nullptr; f = (f->bodyA == this) ? f->nextA : f->nextB)
         if ((f->bodyA == this && f->bodyB == other) || (f->bodyA == other && f->bodyB == this))
             return true;
     return false;
+}
+
+void Rigid::insert(Force* force)
+{
+    if (force == nullptr)
+    {
+        return;
+    }
+
+    // Determine if this body is bodyA or bodyB
+    if (force->bodyA == this)
+    {
+        // This is bodyA
+        force->nextA = forces;
+        force->prevA = nullptr;
+
+        if (forces)
+        {
+            // Update the prev pointer of the old head
+            if (forces->bodyA == this)
+            {
+                forces->prevA = force;
+            }
+            else
+            {
+                forces->prevB = force;
+            }
+        }
+    }
+    else
+    {
+        // This is bodyB
+        force->nextB = forces;
+        force->prevB = nullptr;
+
+        if (forces)
+        {
+            // Update the prev pointer of the old head
+            if (forces->bodyA == this)
+            {
+                forces->prevA = force;
+            }
+            else
+            {
+                forces->prevB = force;
+            }
+        }
+    }
+
+    forces = force;
+}
+
+void Rigid::remove(Force* force)
+{
+    if (force == nullptr)
+    {
+        return;
+    }
+
+    // Determine if this body is bodyA or bodyB
+    bool isBodyA = (force->bodyA == this);
+
+    Force* prev = isBodyA ? force->prevA : force->prevB;
+    Force* next = isBodyA ? force->nextA : force->nextB;
+
+    if (prev)
+    {
+        // Update prev's next pointer
+        if (prev->bodyA == this)
+        {
+            prev->nextA = next;
+        }
+        else
+        {
+            prev->nextB = next;
+        }
+    }
+    else
+    {
+        // This was the head of the list
+        forces = next;
+    }
+
+    if (next)
+    {
+        // Update next's prev pointer
+        if (next->bodyA == this)
+        {
+            next->prevA = prev;
+        }
+        else
+        {
+            next->prevB = prev;
+        }
+    }
+
+    // Clear this force's pointers
+    if (isBodyA)
+    {
+        force->prevA = nullptr;
+        force->nextA = nullptr;
+    }
+    else
+    {
+        force->prevB = nullptr;
+        force->nextB = nullptr;
+    }
 }
 
 void Rigid::setPosition(const glm::vec3& pos)
