@@ -3,11 +3,11 @@
 
 #include <basilisk/util/includes.h>
 #include <basilisk/nodes/virtualNode.h>
-#include <basilisk/shapes/collider.h>
-#include <basilisk/shapes/rigid.h>
-#include <basilisk/scene/scene2d.h>
+#include <basilisk/physics/solver.h>
 
 namespace bsk::internal {
+
+class Scene2D;  // Forward declaration
 
 class Node2D : public VirtualNode<Node2D, glm::vec2, float, glm::vec2> {
 private:
@@ -15,7 +15,6 @@ private:
 
     Rigid* rigid;
     float layer=0.0;
-    glm::vec2 colliderScale;
 
 public:
     struct Params {
@@ -30,11 +29,9 @@ public:
         glm::vec3 velocity = { 0, 0, 0 };
 
         // physics
-        Collider* collider = nullptr;
-        glm::vec2 colliderScale = { 1, 1 };
+        bool collision = false;  // Whether to create a physics body
         float density = 1;
         float friction = 0.8;
-        std::vector<std::string> collisionIgnoreGroups = {};
     };
 
     Node2D(VirtualScene2D* scene, Params params);
@@ -54,13 +51,12 @@ public:
     void setScale(glm::vec2 scale);
     void setVelocity(glm::vec3 velocity);
     void setLayer(float layer) { this->layer = layer; updateModel(); }
-    void setManifoldMask(float x, float y, float z) { rigid->setManifoldMask(x, y, z); }
+    // void setManifoldMask(float x, float y, float z) { rigid->setManifoldMask(x, y, z); }
 
     Scene2D* getScene() { return (Scene2D*) scene; }
-    glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
-    glm::vec2 getColliderScale() { return colliderScale; }
+    // glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
     glm::vec3 getVelocity();
-    float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
+    // float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
     float getLayer() { return layer; }
 
     // collision exposure

@@ -3,14 +3,14 @@
 namespace bsk::internal {
 
 Node2D::Node2D(VirtualScene2D* scene, Params params)
-    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr), colliderScale(params.colliderScale) {
+    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
     updateModel();
     bindRigid(params);
     getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
 }
 
 Node2D::Node2D(Node2D* parent, Params params)
-    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr), colliderScale(params.colliderScale) {
+    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
     updateModel();
     bindRigid(params);
     getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
@@ -18,12 +18,12 @@ Node2D::Node2D(Node2D* parent, Params params)
 
 Node2D::Node2D(VirtualScene2D* scene, Node2D* parent) : VirtualNode(scene, parent), rigid(nullptr) {}
 
-Node2D::Node2D(const Node2D& other) noexcept : VirtualNode(other), rigid(nullptr), colliderScale(other.colliderScale) {
+Node2D::Node2D(const Node2D& other) noexcept : VirtualNode(other), rigid(nullptr) {
     if (this == &other) return;
     setRigid(other);
 }
 
-Node2D::Node2D(Node2D&& other) noexcept : VirtualNode(std::move(other)), rigid(nullptr), colliderScale(other.colliderScale) {
+Node2D::Node2D(Node2D&& other) noexcept : VirtualNode(std::move(other)), rigid(nullptr) {
     if (this == &other) return;
     setRigid(std::move(other));
 }
@@ -83,7 +83,7 @@ void Node2D::setRotation(float rotation) {
 }
 
 void Node2D::setScale(glm::vec2 scale) {
-    if (this->rigid) this->rigid->setScale(colliderScale * scale);
+    if (this->rigid) this->rigid->setScale(scale);
     this->scale = scale;
     updateModel();
 }
@@ -93,10 +93,13 @@ void Node2D::setVelocity(glm::vec3 velocity) {
 }
 
 void Node2D::bindRigid(Params& params) {
-    if (params.collider == nullptr) return;
     if (rigid) delete rigid;
+    rigid = nullptr;
 
-    rigid = new Rigid(getScene()->getSolver(), this, { this->position, this->rotation }, scale * colliderScale, params.density, params.friction, params.velocity, params.collider, params.collisionIgnoreGroups);
+    if (params.collision) {
+        Scene2D* scene2d = static_cast<Scene2D*>(scene);
+        rigid = new Rigid(scene2d->getSolver(), this, { this->position, this->rotation }, this->scale, params.density, params.friction, params.velocity);
+    }
 }
 
 void Node2D::clear() {
@@ -119,12 +122,10 @@ void Node2D::setRigid(const Node2D& other) {
         solver, 
         this, 
         { other.position, other.rotation }, 
-        other.scale * other.colliderScale, 
+        other.scale, 
         other.rigid->getDensity(), 
         other.rigid->getFriction(), 
-        other.rigid->getVel(), 
-        other.rigid->getColliderIndex(),
-        other.rigid->getCollisionIgnoreGroups()
+        other.rigid->getVel()
     );
 }
 
@@ -138,12 +139,11 @@ void Node2D::setRigid(Node2D&& other) {
 }
 
 ForceType Node2D::constrainedTo(Node2D* other){
-    if (other == nullptr || other->rigid == nullptr) {
+    if (this->rigid == nullptr || other == nullptr || other->rigid == nullptr) {
         return NULL_FORCE;
     }
 
-    Force* dummy = nullptr;
-    return this->rigid->constrainedTo(other->rigid, dummy);
+    return this->rigid->constrainedTo(other->rigid) ? NULL_FORCE : MANIFOLD;
 }
 
 bool Node2D::isTouching(Node2D* other){
@@ -155,7 +155,10 @@ bool Node2D::isTouching(Node2D* other){
 }
 
 glm::vec3 Node2D::getVelocity() {
-    return rigid->getVel();
+    if (rigid == nullptr) {
+        return glm::vec3(0.0f, 0.0f, 0.0f);
+    }
+    return rigid->getVelocity();
 }
 
 }

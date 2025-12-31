@@ -21,15 +21,12 @@ int main() {
     bsk::Material* material2 = new bsk::Material({1, 1, 1}, image2);
     bsk::Material* material3 = new bsk::Material({1, 1, 1}, image3);
 
-    // collider
-    bsk::Collider* quadCollider = new bsk::Collider(scene->getSolver(), {{0.5f, 0.5f}, {-0.5f, 0.5f}, {-0.5f, -0.5f}, {0.5f, -0.5f}});
-
     // normal nodes
-    bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, -3}, .rotation=0, .scale={9, 1},  .collider=quadCollider, .density=-1 });
+    bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, -3}, .rotation=0, .scale={9, 1}, .collision=true, .density=-1 });
 
     for (int i = 0; i < 10; i++) {
         float r = 0.1 * i;
-        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=r, .scale={1, 1}, .collider=quadCollider });
+        bsk::Node2D* square = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, i * 2}, .rotation=r, .scale={1, 1}, .collision=true });
     }
 
     std::vector<bsk::Node2D*> contactNodes;
@@ -40,24 +37,22 @@ int main() {
 
         // std::cout << square->getChildren().size() << std::endl;
 
-        for (bsk::Force* force = scene->getSolver()->getForces(); force != nullptr; force = force->getNext()) {
-            bsk::Manifold* manifold = (bsk::Manifold*) force;
+        // Iterate through forces and visualize contact points
+        for (bsk::Force* force = scene->getSolver()->forces; force != nullptr; force = force->next) {
+            bsk::Manifold* manifold = dynamic_cast<bsk::Manifold*>(force);
+            if (manifold == nullptr) continue;
 
-            for (int i = 0; i < 2; i++) {
-                glm::vec2 rAW = manifold->getBodyA()->getRMat() * manifold->getRA()[i];
-                glm::vec2 rBW = manifold->getBodyB()->getRMat() * manifold->getRB()[i];
+            // Iterate through contacts in the manifold
+            for (int i = 0; i < manifold->numContacts; i++) {
+                // Transform local contact positions to world coordinates
+                glm::vec2 rAW = bsk::internal::transform(manifold->bodyA->position, manifold->contacts[i].rA);
+                glm::vec2 rBW = bsk::internal::transform(manifold->bodyB->position, manifold->contacts[i].rB);
 
-                // glm::vec2 rAW = manifold->getRAW()[i];
-                // glm::vec2 rBW = manifold->getRBW()[i];
-
-                rAW += glm::vec2(manifold->getBodyA()->getPos());
-                rBW += glm::vec2(manifold->getBodyB()->getPos());
-
-                bsk::Node2D* nodeA = new bsk::Node2D(scene, { .mesh=quad, .material=material2, .position=rAW, .scale={0.125, 0.125} });
+                bsk::Node2D* nodeA = new bsk::Node2D(scene, { .mesh=quad, .material=material2, .position=rAW, .scale={0.125, 0.125}, .collision=false });
                 nodeA->setLayer(0.9);
                 contactNodes.push_back(nodeA);
 
-                bsk::Node2D* nodeB = new bsk::Node2D(scene, { .mesh=quad, .material=material3, .position=rBW, .scale={0.125, 0.125} });
+                bsk::Node2D* nodeB = new bsk::Node2D(scene, { .mesh=quad, .material=material3, .position=rBW, .scale={0.125, 0.125}, .collision=false });
                 nodeB->setLayer(0.9);
                 contactNodes.push_back(nodeB);
             }

@@ -7,7 +7,7 @@
 #include <basilisk/scene/virtualScene.h>
 #include <basilisk/camera/camera2d.h>
 #include <basilisk/render/shader.h>
-#include <basilisk/solver/solver.h>
+#include <basilisk/physics/solver.h>
 
 namespace bsk::internal {
 
