@@ -28,15 +28,15 @@ private:
     std::vector<bool> toDelete;
     std::vector<ForceType> type;
 
-    std::vector<uint> specialIndex;
-    std::vector<uint> bodyIndex;
+    std::vector<std::size_t> specialIndex;
+    std::vector<std::size_t> bodyIndex;
     std::vector<bool> isA;
 
 public:
-    ForceTable(uint capacity);
+    ForceTable(std::size_t capacity);
     ~ForceTable();
 
-    void markAsDeleted(uint index);
+    void markAsDeleted(std::size_t index);
     void warmstart(float alpha, float gamma);
     
     inline auto& getIsA() { return isA; }
@@ -57,8 +57,8 @@ public:
     inline auto& getType() { return type; } 
     inline ManifoldTable* getManifoldTable() { return manifoldTable; }
 
-    void reserveManifolds(uint numPairs, uint& forceIndex, uint& manifoldIndex);
-    void resize(uint newCapacity) override;
+    void reserveManifolds(std::size_t numPairs, std::size_t& forceIndex, std::size_t& manifoldIndex);
+    void resize(std::size_t newCapacity) override;
     void compact() override;
     int insert();
 };

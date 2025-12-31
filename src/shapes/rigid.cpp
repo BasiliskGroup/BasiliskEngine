@@ -33,7 +33,7 @@ Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float
     computeTransforms();
 }   
 
-Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider, std::vector<std::string> collisionIgnoreGroups) : 
+Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, std::size_t collider, std::vector<std::string> collisionIgnoreGroups) : 
     solver(solver), 
     node(node), 
     forces(nullptr), 
@@ -81,8 +81,8 @@ BodyTable* Rigid::getBodyTable() {
     return solver->getBodyTable();
 }
 
-uint Rigid::getColliderIndex() {
-    return getBodyTable()->getCollider()[index];
+std::size_t Rigid::getColliderIndex() {
+    return getBodyTable()->getCollider(index);
 }
 
 // ----------------------
@@ -175,14 +175,14 @@ void Rigid::remove(Force* force){
 void Rigid::precomputeRelations() {
     relations.clear();
 
-    uint i = 0;
+    std::size_t i = 0;
     for (Force* f = forces; f != nullptr; f = (f->getBodyA() == this) ? f->getNextA() : f->getNextB()) {
         Rigid* other = (f->getBodyA() == this) ? f->getBodyB() : f->getBodyA();
         if (other == nullptr) {
             continue;
         }
 
-        relations.emplace_back(other->getIndex(), f, f->getType());
+        relations.emplace_back(other, f, f->getType());
     }
 }
 
@@ -190,7 +190,7 @@ void Rigid::precomputeRelations() {
 // Broad Collision
 // ----------------------
 
-ForceType Rigid::constrainedTo(uint other, Force*& force) const {
+ForceType Rigid::constrainedTo(Rigid* other, Force*& force) const {
     // check if this body is constrained to the other body
     for (const auto& rel : relations) {
         if (rel.bodyB == other) {
@@ -199,6 +199,15 @@ ForceType Rigid::constrainedTo(uint other, Force*& force) const {
         }
     }
     return NULL_FORCE;
+}
+
+Force* Rigid::getConstraint(Rigid* other) const {
+    for (const auto& rel : relations) {
+        if (rel.bodyB == other) {
+            return rel.force;
+        }
+    }
+    return nullptr;
 }
 
 void Rigid::draw() {

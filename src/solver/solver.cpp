@@ -9,9 +9,9 @@ inline constexpr bool DEBUG_PRIMAL = true;
 
 Solver::Solver() : forces(nullptr), bodies(nullptr) {
     // set default params
-    gravity = -10.0f;
-    iterations = 20;
-    beta = 100000.0f;
+    gravity = -9.8f;
+    iterations = 8;
+    beta = 1.0e9f;
     alpha = 0.99f;
     gamma = 0.99f;
 
@@ -33,44 +33,14 @@ Solver::~Solver() {
 void Solver::step(float dt) {
     auto beforeStep = timeNow();
     
-    // Count bodies and forces
-    for (Rigid* body = bodies; body != nullptr; body = body->getNext())
-    for (Force* force = forces; force != nullptr; force = force->getNext()) 
-
+    // compute rigid transforms for frame
     for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
         body->computeTransforms();
     }
     sphericalCollision();
-
-    // Delete all manifolds
-    std::vector<Force*> toDelete;
-    Force* force = forces;
-    int numForce = 0;
-    while (force != nullptr) {
-        if (force->getType() == MANIFOLD) {
-            toDelete.push_back(force);
-        }
-        force = force->getNext();
-        numForce++;
-    }
-
-    for (Force* f : toDelete) {
-        delete f;
-    }
-
-    if (numForce > 2) std::runtime_error("Too many forces");
-
     narrowCollision();
 
-    // Count manifolds after narrow collision
-    int manifoldCount = 0;
-    for (Force* force = forces; force != nullptr; force = force->getNext()) {
-        if (force->getType() == MANIFOLD) manifoldCount++;
-    }
-
-    for (Force* force = forces; force != nullptr; force = force->getNext()) {
-        force->initialize();
-        
+    for (Force* force = forces; force != nullptr; force = force->getNext()) {        
         for (uint i = 0; i < force->rows(); i++) {
             force->getLambda()[i] = force->getLambda()[i] * alpha * gamma;
             force->getPenalty()[i] = glm::clamp(force->getPenalty()[i] * gamma, PENALTY_MIN, PENALTY_MAX);
@@ -179,22 +149,12 @@ void Solver::sphericalCollision() {
     float radsum;
     for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext()) {
         for (Rigid* bodyB = bodyA->getNext(); bodyB != nullptr; bodyB = bodyB->getNext()) {
-            uint i = bodyA->getIndex();
-            uint j = bodyB->getIndex();
-
-            Force* manifold = nullptr;
-
             if (bodyA->getMass() < 0 && bodyB->getMass() < 0) continue;
-
-            // ignore collision flag
-            if (bodyA->constrainedTo(j, manifold) == IGNORE_COLLISION || (abs(bodyA->getPos().x - bodyB->getPos().x) < 1e-10f && abs(bodyA->getPos().y - bodyB->getPos().y) < 1e-10f)) {
-                continue;
-            }
+            if (glm::all(glm::epsilonEqual(bodyA->getPos(), bodyB->getPos(), 1e-10f))) continue;
 
             // check collision ignore groups // TODO switch to using ignore collision flags
             bool match = false;
             for (const std::string& groupA : bodyA->getCollisionIgnoreGroups()) {
-
                 for (const std::string& groupB : bodyB->getCollisionIgnoreGroups()) {
                     if (groupA != groupB) continue;
                     match = true;
@@ -211,6 +171,14 @@ void Solver::sphericalCollision() {
                 continue;
             }
 
+            // check if there is a constraint between the two bodies
+            Force* manifold = bodyA->getConstraint(bodyB);
+            if (manifold != nullptr && manifold->getType() == MANIFOLD) {
+                collisionPairs.emplace_back(bodyA, bodyB, (Manifold*) manifold);
+                continue;
+            }
+
+            // if there is no constraint, check if the two bodies could be colliding
             dpos = bodyA->getPos() - bodyB->getPos();
             radsum = bodyA->getRadius() + bodyB->getRadius();
             if (radsum * radsum > glm::length2(dpos)) {
@@ -228,6 +196,9 @@ void Solver::narrowCollision() {
         Rigid* bodyA = pair.bodyA;
         Rigid* bodyB = pair.bodyB;
 
+        // Use existing manifold if available, otherwise start with nullptr
+        collisionPair.manifold = pair.manifold ? static_cast<Manifold*>(pair.manifold) : nullptr;
+
         initColliderRow(bodyA, a);
         initColliderRow(bodyB, b);
 
@@ -235,6 +206,11 @@ void Solver::narrowCollision() {
         bool collided = gjk(a, b, collisionPair, 0);
 
         if (!collided) {
+            // Delete manifold if collision has ended (whether existing or newly created)
+            if (collisionPair.manifold != nullptr) {
+                delete collisionPair.manifold;
+                collisionPair.manifold = nullptr;
+            }
             continue;
         }
 
@@ -243,7 +219,12 @@ void Solver::narrowCollision() {
         glm::vec2 normal = collisionPair.polytope[frontIndex].normal;
 
         // TODO determine if we need this check
-        if (glm::length2(normal) < 1e-16f) {
+        if (glm::length2(normal) < 1e-10f) {
+            // Delete manifold if collision validation fails (whether existing or newly created)
+            if (collisionPair.manifold != nullptr) {
+                delete collisionPair.manifold;
+                collisionPair.manifold = nullptr;
+            }
             continue;
         }
 
@@ -252,13 +233,41 @@ void Solver::narrowCollision() {
             normal *= -1;
         }
 
-        // NOTE force index not being used right now
-        Manifold* manifold = new Manifold(this, bodyA, bodyB, -1);
-        manifold->getNormal() = normal;
-        collisionPair.manifold = manifold;
+        // set collision normal and create manifold if needed
+        if (collisionPair.manifold == nullptr) {
+            collisionPair.manifold = new Manifold(this, bodyA, bodyB, -1);
+        }
 
-        // determine object overlap
+        // save and merge old contacts // TODO create a perminant memory location for copying
+        auto oldRA = collisionPair.manifold->getRA();
+        auto oldRB = collisionPair.manifold->getRB();
+        auto oldNormal = collisionPair.manifold->getNormal();
+        auto oldJAn = collisionPair.manifold->getJAn();
+        auto oldJBn = collisionPair.manifold->getJBn();
+        auto oldJAt = collisionPair.manifold->getJAt();
+        auto oldJBt = collisionPair.manifold->getJBt();
+        auto oldC0 = collisionPair.manifold->getC0();
+        auto oldPenalty = collisionPair.manifold->getPenalty();
+        auto oldLambda = collisionPair.manifold->getLambda();
+        auto oldStick = collisionPair.manifold->getStick();
+
+        collisionPair.manifold->getNormal() = normal;
         sat(a, b, collisionPair);
+
+        for (std::size_t i = 0; i < 2; i++) {
+            if (glm::all(glm::epsilonEqual(oldRA[i], collisionPair.manifold->getRA()[i], 1e-10f))) {
+                collisionPair.manifold->getPenalty()[i + JN] = oldPenalty[i + JN];
+                collisionPair.manifold->getPenalty()[i + JT] = oldPenalty[i + JT];
+                collisionPair.manifold->getLambda()[i + JN] = oldLambda[i + JN];
+                collisionPair.manifold->getLambda()[i + JT] = oldLambda[i + JT];
+
+                collisionPair.manifold->getStick()[i] = oldStick[i];
+                if (oldStick[i]) {
+                    collisionPair.manifold->getRA()[i] = oldRA[i];
+                    collisionPair.manifold->getRB()[i] = oldRB[i];
+                }
+            }
+        }
     }
 }
 

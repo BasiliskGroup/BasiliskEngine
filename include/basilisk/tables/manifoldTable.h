@@ -21,7 +21,7 @@ private:
     std::vector<float> friction;
     std::vector<bool> stick;
     std::vector<BskVec2Triplet> simplex;
-    std::vector<uint> forceIndex;
+    std::vector<std::size_t> forceIndex;
 
     // arrays for holding extra compute space
     std::vector<glm::vec2> tangent;
@@ -32,7 +32,7 @@ private:
     std::vector<BskFloatROWS> cdB;
 
 public:
-    ManifoldTable(ForceTable* forceTable, uint capacity);
+    ManifoldTable(ForceTable* forceTable, std::size_t capacity);
     ~ManifoldTable() = default;
 
     void warmstart();
@@ -52,12 +52,12 @@ public:
     auto& getFriction() { return friction; }
     auto& getCdA() { return cdA; }
     auto& getCdB() { return cdB; }
-    glm::vec2* getSimplexPtr(uint index) { return simplex[index].data(); }
+    glm::vec2* getSimplexPtr(std::size_t index) { return simplex[index].data(); }
 
-    uint reserve(uint numBodies);
-    void resize(uint new_capacity) override;
+    std::size_t reserve(std::size_t numBodies);
+    void resize(std::size_t new_capacity) override;
     void compact() override;
-    void remove(uint index);
+    void remove(std::size_t index);
 };
 
 }

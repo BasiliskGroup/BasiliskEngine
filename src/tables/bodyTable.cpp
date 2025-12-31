@@ -4,7 +4,7 @@
 
 namespace bsk::internal {
 
-BodyTable::BodyTable(uint capacity) {
+BodyTable::BodyTable(std::size_t capacity) {
     resize(capacity);
 }
 
@@ -13,7 +13,7 @@ BodyTable::BodyTable(uint capacity) {
  * 
  */
 void BodyTable::computeTransforms() {
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         if (updated[i]) continue;
 
         float angle = pos[i].z;
@@ -33,7 +33,7 @@ void BodyTable::computeTransforms() {
 
 void BodyTable::warmstartBodies(const float dt, const float gravity) {
     glm::vec3 gravityVec = { 0, gravity, 0 };
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
 
         // Compute inertial position (Eq 2)
         inertial[i] = pos[i] + vel[i] * dt + gravityVec * (dt * dt) * (float) (mass[i] > 0);
@@ -53,7 +53,7 @@ void BodyTable::warmstartBodies(const float dt, const float gravity) {
 void BodyTable::updateVelocities(float dt) {
     float invdt = 1 / dt;
 
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         prevVel[i] = vel[i];
         if (mass[i] > 0) {
             vel[i] = invdt * (pos[i] - initial[i]);
@@ -68,7 +68,7 @@ void BodyTable::updateVelocities(float dt) {
  * 
  * @param newCapacity new capacity of the tensor. If this is below the current size, the function is ignored. 
  */
-void BodyTable::resize(uint newCapacity) {
+void BodyTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
@@ -83,13 +83,13 @@ void BodyTable::resize(uint newCapacity) {
 // if needed, find a cheaper solution
 void BodyTable::compact() {
     // do a quick check to see if we need to run more complex compact function
-    uint active = numValid(toDelete, size);
+    std::size_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
 
     // reset old indices
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         oldIndex[i] = i;
     }
 
@@ -101,19 +101,19 @@ void BodyTable::compact() {
     );
 
     // invert old indices so that forces can find their new indices
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         inverseForceMap[oldIndex[i]] = i;
     }
 
     size = active;
 
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         toDelete[i] = false;
         bodies[i]->setIndex(i);
     }
 }
 
-uint BodyTable::insert(Rigid* body, glm::vec3 pos, glm::vec3 vel, glm::vec2 scale, float friction, float mass, float moment, uint collider, float radius) {
+std::size_t BodyTable::insert(Rigid* body, glm::vec3 pos, glm::vec3 vel, glm::vec2 scale, float friction, float mass, float moment, std::size_t collider, float radius) {
     if (size == capacity) {
         resize(capacity * 2);
     }
@@ -135,13 +135,13 @@ uint BodyTable::insert(Rigid* body, glm::vec3 pos, glm::vec3 vel, glm::vec2 scal
     return size++;
 }
 
-void BodyTable::markAsDeleted(uint index) {
+void BodyTable::markAsDeleted(std::size_t index) {
     bodies[index] = nullptr;
     toDelete[index] = true;
 }
 
 void BodyTable::writeToNodes() {
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         Node2D* node = bodies[i]->getNode();
         glm::vec3& pos = this->pos[i];
         node->setPosition(pos);

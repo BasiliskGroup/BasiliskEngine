@@ -3,7 +3,7 @@
 
 namespace bsk::internal {
 
-ManifoldTable::ManifoldTable(ForceTable* forceTable, uint capacity) : forceTable(forceTable) {
+ManifoldTable::ManifoldTable(ForceTable* forceTable, std::size_t capacity) : forceTable(forceTable) {
     resize(capacity);
 }
 
@@ -13,20 +13,20 @@ ManifoldTable::ManifoldTable(ForceTable* forceTable, uint capacity) : forceTable
  * @param numBodies
  * @return the next free index in the Table. 
  */
-uint ManifoldTable::reserve(uint numBodies) {
+std::size_t ManifoldTable::reserve(std::size_t numBodies) {
     // calculate next 2^n to hold all space
-    uint neededSpace = pow(2, ceil(log2(size + numBodies)));
+    std::size_t neededSpace = pow(2, ceil(log2(size + numBodies)));
     
     if (neededSpace >= capacity) {
         resize(neededSpace);
     }
 
     // remove indices for reserveed elements
-    for (uint i = size; i < size + numBodies; i++) {
+    for (std::size_t i = size; i < size + numBodies; i++) {
         toDelete[i] = false;
     }
 
-    uint nextFree = size;
+    std::size_t nextFree = size;
     size += numBodies;
     return nextFree;
 }
@@ -36,7 +36,7 @@ uint ManifoldTable::reserve(uint numBodies) {
  * 
  * @param newCapacity new capacity of the tensor. If this is below the current size, the function is ignored. 
  */
-void ManifoldTable::resize(uint newCapacity) {
+void ManifoldTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
@@ -49,7 +49,7 @@ void ManifoldTable::resize(uint newCapacity) {
 
 void ManifoldTable::compact() {
     // do a quick check to see if we need to run more complex compact function
-    uint active = numValid(toDelete, size);
+    std::size_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
@@ -62,7 +62,7 @@ void ManifoldTable::compact() {
 
     // TODO update foreign keys to forceTable
     // reset values for toDelete since they were not mutated in the compact
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         toDelete[i] = false;
     }
 }
@@ -78,7 +78,7 @@ void ManifoldTable::warmstart() {
     }
 }
 
-void ManifoldTable::remove(uint index) {
+void ManifoldTable::remove(std::size_t index) {
     toDelete[index] = true;
 }
 

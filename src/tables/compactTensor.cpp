@@ -7,11 +7,11 @@ namespace bsk::internal {
  * 
  * @param toDelete 
  * @param size 
- * @return uint 
+ * @return std::size_t 
  */
-uint numValid(const std::vector<bool>& toDelete, const uint size) {
-    uint count = 0;
-    for (uint i = 0; i < size; i++) {
+std::size_t numValid(const std::vector<bool>& toDelete, const std::size_t size) {
+    std::size_t count = 0;
+    for (std::size_t i = 0; i < size; i++) {
         if (toDelete[i] == false) {
             count++;
         }

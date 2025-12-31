@@ -6,7 +6,8 @@ __pycache__/
 
 # Ignore virtual environments
 .venv/
-
+.cursor/
+.cache/
 
 # Build
 basilisk_engine.egg-info/

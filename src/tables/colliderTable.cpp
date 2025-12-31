@@ -1,14 +1,15 @@
 #include <basilisk/tables/colliderTable.h>
+#include <basilisk/shapes/collider.h>
 #include <basilisk/util/print.h>
 
 namespace bsk::internal {
 
-ColliderTable::ColliderTable(uint capacity) {
+ColliderTable::ColliderTable(std::size_t capacity) {
     resize(capacity);
 }
 
 ColliderTable::~ColliderTable() {
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         if (colliders[i]) {
             delete colliders[i];
             colliders[i] = nullptr;
@@ -21,7 +22,7 @@ ColliderTable::~ColliderTable() {
  * 
  * @param newCapacity new capacity of the tensor. If this is below the current size, the function is ignored.
  */
-void ColliderTable::resize(uint newCapacity) {
+void ColliderTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
@@ -36,7 +37,7 @@ void ColliderTable::resize(uint newCapacity) {
 // if needed, find a cheaper solution
 void ColliderTable::compact() {
     // do a quick check to see if we need to run more complex compact function
-    uint active = numValid(toDelete, size);
+    std::size_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
@@ -49,13 +50,13 @@ void ColliderTable::compact() {
     size = active;
 
     // Update collider indices
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         toDelete[i] = false;
         colliders[i]->setIndex(i);
     }
 }
 
-uint ColliderTable::insert(Collider* collider, std::vector<glm::vec2> vertices) {
+std::size_t ColliderTable::insert(Collider* collider, std::vector<glm::vec2> vertices) {
     if (size == capacity) {
         resize(capacity * 2);
     }
@@ -70,7 +71,7 @@ uint ColliderTable::insert(Collider* collider, std::vector<glm::vec2> vertices) 
     float minX = INFINITY, minY = INFINITY;
     float maxX = -INFINITY, maxY = -INFINITY;
     
-    for (uint i = 0; i < verts[size].size(); ++i) {
+    for (std::size_t i = 0; i < verts[size].size(); ++i) {
         glm::vec2& v = verts[size][i];
 
         if (v.x < minX) minX = v.x;
@@ -96,7 +97,7 @@ uint ColliderTable::insert(Collider* collider, std::vector<glm::vec2> vertices) 
     return size++;
 }
 
-void ColliderTable::markAsDeleted(uint index) {
+void ColliderTable::markAsDeleted(std::size_t index) {
     colliders[index] = nullptr;
     toDelete[index] = true;
 }

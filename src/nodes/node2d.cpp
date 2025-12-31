@@ -143,7 +143,7 @@ ForceType Node2D::constrainedTo(Node2D* other){
     }
 
     Force* dummy = nullptr;
-    return this->rigid->constrainedTo(other->rigid->getIndex(), dummy);
+    return this->rigid->constrainedTo(other->rigid, dummy);
 }
 
 bool Node2D::isTouching(Node2D* other){

@@ -3,7 +3,7 @@
 
 namespace bsk::internal {
 
-ForceTable::ForceTable(uint capacity) {
+ForceTable::ForceTable(std::size_t capacity) {
     resize(capacity);
 
     // create Tables
@@ -14,41 +14,37 @@ ForceTable::~ForceTable() {
     delete manifoldTable;
 }
 
-void ForceTable::markAsDeleted(uint index) { 
+void ForceTable::markAsDeleted(std::size_t index) { 
     toDelete[index] = true; 
     forces[index] = nullptr;
 }
 
 void ForceTable::warmstart(float alpha, float gamma) {
     // print("Force Warmstart");
-    for (uint i = 0; i < size; i++) {
-        for (uint j = 0; j < ROWS; j++) {
+    for (std::size_t i = 0; i < size; i++) {
+        for (std::size_t j = 0; j < ROWS; j++) {
             lambda[i][j] *= alpha * gamma;
             penalty[i][j] = glm::clamp(penalty[i][j] * gamma, PENALTY_MIN, PENALTY_MAX);
-            
             penalty[i][j] = glm::min(penalty[i][j], stiffness[i][j]);
-
-            // print(penalty[i][j]);
-            // print(stiffness[i][j]);
         }
     }
 }
 
-void ForceTable::reserveManifolds(uint numPairs, uint& forceIndex, uint& manifoldIndex) {
+void ForceTable::reserveManifolds(std::size_t numPairs, std::size_t& forceIndex, std::size_t& manifoldIndex) {
     manifoldIndex = manifoldTable->reserve(numPairs);
-    uint numBodies = 2 * numPairs;
+    std::size_t numBodies = 2 * numPairs;
     
-    uint neededSpace = pow(2, ceil(log2(size + numBodies)));
+    std::size_t neededSpace = pow(2, ceil(log2(size + numBodies)));
 
     if (neededSpace >= capacity) {
         resize(neededSpace);
     }
 
     // ensure reserved slots arent deleted and set default values
-    for (uint i = size; i < size + numBodies; i++) {
+    for (std::size_t i = size; i < size + numBodies; i++) {
         toDelete[i] = false;
 
-        for (uint j = 0; j < MANIFOLD_ROWS; j++) {
+        for (std::size_t j = 0; j < MANIFOLD_ROWS; j++) {
             J[i][j] = glm::vec3(0);
             H[i][j] = glm::mat3x3(0);
             C[i][j]     = 0.0f;
@@ -66,7 +62,7 @@ void ForceTable::reserveManifolds(uint numPairs, uint& forceIndex, uint& manifol
     size += numBodies;
 }
 
-void ForceTable::resize(uint newCapacity) {
+void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity, 
@@ -81,14 +77,14 @@ void ForceTable::resize(uint newCapacity) {
 
 void ForceTable::compact() {
     // do a quick check to see if we need to run more complex compact function
-    uint active = numValid(toDelete, size);
+    std::size_t active = numValid(toDelete, size);
     if (active == size) {
         // nothing to delete
         return;
     }
 
     // delete marked forces before we lose them in compact
-    for(uint i = 0; i < size; i++) {
+    for(std::size_t i = 0; i < size; i++) {
         if (toDelete[i] == true && forces[i] != nullptr) {
             delete forces[i];
         }
@@ -102,7 +98,7 @@ void ForceTable::compact() {
     size = active;
 
     // update maps
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         // update force object
         forces[i]->setIndex(i);
 

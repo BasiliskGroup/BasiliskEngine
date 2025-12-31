@@ -57,6 +57,7 @@ using BskVec3ROWS = std::array<glm::vec3, ROWS>;
 using BskVec3Pair = std::array<glm::vec3, 2>;
 using BskMat3x3ROWS = std::array<glm::mat3x3, ROWS>;
 using BskFloatROWS = std::array<float, ROWS>;
+using BskBoolPair = std::array<bool, 2>;
 
 // Mini structs
 enum JType {

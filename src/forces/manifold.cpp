@@ -3,33 +3,13 @@
 namespace bsk::internal {
 
 Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB, uint index) : Force(solver, bodyA, bodyB) {
-
-    for (uint i = 0; i < MANIFOLD_ROWS; i++) {
-        getJ()[i] = { 0, 0, 0 };
-        getH()[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        getC()[i] = 0.0f;
-        getStiffness()[i] = std::numeric_limits<float>::infinity();
-        getFmax()[i] = std::numeric_limits<float>::infinity();
-        getFmin()[i] = -std::numeric_limits<float>::infinity();
-        getFracture()[i] = std::numeric_limits<float>::infinity();
-
-        getPenalty()[i] = 0.0f;
-        getLambda()[i] = 0.0f;
-    }
-
     getFmax()[0] = getFmax()[2] = 0.0f;
     getFmin()[0] = getFmin()[2] = -std::numeric_limits<float>::infinity();
 
     type = MANIFOLD;
 }
 
-Manifold::~Manifold() {
-
-}
-
-void Manifold::draw() const {
-
-}
+Manifold::~Manifold() = default;
 
 void Manifold::initialize() {    
     getFriction() = sqrt(bodyA->getFriction() * bodyB->getFriction());
@@ -89,6 +69,8 @@ void Manifold::computeConstraint(float alpha) {
         float frictionBound = abs(getLambda()[2 * i + JN]) * getFriction();
         getFmax()[2 * i + JT] =  frictionBound;
         getFmin()[2 * i + JT] = -frictionBound;
+
+        getStick()[i] = abs(getLambda()[i * 2 + JT]) < frictionBound && abs(getC0()[i].y) < STICK_THRESH;
     }
 }
 

@@ -25,7 +25,7 @@ private:
         Force* manifold = nullptr;
 
         CollisionIndexPair(Rigid* bodyA, Rigid* bodyB) : bodyA(bodyA), bodyB(bodyB) {}
-        CollisionIndexPair(Rigid* bodyA, Rigid* bodyB, Force* manifold) : bodyA(bodyA), bodyB(bodyB), manifold(nullptr) {} // TODO change this to accepting manifold when we preserve them
+        CollisionIndexPair(Rigid* bodyA, Rigid* bodyB, Force* manifold) : bodyA(bodyA), bodyB(bodyB), manifold(manifold) {}
     };
 
     float gravity;      // Gravity
@@ -80,7 +80,7 @@ private:
     using Polytope = std::array<PolytopeFace, EPA_ITERATIONS + 3>;
 
     struct CollisionPair {
-        Manifold* manifold;
+        Manifold* manifold = nullptr;
 
         // gjk
         Simplex minks;

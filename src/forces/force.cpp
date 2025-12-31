@@ -1,3 +1,4 @@
+#include "basilisk/util/includes.h"
 #include <basilisk/solver/physics.h>
 
 namespace bsk::internal {
@@ -18,6 +19,21 @@ Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB) :
     if (bodyB) {
         bodyB->insert(this);
     }
+
+    for (uint i = 0; i < MANIFOLD_ROWS; i++) {
+        getJ()[i] = { 0, 0, 0 };
+        getH()[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        getC()[i] = 0.0f;
+        getStiffness()[i] = std::numeric_limits<float>::infinity();
+        getFmax()[i] = std::numeric_limits<float>::infinity();
+        getFmin()[i] = -std::numeric_limits<float>::infinity();
+        getFracture()[i] = std::numeric_limits<float>::infinity();
+
+        getPenalty()[i] = 0.0f;
+        getLambda()[i] = 0.0f;
+    }
+
+    type = NULL_FORCE;
 }
 
 Force::~Force()

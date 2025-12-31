@@ -21,10 +21,10 @@ private:
     std::vector<float> moment;
 
 public:
-    ColliderTable(uint capacity);
+    ColliderTable(std::size_t capacity);
     ~ColliderTable();
 
-    void markAsDeleted(uint index);
+    void markAsDeleted(std::size_t index);
 
     auto& getColliders() { return colliders; }
     auto& getVerts() { return verts; }
@@ -33,12 +33,12 @@ public:
     auto& getArea() { return area; }
     auto& getMoment() { return moment; }
 
-    glm::vec2* getStartPtr(uint index) { return verts[index].data(); }
-    uint getLength(uint index) { return verts[index].size(); }
+    glm::vec2* getStartPtr(std::size_t index) { return verts[index].data(); }
+    std::size_t getLength(std::size_t index) { return verts[index].size(); }
 
-    void resize(uint newCapacity) override;
+    void resize(std::size_t newCapacity) override;
     void compact() override;
-    uint insert(Collider* collider, std::vector<glm::vec2> vertices);
+    std::size_t insert(Collider* collider, std::vector<glm::vec2> vertices);
 };
 
 }

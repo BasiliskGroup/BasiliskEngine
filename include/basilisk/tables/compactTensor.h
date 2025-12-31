@@ -6,11 +6,11 @@
 namespace bsk::internal {
 
 template <typename... T>
-void compactTensors(const std::vector<bool>& toDelete, uint size, std::vector<T>&... tensors)
+void compactTensors(const std::vector<bool>& toDelete, std::size_t size, std::vector<T>&... tensors)
 {
-    uint dst = 0;
+    std::size_t dst = 0;
 
-    for (uint src = 0; src < size; ++src) {
+    for (std::size_t src = 0; src < size; ++src) {
         if (!toDelete[src]) {
             if (dst != src) {
                 // Use move for efficient transfer
@@ -21,7 +21,7 @@ void compactTensors(const std::vector<bool>& toDelete, uint size, std::vector<T>
     }
 }
 
-uint numValid(const std::vector<bool>& toDelete, const uint size);
+std::size_t numValid(const std::vector<bool>& toDelete, const std::size_t size);
 
 }
 

@@ -1,6 +1,8 @@
 #ifndef BSK_FORCE_H
 #define BSK_FORCE_H
 
+#include <basilisk/util/includes.h>
+
 namespace bsk::internal {
 
 class ForceTable;
@@ -80,7 +82,6 @@ public:
 
     // number of jacobian rows (max = 4)
     virtual int rows() const = 0;
-    virtual void draw() const {};
 
     // NOTE initialization and computations will be done in the ForceTable for bulk operations
     virtual void initialize() = 0;

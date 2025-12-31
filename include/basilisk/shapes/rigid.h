@@ -1,6 +1,8 @@
 #ifndef BSK_RIGID_H
 #define BSK_RIGID_H
 
+#include <basilisk/util/includes.h>
+
 namespace bsk::internal {
 
 class Solver;
@@ -14,7 +16,7 @@ class Node2D;
 class Rigid {
 public:
     struct Relation {
-        uint bodyB;
+        Rigid* bodyB;
         Force* force; // shared pointer, do not delete
         ForceType type;
     };
@@ -31,7 +33,7 @@ private:
     std::vector<Relation> relations;
 
     // for Table access
-    uint index;
+    std::size_t index;
 
     // stored for copy/move constructor
     float density;
@@ -47,7 +49,7 @@ private:
     float mass;
     float moment;
     float radius;
-    uint collider;
+    std::size_t collider;
     glm::mat2x2 mat;
     glm::mat2x2 iMat;
     glm::mat2x2 rMat;
@@ -59,7 +61,7 @@ private:
 
 public:
     Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, Collider* collider, std::vector<std::string> collisionIgnoreGroups = {});
-    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, uint collider, std::vector<std::string> collisionIgnoreGroups = {});
+    Rigid(Solver* solver, Node2D* node, glm::vec3 pos, glm::vec2 scale, float density, float friction, glm::vec3 vel, std::size_t collider, std::vector<std::string> collisionIgnoreGroups = {});
     ~Rigid();
 
     // list management
@@ -74,7 +76,7 @@ public:
 
     BodyTable* getBodyTable();
     Node2D* getNode() { return node; }
-    uint getIndex() { return index; }
+    std::size_t getIndex() { return index; }
 
     glm::vec3& getPos() { return pos; }
     glm::vec3& getInitial() { return initial; }
@@ -86,7 +88,7 @@ public:
     float& getMass() { return mass; }
     float& getMoment() { return moment; }
     float& getRadius() { return radius; }
-    uint& getCollider() { return collider; }
+    std::size_t& getCollider() { return collider; }
     glm::mat2x2& getMat() { return mat; }
     glm::mat2x2& getIMat() { return iMat; }
     glm::mat2x2& getRMat() { return rMat; }
@@ -96,21 +98,22 @@ public:
     glm::bvec3 getManifoldMask() { return manifoldMask; }
     std::vector<std::string> getCollisionIgnoreGroups() { return collisionIgnoreGroups; }
     
-    uint getColliderIndex();
+    std::size_t getColliderIndex();
 
     // setters
     void setPosition(const glm::vec3& pos);
     void setVelocity(const glm::vec3& vel);
     void setScale(const glm::vec2& scale);
 
-    void setIndex(uint index) { this->index = index; }
+    void setIndex(std::size_t index) { this->index = index; }
     void setNode(Node2D* node) { this->node = node; }
     void setManifoldMask(float x, float y, float z) { this->manifoldMask = { x, y, z }; }
     void setCollisionIgnoreGroups(std::vector<std::string> collisionIgnoreGroups) { this->collisionIgnoreGroups = collisionIgnoreGroups; }
 
     // determines if two objects are constrained (no collision needed)
     void precomputeRelations();
-    ForceType constrainedTo(uint other, Force*& force) const;
+    ForceType constrainedTo(Rigid* other, Force*& force) const;
+    Force* getConstraint(Rigid* other) const;
     void draw();
 
     // TEMPORARY

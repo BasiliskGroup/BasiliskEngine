@@ -33,7 +33,7 @@ public:
         Collider* collider = nullptr;
         glm::vec2 colliderScale = { 1, 1 };
         float density = 1;
-        float friction = 0.4;
+        float friction = 0.8;
         std::vector<std::string> collisionIgnoreGroups = {};
     };
 
