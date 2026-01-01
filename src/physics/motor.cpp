@@ -9,6 +9,7 @@
 * It is provided "as is" without express or implied warranty.
 */
 
+#include <basilisk/physics/force.h>
 #include <basilisk/physics/solver.h>
 
 namespace bsk::internal {

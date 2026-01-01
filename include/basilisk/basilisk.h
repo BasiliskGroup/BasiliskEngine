@@ -31,6 +31,7 @@
 #include "camera/camera2d.h"
 
 #include "physics/solver.h"
+#include "physics/collision/collider.h"
 
 namespace bsk {
     // render
@@ -54,6 +55,7 @@ namespace bsk {
     using Manifold = internal::Manifold;
     using Joint = internal::Joint;
     using Spring = internal::Spring;
+    using Collider = internal::Collider;
 
     // render
     using Mesh = internal::Mesh;

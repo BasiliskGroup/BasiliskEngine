@@ -9,16 +9,20 @@
 * It is provided "as is" without express or implied warranty.
 */
 
+#include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/nodes/node2d.h>
 
 namespace bsk::internal {
 
-Rigid::Rigid(Solver* solver, Node2D* node, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity)
+Rigid::Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity)
     : solver(solver), node(node), forces(nullptr), next(nullptr), prev(nullptr), position(position), velocity(velocity), prevVelocity(velocity), size(size), friction(friction)
 {
     // Add to linked list
     solver->insert(this);
+
+    // add collider
+    this->collider = collider;
 
     // Compute mass properties and bounding radius
     mass = size.x * size.y * density;

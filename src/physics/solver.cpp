@@ -10,12 +10,14 @@
 */
 
 #include <basilisk/physics/solver.h>
+#include <basilisk/physics/maths.h>
 #include <basilisk/nodes/node2d.h>
+#include <basilisk/physics/tables/colliderTable.h>
 
 namespace bsk::internal {
 
 Solver::Solver()
-    : bodies(nullptr), forces(nullptr)
+    : bodies(nullptr), forces(nullptr), colliderTable(new ColliderTable(64))
 {
     defaultParams();
 }
@@ -46,6 +48,9 @@ void Solver::clear()
 
     while (bodies)
         delete bodies;
+
+    delete colliderTable;
+    colliderTable = nullptr;
 }
 
 void Solver::insert(Rigid* body)

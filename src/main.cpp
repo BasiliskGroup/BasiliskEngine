@@ -1,4 +1,5 @@
 #include <basilisk/basilisk.h>
+#include <basilisk/physics/maths.h>
 
 int main() {
     // Make a Basilisk Engine instance 
@@ -12,35 +13,40 @@ int main() {
 
     // Load assets from file
     bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
-    bsk::Image* image = new bsk::Image("textures/knight.png");
-    bsk::Image* image2 = new bsk::Image("textures/piss.png");
-    bsk::Image* image3 = new bsk::Image("textures/man.png");
+    bsk::Image* metalImage = new bsk::Image("textures/metal.png");
+    bsk::Image* ropeImage = new bsk::Image("textures/rope.png");
+    bsk::Image* bricksImage = new bsk::Image("textures/bricks.jpg");
+    bsk::Image* containerImage = new bsk::Image("textures/container.jpg");
 
-    // Create a material from image
-    bsk::Material* material = new bsk::Material({1, 1, 1}, image);
-    bsk::Material* material2 = new bsk::Material({1, 1, 1}, image2);
-    bsk::Material* material3 = new bsk::Material({1, 1, 1}, image3);
+    // Create materials from images
+    bsk::Material* metalMaterial = new bsk::Material({1, 1, 1}, metalImage);
+    bsk::Material* ropeMaterial = new bsk::Material({1, 1, 1}, ropeImage);
+    bsk::Material* bricksMaterial = new bsk::Material({1, 1, 1}, bricksImage);
+    bsk::Material* containerMaterial = new bsk::Material({1, 1, 1}, containerImage);
 
-    // Create floor
-    bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, -8}, .rotation=0, .scale={50, 1.5}, .collision=true, .density=-1 });
+    // Create a box collider (unit box vertices) - can be shared by all box-shaped objects
+    bsk::Collider* boxCollider = new bsk::Collider(scene->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
 
-    // Create unmovable obstacles around the scene
+    // Create floor (bricks)
+    bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={0, -8}, .rotation=0, .scale={50, 1.5}, .collider=boxCollider, .density=-1 });
+
+    // Create unmovable obstacles around the scene (bricks)
     // Left wall
-    new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={-12, 0}, .rotation=0, .scale={1.5, 20}, .collision=true, .density=-1 });
+    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={-12, 0}, .rotation=0, .scale={1.5, 20}, .collider=boxCollider, .density=-1 });
     // Right wall
-    new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={12, 0}, .rotation=0, .scale={1.5, 20}, .collision=true, .density=-1 });
+    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={12, 0}, .rotation=0, .scale={1.5, 20}, .collider=boxCollider, .density=-1 });
     // Top platform
-    new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={0, 10}, .rotation=0, .scale={15, 1}, .collision=true, .density=-1 });
+    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={0, 10}, .rotation=0, .scale={15, 1}, .collider=boxCollider, .density=-1 });
     // Middle left obstacle
-    new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={-8, -2}, .rotation=0, .scale={2, 3}, .collision=true, .density=-1 });
+    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={-8, -2}, .rotation=0, .scale={2, 3}, .collider=boxCollider, .density=-1 });
     // Middle right obstacle
-    new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={8, -2}, .rotation=0, .scale={2, 3}, .collision=true, .density=-1 });
+    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={8, -2}, .rotation=0, .scale={2, 3}, .collider=boxCollider, .density=-1 });
     // Platform on the right
-    new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={10, 3}, .rotation=0, .scale={3, 1}, .collision=true, .density=-1 });
+    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={10, 3}, .rotation=0, .scale={3, 1}, .collider=boxCollider, .density=-1 });
     // Platform on the left
-    new bsk::Node2D(scene, { .mesh=quad, .material=material, .position={-10, 3}, .rotation=0, .scale={3, 1}, .collision=true, .density=-1 });
+    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={-10, 3}, .rotation=0, .scale={3, 1}, .collider=boxCollider, .density=-1 });
 
-    // Demo: Create a chain of long bars connected with Joints
+    // Demo: Create a chain of long bars connected with Joints (rope texture)
     std::vector<bsk::Node2D*> chainNodes;
     bsk::Node2D* prevNode = nullptr;
     float barLength = 2.0f;
@@ -48,11 +54,11 @@ int main() {
     for (int i = 0; i < 6; i++) {
         bsk::Node2D* node = new bsk::Node2D(scene, { 
             .mesh=quad, 
-            .material=material, 
+            .material=ropeMaterial, 
             .position={-6.0f + i * barLength, 8.0f}, 
             .rotation=0, 
             .scale={barLength, barWidth},  // Long horizontal bars
-            .collision=true 
+            .collider=boxCollider 
         });
         chainNodes.push_back(node);
 
@@ -72,16 +78,16 @@ int main() {
         prevNode = node;
     }
 
-    // Demo: Create boxes connected with Springs (scaled up)
+    // Demo: Create boxes connected with Springs (metal texture)
     std::vector<bsk::Node2D*> springNodes;
     for (int i = 0; i < 5; i++) {
         bsk::Node2D* node = new bsk::Node2D(scene, { 
             .mesh=quad, 
-            .material=material2, 
+            .material=metalMaterial, 
             .position={6.0f + i * 2.5f, 10.0f}, 
             .rotation=0, 
             .scale={1.2f, 1.2f},  // Scaled up
-            .collision=true 
+            .collider=boxCollider 
         });
         springNodes.push_back(node);
     }
@@ -100,15 +106,15 @@ int main() {
         }
     }
 
-    // Add some free-floating boxes that will bounce around
+    // Add some free-floating boxes that will bounce around (container texture)
     for (int i = 0; i < 3; i++) {
         new bsk::Node2D(scene, { 
             .mesh=quad, 
-            .material=material3, 
+            .material=containerMaterial, 
             .position={-4.0f + i * 4.0f, 6.0f}, 
             .rotation=0.3f * i, 
             .scale={1.3f, 1.3f}, 
-            .collision=true 
+            .collider=boxCollider 
         });
     }
 
@@ -131,11 +137,11 @@ int main() {
                 glm::vec2 rAW = bsk::internal::transform(manifold->bodyA->position, manifold->contacts[i].rA);
                 glm::vec2 rBW = bsk::internal::transform(manifold->bodyB->position, manifold->contacts[i].rB);
 
-                bsk::Node2D* nodeA = new bsk::Node2D(scene, { .mesh=quad, .material=material2, .position=rAW, .scale={0.125, 0.125}, .collision=false });
+                bsk::Node2D* nodeA = new bsk::Node2D(scene, { .mesh=quad, .material=metalMaterial, .position=rAW, .scale={0.125, 0.125} });
                 nodeA->setLayer(0.9);
                 contactNodes.push_back(nodeA);
 
-                bsk::Node2D* nodeB = new bsk::Node2D(scene, { .mesh=quad, .material=material3, .position=rBW, .scale={0.125, 0.125}, .collision=false });
+                bsk::Node2D* nodeB = new bsk::Node2D(scene, { .mesh=quad, .material=containerMaterial, .position=rBW, .scale={0.125, 0.125} });
                 nodeB->setLayer(0.9);
                 contactNodes.push_back(nodeB);
             }
@@ -157,12 +163,14 @@ int main() {
     }
 
     // Free memory allocations
-    delete image;
-    delete image2;
-    delete image3;
-    delete material;
-    delete material2;
-    delete material3;
+    delete metalImage;
+    delete ropeImage;
+    delete bricksImage;
+    delete containerImage;
+    delete metalMaterial;
+    delete ropeMaterial;
+    delete bricksMaterial;
+    delete containerMaterial;
     delete quad;
     delete scene;
     delete voidScene;

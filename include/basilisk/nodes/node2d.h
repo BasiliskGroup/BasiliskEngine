@@ -4,6 +4,7 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/nodes/virtualNode.h>
 #include <basilisk/physics/solver.h>
+#include <basilisk/physics/collision/collider.h>
 
 namespace bsk::internal {
 
@@ -29,7 +30,7 @@ public:
         glm::vec3 velocity = { 0, 0, 0 };
 
         // physics
-        bool collision = false;  // Whether to create a physics body
+        Collider* collider = nullptr;  // Collider for physics body (if nullptr, no physics body is created)
         float density = 1;
         float friction = 0.8;
     };

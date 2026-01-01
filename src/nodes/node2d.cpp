@@ -96,9 +96,9 @@ void Node2D::bindRigid(Params& params) {
     if (rigid) delete rigid;
     rigid = nullptr;
 
-    if (params.collision) {
+    if (params.collider != nullptr) {
         Scene2D* scene2d = static_cast<Scene2D*>(scene);
-        rigid = new Rigid(scene2d->getSolver(), this, { this->position, this->rotation }, this->scale, params.density, params.friction, params.velocity);
+        rigid = new Rigid(scene2d->getSolver(), this, params.collider, { this->position, this->rotation }, this->scale, params.density, params.friction, params.velocity);
     }
 }
 
@@ -121,6 +121,7 @@ void Node2D::setRigid(const Node2D& other) {
     this->rigid = new Rigid(
         solver, 
         this, 
+        other.rigid->collider,
         { other.position, other.rotation }, 
         other.scale, 
         other.rigid->getDensity(), 
