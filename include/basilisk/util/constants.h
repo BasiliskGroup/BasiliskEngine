@@ -17,6 +17,8 @@ namespace bsk::internal {
     inline constexpr unsigned short EPA_ITERATIONS = 15;
 
     // inline constexpr bool SHOW_CONTACTS = true;
+
+    inline constexpr float EPSILON = 1e-10f;
 }
 
 #endif

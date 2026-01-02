@@ -26,7 +26,7 @@ Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
 bool Manifold::initialize()
 {
     // Compute friction
-    friction = sqrtf(bodyA->friction * bodyB->friction);
+    friction = sqrtf(bodyA->getFriction() * bodyB->getFriction());
 
     // Store previous contact state
     Contact oldContacts[2] = { contacts[0], contacts[1] };
@@ -75,8 +75,8 @@ bool Manifold::initialize()
             normal.y, tangent.y    // column 1: (normal.y, tangent.y)
         );
 
-        glm::vec2 rAW = rotate(bodyA->position.z, contacts[i].rA);
-        glm::vec2 rBW = rotate(bodyB->position.z, contacts[i].rB);
+        glm::vec2 rAW = rotate(bodyA->getPosition().z, contacts[i].rA);
+        glm::vec2 rBW = rotate(bodyB->getPosition().z, contacts[i].rB);
 
         // Precompute the constraint and derivatives at C(x-), since we use a truncated Taylor series for contacts (Sec 4).
         // Note that we discard the second order term, since it is insignificant for contacts
@@ -88,7 +88,7 @@ bool Manifold::initialize()
         contacts[i].JAt = glm::vec3(basisRow1.x, basisRow1.y, cross(rAW, tangent));
         contacts[i].JBt = glm::vec3(-basisRow1.x, -basisRow1.y, -cross(rBW, tangent));
 
-        contacts[i].C0 = basis * (glm::vec2(bodyA->position.x, bodyA->position.y) + rAW - glm::vec2(bodyB->position.x, bodyB->position.y) - rBW) + glm::vec2(COLLISION_MARGIN, 0);
+        contacts[i].C0 = basis * (glm::vec2(bodyA->getPosition().x, bodyA->getPosition().y) + rAW - glm::vec2(bodyB->getPosition().x, bodyB->getPosition().y) - rBW) + glm::vec2(COLLISION_MARGIN, 0);
     }
 
     return numContacts > 0;
@@ -99,8 +99,8 @@ void Manifold::computeConstraint(float alpha)
     for (int i = 0; i < numContacts; i++)
     {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
-        glm::vec3 dpA = bodyA->position - bodyA->initial;
-        glm::vec3 dpB = bodyB->position - bodyB->initial;
+        glm::vec3 dpA = bodyA->getPosition() - bodyA->getInitial();
+        glm::vec3 dpB = bodyB->getPosition() - bodyB->getInitial();
         
         C[i * 2 + 0] = contacts[i].C0.x * (1 - alpha) + dot(contacts[i].JAn, dpA) + dot(contacts[i].JBn, dpB);
         C[i * 2 + 1] = contacts[i].C0.y * (1 - alpha) + dot(contacts[i].JAt, dpA) + dot(contacts[i].JBt, dpB);

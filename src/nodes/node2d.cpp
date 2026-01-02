@@ -121,7 +121,7 @@ void Node2D::setRigid(const Node2D& other) {
     this->rigid = new Rigid(
         solver, 
         this, 
-        other.rigid->collider,
+        other.rigid->getCollider(),
         { other.position, other.rotation }, 
         other.scale, 
         other.rigid->getDensity(), 

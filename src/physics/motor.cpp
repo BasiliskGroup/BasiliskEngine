@@ -24,12 +24,12 @@ Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxT
 void Motor::computeConstraint(float alpha)
 {
     // Compute delta angular position between the two bodies
-    float dAngleA = (bodyA ? (bodyA->position.z - bodyA->initial.z) : 0.0f);
-    float dAngleB = bodyB->position.z - bodyB->initial.z;
+    float dAngleA = (bodyA ? (bodyA->getPosition().z - bodyA->getInitial().z) : 0.0f);
+    float dAngleB = bodyB->getPosition().z - bodyB->getInitial().z;
     float deltaAngle = dAngleA - dAngleB;
 
     // Constraint tries to reach desired angular speed
-    C[0] = deltaAngle - speed * solver->dt;
+    C[0] = deltaAngle - speed * solver->getDt();
 }
 
 void Motor::computeDerivatives(Rigid* body)

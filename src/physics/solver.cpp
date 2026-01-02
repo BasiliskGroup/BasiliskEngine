@@ -13,32 +13,21 @@
 #include <basilisk/physics/maths.h>
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/colliderTable.h>
+#include <basilisk/physics/tables/bodyTable.h>
 
 namespace bsk::internal {
 
 Solver::Solver()
-    : bodies(nullptr), forces(nullptr), colliderTable(new ColliderTable(64))
+    : bodies(nullptr), forces(nullptr), colliderTable(nullptr), bodyTable(nullptr)
 {
+    this->colliderTable = new ColliderTable(64);
+    this->bodyTable = new BodyTable(128);
     defaultParams();
 }
 
 Solver::~Solver()
 {
     clear();
-}
-
-Rigid* Solver::pick(glm::vec2 at, glm::vec2& local)
-{
-    // Find which body is at the given point
-    for (Rigid* body = bodies; body != nullptr; body = body->next)
-    {
-        glm::mat2 Rt = rotation(-body->position.z);
-        local = Rt * (at - glm::vec2(body->position.x, body->position.y));
-        if (local.x >= -body->size.x * 0.5f && local.x <= body->size.x * 0.5f &&
-            local.y >= -body->size.y * 0.5f && local.y <= body->size.y * 0.5f)
-            return body;
-    }
-    return nullptr;
 }
 
 void Solver::clear()
@@ -60,12 +49,12 @@ void Solver::insert(Rigid* body)
         return;
     }
 
-    body->next = bodies;
-    body->prev = nullptr;
+    body->setNext(bodies);
+    body->setPrev(nullptr);
 
     if (bodies)
     {
-        bodies->prev = body;
+        bodies->setPrev(body);
     }
 
     bodies = body;
@@ -78,24 +67,24 @@ void Solver::remove(Rigid* body)
         return;
     }
 
-    if (body->prev)
+    if (body->getPrev())
     {
-        body->prev->next = body->next;
+        body->getPrev()->setNext(body->getNext());
     }
     else
     {
         // This was the head of the list
-        bodies = body->next;
+        bodies = body->getNext();
     }
 
-    if (body->next)
+    if (body->getNext())
     {
-        body->next->prev = body->prev;
+        body->getNext()->setPrev(body->getPrev());
     }
 
     // Clear pointers
-    body->next = nullptr;
-    body->prev = nullptr;
+    body->setNext(nullptr);
+    body->setPrev(nullptr);
 }
 
 void Solver::insert(Force* force)
@@ -171,16 +160,18 @@ void Solver::defaultParams()
 
 void Solver::step(float dt)
 {
-    this->dt = dt;
+    this->dt = glm::max(dt, 1.0f / 20.0f);
 
     // Perform broadphase collision detection
     // This is a naive O(n^2) approach, but it is sufficient for small numbers of bodies in this sample.
-    for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->next)
+    for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext())
     {
-        for (Rigid* bodyB = bodyA->next; bodyB != nullptr; bodyB = bodyB->next)
+        for (Rigid* bodyB = bodyA->getNext(); bodyB != nullptr; bodyB = bodyB->getNext())
         {
-            glm::vec2 dp = glm::vec2(bodyA->position.x, bodyA->position.y) - glm::vec2(bodyB->position.x, bodyB->position.y);
-            float r = bodyA->radius + bodyB->radius;
+            glm::vec3 posA = bodyA->getPosition();
+            glm::vec3 posB = bodyB->getPosition();
+            glm::vec2 dp = glm::vec2(posA.x, posA.y) - glm::vec2(posB.x, posB.y);
+            float r = bodyA->getRadius() + bodyB->getRadius();
             if (dot(dp, dp) <= r * r && !bodyA->constrainedTo(bodyB))
                 new Manifold(this, bodyA, bodyB);
         }
@@ -224,26 +215,32 @@ void Solver::step(float dt)
     }
 
     // Initialize and warmstart bodies (ie primal variables)
-    for (Rigid* body = bodies; body != nullptr; body = body->next)
+    for (Rigid* body = bodies; body != nullptr; body = body->getNext())
     {
         // Don't let bodies rotate too fast
-        body->velocity.z = glm::clamp(body->velocity.z, -50.0f, 50.0f);
+        glm::vec3 vel = body->getVelocity();
+        vel.z = glm::clamp(vel.z, -50.0f, 50.0f);
+        body->setVelocity(vel);
 
         // Compute inertial position (Eq 2)
-        body->inertial = body->position + body->velocity * dt;
-        if (body->mass > 0) {
-            body->inertial += glm::vec3{ 0, gravity, 0 } * (dt * dt);
+        glm::vec3 pos = body->getPosition();
+        glm::vec3 inertial = pos + vel * dt;
+        if (body->getMass() > 0) {
+            inertial += glm::vec3{ 0, gravity, 0 } * (dt * dt);
         }
+        body->setInertial(inertial);
 
         // Adaptive warmstart (See original VBD paper)
-        glm::vec3 accel = (body->velocity - body->prevVelocity) / dt;
+        glm::vec3 prevVel = body->getPrevVelocity();
+        glm::vec3 accel = (vel - prevVel) / dt;
         float accelExt = accel.y * sign(gravity);
         float accelWeight = glm::clamp(accelExt / glm::abs(gravity), 0.0f, 1.0f);
         if (!isfinite(accelWeight)) accelWeight = 0.0f;
 
         // Save initial position (x-) and compute warmstarted position (See original VBD paper)
-        body->initial = body->position;
-        body->position = body->position + body->velocity * dt + glm::vec3{ 0, gravity, 0 } * (accelWeight * dt * dt);
+        body->setInitial(pos);
+        glm::vec3 newPos = pos + vel * dt + glm::vec3{ 0, gravity, 0 } * (accelWeight * dt * dt);
+        body->setPosition(newPos);
     }
 
     // Main solver loop
@@ -258,19 +255,23 @@ void Solver::step(float dt)
             currentAlpha = it < iterations ? 1.0f : 0.0f;
 
         // Primal update
-        for (Rigid* body = bodies; body != nullptr; body = body->next)
+        for (Rigid* body = bodies; body != nullptr; body = body->getNext())
         {
             // Skip static / kinematic bodies
-            if (body->mass <= 0)
+            if (body->getMass() <= 0)
                 continue;
 
             // Initialize left and right hand sides of the linear system (Eqs. 5, 6)
-            glm::mat3 M = diagonal(body->mass, body->mass, body->moment);
+            float mass = body->getMass();
+            float moment = body->getMoment();
+            glm::mat3 M = diagonal(mass, mass, moment);
             glm::mat3 lhs = M / (dt * dt);
-            glm::vec3 rhs = M / (dt * dt) * (body->position - body->inertial);
+            glm::vec3 pos = body->getPosition();
+            glm::vec3 inertial = body->getInertial();
+            glm::vec3 rhs = M / (dt * dt) * (pos - inertial);
 
             // Iterate over all forces acting on the body
-            for (Force* force = body->forces; force != nullptr; force = (force->bodyA == body) ? force->nextA : force->nextB)
+            for (Force* force = body->getForces(); force != nullptr; force = (force->bodyA == body) ? force->nextA : force->nextB)
             {
                 // Compute constraint and its derivatives
                 force->computeConstraint(currentAlpha);
@@ -294,7 +295,8 @@ void Solver::step(float dt)
             }
 
             // Solve the SPD linear system using LDL and apply the update (Eq. 4)
-            body->position -= solve(lhs, rhs);
+            pos -= solve(lhs, rhs);
+            body->setPosition(pos);
         }
 
         // Dual update, only for non stabilized iterations in the case of post stabilization
@@ -329,13 +331,18 @@ void Solver::step(float dt)
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
         if (it == iterations - 1)
         {
-            for (Rigid* body = bodies; body != nullptr; body = body->next)
+            for (Rigid* body = bodies; body != nullptr; body = body->getNext())
             {
-                body->prevVelocity = body->velocity;
-                if (body->mass > 0)
-                    body->velocity = (body->position - body->initial) / dt;
+                glm::vec3 vel = body->getVelocity();
+                body->setPrevVelocity(vel);
+                if (body->getMass() > 0) {
+                    glm::vec3 pos = body->getPosition();
+                    glm::vec3 initial = body->getInitial();
+                    vel = (pos - initial) / dt;
+                    body->setVelocity(vel);
+                }
 
-                body->node->setPosition(body->position);
+                body->getNode()->setPosition(body->getPosition());
             }
         }
     }

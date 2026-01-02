@@ -21,13 +21,13 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
 {
     this->stiffness[0] = stiffness;
     if (this->rest < 0)
-        this->rest = length(transform(bodyA->position, rA) - transform(bodyB->position, rB));
+        this->rest = length(transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB));
 }
 
 void Spring::computeConstraint(float alpha)
 {
     // Compute constraint function at current state C(x)
-    C[0] = length(transform(bodyA->position, rA) - transform(bodyB->position, rB)) - rest;
+    C[0] = length(transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB)) - rest;
 }
 
 void Spring::computeDerivatives(Rigid* body)
@@ -37,7 +37,7 @@ void Spring::computeDerivatives(Rigid* body)
     glm::mat2 S = glm::mat2(0, 1, -1, 0);  // [0 -1; 1 0] -> columns (0,1), (-1,0)
     glm::mat2 I = glm::mat2(1, 0, 0, 1);   // Identity: columns (1,0), (0,1)
 
-    glm::vec2 d = transform(bodyA->position, rA) - transform(bodyB->position, rB);
+    glm::vec2 d = transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB);
     float dlen2 = dot(d, d);
     if (dlen2 == 0)
         return;
@@ -48,8 +48,8 @@ void Spring::computeDerivatives(Rigid* body)
 
     if (body == bodyA)
     {
-        glm::vec2 Sr = rotate(bodyA->position.z, S * rA);
-        glm::vec2 r = rotate(bodyA->position.z, rA);
+        glm::vec2 Sr = rotate(bodyA->getPosition().z, S * rA);
+        glm::vec2 r = rotate(bodyA->getPosition().z, rA);
 
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
@@ -69,8 +69,8 @@ void Spring::computeDerivatives(Rigid* body)
     }
     else
     {
-        glm::vec2 Sr = rotate(bodyB->position.z, S * rB);
-        glm::vec2 r = rotate(bodyB->position.z, rB);
+        glm::vec2 Sr = rotate(bodyB->getPosition().z, S * rB);
+        glm::vec2 r = rotate(bodyB->getPosition().z, rB);
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 

@@ -95,7 +95,7 @@ public:
      * @param index Index of the collider
      * @return Reference to the vector of vertices
      */
-    std::vector<glm::vec2>& getVerts(std::size_t index) { return vertices[index]; }
+    std::vector<glm::vec2>& getVertices(std::size_t index) { return vertices[index]; }
     
     /**
      * @brief Gets the center of mass for the collider at the specified index

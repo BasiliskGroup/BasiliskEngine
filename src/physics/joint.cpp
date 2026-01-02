@@ -25,18 +25,18 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
     this->fmax[2] = fracture;
     this->fmin[2] = -fracture;
     this->fracture[2] = fracture;
-    this->restAngle = (bodyA ? bodyA->position.z : 0.0f) - bodyB->position.z;
-    this->torqueArm = lengthSq((bodyA ? bodyA->size : glm::vec2{ 0, 0 }) + bodyB->size);
+    this->restAngle = (bodyA ? bodyA->getPosition().z : 0.0f) - bodyB->getPosition().z;
+    this->torqueArm = lengthSq((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize());
 }
 
 bool Joint::initialize()
 {
     // Store constraint function at beginnning of timestep C(x-)
     // Note: if bodyA is null, it is assumed that the joint connects a body to the world space position rA
-    glm::vec2 c0xy = (bodyA ? transform(bodyA->position, rA) : rA) - transform(bodyB->position, rB);
+    glm::vec2 c0xy = (bodyA ? transform(bodyA->getPosition(), rA) : rA) - transform(bodyB->getPosition(), rB);
     C0.x = c0xy.x;
     C0.y = c0xy.y;
-    C0.z = ((bodyA ? bodyA->position.z : 0) - bodyB->position.z - restAngle) * torqueArm;
+    C0.z = ((bodyA ? bodyA->getPosition().z : 0) - bodyB->getPosition().z - restAngle) * torqueArm;
     return stiffness[0] != 0 || stiffness[1] != 0 || stiffness[2] != 0;
 }
 
@@ -44,10 +44,10 @@ void Joint::computeConstraint(float alpha)
 {
     // Compute constraint function at current state C(x)
     glm::vec3 Cn;
-    glm::vec2 cnxy = (bodyA ? transform(bodyA->position, rA) : rA) - transform(bodyB->position, rB);
+    glm::vec2 cnxy = (bodyA ? transform(bodyA->getPosition(), rA) : rA) - transform(bodyB->getPosition(), rB);
     Cn.x = cnxy.x;
     Cn.y = cnxy.y;
-    Cn.z = ((bodyA ? bodyA->position.z : 0) - bodyB->position.z - restAngle) * torqueArm;
+    Cn.z = ((bodyA ? bodyA->getPosition().z : 0) - bodyB->getPosition().z - restAngle) * torqueArm;
 
     for (int i = 0; i < rows(); i++)
     {
@@ -64,7 +64,7 @@ void Joint::computeDerivatives(Rigid* body)
     // Compute the first and second derivatives for the desired body
     if (body == bodyA)
     {
-        glm::vec2 r = rotate(bodyA->position.z, rA);
+        glm::vec2 r = rotate(bodyA->getPosition().z, rA);
         J[0] = glm::vec3(1.0f, 0.0f, -r.y);
         J[1] = glm::vec3(0.0f, 1.0f, r.x);
         J[2] = glm::vec3(0.0f, 0.0f, torqueArm);
@@ -75,7 +75,7 @@ void Joint::computeDerivatives(Rigid* body)
     }
     else
     {
-        glm::vec2 r = rotate(bodyB->position.z, rB);
+        glm::vec2 r = rotate(bodyB->getPosition().z, rB);
         J[0] = glm::vec3(-1.0f, 0.0f, r.y);
         J[1] = glm::vec3(0.0f, -1.0f, -r.x);
         J[2] = glm::vec3(0.0f, 0.0f, -torqueArm);

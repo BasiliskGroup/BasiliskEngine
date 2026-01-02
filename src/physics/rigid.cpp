@@ -12,42 +12,32 @@
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/nodes/node2d.h>
+#include <basilisk/physics/tables/bodyTable.h>
 
 namespace bsk::internal {
 
 Rigid::Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity)
-    : solver(solver), node(node), forces(nullptr), next(nullptr), prev(nullptr), position(position), velocity(velocity), prevVelocity(velocity), size(size), friction(friction)
-{
+    : solver(solver), node(node), forces(nullptr), next(nullptr), prev(nullptr), collider(collider) {
     // Add to linked list
     solver->insert(this);
-
-    // add collider
-    this->collider = collider;
-
-    // Compute mass properties and bounding radius
-    mass = size.x * size.y * density;
-    moment = mass * dot(size, size) / 12.0f;
-    radius = length(size * 0.5f);
+    this->solver->getBodyTable()->insert(this, position, size, density, friction, velocity, collider);
 }
 
 
-Rigid::~Rigid()
-{
+Rigid::~Rigid() {
     // Remove from linked list
     solver->remove(this);
 
     // Delete all forces
     Force* curForce = forces;
-    while (curForce)
-    {
+    while (curForce) {
         Force* nextForce = (curForce->bodyA == this) ? curForce->nextA : curForce->nextB;
         delete curForce;
         curForce = nextForce;
     }
 }
 
-bool Rigid::constrainedTo(Rigid* other) const
-{
+bool Rigid::constrainedTo(Rigid* other) const {
     // Check if this body is constrained to the other body
     for (Force* f = forces; f != nullptr; f = (f->bodyA == this) ? f->nextA : f->nextB)
         if ((f->bodyA == this && f->bodyB == other) || (f->bodyA == other && f->bodyB == this))
@@ -55,48 +45,35 @@ bool Rigid::constrainedTo(Rigid* other) const
     return false;
 }
 
-void Rigid::insert(Force* force)
-{
-    if (force == nullptr)
-    {
+void Rigid::insert(Force* force) {
+    if (force == nullptr) {
         return;
     }
 
     // Determine if this body is bodyA or bodyB
-    if (force->bodyA == this)
-    {
+    if (force->bodyA == this) {
         // This is bodyA
         force->nextA = forces;
         force->prevA = nullptr;
 
-        if (forces)
-        {
+        if (forces) {
             // Update the prev pointer of the old head
-            if (forces->bodyA == this)
-            {
+            if (forces->bodyA == this) {
                 forces->prevA = force;
-            }
-            else
-            {
+            } else {
                 forces->prevB = force;
             }
         }
-    }
-    else
-    {
+    } else {
         // This is bodyB
         force->nextB = forces;
         force->prevB = nullptr;
 
-        if (forces)
-        {
+        if (forces) {
             // Update the prev pointer of the old head
-            if (forces->bodyA == this)
-            {
+            if (forces->bodyA == this) {
                 forces->prevA = force;
-            }
-            else
-            {
+            } else {
                 forces->prevB = force;
             }
         }
@@ -105,10 +82,8 @@ void Rigid::insert(Force* force)
     forces = force;
 }
 
-void Rigid::remove(Force* force)
-{
-    if (force == nullptr)
-    {
+void Rigid::remove(Force* force) {
+    if (force == nullptr) {
         return;
     }
 
@@ -118,94 +93,149 @@ void Rigid::remove(Force* force)
     Force* prev = isBodyA ? force->prevA : force->prevB;
     Force* next = isBodyA ? force->nextA : force->nextB;
 
-    if (prev)
-    {
+    if (prev) {
         // Update prev's next pointer
-        if (prev->bodyA == this)
-        {
+        if (prev->bodyA == this) {
             prev->nextA = next;
-        }
-        else
-        {
+        } else {
             prev->nextB = next;
         }
-    }
-    else
-    {
+    } else {
         // This was the head of the list
         forces = next;
     }
 
-    if (next)
-    {
+    if (next) {
         // Update next's prev pointer
-        if (next->bodyA == this)
-        {
+        if (next->bodyA == this) {
             next->prevA = prev;
-        }
-        else
-        {
+        } else {
             next->prevB = prev;
         }
     }
 
     // Clear this force's pointers
-    if (isBodyA)
-    {
+    if (isBodyA) {
         force->prevA = nullptr;
         force->nextA = nullptr;
-    }
-    else
-    {
+    } else {
         force->prevB = nullptr;
         force->nextB = nullptr;
     }
 }
 
-void Rigid::setPosition(const glm::vec3& pos)
-{
-    position = pos;
+void Rigid::setPosition(const glm::vec3& pos) {
+    this->solver->getBodyTable()->setPos(this->index, pos);
 }
 
-void Rigid::setScale(const glm::vec2& scale)
-{
-    size = scale;
+void Rigid::setScale(const glm::vec2& scale) {
+    this->solver->getBodyTable()->setScale(this->index, scale);
 }
 
-void Rigid::setVelocity(const glm::vec3& vel)
-{
-    velocity = vel;
+void Rigid::setVelocity(const glm::vec3& vel) {
+    this->solver->getBodyTable()->setVel(this->index, vel);
 }
 
-glm::vec3 Rigid::getVelocity() const
-{
-    return velocity;
+glm::vec3 Rigid::getVelocity() const {
+    return this->solver->getBodyTable()->getVel(this->index);
 }
 
-float Rigid::getDensity() const
-{
+float Rigid::getDensity() const {
+    float mass = this->solver->getBodyTable()->getMass(this->index);
+    glm::vec2 size = this->solver->getBodyTable()->getScale(this->index);
     return mass / (size.x * size.y);
 }
 
-float Rigid::getFriction() const
-{
-    return friction;
+float Rigid::getFriction() const {
+    return this->solver->getBodyTable()->getFriction(this->index);
 }
 
-glm::vec3 Rigid::getVel() const
-{
-    return velocity;
+glm::vec3 Rigid::getVel() const {
+    return this->solver->getBodyTable()->getVel(this->index);
 }
 
-Solver* Rigid::getSolver() const
-{
-    return solver;
+void Rigid::setInitial(const glm::vec3& initial) {
+    this->solver->getBodyTable()->setInitial(this->index, initial);
 }
 
-void Rigid::setNode(void* node)
-{
-    // Node pointer storage - not used in physics but needed for compatibility
-    // The node pointer is not stored in the Rigid struct in the new implementation
+void Rigid::setInertial(const glm::vec3& inertial) {
+    this->solver->getBodyTable()->setInertial(this->index, inertial);
+}
+
+void Rigid::setPrevVelocity(const glm::vec3& prevVelocity) {
+    this->solver->getBodyTable()->setPrevVel(this->index, prevVelocity);
+}
+
+void Rigid::setMass(float mass) {
+    this->solver->getBodyTable()->setMass(this->index, mass);
+}
+
+void Rigid::setMoment(float moment) {
+    this->solver->getBodyTable()->setMoment(this->index, moment);
+}
+
+void Rigid::setFriction(float friction) {
+    this->solver->getBodyTable()->setFriction(this->index, friction);
+}
+
+void Rigid::setRadius(float radius) {
+    this->solver->getBodyTable()->setRadius(this->index, radius);
+}
+
+void Rigid::setCollider(Collider* collider) {
+    this->collider = collider;
+}
+
+void Rigid::setForces(Force* forces) {
+    this->forces = forces;
+}
+
+void Rigid::setNext(Rigid* next) {
+    this->next = next;
+}
+
+void Rigid::setPrev(Rigid* prev) {
+    this->prev = prev;
+}
+
+void Rigid::setNode(Node2D* node) {
+    this->node = node;
+}
+
+void Rigid::setIndex(std::size_t index) {
+    this->index = index;
+}
+
+glm::vec3 Rigid::getPosition() const {
+    return this->solver->getBodyTable()->getPos(this->index);
+}
+
+glm::vec3 Rigid::getInitial() const {
+    return this->solver->getBodyTable()->getInitial(this->index);
+}
+
+glm::vec3 Rigid::getInertial() const {
+    return this->solver->getBodyTable()->getInertial(this->index);
+}
+
+glm::vec3 Rigid::getPrevVelocity() const {
+    return this->solver->getBodyTable()->getPrevVel(this->index);
+}
+
+glm::vec2 Rigid::getSize() const {
+    return this->solver->getBodyTable()->getScale(this->index);
+}
+
+float Rigid::getMass() const {
+    return this->solver->getBodyTable()->getMass(this->index);
+}
+
+float Rigid::getMoment() const {
+    return this->solver->getBodyTable()->getMoment(this->index);
+}
+
+float Rigid::getRadius() const {
+    return this->solver->getBodyTable()->getRadius(this->index);
 }
 
 }

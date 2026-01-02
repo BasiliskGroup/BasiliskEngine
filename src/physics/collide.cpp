@@ -181,13 +181,13 @@ int Manifold::collide(Rigid* bodyA, Rigid* bodyB, Contact* contacts)
 	glm::vec2 normal;
 
 	// Setup
-	glm::vec2 hA = bodyA->size * 0.5f;
-	glm::vec2 hB = bodyB->size * 0.5f;
+	glm::vec2 hA = bodyA->getSize() * 0.5f;
+	glm::vec2 hB = bodyB->getSize() * 0.5f;
 
-	glm::vec2 posA = glm::vec2(bodyA->position.x, bodyA->position.y);
-	glm::vec2 posB = glm::vec2(bodyB->position.x, bodyB->position.y);
+	glm::vec2 posA = glm::vec2(bodyA->getPosition().x, bodyA->getPosition().y);
+	glm::vec2 posB = glm::vec2(bodyB->getPosition().x, bodyB->getPosition().y);
 
-	glm::mat2 RotA = rotation(bodyA->position.z), RotB = rotation(bodyB->position.z);
+	glm::mat2 RotA = rotation(bodyA->getPosition().z), RotB = rotation(bodyB->getPosition().z);
 
 	glm::mat2 RotAT = transpose(RotA);
 	glm::mat2 RotBT = transpose(RotB);

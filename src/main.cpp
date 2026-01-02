@@ -27,24 +27,50 @@ int main() {
     // Create a box collider (unit box vertices) - can be shared by all box-shaped objects
     bsk::Collider* boxCollider = new bsk::Collider(scene->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
 
-    // Create floor (bricks)
-    bsk::Node2D* floor = new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={0, -8}, .rotation=0, .scale={50, 1.5}, .collider=boxCollider, .density=-1 });
-
-    // Create unmovable obstacles around the scene (bricks)
-    // Left wall
-    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={-12, 0}, .rotation=0, .scale={1.5, 20}, .collider=boxCollider, .density=-1 });
-    // Right wall
-    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={12, 0}, .rotation=0, .scale={1.5, 20}, .collider=boxCollider, .density=-1 });
-    // Top platform
-    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={0, 10}, .rotation=0, .scale={15, 1}, .collider=boxCollider, .density=-1 });
-    // Middle left obstacle
-    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={-8, -2}, .rotation=0, .scale={2, 3}, .collider=boxCollider, .density=-1 });
-    // Middle right obstacle
-    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={8, -2}, .rotation=0, .scale={2, 3}, .collider=boxCollider, .density=-1 });
-    // Platform on the right
-    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={10, 3}, .rotation=0, .scale={3, 1}, .collider=boxCollider, .density=-1 });
-    // Platform on the left
-    new bsk::Node2D(scene, { .mesh=quad, .material=bricksMaterial, .position={-10, 3}, .rotation=0, .scale={3, 1}, .collider=boxCollider, .density=-1 });
+    // Create a rotating circle made of rectangles with bumps (like a drying machine)
+    const int numSegments = 16;  // Number of rectangles in the circle
+    const float circleRadius = 12.5f;  // Radius of the circle
+    const float segmentWidth = 0.5f;  // Width of each rectangle
+    const float segmentLength = 6.0f;  // Length of each rectangle
+    const float rotationSpeed = 0.1f;  // Radians per second
+    const float bumpSize = 0.5f;  // Size of the bumps
+    
+    std::vector<bsk::Node2D*> circleSegments;
+    std::vector<bsk::Node2D*> circleBumps;  // Store bumps separately for rotation updates
+    circleSegments.reserve(numSegments);
+    circleBumps.reserve(numSegments);
+    
+    // Create rectangles arranged in a circle with bumps
+    for (int i = 0; i < numSegments; i++) {
+        float angle = (2.0f * static_cast<float>(M_PI) * i) / numSegments;
+        float x = circleRadius * cosf(angle);
+        float y = circleRadius * sinf(angle);
+        
+        // Main segment
+        bsk::Node2D* segment = new bsk::Node2D(scene, {
+            .mesh=quad,
+            .material=bricksMaterial,
+            .position={x, y},
+            .rotation=angle + static_cast<float>(M_PI) / 2.0f,  // Perpendicular to radius
+            .scale={segmentLength, segmentWidth},
+            .collider=boxCollider,
+            .density=-1  // Unmovable
+        });
+        circleSegments.push_back(segment);
+        
+        bsk::Node2D* bump = new bsk::Node2D(scene, {
+            .mesh=quad,
+            .material=bricksMaterial,
+            .position={x, y},
+            .rotation=angle + static_cast<float>(M_PI) / 2.0f,  // Same rotation as segment
+            .scale={bumpSize, 10 * bumpSize},
+            .collider=boxCollider,
+            .density=-1  // Unmovable
+        });
+        circleBumps.push_back(bump);
+    }
+    
+    float circleRotation = 0.0f;  // Current rotation angle of the circle
 
     // Demo: Create a chain of long bars connected with Joints (rope texture)
     std::vector<bsk::Node2D*> chainNodes;
@@ -78,13 +104,13 @@ int main() {
         prevNode = node;
     }
 
-    // Demo: Create boxes connected with Springs (metal texture)
+    // Demo: Create boxes connected with Springs (metal texture) - closer to origin
     std::vector<bsk::Node2D*> springNodes;
     for (int i = 0; i < 5; i++) {
         bsk::Node2D* node = new bsk::Node2D(scene, { 
             .mesh=quad, 
             .material=metalMaterial, 
-            .position={6.0f + i * 2.5f, 10.0f}, 
+            .position={-2.0f + i * 1.5f, 2.0f},  // Closer to origin
             .rotation=0, 
             .scale={1.2f, 1.2f},  // Scaled up
             .collider=boxCollider 
@@ -107,7 +133,7 @@ int main() {
     }
 
     // Add some free-floating boxes that will bounce around (container texture)
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 7; i++) {
         new bsk::Node2D(scene, { 
             .mesh=quad, 
             .material=containerMaterial, 
@@ -123,19 +149,46 @@ int main() {
     // Main loop continues as long as the window is open
     int i = 0;
     while (engine->isRunning()) {
-
-        // std::cout << square->getChildren().size() << std::endl;
+        
+        // Update rotating circle manually
+        double dt = engine->getDeltaTime();
+        circleRotation += rotationSpeed * static_cast<float>(dt);
+        
+        // Update each segment's position and rotation
+        for (int j = 0; j < numSegments; j++) {
+            float baseAngle = (2.0f * static_cast<float>(M_PI) * j) / numSegments;
+            float currentAngle = baseAngle + circleRotation;
+            float x = circleRadius * cosf(currentAngle);
+            float y = circleRadius * sinf(currentAngle);
+            
+            // Update main segment
+            circleSegments[j]->setPosition({x, y});
+            circleSegments[j]->setRotation(currentAngle + static_cast<float>(M_PI) / 2.0f);
+            
+            // Update physics body position and rotation if it exists
+            if (circleSegments[j]->getRigid() != nullptr) {
+                circleSegments[j]->getRigid()->setPosition({x, y, currentAngle + static_cast<float>(M_PI) / 2.0f});
+            }
+            
+            circleBumps[j]->setPosition({x, y});
+            circleBumps[j]->setRotation(currentAngle + static_cast<float>(M_PI) / 2.0f);
+            
+            if (circleBumps[j]->getRigid() != nullptr) {
+                circleBumps[j]->getRigid()->setPosition({x, y, currentAngle + static_cast<float>(M_PI) / 2.0f});
+            }
+        }
 
         // Iterate through forces and visualize contact points
-        for (bsk::Force* force = scene->getSolver()->forces; force != nullptr; force = force->next) {
+        for (bsk::Force* force = scene->getSolver()->getForces(); force != nullptr; force = force->getNext()) {
             bsk::Manifold* manifold = dynamic_cast<bsk::Manifold*>(force);
             if (manifold == nullptr) continue;
 
             // Iterate through contacts in the manifold
-            for (int i = 0; i < manifold->numContacts; i++) {
+            for (int i = 0; i < manifold->getNumContacts(); i++) {
                 // Transform local contact positions to world coordinates
-                glm::vec2 rAW = bsk::internal::transform(manifold->bodyA->position, manifold->contacts[i].rA);
-                glm::vec2 rBW = bsk::internal::transform(manifold->bodyB->position, manifold->contacts[i].rB);
+                bsk::Manifold::Contact contact = manifold->getContact(i);
+                glm::vec2 rAW = bsk::internal::transform(manifold->getBodyA()->getPosition(), contact.rA);
+                glm::vec2 rBW = bsk::internal::transform(manifold->getBodyB()->getPosition(), contact.rB);
 
                 bsk::Node2D* nodeA = new bsk::Node2D(scene, { .mesh=quad, .material=metalMaterial, .position=rAW, .scale={0.125, 0.125} });
                 nodeA->setLayer(0.9);
