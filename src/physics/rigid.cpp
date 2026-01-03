@@ -1,15 +1,5 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
 #include <basilisk/physics/rigid.h>
+#include <basilisk/physics/forces/force.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/bodyTable.h>
@@ -31,7 +21,7 @@ Rigid::~Rigid() {
     // Delete all forces
     Force* curForce = forces;
     while (curForce) {
-        Force* nextForce = (curForce->bodyA == this) ? curForce->nextA : curForce->nextB;
+        Force* nextForce = (curForce->getBodyA() == this) ? curForce->getNextA() : curForce->getNextB();
         delete curForce;
         curForce = nextForce;
     }
@@ -39,8 +29,8 @@ Rigid::~Rigid() {
 
 bool Rigid::constrainedTo(Rigid* other) const {
     // Check if this body is constrained to the other body
-    for (Force* f = forces; f != nullptr; f = (f->bodyA == this) ? f->nextA : f->nextB)
-        if ((f->bodyA == this && f->bodyB == other) || (f->bodyA == other && f->bodyB == this))
+    for (Force* f = forces; f != nullptr; f = (f->getBodyA() == this) ? f->getNextA() : f->getNextB())
+        if ((f->getBodyA() == this && f->getBodyB() == other) || (f->getBodyA() == other && f->getBodyB() == this))
             return true;
     return false;
 }
@@ -51,30 +41,30 @@ void Rigid::insert(Force* force) {
     }
 
     // Determine if this body is bodyA or bodyB
-    if (force->bodyA == this) {
+    if (force->getBodyA() == this) {
         // This is bodyA
-        force->nextA = forces;
-        force->prevA = nullptr;
+        force->setNextA(forces);
+        force->setPrevA(nullptr);
 
         if (forces) {
             // Update the prev pointer of the old head
-            if (forces->bodyA == this) {
-                forces->prevA = force;
+            if (forces->getBodyA() == this) {
+                forces->setPrevA(force);
             } else {
-                forces->prevB = force;
+                forces->setPrevB(force);
             }
         }
     } else {
         // This is bodyB
-        force->nextB = forces;
-        force->prevB = nullptr;
+        force->setNextB(forces);
+        force->setPrevB(nullptr);
 
         if (forces) {
             // Update the prev pointer of the old head
-            if (forces->bodyA == this) {
-                forces->prevA = force;
+            if (forces->getBodyA() == this) {
+                forces->setPrevA(force);
             } else {
-                forces->prevB = force;
+                forces->setPrevB(force);
             }
         }
     }
@@ -88,17 +78,17 @@ void Rigid::remove(Force* force) {
     }
 
     // Determine if this body is bodyA or bodyB
-    bool isBodyA = (force->bodyA == this);
+    bool isBodyA = (force->getBodyA() == this);
 
-    Force* prev = isBodyA ? force->prevA : force->prevB;
-    Force* next = isBodyA ? force->nextA : force->nextB;
+    Force* prev = isBodyA ? force->getPrevA() : force->getPrevB();
+    Force* next = isBodyA ? force->getNextA() : force->getNextB();
 
     if (prev) {
         // Update prev's next pointer
-        if (prev->bodyA == this) {
-            prev->nextA = next;
+        if (prev->getBodyA() == this) {
+            prev->setNextA(next);
         } else {
-            prev->nextB = next;
+            prev->setNextB(next);
         }
     } else {
         // This was the head of the list
@@ -107,20 +97,20 @@ void Rigid::remove(Force* force) {
 
     if (next) {
         // Update next's prev pointer
-        if (next->bodyA == this) {
-            next->prevA = prev;
+        if (next->getBodyA() == this) {
+            next->setPrevA(prev);
         } else {
-            next->prevB = prev;
+            next->setPrevB(prev);
         }
     }
 
     // Clear this force's pointers
     if (isBodyA) {
-        force->prevA = nullptr;
-        force->nextA = nullptr;
+        force->setPrevA(nullptr);
+        force->setNextA(nullptr);
     } else {
-        force->prevB = nullptr;
-        force->nextB = nullptr;
+        force->setPrevB(nullptr);
+        force->setNextB(nullptr);
     }
 }
 

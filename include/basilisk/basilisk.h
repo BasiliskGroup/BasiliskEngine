@@ -31,6 +31,11 @@
 #include "camera/camera2d.h"
 
 #include "physics/solver.h"
+#include "physics/forces/force.h"
+#include "physics/forces/joint.h"
+#include "physics/forces/spring.h"
+#include "physics/forces/motor.h"
+#include "physics/forces/manifold.h"
 #include "physics/collision/collider.h"
 
 namespace bsk {

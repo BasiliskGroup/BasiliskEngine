@@ -26,6 +26,8 @@ SOFTWARE.
 */
 
 #include <basilisk/physics/solver.h>
+#include <basilisk/physics/forces/manifold.h>
+#include <basilisk/physics/rigid.h>
 #include <basilisk/physics/maths.h>
 
 // Box vertex and edge numbering:

@@ -1,4 +1,5 @@
 #include <basilisk/physics/tables/bodyTable.h>
+#include <basilisk/physics/rigid.h>
 #include <basilisk/nodes/node2d.h>
 
 namespace bsk::internal {

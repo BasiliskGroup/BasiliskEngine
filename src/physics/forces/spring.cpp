@@ -10,7 +10,8 @@
 */
 
 #include <basilisk/util/includes.h>
-#include <basilisk/physics/force.h>
+#include <basilisk/physics/forces/spring.h>
+#include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/maths.h>
 

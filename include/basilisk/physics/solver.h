@@ -11,8 +11,7 @@
 
 #pragma once
 
-#include <basilisk/physics/rigid.h>
-#include <basilisk/physics/force.h>
+#include <basilisk/util/includes.h>
 
 #define PENALTY_MIN 1.0f              // Minimum penalty parameter
 #define PENALTY_MAX 1000000000.0f     // Maximum penalty parameter
@@ -20,49 +19,16 @@
 #define STICK_THRESH 0.01f            // Position threshold for sticking contacts (ie static friction)
 
 namespace bsk::internal {
-    class ColliderTable;
-    class BodyTable;
-}
 
-namespace bsk::internal {
-
-struct PolytopeFace {
-    glm::vec2 normal;
-    float distance;
-    ushort va;
-    ushort vb;
-
-    PolytopeFace() = default;
-    PolytopeFace(ushort va, ushort vb, glm::vec2 normal, float distance)
-        : normal(normal), distance(distance), va(va), vb(vb) {}
-};
-
-using Simplex = std::array<glm::vec2, 3>;
-
-// add 3 since the simplex starts with 3 vertices
-using SpSet = std::array<ushort, EPA_ITERATIONS + 3>;
-using SpArray = std::array<glm::vec2, EPA_ITERATIONS + 3>;
-using Polytope = std::array<PolytopeFace, EPA_ITERATIONS + 3>;
-
-struct CollisionPair {
-    // gjk
-    Simplex simplex;
-    glm::vec2 searchDir;
-
-    // epa // TODO reuse this memory for multiple collision pairs
-    SpArray sps;
-    SpSet spSet;
-    Polytope polytope;
-
-    CollisionPair() = default;
-};
+// Forward declarations
+class Rigid;
+class Force;
+class ColliderTable;
+class BodyTable;
 
 // Core solver class which holds all the rigid bodies and forces, and has logic to step the simulation forward in time
 class Solver
 {
-    friend class Rigid;
-    friend class Force;
-    
 private:
     float gravity;      // Gravity
     int iterations;     // Solver iterations
@@ -117,10 +83,6 @@ public:
     void setPostStabilize(bool value) { postStabilize = value; }
     void setBodies(Rigid* value) { bodies = value; }
     void setForces(Force* value) { forces = value; }
-    
-    // Mutable references for friend classes (for linked list operations)
-    Rigid*& getBodiesRef() { return bodies; }
-    Force*& getForcesRef() { return forces; }
 };
 
 }

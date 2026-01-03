@@ -1,4 +1,9 @@
 #include <basilisk/basilisk.h>
+#include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/forces/manifold.h>
+#include <basilisk/physics/forces/joint.h>
+#include <basilisk/physics/forces/spring.h>
+#include <basilisk/physics/rigid.h>
 #include <basilisk/physics/maths.h>
 
 int main() {
@@ -209,8 +214,6 @@ int main() {
             delete node;
         }
         contactNodes.clear();
-
-        // if (square->getPosition().y < -2.1) break;
 
         i++;
     }

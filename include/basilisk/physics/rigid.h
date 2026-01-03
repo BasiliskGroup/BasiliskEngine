@@ -28,12 +28,6 @@ struct CollisionPair;
 // Holds all the state for a single rigid body that is needed by AVBD
 class Rigid
 {
-    // Friend functions for collision detection (need direct access for performance)
-    // These are declared in collision/gjk.h
-    friend bool gjk(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair);
-    friend void addSupport(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair, std::size_t insertIndex);
-    friend void getFar(const Rigid* body, const glm::vec2 &dir, glm::vec2 &simplexLocal);
-    
 private:
     Solver* solver;
     Node2D* node;

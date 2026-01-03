@@ -1,6 +1,5 @@
 #include <basilisk/physics/collision/gjk.h>
-#include <basilisk/util/constants.h>
-#include <basilisk/physics/solver.h>
+#include <basilisk/physics/rigid.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/util/maths.h>
 #include <basilisk/physics/collision/collider.h>

@@ -10,6 +10,9 @@
 */
 
 #include <basilisk/physics/solver.h>
+#include <basilisk/physics/rigid.h>
+#include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/colliderTable.h>
@@ -94,12 +97,12 @@ void Solver::insert(Force* force)
         return;
     }
 
-    force->next = forces;
-    force->prev = nullptr;
+    force->setNext(forces);
+    force->setPrev(nullptr);
 
     if (forces)
     {
-        forces->prev = force;
+        forces->setPrev(force);
     }
 
     forces = force;
@@ -112,24 +115,24 @@ void Solver::remove(Force* force)
         return;
     }
 
-    if (force->prev)
+    if (force->getPrev())
     {
-        force->prev->next = force->next;
+        force->getPrev()->setNext(force->getNext());
     }
     else
     {
         // This was the head of the list
-        forces = force->next;
+        forces = force->getNext();
     }
 
-    if (force->next)
+    if (force->getNext())
     {
-        force->next->prev = force->prev;
+        force->getNext()->setPrev(force->getPrev());
     }
 
     // Clear pointers
-    force->next = nullptr;
-    force->prev = nullptr;
+    force->setNext(nullptr);
+    force->setPrev(nullptr);
 }
 
 void Solver::defaultParams()
@@ -184,7 +187,7 @@ void Solver::step(float dt)
         if (!force->initialize())
         {
             // Force has returned false meaning it is inactive, so remove it from the solver
-            Force* next = force->next;
+            Force* next = force->getNext();
             delete force;
             force = next;
         }
@@ -196,21 +199,26 @@ void Solver::step(float dt)
                 {
                     // With post stabilization, we can reuse the full lambda from the previous step,
                     // and only need to reduce the penalty parameters
-                    force->penalty[i] = glm::clamp(force->penalty[i] * gamma, PENALTY_MIN, PENALTY_MAX);
+                    float penalty = force->getPenalty(i);
+                    force->setPenalty(i, glm::clamp(penalty * gamma, PENALTY_MIN, PENALTY_MAX));
                 }
                 else
                 {
                     // Warmstart the dual variables and penalty parameters (Eq. 19)
                     // Penalty is safely clamped to a minimum and maximum value
-                    force->lambda[i] = force->lambda[i] * alpha * gamma;
-                    force->penalty[i] = glm::clamp(force->penalty[i] * gamma, PENALTY_MIN, PENALTY_MAX);
+                    float lambda = force->getLambda(i);
+                    force->setLambda(i, lambda * alpha * gamma);
+                    float penalty = force->getPenalty(i);
+                    force->setPenalty(i, glm::clamp(penalty * gamma, PENALTY_MIN, PENALTY_MAX));
                 }
 
                 // If it's not a hard constraint, we don't let the penalty exceed the material stiffness
-                force->penalty[i] = glm::min(force->penalty[i], force->stiffness[i]);
+                float penalty = force->getPenalty(i);
+                float stiffness = force->getStiffness(i);
+                force->setPenalty(i, glm::min(penalty, stiffness));
             }
 
-            force = force->next;
+            force = force->getNext();
         }
     }
 
@@ -271,7 +279,7 @@ void Solver::step(float dt)
             glm::vec3 rhs = M / (dt * dt) * (pos - inertial);
 
             // Iterate over all forces acting on the body
-            for (Force* force = body->getForces(); force != nullptr; force = (force->bodyA == body) ? force->nextA : force->nextB)
+            for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB())
             {
                 // Compute constraint and its derivatives
                 force->computeConstraint(currentAlpha);
@@ -280,17 +288,24 @@ void Solver::step(float dt)
                 for (int i = 0; i < force->rows(); i++)
                 {
                     // Use lambda as 0 if it's not a hard constraint
-                    float lambda = isinf(force->stiffness[i]) ? force->lambda[i] : 0.0f;
+                    float stiffness = force->getStiffness(i);
+                    float lambda = isinf(stiffness) ? force->getLambda(i) : 0.0f;
 
                     // Compute the clamped force magnitude (Sec 3.2)
-                    float f = glm::clamp(force->penalty[i] * force->C[i] + lambda, force->fmin[i], force->fmax[i]);
+                    float penalty = force->getPenalty(i);
+                    float C = force->getC(i);
+                    float fmin = force->getFmin(i);
+                    float fmax = force->getFmax(i);
+                    float f = glm::clamp(penalty * C + lambda, fmin, fmax);
 
                     // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
-                    glm::mat3 G = diagonal(length(force->H[i][0]), length(force->H[i][1]), length(force->H[i][2])) * glm::abs(f);
+                    glm::mat3 H = force->getH(i);
+                    glm::mat3 G = diagonal(length(H[0]), length(H[1]), length(H[2])) * glm::abs(f);
 
                     // Accumulate force (Eq. 13) and hessian (Eq. 17)
-                    rhs += force->J[i] * f;
-                    lhs += outer(force->J[i], force->J[i] * force->penalty[i]) + G;
+                    glm::vec3 J = force->getJ(i);
+                    rhs += J * f;
+                    lhs += outer(J, J * penalty) + G;
                 }
             }
 
@@ -304,7 +319,7 @@ void Solver::step(float dt)
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
         if (it < iterations)
         {
-            for (Force* force = forces; force != nullptr; force = force->next)
+            for (Force* force = forces; force != nullptr; force = force->getNext())
             {
                 // Compute constraint
                 force->computeConstraint(currentAlpha);
@@ -312,18 +327,27 @@ void Solver::step(float dt)
                 for (int i = 0; i < force->rows(); i++)
                 {
                     // Use lambda as 0 if it's not a hard constraint
-                    float lambda = isinf(force->stiffness[i]) ? force->lambda[i] : 0.0f;
+                    float stiffness = force->getStiffness(i);
+                    float lambda = isinf(stiffness) ? force->getLambda(i) : 0.0f;
 
                     // Update lambda (Eq 11)
-                    force->lambda[i] = glm::clamp(force->penalty[i] * force->C[i] + lambda, force->fmin[i], force->fmax[i]);
+                    float penalty = force->getPenalty(i);
+                    float C = force->getC(i);
+                    float fmin = force->getFmin(i);
+                    float fmax = force->getFmax(i);
+                    float newLambda = glm::clamp(penalty * C + lambda, fmin, fmax);
+                    force->setLambda(i, newLambda);
 
                     // Disable the force if it has exceeded its fracture threshold
-                    if (fabsf(force->lambda[i]) >= force->fracture[i])
+                    float fracture = force->getFracture(i);
+                    if (fabsf(newLambda) >= fracture)
                         force->disable();
 
                     // Update the penalty parameter and clamp to material stiffness if we are within the force bounds (Eq. 16)
-                    if (force->lambda[i] > force->fmin[i] && force->lambda[i] < force->fmax[i])
-                        force->penalty[i] = glm::min(force->penalty[i] + beta * glm::abs(force->C[i]), glm::min(PENALTY_MAX, force->stiffness[i]));
+                    if (newLambda > fmin && newLambda < fmax) {
+                        float newPenalty = glm::min(penalty + beta * glm::abs(C), glm::min(PENALTY_MAX, stiffness));
+                        force->setPenalty(i, newPenalty);
+                    }
                 }
             }
         }

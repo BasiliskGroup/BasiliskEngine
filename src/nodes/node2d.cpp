@@ -1,4 +1,5 @@
 #include <basilisk/scene/sceneRoute.h>
+#include <basilisk/physics/rigid.h>
 
 namespace bsk::internal {
 
