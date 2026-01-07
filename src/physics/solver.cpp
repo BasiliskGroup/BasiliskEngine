@@ -17,6 +17,9 @@
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/colliderTable.h>
 #include <basilisk/physics/tables/bodyTable.h>
+#include <basilisk/util/time.h>
+#include <basilisk/physics/collision/bvh.h>
+
 
 namespace bsk::internal {
 
@@ -137,7 +140,8 @@ void Solver::remove(Force* force)
 
 void Solver::defaultParams()
 {
-    gravity = -10.0f;
+    // gravity = { 0.0f, -9.81f, 0.0f };
+    gravity = std::nullopt;
     iterations = 10;
 
     // Note: in the paper, beta is suggested to be [1, 1000]. Technically, the best choice will
@@ -161,26 +165,51 @@ void Solver::defaultParams()
     postStabilize = true;
 }
 
-void Solver::step(float dt)
+void Solver::step(float dtIncoming)
 {
-    this->dt = glm::max(dt, 1.0f / 20.0f);
+    auto stepStart = timeNow();
+    
+    this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
+
+    bodyTable->getBVH()->update();
 
     // Perform broadphase collision detection
-    // This is a naive O(n^2) approach, but it is sufficient for small numbers of bodies in this sample.
+    auto broadphaseStart = timeNow();
+
+    // Use BVH to find potential collisions
     for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext())
     {
-        for (Rigid* bodyB = bodyA->getNext(); bodyB != nullptr; bodyB = bodyB->getNext())
+        std::vector<Rigid*> results = bodyTable->getBVH()->query(bodyA);
+        for (Rigid* bodyB : results)
         {
-            glm::vec3 posA = bodyA->getPosition();
-            glm::vec3 posB = bodyB->getPosition();
-            glm::vec2 dp = glm::vec2(posA.x, posA.y) - glm::vec2(posB.x, posB.y);
-            float r = bodyA->getRadius() + bodyB->getRadius();
-            if (dot(dp, dp) <= r * r && !bodyA->constrainedTo(bodyB))
-                new Manifold(this, bodyA, bodyB);
+            // Skip self-collision and already constrained pairs
+            if (bodyB == bodyA || bodyA->constrainedTo(bodyB))
+                continue;
+            
+            new Manifold(this, bodyA, bodyB);
         }
     }
 
+    // Perform broadphase collision detection
+    // This is a naive O(n^2) approach, but it is sufficient for small numbers of bodies in this sample.
+    // for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext())
+    // {
+    //     for (Rigid* bodyB = bodyA->getNext(); bodyB != nullptr; bodyB = bodyB->getNext())
+    //     {
+    //         glm::vec3 posA = bodyA->getPosition();
+    //         glm::vec3 posB = bodyB->getPosition();
+    //         glm::vec2 dp = glm::vec2(posA.x, posA.y) - glm::vec2(posB.x, posB.y);
+    //         float r = bodyA->getRadius() + bodyB->getRadius();
+    //         if (dot(dp, dp) <= r * r && !bodyA->constrainedTo(bodyB))
+    //             new Manifold(this, bodyA, bodyB);
+    //     }
+    // }
+    
+    auto broadphaseEnd = timeNow();
+    printDurationUS(broadphaseStart, broadphaseEnd, "Broadphase: ");
+
     // Initialize and warmstart forces
+    auto warmstartForcesStart = timeNow();
     for (Force* force = forces; force != nullptr;)
     {
         // Initialization can including caching anything that is constant over the step
@@ -221,40 +250,19 @@ void Solver::step(float dt)
             force = force->getNext();
         }
     }
+    auto warmstartForcesEnd = timeNow();
+    printDurationUS(warmstartForcesStart, warmstartForcesEnd, "Warmstart Forces: ");
 
-    // Initialize and warmstart bodies (ie primal variables)
-    for (Rigid* body = bodies; body != nullptr; body = body->getNext())
-    {
-        // Don't let bodies rotate too fast
-        glm::vec3 vel = body->getVelocity();
-        vel.z = glm::clamp(vel.z, -50.0f, 50.0f);
-        body->setVelocity(vel);
-
-        // Compute inertial position (Eq 2)
-        glm::vec3 pos = body->getPosition();
-        glm::vec3 inertial = pos + vel * dt;
-        if (body->getMass() > 0) {
-            inertial += glm::vec3{ 0, gravity, 0 } * (dt * dt);
-        }
-        body->setInertial(inertial);
-
-        // Adaptive warmstart (See original VBD paper)
-        glm::vec3 prevVel = body->getPrevVelocity();
-        glm::vec3 accel = (vel - prevVel) / dt;
-        float accelExt = accel.y * sign(gravity);
-        float accelWeight = glm::clamp(accelExt / glm::abs(gravity), 0.0f, 1.0f);
-        if (!isfinite(accelWeight)) accelWeight = 0.0f;
-
-        // Save initial position (x-) and compute warmstarted position (See original VBD paper)
-        body->setInitial(pos);
-        glm::vec3 newPos = pos + vel * dt + glm::vec3{ 0, gravity, 0 } * (accelWeight * dt * dt);
-        body->setPosition(newPos);
-    }
+    auto warmstartBodiesStart = timeNow();
+    bodyTable->warmstartBodies(dt, gravity);
+    auto warmstartBodiesEnd = timeNow();
+    printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
     int totalIterations = iterations + (postStabilize ? 1 : 0);
-
+    
+    auto solverLoopStart = timeNow();
     for (int it = 0; it < totalIterations; it++)
     {
         // If using post stabilization, either remove all or none of the pre-existing constraint error
@@ -263,6 +271,7 @@ void Solver::step(float dt)
             currentAlpha = it < iterations ? 1.0f : 0.0f;
 
         // Primal update
+        auto primalStart = timeNow();
         for (Rigid* body = bodies; body != nullptr; body = body->getNext())
         {
             // Skip static / kinematic bodies
@@ -313,10 +322,13 @@ void Solver::step(float dt)
             pos -= solve(lhs, rhs);
             body->setPosition(pos);
         }
+        auto primalEnd = timeNow();
+        printDurationUS(primalStart, primalEnd, "  Primal Update: ");
 
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
+        auto dualStart = timeNow();
         if (it < iterations)
         {
             for (Force* force = forces; force != nullptr; force = force->getNext())
@@ -351,25 +363,28 @@ void Solver::step(float dt)
                 }
             }
         }
+        auto dualEnd = timeNow();
+        if (it < iterations) {
+            printDurationUS(dualStart, dualEnd, "  Dual Update: ");
+        }
 
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
+        auto velocityStart = timeNow();
         if (it == iterations - 1)
         {
-            for (Rigid* body = bodies; body != nullptr; body = body->getNext())
-            {
-                glm::vec3 vel = body->getVelocity();
-                body->setPrevVelocity(vel);
-                if (body->getMass() > 0) {
-                    glm::vec3 pos = body->getPosition();
-                    glm::vec3 initial = body->getInitial();
-                    vel = (pos - initial) / dt;
-                    body->setVelocity(vel);
-                }
-
-                body->getNode()->setPosition(body->getPosition());
-            }
+            bodyTable->updateVelocities(dt);
+        }
+        auto velocityEnd = timeNow();
+        if (it == iterations - 1) {
+            printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
         }
     }
+    auto solverLoopEnd = timeNow();
+    printDurationUS(solverLoopStart, solverLoopEnd, "Solver Loop Total: ");
+    
+    auto stepEnd = timeNow();
+    printDurationUS(stepStart, stepEnd, "Step Total: ");
+    std::cout << std::endl;
 }
 
 }

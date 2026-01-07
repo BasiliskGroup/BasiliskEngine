@@ -15,10 +15,12 @@ namespace bsk::internal {
     // inline constexpr float COLLISION_MARGIN = 1e-6f;
     inline constexpr unsigned short GJK_ITERATIONS = 15;
     inline constexpr unsigned short EPA_ITERATIONS = 15;
+    inline constexpr float BVH_MARGIN = 0.1f;
 
     // inline constexpr bool SHOW_CONTACTS = true;
 
     inline constexpr float EPSILON = 1e-10f;
+    inline constexpr float GRAVITATIONAL = 6.67430e-11f;
 }
 
 #endif

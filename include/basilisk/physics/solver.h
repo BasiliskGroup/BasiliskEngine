@@ -12,6 +12,7 @@
 #pragma once
 
 #include <basilisk/util/includes.h>
+#include <optional>
 
 #define PENALTY_MIN 1.0f              // Minimum penalty parameter
 #define PENALTY_MAX 1000000000.0f     // Maximum penalty parameter
@@ -30,7 +31,7 @@ class BodyTable;
 class Solver
 {
 private:
-    float gravity;      // Gravity
+    std::optional<glm::vec3> gravity;  // Gravity
     int iterations;     // Solver iterations
     float dt;           // Timestep
 
@@ -65,7 +66,7 @@ public:
     BodyTable* getBodyTable() const { return bodyTable; }
     Rigid* getBodies() const { return bodies; }
     Force* getForces() const { return forces; }
-    float getGravity() const { return gravity; }
+    std::optional<glm::vec3> getGravity() const { return gravity; }
     int getIterations() const { return iterations; }
     float getDt() const { return dt; }
     float getAlpha() const { return alpha; }
@@ -74,7 +75,7 @@ public:
     bool getPostStabilize() const { return postStabilize; }
     
     // Setters
-    void setGravity(float value) { gravity = value; }
+    void setGravity(std::optional<glm::vec3> value) { gravity = value; }
     void setIterations(int value) { iterations = value; }
     void setDt(float value) { dt = value; }
     void setAlpha(float value) { alpha = value; }

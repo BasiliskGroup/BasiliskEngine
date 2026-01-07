@@ -15,6 +15,7 @@ inline glm::vec2 xy(const glm::vec3& v) noexcept {
 }
 
 float triangleArea2(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
+std::pair<glm::vec3, glm::vec2> connectSquare(const glm::vec2& a, const glm::vec2& b, float width=0.1f);
 
 }
 

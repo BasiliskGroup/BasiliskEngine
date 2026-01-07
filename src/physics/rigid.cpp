@@ -3,6 +3,8 @@
 #include <basilisk/physics/solver.h>
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/bodyTable.h>
+#include <basilisk/physics/collision/bvh.h>
+#include <basilisk/physics/maths.h>
 
 namespace bsk::internal {
 
@@ -17,6 +19,10 @@ Rigid::Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 positio
 Rigid::~Rigid() {
     // Remove from linked list
     solver->remove(this);
+
+    // remove from bvh and bodytable
+    this->solver->getBodyTable()->getBVH()->remove(this);
+    this->solver->getBodyTable()->markAsDeleted(this->index);
 
     // Delete all forces
     Force* curForce = forces;
@@ -226,6 +232,38 @@ float Rigid::getMoment() const {
 
 float Rigid::getRadius() const {
     return this->solver->getBodyTable()->getRadius(this->index);
+}
+
+void Rigid::getAABB(glm::vec2& bl, glm::vec2& tr) const {
+    glm::vec3 pos = getPosition();
+    glm::vec2 size = getSize();
+    glm::vec2 halfDim = collider->getHalfDim();
+    float angle = pos.z;  // Rotation angle
+    
+    // Compute the four corners of the unrotated rectangle in local space
+    glm::vec2 localHalfDim = size * halfDim;
+    glm::vec2 corners[4] = {
+        glm::vec2(-localHalfDim.x, -localHalfDim.y),  // bottom-left
+        glm::vec2( localHalfDim.x, -localHalfDim.y),  // bottom-right
+        glm::vec2( localHalfDim.x,  localHalfDim.y),   // top-right
+        glm::vec2(-localHalfDim.x,  localHalfDim.y)   // top-left
+    };
+    
+    // Rotate and translate each corner, then find the bounding AABB
+    glm::mat2 rot = rotation(angle);
+    glm::vec2 worldPos = glm::vec2(pos.x, pos.y);
+    
+    // Initialize with first transformed corner
+    glm::vec2 transformed = rot * corners[0] + worldPos;
+    bl = transformed;
+    tr = transformed;
+    
+    // Find min/max of all transformed corners
+    for (int i = 1; i < 4; i++) {
+        transformed = rot * corners[i] + worldPos;
+        bl = glm::min(bl, transformed);
+        tr = glm::max(tr, transformed);
+    }
 }
 
 }

@@ -85,6 +85,7 @@ public:
     float getDensity() const;
     glm::vec3 getVel() const;
     std::size_t getIndex() const { return index; }
+    void getAABB(glm::vec2& bl, glm::vec2& tr) const;
 };
 
 }

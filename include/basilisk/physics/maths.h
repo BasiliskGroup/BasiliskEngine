@@ -147,4 +147,22 @@ inline glm::vec3 solve(glm::mat3 a, glm::vec3 b)
     return x;
 }
 
+inline bool AABBIntersect(glm::vec2 blA, glm::vec2 trA, glm::vec2 blB, glm::vec2 trB) {
+    return (blA.x <= trB.x && trA.x >= blB.x && blA.y <= trB.y && trA.y >= blB.y);
+}
+
+inline bool AABBContains(glm::vec2 blA, glm::vec2 trA, glm::vec2 point) {
+    return (point.x >= blA.x && point.x <= trA.x && point.y >= blA.y && point.y <= trA.y);
+}
+
+inline float AABBArea(glm::vec2 bl, glm::vec2 tr) {
+    return (tr.x - bl.x) * (tr.y - bl.y);
+}
+
+inline float AABBArea(glm::vec2 blA, glm::vec2 trA, glm::vec2 blB, glm::vec2 trB) {
+    glm::vec2 bl = glm::min(blA, blB);
+    glm::vec2 tr = glm::max(trA, trB);
+    return AABBArea(bl, tr);
+}
+
 }

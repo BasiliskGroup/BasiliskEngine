@@ -8,6 +8,7 @@ namespace bsk::internal {
 
 class Rigid;
 class Collider;
+class BVH;
 
 class BodyTable : public VirtualTable {
 private:
@@ -39,14 +40,18 @@ private:
     // solving
     std::vector<glm::vec3> rhs;
     std::vector<glm::mat3x3> lhs;
+
+    BVH* bvh;
     
 public:
     BodyTable(std::size_t capacity);
-    ~BodyTable() = default;
+    ~BodyTable();
 
     void computeTransforms(); // TODO, determine if this would be better per-object
-    void warmstartBodies(const float dt, const float gravity);
+    void warmstartBodies(const float dt, const std::optional<glm::vec3>& gravity);
     void updateVelocities(float dt);
+    glm::vec3 getGravity(std::size_t index) const;
+    glm::vec3 getGravity(Rigid* body) const;
 
     void markAsDeleted(std::size_t index);
 
@@ -81,6 +86,7 @@ public:
     std::size_t getInverseForceMap(std::size_t index) { return inverseForceMap[index]; }
     glm::vec3& getRhs(std::size_t index) { return rhs[index]; }
     glm::mat3x3& getLhs(std::size_t index) { return lhs[index]; }
+    BVH* getBVH() { return bvh; }
 
     // setters
     void setBodies(std::size_t index, Rigid* value) { bodies[index] = value; }
