@@ -171,10 +171,9 @@ void Solver::step(float dtIncoming)
     
     this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
 
-    bodyTable->getBVH()->update();
-
     // Perform broadphase collision detection
     auto broadphaseStart = timeNow();
+    bodyTable->getBVH()->update();
 
     // Use BVH to find potential collisions
     for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext())
@@ -242,6 +241,13 @@ void Solver::step(float dtIncoming)
     bodyTable->warmstartBodies(dt, gravity);
     auto warmstartBodiesEnd = timeNow();
     printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
+
+    // Coloring
+    auto coloringStart = timeNow();
+    resetColoring();
+    dsatur();
+    auto coloringEnd = timeNow();
+    printDurationUS(coloringStart, coloringEnd, "Coloring: ");
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
@@ -370,6 +376,54 @@ void Solver::step(float dtIncoming)
     auto stepEnd = timeNow();
     printDurationUS(stepStart, stepEnd, "Step Total: ");
     std::cout << std::endl;
+}
+
+// Coloring
+void Solver::resetColoring() {
+    for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
+        body->resetColoring();
+    }
+
+    // Clear priority queue by swapping with empty queue
+    ColorQueue empty;
+    colorQueue.swap(empty);
+    colorGroups.clear();
+}
+
+void Solver::dsatur() {
+    // Add all bodies to the priority queue
+    for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
+        colorQueue.push(body);
+    }
+
+    // Color the bodies
+    while (colorQueue.empty() == false) {
+        Rigid* body = colorQueue.top();
+        colorQueue.pop();
+        int color = body->getNextUnusedColor();
+
+        // add color to body
+        body->setColor(color);
+        body->useColor(color);
+
+        // add body to color group
+        colorGroups.resize(color + 1);
+        colorGroups[color].push_back(body);
+
+        // update uncolored bodies connected to this body
+        for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB()) {
+            Rigid* other = (force->getBodyA() == body) ? force->getBodyB() : force->getBodyA();
+
+            // Skip if already colored or has already used this color
+            if (other->isColored() || other->isColorUsed(color)) {
+                continue;
+            }
+
+            other->useColor(color);
+            other->incrSatur();
+            colorQueue.push(other);
+        }
+    }
 }
 
 }

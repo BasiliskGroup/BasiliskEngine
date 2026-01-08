@@ -29,9 +29,7 @@ private:
     std::vector<glm::mat2x2> imat;
     std::vector<glm::mat2x2> rmat;
     std::vector<bool> updated;
-    std::vector<ushort> color;
-    std::vector<ushort> degree;
-    std::vector<ushort> satur;
+    std::vector<int> color;
 
     // updating forces
     std::vector<std::size_t> oldIndex;
@@ -79,9 +77,7 @@ public:
     glm::mat2x2& getImat(std::size_t index) { return imat[index]; }
     glm::mat2x2& getRmat(std::size_t index) { return rmat[index]; }
     bool getUpdated(std::size_t index) { return updated[index]; }
-    ushort getColor(std::size_t index) { return color[index]; }
-    ushort getDegree(std::size_t index) { return degree[index]; }
-    ushort getSatur(std::size_t index) { return satur[index]; }
+    int getColor(std::size_t index) { return color[index]; }
     std::size_t getOldIndex(std::size_t index) { return oldIndex[index]; }
     std::size_t getInverseForceMap(std::size_t index) { return inverseForceMap[index]; }
     glm::vec3& getRhs(std::size_t index) { return rhs[index]; }
@@ -106,9 +102,7 @@ public:
     void setImat(std::size_t index, const glm::mat2x2& value) { imat[index] = value; }
     void setRmat(std::size_t index, const glm::mat2x2& value) { rmat[index] = value; }
     void setUpdated(std::size_t index, bool value) { updated[index] = value; }
-    void setColor(std::size_t index, ushort value) { color[index] = value; }
-    void setDegree(std::size_t index, ushort value) { degree[index] = value; }
-    void setSatur(std::size_t index, ushort value) { satur[index] = value; }
+    void setColor(std::size_t index, int value) { color[index] = value; }
     void setOldIndex(std::size_t index, std::size_t value) { oldIndex[index] = value; }
     void setInverseForceMap(std::size_t index, std::size_t value) { inverseForceMap[index] = value; }
     void setRhs(std::size_t index, const glm::vec3& value) { rhs[index] = value; }

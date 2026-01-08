@@ -9,7 +9,6 @@
 #include <basilisk/util/random.h>
 #include <basilisk/util/maths.h>
 #include <basilisk/physics/collision/bvh.h>
-#include <cmath>
 
 int main() {
     // Make a Basilisk Engine instance 
@@ -19,18 +18,18 @@ int main() {
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
     bsk::Scene2D* voidScene = new bsk::Scene2D(engine);
 
-    // Load assets from file
+    // Load assets
     bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
-    bsk::Image* metalImage = new bsk::Image("textures/metal.png");
-    bsk::Image* ropeImage = new bsk::Image("textures/rope.png");
-    bsk::Image* bricksImage = new bsk::Image("textures/bricks.jpg");
-    bsk::Image* containerImage = new bsk::Image("textures/container.jpg");
-
-    // Create materials from images
-    bsk::Material* metalMaterial = new bsk::Material({1, 1, 1}, metalImage);
-    bsk::Material* ropeMaterial = new bsk::Material({1, 1, 1}, ropeImage);
-    bsk::Material* bricksMaterial = new bsk::Material({1, 1, 1}, bricksImage);
-    bsk::Material* containerMaterial = new bsk::Material({1, 1, 1}, containerImage);
+    bsk::Image* images[] = {
+        new bsk::Image("textures/metal.png"),
+        new bsk::Image("textures/rope.png"),
+        new bsk::Image("textures/bricks.jpg"),
+        new bsk::Image("textures/container.jpg")
+    };
+    bsk::Material* metalMaterial = new bsk::Material({1, 1, 1}, images[0]);
+    bsk::Material* ropeMaterial = new bsk::Material({1, 1, 1}, images[1]);
+    bsk::Material* bricksMaterial = new bsk::Material({1, 1, 1}, images[2]);
+    bsk::Material* containerMaterial = new bsk::Material({1, 1, 1}, images[3]);
 
     // Create a box collider (unit box vertices) - can be shared by all box-shaped objects
     bsk::Collider* boxCollider = new bsk::Collider(scene->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
@@ -92,72 +91,25 @@ int main() {
         
         // Get all primatives from BVH and visualize their AABBs
         if (showBVH) {
-            std::vector<bsk::internal::PrimativeInfo> primatives = scene->getSolver()->getBodyTable()->getBVH()->getAllPrimatives();
+            auto primatives = scene->getSolver()->getBodyTable()->getBVH()->getAllPrimatives();
             for (const auto& info : primatives) {
-            // Draw 4 edges of the AABB using connectSquare
-            // Bottom edge: from (bl.x, bl.y) to (tr.x, bl.y)
-            auto [bottomPos, bottomScale] = bsk::internal::connectSquare(
-                glm::vec2(info.bl.x, info.bl.y),
-                glm::vec2(info.tr.x, info.bl.y),
-                aabbLineWidth
-            );
-            bsk::Node2D* bottomNode = new bsk::Node2D(scene, {
-                .mesh=quad,
-                .material=aabbMaterial,
-                .position={bottomPos.x, bottomPos.y},
-                .rotation=bottomPos.z,
-                .scale=bottomScale
-            });
-            bottomNode->setLayer(0.95f);
-            aabbNodes.push_back(bottomNode);
-            
-            // Right edge: from (tr.x, bl.y) to (tr.x, tr.y)
-            auto [rightPos, rightScale] = bsk::internal::connectSquare(
-                glm::vec2(info.tr.x, info.bl.y),
-                glm::vec2(info.tr.x, info.tr.y),
-                aabbLineWidth
-            );
-            bsk::Node2D* rightNode = new bsk::Node2D(scene, {
-                .mesh=quad,
-                .material=aabbMaterial,
-                .position={rightPos.x, rightPos.y},
-                .rotation=rightPos.z,
-                .scale=rightScale
-            });
-            rightNode->setLayer(0.95f);
-            aabbNodes.push_back(rightNode);
-            
-            // Top edge: from (tr.x, tr.y) to (bl.x, tr.y)
-            auto [topPos, topScale] = bsk::internal::connectSquare(
-                glm::vec2(info.tr.x, info.tr.y),
-                glm::vec2(info.bl.x, info.tr.y),
-                aabbLineWidth
-            );
-            bsk::Node2D* topNode = new bsk::Node2D(scene, {
-                .mesh=quad,
-                .material=aabbMaterial,
-                .position={topPos.x, topPos.y},
-                .rotation=topPos.z,
-                .scale=topScale
-            });
-            topNode->setLayer(0.95f);
-            aabbNodes.push_back(topNode);
-            
-            // Left edge: from (bl.x, tr.y) to (bl.x, bl.y)
-            auto [leftPos, leftScale] = bsk::internal::connectSquare(
-                glm::vec2(info.bl.x, info.tr.y),
-                glm::vec2(info.bl.x, info.bl.y),
-                aabbLineWidth
-            );
-            bsk::Node2D* leftNode = new bsk::Node2D(scene, {
-                .mesh=quad,
-                .material=aabbMaterial,
-                .position={leftPos.x, leftPos.y},
-                .rotation=leftPos.z,
-                .scale=leftScale
-            });
-            leftNode->setLayer(0.95f);
-            aabbNodes.push_back(leftNode);
+                // Draw 4 edges of the AABB
+                glm::vec2 edges[4][2] = {
+                    {{info.bl.x, info.bl.y}, {info.tr.x, info.bl.y}},  // bottom
+                    {{info.tr.x, info.bl.y}, {info.tr.x, info.tr.y}},  // right
+                    {{info.tr.x, info.tr.y}, {info.bl.x, info.tr.y}},  // top
+                    {{info.bl.x, info.tr.y}, {info.bl.x, info.bl.y}}   // left
+                };
+                
+                for (auto& [start, end] : edges) {
+                    auto [pos, scale] = bsk::internal::connectSquare(start, end, aabbLineWidth);
+                    auto* node = new bsk::Node2D(scene, {
+                        .mesh=quad, .material=aabbMaterial,
+                        .position={pos.x, pos.y}, .rotation=pos.z, .scale=scale
+                    });
+                    node->setLayer(0.95f);
+                    aabbNodes.push_back(node);
+                }
             }
         }
         
@@ -167,11 +119,8 @@ int main() {
         engine->render();
     }
 
-    // Free memory allocations
-    delete metalImage;
-    delete ropeImage;
-    delete bricksImage;
-    delete containerImage;
+    // Cleanup
+    for (auto* img : images) delete img;
     delete metalMaterial;
     delete ropeMaterial;
     delete bricksMaterial;

@@ -84,7 +84,7 @@ void BodyTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, degree, satur, oldIndex, inverseForceMap, lhs, rhs
+        bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, oldIndex, inverseForceMap, lhs, rhs
     );
 
     // update capacity
@@ -107,7 +107,7 @@ void BodyTable::compact() {
     compactTensors(toDelete, size,
         bodies, pos, initial, inertial, vel, prevVel,
         scale, friction, radius, mass, moment,
-        collider, mat, imat, rmat, updated, color, degree, satur, oldIndex, lhs, rhs
+        collider, mat, imat, rmat, updated, color, oldIndex, lhs, rhs
     );
 
     // invert old indices so that forces can find their new indices

@@ -13,6 +13,7 @@
 
 #include <basilisk/util/includes.h>
 #include <optional>
+#include <basilisk/physics/coloring/color_queue.h>
 
 #define PENALTY_MIN 1.0f              // Minimum penalty parameter
 #define PENALTY_MAX 1000000000.0f     // Maximum penalty parameter
@@ -28,8 +29,7 @@ class ColliderTable;
 class BodyTable;
 
 // Core solver class which holds all the rigid bodies and forces, and has logic to step the simulation forward in time
-class Solver
-{
+class Solver {
 private:
     std::optional<glm::vec3> gravity;  // Gravity
     int iterations;     // Solver iterations
@@ -46,6 +46,10 @@ private:
 
     ColliderTable* colliderTable;
     BodyTable* bodyTable;
+
+    // Coloring
+    ColorQueue colorQueue;
+    std::vector<std::vector<Rigid*>> colorGroups;
 
 public:
     Solver();
@@ -84,6 +88,10 @@ public:
     void setPostStabilize(bool value) { postStabilize = value; }
     void setBodies(Rigid* value) { bodies = value; }
     void setForces(Force* value) { forces = value; }
+
+    // Coloring
+    void resetColoring();
+    void dsatur();
 };
 
 }

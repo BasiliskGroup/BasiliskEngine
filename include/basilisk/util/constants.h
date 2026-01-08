@@ -1,6 +1,8 @@
 #ifndef BSK_CONSTANTS_H
 #define BSK_CONSTANTS_H
 
+#include <thread>
+
 namespace bsk::internal {
     inline constexpr unsigned int ROWS = 4;
     inline constexpr unsigned int MANIFOLD_ROWS = 4;
@@ -22,6 +24,9 @@ namespace bsk::internal {
     inline constexpr float EPSILON = 1e-10f;
     inline constexpr float GRAVITATIONAL = 6.0e-4f; // 6.67430e-11f;
     inline constexpr float GRAVITATIONAL_THETA = 0.65f;
+
+    // threading
+    inline unsigned int NUM_THREADS = std::max(1u, std::thread::hardware_concurrency());
 }
 
 #endif

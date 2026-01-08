@@ -37,11 +37,25 @@ private:
     std::size_t index;
     Collider* collider;
 
+    // Coloring
+    int degree;
+    int satur;
+    std::vector<bool> usedColors;
+
 public:
     Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity = glm::vec3{ 0, 0, 0 });
     ~Rigid();
 
     bool constrainedTo(Rigid* other) const;
+
+    // Coloring
+    void resetColoring();
+    bool isColored() const;
+    bool isColorUsed(int color) const;
+    int getNextUnusedColor() const;
+    void reserveColors(int count);
+    void useColor(int color);
+    void incrSatur() { satur++; }
     
     // Linked list management
     void insert(Force* force);
@@ -58,6 +72,9 @@ public:
     void setMoment(float moment);
     void setFriction(float friction);
     void setRadius(float radius);
+    void setColor(int color);
+    void setDegree(int degree);
+    void setSatur(int satur);
     void setCollider(Collider* collider);
     void setForces(Force* forces);
     void setNext(Rigid* next);
@@ -76,6 +93,9 @@ public:
     float getMoment() const;
     float getFriction() const;
     float getRadius() const;
+    int getColor() const;
+    int getDegree() const;
+    int getSatur() const;
     Collider* getCollider() const { return collider; }
     Force* getForces() const { return forces; }
     Rigid* getNext() const { return next; }

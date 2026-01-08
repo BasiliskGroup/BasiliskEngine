@@ -9,7 +9,7 @@
 namespace bsk::internal {
 
 Rigid::Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity)
-    : solver(solver), node(node), forces(nullptr), next(nullptr), prev(nullptr), collider(collider) {
+    : solver(solver), node(node), forces(nullptr), next(nullptr), prev(nullptr), collider(collider), degree(0), satur(0) {
     // Add to linked list
     solver->insert(this);
     this->solver->getBodyTable()->insert(this, position, size, density, friction, velocity, collider);
@@ -39,6 +39,41 @@ bool Rigid::constrainedTo(Rigid* other) const {
         if ((f->getBodyA() == this && f->getBodyB() == other) || (f->getBodyA() == other && f->getBodyB() == this))
             return true;
     return false;
+}
+
+void Rigid::resetColoring() {
+    setColor(-1);
+    setDegree(0);
+    setSatur(0);
+    this->usedColors.clear();
+}
+
+bool Rigid::isColorUsed(int color) const {
+    if (color < 0 || color >= usedColors.size()) {
+        return false;
+    }
+    return usedColors[color];
+}
+
+void Rigid::reserveColors(int count) {
+    usedColors.resize(count, false);
+}
+
+bool Rigid::isColored() const {
+    return getColor() != -1;
+}
+
+void Rigid::useColor(int color) {
+    reserveColors(color + 1);
+    usedColors[color] = true;
+}
+
+int Rigid::getNextUnusedColor() const {
+    int candidate = 0;
+    while (isColorUsed(candidate)) {
+        candidate++;
+    }
+    return candidate;
 }
 
 void Rigid::insert(Force* force) {
@@ -76,6 +111,7 @@ void Rigid::insert(Force* force) {
     }
 
     forces = force;
+    degree++;
 }
 
 void Rigid::remove(Force* force) {
@@ -118,6 +154,8 @@ void Rigid::remove(Force* force) {
         force->setPrevB(nullptr);
         force->setNextB(nullptr);
     }
+
+    degree--;
 }
 
 void Rigid::setPosition(const glm::vec3& pos) {
@@ -178,6 +216,18 @@ void Rigid::setRadius(float radius) {
     this->solver->getBodyTable()->setRadius(this->index, radius);
 }
 
+void Rigid::setColor(int color) {
+    this->solver->getBodyTable()->setColor(this->index, color);
+}
+
+void Rigid::setDegree(int degree) {
+    this->degree = degree;
+}
+
+void Rigid::setSatur(int satur) {
+    this->satur = satur;
+}
+
 void Rigid::setCollider(Collider* collider) {
     this->collider = collider;
 }
@@ -232,6 +282,18 @@ float Rigid::getMoment() const {
 
 float Rigid::getRadius() const {
     return this->solver->getBodyTable()->getRadius(this->index);
+}
+
+int Rigid::getColor() const {
+    return this->solver->getBodyTable()->getColor(this->index);
+}
+
+int Rigid::getDegree() const {
+    return this->degree;
+}
+
+int Rigid::getSatur() const {
+    return this->satur;
 }
 
 void Rigid::getAABB(glm::vec2& bl, glm::vec2& tr) const {
