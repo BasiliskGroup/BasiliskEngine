@@ -192,4 +192,17 @@ std::vector<PrimativeInfo> BVH::getAllPrimatives() const {
     return results;
 }
 
+void BVH::computeMassProperties() {
+    if (root != nullptr) {
+        root->computeMassProperties();
+    }
+}
+
+glm::vec2 BVH::computeGravity(Rigid* rigid) {
+    if (root != nullptr) {
+        return root->computeGravity(rigid);
+    }
+    return glm::vec2(0.0f, 0.0f);
+}
+
 }

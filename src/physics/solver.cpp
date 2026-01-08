@@ -189,21 +189,6 @@ void Solver::step(float dtIncoming)
             new Manifold(this, bodyA, bodyB);
         }
     }
-
-    // Perform broadphase collision detection
-    // This is a naive O(n^2) approach, but it is sufficient for small numbers of bodies in this sample.
-    // for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext())
-    // {
-    //     for (Rigid* bodyB = bodyA->getNext(); bodyB != nullptr; bodyB = bodyB->getNext())
-    //     {
-    //         glm::vec3 posA = bodyA->getPosition();
-    //         glm::vec3 posB = bodyB->getPosition();
-    //         glm::vec2 dp = glm::vec2(posA.x, posA.y) - glm::vec2(posB.x, posB.y);
-    //         float r = bodyA->getRadius() + bodyB->getRadius();
-    //         if (dot(dp, dp) <= r * r && !bodyA->constrainedTo(bodyB))
-    //             new Manifold(this, bodyA, bodyB);
-    //     }
-    // }
     
     auto broadphaseEnd = timeNow();
     printDurationUS(broadphaseStart, broadphaseEnd, "Broadphase: ");

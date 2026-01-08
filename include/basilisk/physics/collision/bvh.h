@@ -35,6 +35,10 @@ public:
     // Utility
     std::size_t getSize() const { return size; }
     bool isEmpty() const { return root == nullptr; }
+
+    // Gravity operations
+    void computeMassProperties();
+    glm::vec2 computeGravity(Rigid* rigid);
     
     // Debug/visualization
     std::vector<PrimativeInfo> getAllPrimatives() const;

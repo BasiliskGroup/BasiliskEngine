@@ -22,6 +22,11 @@ class Primative {
         Primative* right;
         Rigid* rigid;
 
+        // gravity properties
+        float mass;
+        float radius;
+        glm::vec2 com;
+
         void updateArea();
         void updateBound();
     
@@ -59,6 +64,10 @@ class Primative {
         bool isLeaf() const { return rigid != nullptr; } // has rigid <-> leaf
         void swapChild(Primative* child, Primative* newChild);
         void refitUpward();
+
+        // gravity operations
+        void computeMassProperties();
+        glm::vec2 computeGravity(Rigid* rigid);
         
         // Debug/visualization
         void getAllPrimatives(std::vector<PrimativeInfo>& results, int level = 0) const;

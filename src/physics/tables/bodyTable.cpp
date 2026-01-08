@@ -23,6 +23,11 @@ void BodyTable::computeTransforms() {
 // Initialize and warmstart bodies (ie primal variables)
 void BodyTable::warmstartBodies(const float dt, const std::optional<glm::vec3>& gravityOpt) {
     glm::vec3 accel, accelExt, accelWeight, gravity;
+
+    // compute gravity
+    if (gravityOpt.has_value() == false) {
+        bvh->computeMassProperties();
+    }
     
     for (std::size_t i = 0; i < size; i++) {
         // Don't let bodies rotate too fast
@@ -164,24 +169,26 @@ glm::vec3 BodyTable::getGravity(std::size_t index) const {
     glm::vec3 r;
     float lenr;
 
-    for (std::size_t i = 0; i < size; i++) {
-        if (i == index) {
-            continue;
-        }
+    // for (std::size_t i = 0; i < size; i++) {
+    //     if (i == index) {
+    //         continue;
+    //     }
 
-        // Newtonian gravity formula, acceleration form
-        r = pos[i] - pos[index];
-        lenr = glm::length2(r);
+    //     // Newtonian gravity formula, acceleration form
+    //     r = pos[i] - pos[index];
+    //     lenr = glm::length2(r);
 
-        if (lenr < EPSILON) {
-            continue;
-        }
+    //     if (lenr < EPSILON) {
+    //         continue;
+    //     }
 
-        lenr = glm::sqrt(lenr);
-        gravity += (mass[i] / (lenr * lenr * lenr)) * r;
-    }
+    //     lenr = glm::sqrt(lenr);
+    //     gravity += (mass[i] / (lenr * lenr * lenr)) * r;
+    // }
 
-    return gravity;
+    // return gravity;
+
+    return { bvh->computeGravity(bodies[index]), 0 } ;
 }
 
 }

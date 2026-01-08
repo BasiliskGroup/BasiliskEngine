@@ -9,6 +9,7 @@
 #include <basilisk/util/random.h>
 #include <basilisk/util/maths.h>
 #include <basilisk/physics/collision/bvh.h>
+#include <cmath>
 
 int main() {
     // Make a Basilisk Engine instance 
@@ -38,7 +39,7 @@ int main() {
     const int gridSize = 25;
     const float spacing = 2.0f;  // Space between quads
     const float quadSize = 0.8f;  // Size of each quad
-    const float missingProbability = 0.30f;
+    const float missingProbability = 0.50f;
 
     scene->getCamera()->setScale(gridSize * 2.0f);  // Zoom out to see the full grid
     
@@ -64,7 +65,8 @@ int main() {
                 .position={x, y},
                 .rotation=0.0f,
                 .scale={quadSize, quadSize},
-                .collider=boxCollider
+                .collider=boxCollider,
+                .density=1.0e3f
             });
             gridNodes.push_back(node);
         }
@@ -73,12 +75,6 @@ int main() {
     // Create a simple material for AABB visualization (wireframe-like)
     bsk::Material* aabbMaterial = metalMaterial;  // Green color, no texture
     const float aabbLineWidth = 0.05f;  // Width of AABB lines
-    
-    // // Validate tree after construction
-    // std::cerr << "\n=== Tree Construction Complete ===" << std::endl;
-    // scene->getSolver()->getBodyTable()->getBVH()->validateTree();
-    // std::cerr << "Stopping program after tree construction for inspection." << std::endl;
-    // return 0;  // Exit after tree construction
     
     // Boolean flag to toggle BVH visualization
     bool showBVH = true;

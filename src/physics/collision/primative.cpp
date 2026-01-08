@@ -5,15 +5,28 @@
 
 namespace bsk::internal {
 
-    Primative::Primative(glm::vec2 bl, glm::vec2 tr, Rigid* rigid) :
-    bl(bl - BVH_MARGIN), tr(tr + BVH_MARGIN),  // Add margin here
-    parent(nullptr), left(nullptr), right(nullptr), rigid(rigid)
+Primative::Primative(glm::vec2 bl, glm::vec2 tr, Rigid* rigid) :
+    bl(bl - BVH_MARGIN), 
+    tr(tr + BVH_MARGIN),
+    parent(nullptr), 
+    left(nullptr), 
+    right(nullptr), 
+    rigid(rigid),
+    mass(0.0f),
+    radius(0.0f),
+    com(0.0f, 0.0f)
 {
     updateArea();
 }
 
 Primative::Primative(Primative* left, Primative* right) :
-    left(left), right(right), parent(nullptr), rigid(nullptr)
+    left(left), 
+    right(right), 
+    parent(nullptr), 
+    rigid(nullptr),
+    mass(0.0f),
+    radius(0.0f),
+    com(0.0f, 0.0f)
 {
     updateBound();
     updateArea();
@@ -153,6 +166,40 @@ void Primative::getAllPrimatives(std::vector<PrimativeInfo>& results, int level)
     if (right != nullptr) {
         right->getAllPrimatives(results, level + 1);
     }
+}
+
+void Primative::computeMassProperties() {
+    if (isLeaf()) {
+        mass = rigid->getMass();
+        com = rigid->getPosition();
+    } else {
+        left->computeMassProperties();
+        right->computeMassProperties();
+        mass = left->mass + right->mass;
+        com = (left->mass * left->com + right->mass * right->com) / mass;
+    }
+
+    radius = 0.5f * glm::length(tr - bl);
+}
+
+glm::vec2 Primative::computeGravity(Rigid* rigid) {
+    if (isLeaf() && this->rigid == rigid) {
+        return glm::vec2(0.0f);
+    }
+
+    glm::vec2 d = com - (glm::vec2) rigid->getPosition();
+    float len2 = glm::length2(d);
+
+    if (len2 < EPSILON) {
+        return glm::vec2(0.0f);
+    }
+
+    float len = glm::sqrt(len2);
+    if (isLeaf() || radius / len < GRAVITATIONAL_THETA) {
+        return GRAVITATIONAL * mass * d / len2;
+    }
+
+    return left->computeGravity(rigid) + right->computeGravity(rigid);
 }
 
 }
