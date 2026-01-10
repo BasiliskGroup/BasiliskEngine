@@ -128,7 +128,9 @@ public:
 
     // Stages
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
-    void primalUpdateSingle(Rigid* body);
+    void primalUpdateSingle(PrimalScratch& scratch, Rigid* body);
+    void dualStage(ThreadScratch& scratch, int threadID);
+    void dualUpdateSingle(Force* force);
 };
 
 }

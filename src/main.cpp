@@ -8,7 +8,6 @@
 #include <basilisk/physics/tables/bodyTable.h>
 #include <basilisk/util/random.h>
 #include <basilisk/util/maths.h>
-#include <basilisk/physics/collision/bvh.h>
 
 int main() {
     // Make a Basilisk Engine instance 
@@ -35,12 +34,17 @@ int main() {
     bsk::Collider* boxCollider = new bsk::Collider(scene->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
 
     // Create a 50x50 grid of quads with some missing
-    const int gridSize = 25;
+    const int gridSize = 20;
     const float spacing = 2.0f;  // Space between quads
     const float quadSize = 0.8f;  // Size of each quad
-    const float missingProbability = 0.50f;
+    const float missingProbability = 0.0f;
 
-    scene->getCamera()->setScale(gridSize * 2.0f);  // Zoom out to see the full grid
+    scene->getCamera()->setScale(gridSize * 3.0f);  // Zoom out to see the full grid
+    
+    // Increase camera speed by 5x (default is 3.0, so set to 15.0)
+    if (auto* camera2D = dynamic_cast<bsk::Camera2D*>(scene->getCamera())) {
+        camera2D->setSpeed(15.0f);
+    }
     
     // Calculate grid offset to center it
     float gridOffset = -(gridSize - 1) * spacing * 0.5f;
@@ -63,56 +67,17 @@ int main() {
                 .material=bricksMaterial,
                 .position={x, y},
                 .rotation=0.0f,
-                .scale={quadSize, quadSize},
+                .scale={quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)},
                 .collider=boxCollider,
-                .density=1.0e3f
+                .density=1.0e1f,
+                .velocity=10.0f * glm::vec3{bsk::internal::uniform(-1.0f, 1.0f), bsk::internal::uniform(-1.0f, 1.0f), 0.0f}
             });
             gridNodes.push_back(node);
         }
     }
-
-    // Create a simple material for AABB visualization (wireframe-like)
-    bsk::Material* aabbMaterial = metalMaterial;  // Green color, no texture
-    const float aabbLineWidth = 0.05f;  // Width of AABB lines
-    
-    // Boolean flag to toggle BVH visualization
-    bool showBVH = true;
     
     // Main loop continues as long as the window is open
-    std::vector<bsk::Node2D*> aabbNodes;
     while (engine->isRunning()) {
-        // Delete and clear all previous AABB visualizations before rebuilding
-        for (bsk::Node2D* node : aabbNodes) {
-            if (node != nullptr) {
-                delete node;
-            }
-        }
-        aabbNodes.clear();
-        
-        // Get all primatives from BVH and visualize their AABBs
-        if (showBVH) {
-            auto primatives = scene->getSolver()->getBodyTable()->getBVH()->getAllPrimatives();
-            for (const auto& info : primatives) {
-                // Draw 4 edges of the AABB
-                glm::vec2 edges[4][2] = {
-                    {{info.bl.x, info.bl.y}, {info.tr.x, info.bl.y}},  // bottom
-                    {{info.tr.x, info.bl.y}, {info.tr.x, info.tr.y}},  // right
-                    {{info.tr.x, info.tr.y}, {info.bl.x, info.tr.y}},  // top
-                    {{info.bl.x, info.tr.y}, {info.bl.x, info.bl.y}}   // left
-                };
-                
-                for (auto& [start, end] : edges) {
-                    auto [pos, scale] = bsk::internal::connectSquare(start, end, aabbLineWidth);
-                    auto* node = new bsk::Node2D(scene, {
-                        .mesh=quad, .material=aabbMaterial,
-                        .position={pos.x, pos.y}, .rotation=pos.z, .scale=scale
-                    });
-                    node->setLayer(0.95f);
-                    aabbNodes.push_back(node);
-                }
-            }
-        }
-        
         engine->update();
         scene->update();
         scene->render();

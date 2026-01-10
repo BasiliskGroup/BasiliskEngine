@@ -14,7 +14,6 @@ void Camera2D::update() {
     Keyboard* keys = engine->getKeyboard();
     
     // Movement
-    float speed = 3.0;
     float dt = 0.005;
     float velocity = (speed * dt);
 

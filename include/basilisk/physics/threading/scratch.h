@@ -9,6 +9,12 @@ namespace bsk::internal {
 struct PrimalScratch {
     glm::vec3 rhs;
     glm::mat3x3 lhs;
+    glm::mat3x3 GoH;
+    glm::vec3 J;
+};
+
+struct DualScratch {
+    
 };
 
 // union
