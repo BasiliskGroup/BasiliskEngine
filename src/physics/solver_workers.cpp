@@ -101,7 +101,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, Rigid* body) {
             scratch.GoH = diagonal(length(scratch.GoH[0]), length(scratch.GoH[1]), length(scratch.GoH[2])) * glm::abs(f);
 
             // Accumulate force (Eq. 13) and hessian (Eq. 17)
-            scratch.J = force->getJ(i);
+            scratch.J = force->getJ(i, body);
             scratch.rhs += scratch.J * f;
             scratch.lhs += outer(scratch.J, scratch.J * penalty) + scratch.GoH;
         }

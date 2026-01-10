@@ -38,12 +38,12 @@ void Motor::computeDerivatives(Rigid* body)
     // Compute the first and second derivatives for the desired body
     if (body == bodyA)
     {
-        J[0] = glm::vec3(0.0f, 0.0f, 1.0f);
+        JA[0] = glm::vec3(0.0f, 0.0f, 1.0f);
         H[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
     else
     {
-        J[0] = glm::vec3(0.0f, 0.0f, -1.0f);
+        JB[0] = glm::vec3(0.0f, 0.0f, -1.0f);
         H[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 }

@@ -15,10 +15,12 @@
 #include <basilisk/physics/forces/force.h>
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/maths.h>
+#include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/colliderTable.h>
 #include <basilisk/physics/tables/bodyTable.h>
 #include <basilisk/util/time.h>
 #include <basilisk/physics/collision/bvh.h>
+#include <basilisk/physics/threading/scratch.h>
 #include <stdexcept>
 
 
@@ -313,9 +315,11 @@ void Solver::step(float dtIncoming)
                 continue;
             }
             
-            // release threads for primal update
+            // Store the active color with release ordering - ensures visibility to workers
             currentColor.store(activeColor, std::memory_order_release);
+            // Release workers to process this color group
             startSignal.release(NUM_THREADS);
+            // Wait for all workers to finish processing this color group
             finishSignal.acquire();
         }
 
@@ -325,21 +329,23 @@ void Solver::step(float dtIncoming)
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
+        auto dualStart = timeNow();
+        if (it < iterations)
+        {
+            for (Force* force = forces; force != nullptr; force = force->getNext())
+            {
+                dualUpdateSingle(force);
+            }
+        }
+        auto dualEnd = timeNow();
         if (it < iterations) {
-            auto dualStart = timeNow();
-
-            // release threads for dual update
-            currentStage.store(Stage::STAGE_DUAL, std::memory_order_release);
-            startSignal.release(NUM_THREADS);
-            finishSignal.acquire();
-
-            auto dualEnd = timeNow();
             printDurationUS(dualStart, dualEnd, "  Dual Update: ");
         }
 
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
         auto velocityStart = timeNow();
-        if (it == iterations - 1) {
+        if (it == iterations - 1)
+        {
             bodyTable->updateVelocities(dt);
         }
         auto velocityEnd = timeNow();

@@ -39,8 +39,6 @@ public:
         glm::vec2 rA;
         glm::vec2 rB;
         glm::vec2 normal;
-
-        glm::vec3 JAn, JBn, JAt, JBt;
         glm::vec2 C0;
         bool stick;
     };

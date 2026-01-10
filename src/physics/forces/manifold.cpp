@@ -56,8 +56,7 @@ bool Manifold::initialize()
                 contacts[i].stick = oldStick[j];
 
                 // If static friction in last frame, use the old contact points
-                if (oldStick[j])
-                {
+                if (oldStick[j]) {
                     contacts[i].rA = oldContacts[j].rA;
                     contacts[i].rB = oldContacts[j].rB;
                 }
@@ -65,8 +64,7 @@ bool Manifold::initialize()
         }
     }
 
-    for (int i = 0; i < numContacts; i++)
-    {
+    for (int i = 0; i < numContacts; i++) {
         // Compute the contact basis (Eq. 15)
         glm::vec2 normal = contacts[i].normal;
         glm::vec2 tangent = { normal.y, -normal.x };
@@ -84,10 +82,10 @@ bool Manifold::initialize()
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 basisRow0 = glm::vec2(basis[0][0], basis[1][0]);  // row 0: (normal.x, normal.y)
         glm::vec2 basisRow1 = glm::vec2(basis[0][1], basis[1][1]);  // row 1: (tangent.x, tangent.y)
-        contacts[i].JAn = glm::vec3(basisRow0.x, basisRow0.y, cross(rAW, normal));
-        contacts[i].JBn = glm::vec3(-basisRow0.x, -basisRow0.y, -cross(rBW, normal));
-        contacts[i].JAt = glm::vec3(basisRow1.x, basisRow1.y, cross(rAW, tangent));
-        contacts[i].JBt = glm::vec3(-basisRow1.x, -basisRow1.y, -cross(rBW, tangent));
+        setJ(i * 2 + JN, bodyA, glm::vec3(basisRow0.x, basisRow0.y, cross(rAW, normal)));
+        setJ(i * 2 + JN, bodyB, glm::vec3(-basisRow0.x, -basisRow0.y, -cross(rBW, normal)));
+        setJ(i * 2 + JT, bodyA, glm::vec3(basisRow1.x, basisRow1.y, cross(rAW, tangent)));
+        setJ(i * 2 + JT, bodyB, glm::vec3(-basisRow1.x, -basisRow1.y, -cross(rBW, tangent)));
 
         contacts[i].C0 = basis * (glm::vec2(bodyA->getPosition().x, bodyA->getPosition().y) + rAW - glm::vec2(bodyB->getPosition().x, bodyB->getPosition().y) - rBW) + glm::vec2(COLLISION_MARGIN, 0);
     }
@@ -95,16 +93,14 @@ bool Manifold::initialize()
     return numContacts > 0;
 }
 
-void Manifold::computeConstraint(float alpha)
-{
-    for (int i = 0; i < numContacts; i++)
-    {
+void Manifold::computeConstraint(float alpha) {
+    for (int i = 0; i < numContacts; i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
         glm::vec3 dpA = bodyA->getPosition() - bodyA->getInitial();
         glm::vec3 dpB = bodyB->getPosition() - bodyB->getInitial();
         
-        C[i * 2 + 0] = contacts[i].C0.x * (1 - alpha) + dot(contacts[i].JAn, dpA) + dot(contacts[i].JBn, dpB);
-        C[i * 2 + 1] = contacts[i].C0.y * (1 - alpha) + dot(contacts[i].JAt, dpA) + dot(contacts[i].JBt, dpB);
+        C[i * 2 + 0] = contacts[i].C0.x * (1 - alpha) + dot(getJ(i * 2 + JN, bodyA), dpA) + dot(getJ(i * 2 + JN, bodyB), dpB);
+        C[i * 2 + 1] = contacts[i].C0.y * (1 - alpha) + dot(getJ(i * 2 + JT, bodyA), dpA) + dot(getJ(i * 2 + JT, bodyB), dpB);
 
         // Update the friction bounds using the latest lambda values
         float frictionBound = glm::abs(lambda[i * 2 + 0]) * friction;
@@ -116,22 +112,8 @@ void Manifold::computeConstraint(float alpha)
     }
 }
 
-void Manifold::computeDerivatives(Rigid* body)
-{
-    // Just store precomputed derivatives in J for the desired body
-    for (int i = 0; i < numContacts; i++)
-    {
-        if (body == bodyA)
-        {
-            J[i * 2 + 0] = contacts[i].JAn;
-            J[i * 2 + 1] = contacts[i].JAt;
-        }
-        else
-        {
-            J[i * 2 + 0] = contacts[i].JBn;
-            J[i * 2 + 1] = contacts[i].JBt;
-        }
-    }
+void Manifold::computeDerivatives(Rigid* body) {
+    return; // should already be stored, doesn't change after initialization
 }
 
 }

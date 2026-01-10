@@ -34,7 +34,8 @@ Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     // Set some reasonable defaults
     for (int i = 0; i < MAX_ROWS; i++)
     {
-        J[i] = { 0, 0, 0 };
+        JA[i] = { 0, 0, 0 };
+        JB[i] = { 0, 0, 0 };
         H[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         C[i] = 0.0f;
         stiffness[i] = INFINITY;

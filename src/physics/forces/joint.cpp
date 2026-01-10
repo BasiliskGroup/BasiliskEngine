@@ -66,9 +66,9 @@ void Joint::computeDerivatives(Rigid* body)
     if (body == bodyA)
     {
         glm::vec2 r = rotate(bodyA->getPosition().z, rA);
-        J[0] = glm::vec3(1.0f, 0.0f, -r.y);
-        J[1] = glm::vec3(0.0f, 1.0f, r.x);
-        J[2] = glm::vec3(0.0f, 0.0f, torqueArm);
+        JA[0] = glm::vec3(1.0f, 0.0f, -r.y);
+        JA[1] = glm::vec3(0.0f, 1.0f, r.x);
+        JA[2] = glm::vec3(0.0f, 0.0f, torqueArm);
         // GLM 3x3 constructor: mat3(x1,y1,z1, x2,y2,z2, x3,y3,z3) = columns
         H[0] = glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0);
         H[1] = glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0);
@@ -77,9 +77,9 @@ void Joint::computeDerivatives(Rigid* body)
     else
     {
         glm::vec2 r = rotate(bodyB->getPosition().z, rB);
-        J[0] = glm::vec3(-1.0f, 0.0f, r.y);
-        J[1] = glm::vec3(0.0f, -1.0f, -r.x);
-        J[2] = glm::vec3(0.0f, 0.0f, -torqueArm);
+        JB[0] = glm::vec3(-1.0f, 0.0f, r.y);
+        JB[1] = glm::vec3(0.0f, -1.0f, -r.x);
+        JB[2] = glm::vec3(0.0f, 0.0f, -torqueArm);
         H[0] = glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0);
         H[1] = glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0);
         H[2] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
