@@ -4,16 +4,18 @@
 namespace bsk::internal {
 
 bool RigidComparator::operator()(Rigid* a, Rigid* b) const {
-    // For max-heap: return true if 'a' has lower priority than 'b'
-    // Lower priority means it should come after 'b' in the heap
-    
     // Primary comparison: satur (higher is better)
     if (a->getSatur() != b->getSatur()) {
-        return a->getSatur() < b->getSatur();
+        return a->getSatur() > b->getSatur();  // Reversed for max ordering
     }
     
     // Secondary tiebreaker: degree (higher is better)
-    return a->getDegree() < b->getDegree();
+    if (a->getDegree() != b->getDegree()) {
+        return a->getDegree() > b->getDegree();  // Reversed for max ordering
+    }
+    
+    // Final tiebreaker: pointer address for strict weak ordering
+    return a < b;
 }
 
 }

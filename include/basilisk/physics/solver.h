@@ -11,9 +11,15 @@
 
 #pragma once
 
+#include "basilisk/physics/threading/scratch.h"
 #include <basilisk/util/includes.h>
 #include <optional>
 #include <basilisk/physics/coloring/color_queue.h>
+#include <thread>
+#include <barrier>
+#include <semaphore>
+#include <atomic>
+
 
 #define PENALTY_MIN 1.0f              // Minimum penalty parameter
 #define PENALTY_MAX 1000000000.0f     // Maximum penalty parameter
@@ -27,10 +33,19 @@ class Rigid;
 class Force;
 class ColliderTable;
 class BodyTable;
+struct ThreadScratch;
+struct WorkRange;
 
 // Core solver class which holds all the rigid bodies and forces, and has logic to step the simulation forward in time
 class Solver {
 private:
+    enum class Stage {
+        STAGE_NONE,
+        STAGE_DUAL,
+        STAGE_PRIMAL,
+        STAGE_EXIT
+    };
+
     std::optional<glm::vec3> gravity;  // Gravity
     int iterations;     // Solver iterations
     float dt;           // Timestep
@@ -44,12 +59,25 @@ private:
     Rigid* bodies;
     Force* forces;
 
+    int numRigids;
+    int numForces;
+
     ColliderTable* colliderTable;
     BodyTable* bodyTable;
 
     // Coloring
     ColorQueue colorQueue;
     std::vector<std::vector<Rigid*>> colorGroups;
+
+    // Threading
+    std::barrier<> stageBarrier;
+    std::counting_semaphore<> startSignal;
+    std::counting_semaphore<> finishSignal;
+    std::atomic<Stage> currentStage;
+    std::atomic<float> currentAlpha;
+    std::atomic<int> currentColor;
+    std::atomic<bool> running;
+    std::vector<std::thread> workers;
 
 public:
     Solver();
@@ -70,6 +98,8 @@ public:
     BodyTable* getBodyTable() const { return bodyTable; }
     Rigid* getBodies() const { return bodies; }
     Force* getForces() const { return forces; }
+    int getNumRigids() const { return numRigids; }
+    int getNumForces() const { return numForces; }
     std::optional<glm::vec3> getGravity() const { return gravity; }
     int getIterations() const { return iterations; }
     float getDt() const { return dt; }
@@ -92,6 +122,13 @@ public:
     // Coloring
     void resetColoring();
     void dsatur();
+
+    // Threading
+    void workerLoop(unsigned int threadID);
+
+    // Stages
+    void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
+    void primalUpdateSingle(Rigid* body);
 };
 
 }

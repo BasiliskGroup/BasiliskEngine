@@ -76,6 +76,26 @@ int Rigid::getNextUnusedColor() const {
     return candidate;
 }
 
+bool Rigid::verifyColoring() const {
+    int myColor = getColor();
+    // If not colored, verification passes trivially
+    if (myColor == -1) {
+        return true;
+    }
+    
+    // Check all adjacent rigid bodies connected through forces
+    for (Force* force = forces; force != nullptr; force = (force->getBodyA() == this) ? force->getNextA() : force->getNextB()) {
+        Rigid* other = (force->getBodyA() == this) ? force->getBodyB() : force->getBodyA();
+        
+        // If adjacent rigid has the same color, coloring is invalid
+        if (other != nullptr && other->getColor() == myColor) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 void Rigid::insert(Force* force) {
     if (force == nullptr) {
         return;

@@ -56,6 +56,7 @@ public:
     void reserveColors(int count);
     void useColor(int color);
     void incrSatur() { satur++; }
+    bool verifyColoring() const;
     
     // Linked list management
     void insert(Force* force);

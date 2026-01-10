@@ -9,6 +9,7 @@
 * It is provided "as is" without express or implied warranty.
 */
 
+#include "basilisk/util/constants.h"
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/forces/force.h>
@@ -19,16 +20,36 @@
 #include <basilisk/physics/tables/bodyTable.h>
 #include <basilisk/util/time.h>
 #include <basilisk/physics/collision/bvh.h>
+#include <basilisk/physics/threading/scratch.h>
+#include <stdexcept>
 
 
 namespace bsk::internal {
 
-Solver::Solver()
-    : bodies(nullptr), forces(nullptr), colliderTable(nullptr), bodyTable(nullptr)
+Solver::Solver() : 
+    bodies(nullptr), 
+    forces(nullptr),
+    numRigids(0),
+    numForces(0),
+    colliderTable(nullptr), 
+    bodyTable(nullptr),
+    stageBarrier(NUM_THREADS),
+    startSignal(0),
+    finishSignal(0),
+    currentStage(Stage::STAGE_NONE),
+    currentAlpha(0.0f),
+    currentColor(0),
+    running(true),
+    workers()
 {
     this->colliderTable = new ColliderTable(64);
     this->bodyTable = new BodyTable(128);
     defaultParams();
+
+    workers.reserve(NUM_THREADS);
+    for (unsigned int i = 0; i < NUM_THREADS; i++) {
+        workers.emplace_back(&Solver::workerLoop, this, i);
+    }
 }
 
 Solver::~Solver()
@@ -44,8 +65,18 @@ void Solver::clear()
     while (bodies)
         delete bodies;
 
+    numRigids = 0;
+    numForces = 0;
+
     delete colliderTable;
     colliderTable = nullptr;
+
+    // Signal workers to exit
+    currentStage.store(Stage::STAGE_EXIT, std::memory_order_release);
+    startSignal.release(workers.size());
+
+    for (auto& w : workers)
+        w.join();
 }
 
 void Solver::insert(Rigid* body)
@@ -64,6 +95,7 @@ void Solver::insert(Rigid* body)
     }
 
     bodies = body;
+    numRigids++;
 }
 
 void Solver::remove(Rigid* body)
@@ -91,6 +123,7 @@ void Solver::remove(Rigid* body)
     // Clear pointers
     body->setNext(nullptr);
     body->setPrev(nullptr);
+    numRigids--;
 }
 
 void Solver::insert(Force* force)
@@ -109,6 +142,7 @@ void Solver::insert(Force* force)
     }
 
     forces = force;
+    numForces++;
 }
 
 void Solver::remove(Force* force)
@@ -136,6 +170,7 @@ void Solver::remove(Force* force)
     // Clear pointers
     force->setNext(nullptr);
     force->setPrev(nullptr);
+    numForces--;
 }
 
 void Solver::defaultParams()
@@ -154,6 +189,7 @@ void Solver::defaultParams()
     // error correction, and lower values are more responsive and energetic. Tune this depending
     // on your desired constraint error response.
     alpha = 0.99f;
+    currentAlpha.store(alpha, std::memory_order_relaxed);
 
     // Gamma controls how much the penalty and lambda values are decayed each step during warmstarting.
     // This should always be < 1 so that the penalty values can decrease (unless you use a different
@@ -257,62 +293,39 @@ void Solver::step(float dtIncoming)
     for (int it = 0; it < totalIterations; it++)
     {
         // If using post stabilization, either remove all or none of the pre-existing constraint error
-        float currentAlpha = alpha;
+        float alphaValue = alpha;
         if (postStabilize)
-            currentAlpha = it < iterations ? 1.0f : 0.0f;
+            alphaValue = it < iterations ? 1.0f : 0.0f;
+        
+        // Store currentAlpha with release ordering to pair with acquire on worker side
+        currentAlpha.store(alphaValue, std::memory_order_release);
 
         // Primal update
         auto primalStart = timeNow();
-        for (Rigid* body = bodies; body != nullptr; body = body->getNext())
-        {
-            // Skip static / kinematic bodies
-            if (body->getMass() <= 0)
+        currentStage.store(Stage::STAGE_PRIMAL, std::memory_order_release);
+
+        // iterate through colors - process bodies by color to enable parallel execution
+        // Bodies of the same color can be processed in parallel since they have no dependencies
+        for (int activeColor = 0; activeColor < colorGroups.size(); activeColor++) {
+            // Skip empty color groups (shouldn't happen with proper dsatur, but be safe)
+            if (colorGroups[activeColor].empty()) {
                 continue;
-
-            // Initialize left and right hand sides of the linear system (Eqs. 5, 6)
-            float mass = body->getMass();
-            float moment = body->getMoment();
-            glm::mat3 M = diagonal(mass, mass, moment);
-            glm::mat3 lhs = M / (dt * dt);
-            glm::vec3 pos = body->getPosition();
-            glm::vec3 inertial = body->getInertial();
-            glm::vec3 rhs = M / (dt * dt) * (pos - inertial);
-
-            // Iterate over all forces acting on the body
-            for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB())
-            {
-                // Compute constraint and its derivatives
-                force->computeConstraint(currentAlpha);
-                force->computeDerivatives(body);
-
-                for (int i = 0; i < force->rows(); i++)
-                {
-                    // Use lambda as 0 if it's not a hard constraint
-                    float stiffness = force->getStiffness(i);
-                    float lambda = isinf(stiffness) ? force->getLambda(i) : 0.0f;
-
-                    // Compute the clamped force magnitude (Sec 3.2)
-                    float penalty = force->getPenalty(i);
-                    float C = force->getC(i);
-                    float fmin = force->getFmin(i);
-                    float fmax = force->getFmax(i);
-                    float f = glm::clamp(penalty * C + lambda, fmin, fmax);
-
-                    // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
-                    glm::mat3 H = force->getH(i);
-                    glm::mat3 G = diagonal(length(H[0]), length(H[1]), length(H[2])) * glm::abs(f);
-
-                    // Accumulate force (Eq. 13) and hessian (Eq. 17)
-                    glm::vec3 J = force->getJ(i);
-                    rhs += J * f;
-                    lhs += outer(J, J * penalty) + G;
-                }
             }
-
-            // Solve the SPD linear system using LDL and apply the update (Eq. 4)
-            pos -= solve(lhs, rhs);
-            body->setPosition(pos);
+            
+            // Store the active color with release ordering - ensures visibility to workers
+            currentColor.store(activeColor, std::memory_order_release);
+            // Release workers to process this color group
+            startSignal.release(NUM_THREADS);
+            // Wait for all workers to finish processing this color group
+            finishSignal.acquire();
         }
+
+        // old primal update loop
+        // for (Rigid* body = bodies; body != nullptr; body = body->getNext())
+        // {
+        //     primalUpdateSingle(body);
+        // }
+
         auto primalEnd = timeNow();
         printDurationUS(primalStart, primalEnd, "  Primal Update: ");
 
@@ -325,7 +338,7 @@ void Solver::step(float dtIncoming)
             for (Force* force = forces; force != nullptr; force = force->getNext())
             {
                 // Compute constraint
-                force->computeConstraint(currentAlpha);
+                force->computeConstraint(currentAlpha.load(std::memory_order_acquire));
 
                 for (int i = 0; i < force->rows(); i++)
                 {
@@ -391,15 +404,22 @@ void Solver::resetColoring() {
 }
 
 void Solver::dsatur() {
-    // Add all bodies to the priority queue
+    // Use a set instead of priority_queue for O(log n) updates
+    std::set<Rigid*, RigidComparator> colorSet;
+    
+    // Add all bodies to the set
     for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
-        colorQueue.push(body);
+        colorSet.insert(body);
     }
 
     // Color the bodies
-    while (colorQueue.empty() == false) {
-        Rigid* body = colorQueue.top();
-        colorQueue.pop();
+    while (!colorSet.empty()) {
+        // Get highest priority element
+        auto it = colorSet.end();
+        --it;
+        Rigid* body = *it;
+        colorSet.erase(it);
+        
         int color = body->getNextUnusedColor();
 
         // add color to body
@@ -419,11 +439,124 @@ void Solver::dsatur() {
                 continue;
             }
 
+            // Remove from set, update, re-insert (this triggers re-ordering)
+            colorSet.erase(other);
             other->useColor(color);
             other->incrSatur();
-            colorQueue.push(other);
+            colorSet.insert(other);
         }
     }
+    
+    // Verify coloring is correct
+    for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
+        if (!body->verifyColoring()) {
+            throw std::runtime_error("Coloring verification failed: Adjacent rigid bodies have the same color");
+        }
+    }
+
+    // Print number of colors used
+    std::cout << "Number of colors used: " << colorGroups.size() << std::endl;
+}
+
+void Solver::workerLoop(unsigned int threadID) {
+    ThreadScratch scratch;
+
+    while (true) {
+        startSignal.acquire();
+        // The acquire on currentStage.load() ensures we see all writes (including currentAlpha) 
+        // that happened before the release store of currentStage
+        Stage stage = currentStage.load(std::memory_order_acquire);
+        if (stage == Stage::STAGE_EXIT)
+            return;
+
+        switch (stage) {
+            case Stage::STAGE_PRIMAL:
+                primalStage(scratch, threadID, currentColor.load(std::memory_order_acquire)); 
+                break;
+            default: 
+                break;
+        }
+
+        stageBarrier.arrive_and_wait();
+
+        if (threadID == 0) {
+            finishSignal.release();
+        }
+    }
+}
+
+void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) {
+    // Verify activeColor is within bounds (defensive programming)
+    if (activeColor < 0 || activeColor >= static_cast<int>(colorGroups.size())) {
+        return;
+    }
+    
+    // Get the bodies for this color group - all bodies in the same color can be processed in parallel
+    std::size_t colorSize = colorGroups[activeColor].size();
+    if (colorSize == 0) {
+        return; // Empty color group
+    }
+    
+    // Partition the work among threads for this color group
+    WorkRange range = partition(colorSize, threadID, NUM_THREADS);
+
+    // Process assigned range of bodies for this color
+    for (std::size_t i = range.start; i < range.end; i++) {
+        Rigid* body = colorGroups[activeColor][i];
+        primalUpdateSingle(body);
+    }
+}
+
+void Solver::primalUpdateSingle(Rigid* body) {
+    // Skip static / kinematic bodies
+    if (body->getMass() <= 0)
+        return;
+
+    // Initialize left and right hand sides of the linear system (Eqs. 5, 6)
+    float mass = body->getMass();
+    float moment = body->getMoment();
+    glm::mat3 M = diagonal(mass, mass, moment);
+    glm::mat3 lhs = M / (dt * dt);
+    glm::vec3 pos = body->getPosition();
+    glm::vec3 inertial = body->getInertial();
+    glm::vec3 rhs = M / (dt * dt) * (pos - inertial);
+
+    // Iterate over all forces acting on the body
+    // Load currentAlpha once per body (it's constant during the stage)
+    float alpha = currentAlpha.load(std::memory_order_acquire);
+    for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB())
+        {
+            // Compute constraint and its derivatives
+        force->computeConstraint(alpha);
+        force->computeDerivatives(body);
+
+        for (int i = 0; i < force->rows(); i++)
+        {
+            // Use lambda as 0 if it's not a hard constraint
+            float stiffness = force->getStiffness(i);
+            float lambda = isinf(stiffness) ? force->getLambda(i) : 0.0f;
+
+            // Compute the clamped force magnitude (Sec 3.2)
+            float penalty = force->getPenalty(i);
+            float C = force->getC(i);
+            float fmin = force->getFmin(i);
+            float fmax = force->getFmax(i);
+            float f = glm::clamp(penalty * C + lambda, fmin, fmax);
+
+            // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
+            glm::mat3 H = force->getH(i);
+            glm::mat3 G = diagonal(length(H[0]), length(H[1]), length(H[2])) * glm::abs(f);
+
+            // Accumulate force (Eq. 13) and hessian (Eq. 17)
+            glm::vec3 J = force->getJ(i);
+            rhs += J * f;
+            lhs += outer(J, J * penalty) + G;
+        }
+    }
+
+    // Solve the SPD linear system using LDL and apply the update (Eq. 4)
+    pos -= solve(lhs, rhs);
+    body->setPosition(pos);
 }
 
 }
