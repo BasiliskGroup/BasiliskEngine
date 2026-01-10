@@ -131,6 +131,9 @@ public:
     void primalUpdateSingle(PrimalScratch& scratch, Rigid* body);
     void dualStage(ThreadScratch& scratch, int threadID);
     void dualUpdateSingle(Force* force);
+
+    // Picking
+    Rigid* pick(glm::vec2 at, glm::vec2& local);
 };
 
 }

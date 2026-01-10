@@ -405,7 +405,7 @@ void Solver::dsatur() {
             Rigid* other = (force->getBodyA() == body) ? force->getBodyB() : force->getBodyA();
 
             // Skip if already colored or has already used this color
-            if (other->isColored() || other->isColorUsed(color)) {
+            if (other == nullptr || other->isColored() || other->isColorUsed(color)) {
                 continue;
             }
 
@@ -426,6 +426,22 @@ void Solver::dsatur() {
 
     // Print number of colors used
     std::cout << "Number of colors used: " << colorGroups.size() << std::endl;
+}
+
+Rigid* Solver::pick(glm::vec2 at, glm::vec2& local)
+{
+    // Find which body is at the given point
+    for (Rigid* body = bodies; body != nullptr; body = body->getNext())
+    {
+        glm::mat2 Rt = rotation(-body->getPosition().z);
+        glm::vec2 bodyPos = glm::vec2(body->getPosition().x, body->getPosition().y);
+        local = Rt * (at - bodyPos);
+        glm::vec2 bodySize = body->getSize();
+        if (local.x >= -bodySize.x * 0.5f && local.x <= bodySize.x * 0.5f &&
+            local.y >= -bodySize.y * 0.5f && local.y <= bodySize.y * 0.5f)
+            return body;
+    }
+    return nullptr;
 }
 
 }
