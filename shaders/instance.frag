@@ -1,40 +1,30 @@
 #version 330 core
 
-struct textArray {
-    sampler2DArray array;
-};
+#include "include/material.glsl"
+#include "include/texture.glsl"
 
-struct MaterialData {
-    vec3 color;
-
-    uint albedoArray;
-    uint albedoIndex;
-    uint normalArray;
-    uint normalIndex;
-
-    float roughness;
-    float subsurface;
-    float sheen;
-    float sheenTint;
-    float anisotropic;
-    float specular;
-    float metallicness;
-    float clearcoat;
-    float clearcoatGloss;
-};
-
-in vec3 normal;
+in vec3 position;
 in vec2 uv;
-flat in MaterialData material;
+in vec3 normal;
+flat in Material material;
 
 uniform sampler2D uTexture;
-uniform textArray textureArrays[4];
+uniform vec3 uCameraPosition;
+uniform vec3 uViewDirection;
 
 out vec4 fragColor;
 
 void main() {
-    vec3 globalLight = normalize(vec3(.5, 1, .25));
-    float brightness = (dot(normal, globalLight) + 1) / 2;
+    vec3 N = normalize(normal);
+    vec3 L = normalize(vec3(.5, 1.0, .25));
+    vec3 V = normalize(uCameraPosition - position);
+    vec3 H = normalize(L + V);
 
-    fragColor = brightness * texture(textureArrays[material.albedoArray].array, vec3(uv, material.albedoIndex));;
+    float ambient = 0.1;
+    float diffuse = max(dot(N, L), 0.0);
+    float specular = pow(max(dot(N, H), 0.0), 64);
+    float brightness = (ambient + diffuse + specular);
+
+    vec4 textureColor = getTextureValue(material, uv);
+    fragColor = vec4(brightness * textureColor.rgb, textureColor.a);
 } 
