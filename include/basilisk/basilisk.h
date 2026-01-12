@@ -30,11 +30,13 @@
 #include "camera/camera.h"
 #include "camera/camera2d.h"
 
-#include "shapes/collider.h"
-#include "shapes/rigid.h"
-#include "solver/solver.h"
-#include "forces/force.h"
-#include "forces/manifold.h"
+#include "physics/solver.h"
+#include "physics/forces/force.h"
+#include "physics/forces/joint.h"
+#include "physics/forces/spring.h"
+#include "physics/forces/motor.h"
+#include "physics/forces/manifold.h"
+#include "physics/collision/collider.h"
 
 namespace bsk {
     // render
@@ -52,11 +54,13 @@ namespace bsk {
     using Node2D = internal::Node2D;
 
     // physics
-    using Collider = internal::Collider;
     using Rigid = internal::Rigid;
     using Solver = internal::Solver;
     using Force = internal::Force;
     using Manifold = internal::Manifold;
+    using Joint = internal::Joint;
+    using Spring = internal::Spring;
+    using Collider = internal::Collider;
 
     // render
     using Mesh = internal::Mesh;

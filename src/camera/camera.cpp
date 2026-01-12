@@ -22,7 +22,6 @@ void Camera::update() {
     pitch = std::max(-89.0f, std::min(89.0f, pitch));
 
     // Movement
-    float speed = 3.0;
     float dt = 0.005;
     float velocity = (speed * dt) * (keys->getPressed(GLFW_KEY_CAPS_LOCK) * 3 + 1);
 

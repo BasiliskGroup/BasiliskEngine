@@ -1,6 +1,13 @@
 #include <basilisk/basilisk.h>
-#include <iostream>
-
+#include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/forces/manifold.h>
+#include <basilisk/physics/forces/joint.h>
+#include <basilisk/physics/forces/spring.h>
+#include <basilisk/physics/rigid.h>
+#include <basilisk/physics/maths.h>
+#include <basilisk/physics/tables/bodyTable.h>
+#include <basilisk/util/random.h>
+#include <basilisk/util/maths.h>
 
 int main() {
     // Make a Basilisk Engine instance 
@@ -12,13 +19,11 @@ int main() {
     // Load assets from file
     bsk::Mesh* cube = new bsk::Mesh("models/cube.obj");
     bsk::Image* image = new bsk::Image("textures/container.jpg");
-
-    // Create a material from image
     bsk::Material* material = new bsk::Material({1, 1, 1}, image);
 
     bsk::Node* node = new bsk::Node(scene, {.mesh=cube, .material=material});
-
-    bool i = true;
+    
+    // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
         scene->update();

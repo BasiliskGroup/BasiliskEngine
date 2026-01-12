@@ -35,4 +35,15 @@ float triangleArea2(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) 
     return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
 }
 
+std::pair<glm::vec3, glm::vec2> connectSquare(const glm::vec2& a, const glm::vec2& b, float width) {
+    glm::vec2 delta = b - a;
+    float len = glm::length(delta);
+    glm::vec2 mid = (a + b) * 0.5f;
+    float angle = std::atan2(delta.y, delta.x);
+    glm::vec3 pos(mid.x, mid.y, angle);
+    glm::vec2 scale(len, width);
+
+    return {pos, scale};
+}
+
 }
