@@ -8,6 +8,16 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+
+# Architecture settings (can be overridden with -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" for universal)
+# Options: "arm64", "x86_64", or "x86_64;arm64" for universal
+if(NOT DEFINED CMAKE_OSX_ARCHITECTURES)
+    # Default to system architecture if not specified
+    # To build universal: cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ..
+    # To build x86_64: cmake -DCMAKE_OSX_ARCHITECTURES="x86_64" ..
+    # To build arm64: cmake -DCMAKE_OSX_ARCHITECTURES="arm64" ..
+endif()
+
 option(BASILISK_BUILD_DOCS "Build API documentation" OFF)
 
 include(FetchContent)
@@ -91,6 +101,30 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(clipper2)
 
+# ======================================================
+# PyBind11
+# ======================================================
+# Find Python before pybind11 to ensure correct Python is used
+# Users can override with: -DPYTHON_EXECUTABLE=/path/to/python3
+
+# Find Python3 package (will use PYTHON_EXECUTABLE if set)
+find_package(Python3 COMPONENTS Interpreter Development QUIET)
+if(Python3_FOUND)
+    message(STATUS "Found Python ${Python3_VERSION}: ${Python3_EXECUTABLE}")
+    message(STATUS "  Python include dirs: ${Python3_INCLUDE_DIRS}")
+    # Ensure pybind11 uses the same Python
+    set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE} CACHE PATH "Python executable" FORCE)
+else()
+    message(WARNING "Python3 not found - pybind11 will attempt to find it automatically")
+endif()
+
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG v3.0.1
+)
+FetchContent_MakeAvailable(pybind11)
+
 file(GLOB CLIPPER2_SOURCES
     ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/src/*.cpp
 )
@@ -142,6 +176,23 @@ target_link_libraries(basilisk
 if(MSVC)
     target_compile_options(basilisk PRIVATE /FS)
 endif()
+
+# ======================================================
+# Python Bindings
+# ======================================================
+file(GLOB_RECURSE BINDING_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/bindings/*.cpp
+)
+
+pybind11_add_module(basilisk_python ${BINDING_SOURCES})
+
+target_include_directories(basilisk_python PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(basilisk_python PRIVATE
+    basilisk
+)
 
 # ======================================================
 # Engine executable
