@@ -39,12 +39,12 @@ void Motor::computeDerivatives(Rigid* body)
     if (body == bodyA)
     {
         JA[0] = glm::vec3(0.0f, 0.0f, 1.0f);
-        H[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        HA[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
     else
     {
         JB[0] = glm::vec3(0.0f, 0.0f, -1.0f);
-        H[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        HB[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 }
 

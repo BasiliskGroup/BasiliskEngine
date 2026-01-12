@@ -62,7 +62,7 @@ void Spring::computeDerivatives(Rigid* body)
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        H[0] = glm::mat3(
+        HA[0] = glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
@@ -80,7 +80,7 @@ void Spring::computeDerivatives(Rigid* body)
         JB[0].z = dot(n, -Sr);
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        H[0] = glm::mat3(
+        HB[0] = glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2

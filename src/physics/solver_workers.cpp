@@ -91,13 +91,10 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, Rigid* body) {
 
             // Compute the clamped force magnitude (Sec 3.2)
             float penalty = force->getPenalty(i);
-            float C = force->getC(i);
-            float fmin = force->getFmin(i);
-            float fmax = force->getFmax(i);
-            float f = glm::clamp(penalty * C + lambda, fmin, fmax);
+            float f = glm::clamp(penalty * force->getC(i) + lambda, force->getFmin(i), force->getFmax(i));
 
             // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
-            scratch.GoH = force->getH(i);
+            scratch.GoH = force->getH(i, body);
             scratch.GoH = diagonal(length(scratch.GoH[0]), length(scratch.GoH[1]), length(scratch.GoH[2])) * glm::abs(f);
 
             // Accumulate force (Eq. 13) and hessian (Eq. 17)

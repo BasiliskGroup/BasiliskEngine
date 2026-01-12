@@ -72,7 +72,7 @@ int main() {
                 .scale={quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)},
                 .collider=boxCollider,
                 .density=1.0e1f,
-                .velocity=25.0f * glm::vec3{bsk::internal::uniform(-1.0f, 1.0f), bsk::internal::uniform(-1.0f, 1.0f), 0.0f}
+                // .velocity=25.0f * glm::vec3{bsk::internal::uniform(-1.0f, 1.0f), bsk::internal::uniform(-1.0f, 1.0f), 0.0f}
             });
             gridNodes.push_back(node);
         }

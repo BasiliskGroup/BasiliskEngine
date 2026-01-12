@@ -22,7 +22,7 @@ namespace bsk::internal {
     // inline constexpr bool SHOW_CONTACTS = true;
 
     inline constexpr float EPSILON = 1e-10f;
-    inline constexpr float GRAVITATIONAL = 6.0e-2f; // 6.67430e-11f;
+    inline constexpr float GRAVITATIONAL = 6.67430e-11f;
     inline constexpr float GRAVITATIONAL_THETA = 0.65f;
 
     // threading

@@ -12,7 +12,6 @@
 #pragma once
 
 #include <basilisk/util/includes.h>
-#include <stdexcept>
 
 #define MAX_ROWS 4                    // Most number of rows an individual constraint can have
 
@@ -39,7 +38,8 @@ protected:
 
     glm::vec3 JA[MAX_ROWS];
     glm::vec3 JB[MAX_ROWS];
-    glm::mat3 H[MAX_ROWS];
+    glm::mat3 HA[MAX_ROWS];
+    glm::mat3 HB[MAX_ROWS];
     float C[MAX_ROWS];
     float fmin[MAX_ROWS];
     float fmax[MAX_ROWS];
@@ -69,12 +69,8 @@ public:
     Force* getPrev() const { return prev; }
     Force* getPrevA() const { return prevA; }
     Force* getPrevB() const { return prevB; }
-    const glm::vec3& getJ(int index, Rigid* body) const { 
-        if (body == bodyA) return JA[index];
-        if (body == bodyB) return JB[index];
-        throw std::runtime_error("Force::getJ: body must be either bodyA or bodyB");
-    }
-    const glm::mat3& getH(int index) const { return H[index]; }
+    const glm::vec3& getJ(int index, Rigid* body) const { return (body == bodyA) ? JA[index] : JB[index]; }
+    const glm::mat3& getH(int index, Rigid* body) const { return (body == bodyA) ? HA[index] : HB[index]; }
     float getC(int index) const { return C[index]; }
     float getFmin(int index) const { return fmin[index]; }
     float getFmax(int index) const { return fmax[index]; }
@@ -84,18 +80,8 @@ public:
     float getLambda(int index) const { return lambda[index]; }
     
     // Setters
-    void setJ(int index, Rigid* body, const glm::vec3& value) { 
-        if (body == bodyA) {
-            JA[index] = value;
-            return;
-        }
-        if (body == bodyB) {
-            JB[index] = value;
-            return;
-        }
-        throw std::runtime_error("Force::getJ: body must be either bodyA or bodyB");
-    }
-    void setH(int index, const glm::mat3& value) { H[index] = value; }
+    void setJ(int index, Rigid* body, const glm::vec3& value) { if (body == bodyA) { JA[index] = value; } else { JB[index] = value; } }
+    void setH(int index, Rigid* body, const glm::mat3& value) { if (body == bodyA) { HA[index] = value; } else { HB[index] = value; } }
     void setC(int index, float value) { C[index] = value; }
     void setFmin(int index, float value) { fmin[index] = value; }
     void setFmax(int index, float value) { fmax[index] = value; }
@@ -109,17 +95,6 @@ public:
     void setNextB(Force* value) { nextB = value; }
     void setPrevA(Force* value) { prevA = value; }
     void setPrevB(Force* value) { prevB = value; }
-    
-    // // Get mutable references for direct access (for performance-critical code)
-    // glm::vec3& getJRef(int index, Rigid* body) { return (body == bodyA) ? JA[index] : JB[index]; }
-    // glm::mat3& getHRef(int index) { return H[index]; }
-    // float& getCRef(int index) { return C[index]; }
-    // float& getStiffnessRef(int index) { return stiffness[index]; }
-    // float& getPenaltyRef(int index) { return penalty[index]; }
-    // float& getLambdaRef(int index) { return lambda[index]; }
-    // float& getFminRef(int index) { return fmin[index]; }
-    // float& getFmaxRef(int index) { return fmax[index]; }
-    // float& getFractureRef(int index) { return fracture[index]; }
 };
 
 }

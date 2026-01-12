@@ -36,7 +36,8 @@ Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     {
         JA[i] = { 0, 0, 0 };
         JB[i] = { 0, 0, 0 };
-        H[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        HA[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        HB[i] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         C[i] = 0.0f;
         stiffness[i] = INFINITY;
         fmax[i] = INFINITY;
