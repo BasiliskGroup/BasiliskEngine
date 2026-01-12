@@ -1,4 +1,6 @@
 #include <basilisk/render/shader.h>
+#include <regex>
+#include <filesystem>
 
 namespace bsk::internal {
 
@@ -62,7 +64,7 @@ inline GLsizei getGLTypeSize(GLenum type) {
 }
 
 /**
- * @brief Read a file as a c-string
+ * @brief Read a file as a c-string. Unused now (replaced by loadShader Source), but kept in case needed for testing
  * 
  * @param path The absolute or relative path of the file to read
  * @return const char* 
@@ -86,6 +88,63 @@ std::string loadFile(const char* path) {
     }
 
     return content;
+}
+
+
+std::string loadShaderSource(const std::string& filepath, std::unordered_set<std::string>& includedFiles, bool isRootFile) {
+    // Mark as included
+    includedFiles.insert(filepath);
+    
+    // Open the file
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << filepath << std::endl;
+        return "";
+    }
+
+    // Get directory of file
+    std::filesystem::path currentFilePath(filepath);
+    std::filesystem::path currentDir = currentFilePath.parent_path();
+
+    std::string line;
+    std::stringstream fullSource;
+    
+    // Regex for #include "path/to/file.glsl"
+    std::regex includeRegex(R"(#include\s+["<](.*)[">])");
+    // Regex for #version
+    std::regex versionRegex(R"(#version\s+.*)");
+
+    while (std::getline(file, line)) {
+
+        // Filter out #version unless at root
+        if (std::regex_match(line, versionRegex)) {
+            if (isRootFile) {
+                fullSource << line << "\n";
+            }
+            continue;
+        }
+
+        // Add include files if needed
+        std::smatch match;
+        if (std::regex_search(line, match, includeRegex)) {
+            std::string includeName = match[1].str();
+            std::filesystem::path includePath = currentDir / includeName;
+            
+            if (!includedFiles.contains(includePath)) {
+                fullSource << "\n" << loadShaderSource(includePath, includedFiles, false) << "\n";
+            }
+        } 
+        // Add line as is if not an include
+        else {
+            fullSource << line << "\n";
+        }
+    }
+
+    return fullSource.str();
+}
+std::string loadShaderSource(const std::string& filepath) {
+    std::unordered_set<std::string> includedFiles;
+    return loadShaderSource(filepath, includedFiles, true);
 }
 
 /**
@@ -151,8 +210,8 @@ unsigned int loadProgram(unsigned int vertex, unsigned int fragment) {
  */
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     //  Load the source code
-    std::string vertexShaderSource   = loadFile(vertexPath);
-    std::string fragmentShaderSource = loadFile(fragmentPath);
+    std::string vertexShaderSource   = loadShaderSource(vertexPath);
+    std::string fragmentShaderSource = loadShaderSource(fragmentPath);
 
     // Compile shaders from source
     unsigned int vertex   = loadShader(vertexShaderSource,   GL_VERTEX_SHADER);
@@ -330,6 +389,11 @@ void Shader::setUniform(const char* name, double value) {
 void Shader::setUniform(const char* name, int value) { 
     use();
     glUniform1i(getUniformLocation(name), value); 
+}
+
+void Shader::setUniform(const char* name, glm::vec3 value) { 
+    use();
+    glUniform3fv(getUniformLocation(name), 1, glm::value_ptr(value)); 
 }
 
 /**

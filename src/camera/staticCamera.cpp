@@ -59,6 +59,8 @@ void StaticCamera::updateProjection() {
 void StaticCamera::use(Shader* shader) {
     shader->setUniform("uView", view);
     shader->setUniform("uProjection", projection);
+    shader->setUniform("uCameraPosition", position);
+    shader->setUniform("uViewDirection", forward);
 }
 
 }
