@@ -1,16 +1,24 @@
 #include <pybind11/pybind11.h>
+
 #include <basilisk/render/material.h>
-#include "helpers/glm_helpers.h"
+
+// IMPORTANT: include GLM casters
+#include "../glm/glmCasters.hpp"
 
 namespace py = pybind11;
-using namespace bsk::bindings::helpers;
+using namespace bsk::internal;
 
 void bind_material(py::module_& m) {
-    py::class_<bsk::internal::Material>(m, "Material")
-        .def(py::init([](py::tuple color, bsk::internal::Image* albedo, bsk::internal::Image* normal) {
-            return new bsk::internal::Material(tuple_to_vec3(color), albedo, normal);
-        }))
-        .def("getColor", &bsk::internal::Material::getColor)
-        .def("getAlbedo", &bsk::internal::Material::getAlbedo)
-        .def("getNormal", &bsk::internal::Material::getNormal);
+    py::class_<Material>(m, "Material")
+        .def(py::init([](const glm::vec3& color, Image* albedo, Image* normal) {
+            return new Material(color, albedo, normal);
+        }),
+        py::arg("color") = glm::vec3{1.0f, 1.0f, 1.0f},
+        py::arg("albedo") = nullptr,
+        py::arg("normal") = nullptr)
+
+        // Getters
+        .def("getColor", &Material::getColor)
+        .def("getAlbedo", &Material::getAlbedo)
+        .def("getNormal", &Material::getNormal);
 }
