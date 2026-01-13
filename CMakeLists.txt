@@ -147,9 +147,9 @@ file(GLOB_RECURSE BASILISK_SOURCES
 # Remove main.cpp since engine executable builds it
 list(REMOVE_ITEM BASILISK_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
-add_library(basilisk STATIC ${BASILISK_SOURCES})
+add_library(basilisk_lib STATIC ${BASILISK_SOURCES})
 
-target_include_directories(basilisk
+target_include_directories(basilisk_lib
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -162,7 +162,7 @@ target_include_directories(basilisk
 # ======================================================
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(basilisk
+target_link_libraries(basilisk_lib
     PUBLIC
         glfw
         glad
@@ -174,7 +174,7 @@ target_link_libraries(basilisk
 )
 
 if(MSVC)
-    target_compile_options(basilisk PRIVATE /FS)
+    target_compile_options(basilisk_lib PRIVATE /FS)
 endif()
 
 # ======================================================
@@ -184,14 +184,14 @@ file(GLOB_RECURSE BINDING_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/bindings/*.cpp
 )
 
-pybind11_add_module(basilisk_python ${BINDING_SOURCES})
+pybind11_add_module(basilisk ${BINDING_SOURCES})
 
-target_include_directories(basilisk_python PRIVATE
+target_include_directories(basilisk PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(basilisk_python PRIVATE
-    basilisk
+target_link_libraries(basilisk PRIVATE
+    basilisk_lib
 )
 
 # ======================================================
@@ -208,7 +208,7 @@ if(EXISTS ${BASILISK_MAIN})
 
     target_link_libraries(engine
         PRIVATE
-            basilisk
+            basilisk_lib
             clipper2
     )
 
