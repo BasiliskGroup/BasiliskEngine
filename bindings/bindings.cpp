@@ -12,6 +12,7 @@ void bind_mesh(py::module_&);
 void bind_material(py::module_&);
 void bind_solver(py::module_&);
 void bind_rigid(py::module_&);
+void bind_collider(py::module_&);
 void bind_force(py::module_&);
 void bind_joint(py::module_&);
 void bind_spring(py::module_&);
@@ -32,6 +33,7 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     
     // Physics bindings - order matters: base classes before derived
     bind_solver(m);
+    bind_collider(m);  // Collider is used by Rigid, so bind it before Rigid
     bind_rigid(m);
     bind_force(m);  // Base class must be bound before derived classes
     bind_joint(m);
