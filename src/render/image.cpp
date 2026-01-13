@@ -13,6 +13,9 @@ Image::Image(std::string file) {
     stbi_set_flip_vertically_on_load(true);  
     std::string resolvedPath = externalPath(file);
     data = stbi_load(resolvedPath.c_str(), &width, &height, &nChannels, 4);
+    if (!data) {
+        std::cout << "Failed to load texture from path: " << resolvedPath << std::endl;
+    }
 }
 
 /**

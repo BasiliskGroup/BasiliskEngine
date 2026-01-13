@@ -213,6 +213,13 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     std::string vertexShaderSource   = loadShaderSource(vertexPath);
     std::string fragmentShaderSource = loadShaderSource(fragmentPath);
 
+    if (vertexShaderSource.empty()) {
+        std::cout << "Failed to load shader from path: " << vertexPath << std::endl;
+    }
+    if (fragmentShaderSource.empty()) {
+        std::cout << "Failed to load shader from path: " << fragmentPath << std::endl;
+    }
+
     // Compile shaders from source
     unsigned int vertex   = loadShader(vertexShaderSource,   GL_VERTEX_SHADER);
     unsigned int fragment = loadShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
