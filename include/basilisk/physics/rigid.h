@@ -43,7 +43,7 @@ private:
     std::vector<bool> usedColors;
 
 public:
-    Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity = glm::vec3{ 0, 0, 0 });
+    Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity);
     ~Rigid();
 
     bool constrainedTo(Rigid* other) const;

@@ -1,5 +1,5 @@
 #include <basilisk/scene/sceneRoute.h>
-#include <basilisk/util/print.h>
+#include <basilisk/util/resolvePath.h>
 
 namespace bsk::internal {
 
@@ -11,7 +11,7 @@ namespace bsk::internal {
 Scene::Scene(Engine* engine) : VirtualScene(engine) {
     camera = new Camera(engine);
     internalCamera = camera;
-    shader = new Shader("shaders/instance.vert", "shaders/instance.frag");
+    shader = new Shader(internalPath("shaders/instance.vert").c_str(), internalPath("shaders/instance.frag").c_str());
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
 }
 

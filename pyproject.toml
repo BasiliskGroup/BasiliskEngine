@@ -1,0 +1,37 @@
+[build-system]
+requires = [
+  "scikit-build-core>=0.9",
+  "pybind11>=2.11",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "basilisk"
+version = "0.2.0"
+description = "Python bindings for the Basilisk C++ library"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Jonah Coffelt", email = "coffelt.jonah0918@gmail.com" },
+  { name = "Isaac Lagoy", email = "isaacblagoy@gmail.com" }
+]
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: C++",
+  "Operating System :: OS Independent",
+]
+
+[tool.scikit-build]
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["basilisk"]
+
+[tool.scikit-build.cmake]
+minimum-version = "3.15"
+
+[tool.scikit-build.logging]
+level = "INFO"
+
+[tool.cibuildwheel]
+build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
+skip = ["pp*", "*musllinux*"]

@@ -16,3 +16,9 @@ dist/
 docs/
 
 !.gitkeep
+
+# Python build artifacts
+python/include/
+python/lib/
+python/basilisk/*
+!python/basilisk/__init__.py

@@ -87,7 +87,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, Rigid* body) {
         {
             // Use lambda as 0 if it's not a hard constraint
             float stiffness = force->getStiffness(i);
-            float lambda = isinf(stiffness) ? force->getLambda(i) : 0.0f;
+            float lambda = glm::isinf(stiffness) ? force->getLambda(i) : 0.0f;
 
             // Compute the clamped force magnitude (Sec 3.2)
             float penalty = force->getPenalty(i);
@@ -135,7 +135,7 @@ void Solver::dualUpdateSingle(Force* force) {
     {
         // Use lambda as 0 if it's not a hard constraint
         float stiffness = force->getStiffness(i);
-        float lambda = isinf(stiffness) ? force->getLambda(i) : 0.0f;
+        float lambda = glm::isinf(stiffness) ? force->getLambda(i) : 0.0f;
 
         // Update lambda (Eq 11)
         float penalty = force->getPenalty(i);

@@ -8,6 +8,16 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+
+# Architecture settings (can be overridden with -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" for universal)
+# Options: "arm64", "x86_64", or "x86_64;arm64" for universal
+if(NOT DEFINED CMAKE_OSX_ARCHITECTURES)
+    # Default to system architecture if not specified
+    # To build universal: cmake -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" ..
+    # To build x86_64: cmake -DCMAKE_OSX_ARCHITECTURES="x86_64" ..
+    # To build arm64: cmake -DCMAKE_OSX_ARCHITECTURES="arm64" ..
+endif()
+
 option(BASILISK_BUILD_DOCS "Build API documentation" OFF)
 
 include(FetchContent)
@@ -74,6 +84,20 @@ target_include_directories(stb INTERFACE
 # ======================================================
 # Assimp
 # ======================================================
+# Use system zlib instead of bundled zlib to avoid macOS compatibility issues
+set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "Build zlib" FORCE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+
+# Find system zlib
+find_package(ZLIB QUIET)
+if(NOT ZLIB_FOUND)
+    message(WARNING "System zlib not found. Assimp may not work correctly.")
+endif()
+
 FetchContent_Declare(
     assimp
     GIT_REPOSITORY https://github.com/assimp/assimp.git
@@ -90,6 +114,30 @@ FetchContent_Declare(
     GIT_TAG main
 )
 FetchContent_MakeAvailable(clipper2)
+
+# ======================================================
+# PyBind11
+# ======================================================
+# Find Python before pybind11 to ensure correct Python is used
+# Users can override with: -DPYTHON_EXECUTABLE=/path/to/python3
+
+# Find Python3 package (will use PYTHON_EXECUTABLE if set)
+find_package(Python3 COMPONENTS Interpreter Development QUIET)
+if(Python3_FOUND)
+    message(STATUS "Found Python ${Python3_VERSION}: ${Python3_EXECUTABLE}")
+    message(STATUS "  Python include dirs: ${Python3_INCLUDE_DIRS}")
+    # Ensure pybind11 uses the same Python
+    set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE} CACHE PATH "Python executable" FORCE)
+else()
+    message(WARNING "Python3 not found - pybind11 will attempt to find it automatically")
+endif()
+
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG v3.0.1
+)
+FetchContent_MakeAvailable(pybind11)
 
 file(GLOB CLIPPER2_SOURCES
     ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/src/*.cpp
@@ -113,9 +161,9 @@ file(GLOB_RECURSE BASILISK_SOURCES
 # Remove main.cpp since engine executable builds it
 list(REMOVE_ITEM BASILISK_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 
-add_library(basilisk STATIC ${BASILISK_SOURCES})
+add_library(basilisk_lib STATIC ${BASILISK_SOURCES})
 
-target_include_directories(basilisk
+target_include_directories(basilisk_lib
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -128,7 +176,7 @@ target_include_directories(basilisk
 # ======================================================
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(basilisk
+target_link_libraries(basilisk_lib
     PUBLIC
         glfw
         glad
@@ -140,8 +188,26 @@ target_link_libraries(basilisk
 )
 
 if(MSVC)
-    target_compile_options(basilisk PRIVATE /FS)
+    target_compile_options(basilisk_lib PRIVATE /FS)
 endif()
+
+# ======================================================
+# Python Bindings
+# ======================================================
+file(GLOB_RECURSE BINDING_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/bindings/*.cpp
+)
+
+pybind11_add_module(basilisk ${BINDING_SOURCES})
+
+target_include_directories(basilisk PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bindings
+)
+
+target_link_libraries(basilisk PRIVATE
+    basilisk_lib
+)
 
 # ======================================================
 # Engine executable
@@ -157,7 +223,7 @@ if(EXISTS ${BASILISK_MAIN})
 
     target_link_libraries(engine
         PRIVATE
-            basilisk
+            basilisk_lib
             clipper2
     )
 
@@ -211,3 +277,11 @@ message(STATUS "================= Basilisk Configuration =================")
 message(STATUS "  C++ Standard:          ${CMAKE_CXX_STANDARD}")
 message(STATUS "  Build Docs:            ${BASILISK_BUILD_DOCS}")
 message(STATUS "==========================================================")
+
+# ======================================================
+# Install
+# ======================================================
+install(TARGETS basilisk
+    LIBRARY DESTINATION basilisk
+    RUNTIME DESTINATION basilisk
+)

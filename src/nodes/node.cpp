@@ -2,16 +2,16 @@
 
 namespace bsk::internal {
 
-Node::Node(VirtualScene3D* scene, Params params)
-    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale) {
+Node::Node(VirtualScene3D* scene, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
+    : VirtualNode(scene, mesh, material, position, rotation, scale) {
     updateModel();
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
 }
 
-Node::Node(Node* parent, Params params)
-    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale) {
+Node::Node(Node* parent, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
+    : VirtualNode(parent, mesh, material, position, rotation, scale) {
     updateModel();
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
 }
 
 Node::Node(VirtualScene3D* scene, Node* parent) : VirtualNode(scene, parent) {}

@@ -1,4 +1,5 @@
 #include <basilisk/scene/sceneRoute.h>
+#include <basilisk/util/resolvePath.h>
 
 namespace bsk::internal {
 
@@ -10,7 +11,7 @@ namespace bsk::internal {
 Scene2D::Scene2D(Engine* engine) : VirtualScene(engine) {
     camera = new Camera2D(engine);
     internalCamera = camera;
-    shader = new Shader("shaders/instance2D.vert", "shaders/instance2D.frag");
+    shader = new Shader(internalPath("shaders/instance2D.vert").c_str(), internalPath("shaders/instance2D.frag").c_str());
     solver = new Solver();
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
 }

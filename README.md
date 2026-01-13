@@ -22,3 +22,13 @@ Once the build is complete, you can run the final program with this command:
 ```bash
 ./render
 ```
+
+## steps for publishing wheels
+
+```
+cmake .. (from build)
+cmake --build build (from root)
+cmake --install build --prefix ./python
+pip install build (run once)
+python -m build
+```
