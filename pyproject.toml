@@ -68,3 +68,14 @@ level = "INFO"
 [tool.cibuildwheel]
 build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
 skip = ["pp*", "*musllinux*"]
+
+[tool.cibuildwheel.linux]
+before-build = """
+yum install -y \
+  libXrandr-devel \
+  libXinerama-devel \
+  libXcursor-devel \
+  libXi-devel \
+  libX11-devel \
+  mesa-libGL-devel
+"""
