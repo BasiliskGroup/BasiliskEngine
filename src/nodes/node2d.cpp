@@ -3,18 +3,18 @@
 
 namespace bsk::internal {
 
-Node2D::Node2D(VirtualScene2D* scene, Params params)
-    : VirtualNode(scene, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
+Node2D::Node2D(VirtualScene2D* scene, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
+    : VirtualNode(scene, mesh, material, position, rotation, scale), rigid(nullptr) {
     updateModel();
-    bindRigid(params);
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
+    bindRigid(mesh, material, position, rotation, scale, velocity, collider, density, friction);
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
 }
 
-Node2D::Node2D(Node2D* parent, Params params)
-    : VirtualNode(parent, params.mesh, params.material, params.position, params.rotation, params.scale), rigid(nullptr) {
+Node2D::Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
+    : VirtualNode(parent, mesh, material, position, rotation, scale), rigid(nullptr) {
     updateModel();
-    bindRigid(params);
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(params.material);
+    bindRigid(mesh, material, position, rotation, scale, velocity, collider, density, friction);
+    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
 }
 
 Node2D::Node2D(VirtualScene2D* scene, Node2D* parent) : VirtualNode(scene, parent), rigid(nullptr) {}
@@ -93,13 +93,13 @@ void Node2D::setVelocity(glm::vec3 velocity) {
     if (this->rigid) this->rigid->setVelocity(velocity);
 }
 
-void Node2D::bindRigid(Params& params) {
+void Node2D::bindRigid(Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction) {
     if (rigid) delete rigid;
     rigid = nullptr;
 
-    if (params.collider != nullptr) {
+    if (collider != nullptr) {
         Scene2D* scene2d = static_cast<Scene2D*>(scene);
-        rigid = new Rigid(scene2d->getSolver(), this, params.collider, { this->position, this->rotation }, this->scale, params.density, params.friction, params.velocity);
+        rigid = new Rigid(scene2d->getSolver(), this, collider, { this->position, this->rotation }, this->scale, density, friction, velocity);
     }
 }
 

@@ -18,25 +18,8 @@ private:
     float layer=0.0;
 
 public:
-    struct Params {
-        // graphics
-        Mesh* mesh = nullptr;
-        Material* material = nullptr;
-        glm::vec2 position = { 0, 0 };
-        float rotation = 0;
-        glm::vec2 scale = { 1, 1 };
-        
-        // both?
-        glm::vec3 velocity = { 0, 0, 0 };
-
-        // physics
-        Collider* collider = nullptr;  // Collider for physics body (if nullptr, no physics body is created)
-        float density = 1;
-        float friction = 0.8;
-    };
-
-    Node2D(VirtualScene2D* scene, Params params);
-    Node2D(Node2D* parent, Params params);
+    Node2D(VirtualScene2D* scene, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
+    Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
     Node2D(VirtualScene2D* scene, Node2D* parent);
     Node2D(const Node2D& other) noexcept;
     Node2D(Node2D&& other) noexcept;
@@ -68,7 +51,7 @@ public:
 
 private:
     void updateModel();
-    void bindRigid(Params& params);
+    void bindRigid(Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
     void clear();
     void setRigid(const Node2D& other);
     void setRigid(Node2D&& other);

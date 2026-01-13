@@ -84,12 +84,19 @@ target_include_directories(stb INTERFACE
 # ======================================================
 # Assimp
 # ======================================================
-set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "Build zlib" FORCE)
+# Use system zlib instead of bundled zlib to avoid macOS compatibility issues
+set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "Build zlib" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+
+# Find system zlib
+find_package(ZLIB QUIET)
+if(NOT ZLIB_FOUND)
+    message(WARNING "System zlib not found. Assimp may not work correctly.")
+endif()
 
 FetchContent_Declare(
     assimp
@@ -195,6 +202,7 @@ pybind11_add_module(basilisk ${BINDING_SOURCES})
 
 target_include_directories(basilisk PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/bindings
 )
 
 target_link_libraries(basilisk PRIVATE

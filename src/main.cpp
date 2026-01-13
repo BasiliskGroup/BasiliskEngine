@@ -21,7 +21,7 @@ int main() {
     bsk::Image* image = new bsk::Image("textures/container.jpg");
     bsk::Material* material = new bsk::Material({1, 1, 1}, image);
 
-    bsk::Node* node = new bsk::Node(scene, {.mesh=cube, .material=material});
+    bsk::Node* node = new bsk::Node(scene, cube, material, {0, 0, 0}, {1, 0, 0, 0}, {1, 1, 1});
     
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {

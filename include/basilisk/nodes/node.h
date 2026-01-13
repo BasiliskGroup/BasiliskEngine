@@ -12,16 +12,8 @@ class Node : public VirtualNode<Node, glm::vec3, glm::quat, glm::vec3> {
         using VirtualScene3D = VirtualScene<Node, glm::vec3, glm::quat, glm::vec3>;
 
     public:
-        struct Params {
-            Mesh* mesh = nullptr;
-            Material* material = nullptr;
-            glm::vec3 position = { 0, 0, 0 };
-            glm::quat rotation = { 1, 0, 0, 0 };
-            glm::vec3 scale = { 1, 1, 1 };
-        };
-
-        Node(VirtualScene3D* scene, Params params);
-        Node(Node* parent, Params params);
+        Node(VirtualScene3D* scene, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale);
+        Node(Node* parent, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale);
         Node(VirtualScene3D* scene, Node* parent);
 
         // already defined in VirtualNode
