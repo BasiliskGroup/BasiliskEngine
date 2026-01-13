@@ -10,16 +10,16 @@ namespace py = pybind11;
 
 void bind_rigid(py::module_& m) {
     py::class_<bsk::internal::Rigid>(m, "Rigid")
-        // Constructor
-        .def(py::init<bsk::internal::Solver*, bsk::internal::Node2D*, bsk::internal::Collider*, glm::vec3, glm::vec2, float, float, glm::vec3>(),
-             py::arg("solver"),
-             py::arg("node"),
-             py::arg("collider"),
-             py::arg("position"),
-             py::arg("size"),
-             py::arg("density"),
-             py::arg("friction"),
-             py::arg("velocity") = glm::vec3{0, 0, 0})
+        // Constructor without velocity (uses default velocity of {0, 0, 0})
+        .def(py::init([](bsk::internal::Solver* solver, bsk::internal::Node2D* node, bsk::internal::Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction) {
+            return new bsk::internal::Rigid(solver, node, collider, position, size, density, friction, glm::vec3{0, 0, 0});
+        }), py::arg("solver"), py::arg("node"), py::arg("collider"), py::arg("position"), 
+            py::arg("size"), py::arg("density"), py::arg("friction"))
+        // Constructor with explicit velocity
+        .def(py::init([](bsk::internal::Solver* solver, bsk::internal::Node2D* node, bsk::internal::Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity) {
+            return new bsk::internal::Rigid(solver, node, collider, position, size, density, friction, velocity);
+        }), py::arg("solver"), py::arg("node"), py::arg("collider"), py::arg("position"), 
+            py::arg("size"), py::arg("density"), py::arg("friction"), py::arg("velocity"))
         
         // Constraint methods
         .def("constrainedTo", &bsk::internal::Rigid::constrainedTo)
