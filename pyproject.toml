@@ -7,12 +7,13 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "basilisk"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python bindings for the Basilisk C++ library"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
-  { name = "Your Name", email = "you@example.com" }
+  { name = "Jonah Coffelt", email = "coffelt.jonah0918@gmail.com" },
+  { name = "Isaac Lagoy", email = "isaacblagoy@gmail.com" }
 ]
 requires-python = ">=3.9"
 classifiers = [
