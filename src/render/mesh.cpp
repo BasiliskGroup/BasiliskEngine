@@ -11,9 +11,13 @@ namespace bsk::internal {
 Mesh::Mesh(const std::string modelPath, bool generateUV, bool generateNormals) {
     Assimp::Importer importer;
 
-    const aiScene* scene = importer.ReadFile(externalPath(modelPath).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | (aiProcess_GenSmoothNormals & generateNormals) | (aiProcess_GenUVCoords & generateUV));
+    std::string resolvedPath = externalPath(modelPath);
+    const aiScene* scene = importer.ReadFile(resolvedPath.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | (aiProcess_GenSmoothNormals & generateNormals) | (aiProcess_GenUVCoords & generateUV));
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { return; }
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        std::cout << "Failed to load mesh from path: " << resolvedPath << std::endl;
+        return;
+    }
 
     unsigned int vertexOffset = 0;
 
