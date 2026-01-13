@@ -15,12 +15,45 @@ authors = [
   { name = "Jonah Coffelt", email = "coffelt.jonah0918@gmail.com" },
   { name = "Isaac Lagoy", email = "isaacblagoy@gmail.com" }
 ]
-requires-python = ">=3.9"
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "Programming Language :: C++",
-  "Operating System :: OS Independent",
+maintainers = [
+  { name = "Jonah Coffelt", email = "coffelt.jonah0918@gmail.com" },
+  { name = "Isaac Lagoy", email = "isaacblagoy@gmail.com" }
 ]
+requires-python = ">=3.9"
+keywords = [
+  "graphics",
+  "game-engine",
+  "3d",
+  "2d",
+  "opengl",
+  "physics",
+  "simulation",
+  "rendering"
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: C++",
+  "Topic :: Multimedia :: Graphics",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Games/Entertainment",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/BasiliskGroup/BasiliskEngine"
+Repository = "https://github.com/BasiliskGroup/BasiliskEngine"
+Documentation = "https://github.com/BasiliskGroup/BasiliskEngine#readme"
+"Bug Tracker" = "https://github.com/BasiliskGroup/BasiliskEngine/issues"
 
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
