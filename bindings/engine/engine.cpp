@@ -19,6 +19,6 @@ void bind_engine(py::module_& m) {
         .def("getMouse", &bsk::internal::Engine::getMouse)
         .def("getKeyboard", &bsk::internal::Engine::getKeyboard)
         .def("getFrame", &bsk::internal::Engine::getFrame)
-        .def("getResourceServer", &bsk::internal::Engine::getResourceServer)
-        .def("getDeltaTime", &bsk::internal::Engine::getDeltaTime);
+        .def("getResourceServer", &bsk::internal::Engine::getResourceServer);
+        // .def("getDeltaTime", &bsk::internal::Engine::getDeltaTime);
 }

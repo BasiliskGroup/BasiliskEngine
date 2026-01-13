@@ -1,0 +1,32 @@
+[build-system]
+requires = [
+  "scikit-build-core>=0.9",
+  "pybind11>=2.11",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "basilisk"
+version = "0.1.0"
+description = "Python bindings for the Basilisk C++ library"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Your Name", email = "you@example.com" }
+]
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: C++",
+  "Operating System :: OS Independent",
+]
+
+[tool.scikit-build]
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["python/basilisk"]
+
+[tool.scikit-build.cmake]
+minimum-version = "3.15"
+
+[tool.scikit-build.logging]
+level = "INFO"

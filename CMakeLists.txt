@@ -262,3 +262,11 @@ message(STATUS "================= Basilisk Configuration =================")
 message(STATUS "  C++ Standard:          ${CMAKE_CXX_STANDARD}")
 message(STATUS "  Build Docs:            ${BASILISK_BUILD_DOCS}")
 message(STATUS "==========================================================")
+
+# ======================================================
+# Install
+# ======================================================
+install(TARGETS basilisk
+    LIBRARY DESTINATION basilisk
+    RUNTIME DESTINATION basilisk
+)
