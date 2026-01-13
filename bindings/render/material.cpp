@@ -3,7 +3,7 @@
 #include <basilisk/render/material.h>
 
 // IMPORTANT: include GLM casters
-#include "../glm/glmCasters.hpp"
+#include "glm/glmCasters.hpp" // DO NOT REMOVE THIS LINE
 
 namespace py = pybind11;
 using namespace bsk::internal;

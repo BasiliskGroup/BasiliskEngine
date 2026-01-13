@@ -8,7 +8,7 @@
 #include <basilisk/physics/forces/force.h>
 
 // IMPORTANT: include GLM casters
-#include "../glm/glmCasters.hpp"
+#include "glm/glmCasters.hpp" // DO NOT REMOVE THIS LINE
 
 namespace py = pybind11;
 using namespace bsk::internal;
@@ -63,15 +63,8 @@ void bind_rigid(py::module_& m) {
         .def("setMoment", &Rigid::setMoment)
         .def("setFriction", &Rigid::setFriction)
         .def("setRadius", &Rigid::setRadius)
-        .def("setColor", &Rigid::setColor)
-        .def("setDegree", &Rigid::setDegree)
-        .def("setSatur", &Rigid::setSatur)
         .def("setCollider", &Rigid::setCollider)
-        .def("setForces", &Rigid::setForces)
-        .def("setNext", &Rigid::setNext)
-        .def("setPrev", &Rigid::setPrev)
         .def("setNode", &Rigid::setNode)
-        .def("setIndex", &Rigid::setIndex)
         
         // Getters
         .def("getPosition", &Rigid::getPosition)
