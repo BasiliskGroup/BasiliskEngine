@@ -23,7 +23,7 @@ classifiers = [
 
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
-wheel.packages = ["python/basilisk"]
+wheel.packages = ["basilisk"]
 
 [tool.scikit-build.cmake]
 minimum-version = "3.15"

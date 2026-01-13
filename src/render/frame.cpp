@@ -1,5 +1,6 @@
 #include <basilisk/render/frame.h>
 #include <basilisk/engine/engine.h>
+#include <basilisk/util/resolvePath.h>
 
 
 namespace bsk::internal {
@@ -13,7 +14,7 @@ namespace bsk::internal {
 Frame::Frame(Engine* engine, unsigned int width, unsigned int height): engine(engine), width(width), height(height), aspectRatio((float)width / (float)height) {
 
     // Load simple shader for rendering a quad wuth texture
-    shader = new Shader("shaders/frame.vert", "shaders/frame.frag");
+    shader = new Shader(internalPath("shaders/frame.vert").c_str(), internalPath("shaders/frame.frag").c_str());
 
     // Create data needed to render a full-screen quad
     std::vector<float> vertexData = {

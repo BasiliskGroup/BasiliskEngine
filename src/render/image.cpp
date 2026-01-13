@@ -1,5 +1,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <basilisk/render/image.h>
+#include <basilisk/util/resolvePath.h>
 
 namespace bsk::internal {
 
@@ -10,8 +11,8 @@ namespace bsk::internal {
  */
 Image::Image(std::string file) {
     stbi_set_flip_vertically_on_load(true);  
-    data = stbi_load(file.c_str(), &width, &height, &nChannels, 4); 
-    if (!data) { std::cout << "Failed to load texture" << std::endl; }
+    std::string resolvedPath = externalPath(file);
+    data = stbi_load(resolvedPath.c_str(), &width, &height, &nChannels, 4);
 }
 
 /**

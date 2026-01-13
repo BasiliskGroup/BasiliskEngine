@@ -1,4 +1,5 @@
 #include <basilisk/render/mesh.h>
+#include <basilisk/util/resolvePath.h>
 
 namespace bsk::internal {
 
@@ -10,7 +11,7 @@ namespace bsk::internal {
 Mesh::Mesh(const std::string modelPath, bool generateUV, bool generateNormals) {
     Assimp::Importer importer;
 
-    const aiScene* scene = importer.ReadFile(modelPath, aiProcess_Triangulate | aiProcess_FlipUVs | (aiProcess_GenSmoothNormals & generateNormals) | (aiProcess_GenUVCoords & generateUV));
+    const aiScene* scene = importer.ReadFile(externalPath(modelPath).c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | (aiProcess_GenSmoothNormals & generateNormals) | (aiProcess_GenUVCoords & generateUV));
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) { return; }
 
