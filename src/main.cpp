@@ -17,7 +17,7 @@ int main() {
     bsk::Scene* scene = new bsk::Scene(engine);
 
     // Load assets from file
-    bsk::Mesh* cube = new bsk::Mesh("models/cube.obj");
+    bsk::Mesh* cube = new bsk::Mesh("models/john.obj");
     bsk::Image* image = new bsk::Image("textures/container.jpg");
     bsk::Material* material = new bsk::Material({1, 1, 1}, image);
 
