@@ -213,6 +213,51 @@ target_link_libraries(basilisk PRIVATE
 )
 
 # ======================================================
+# Generate Python type stubs with pybind11-stubgen
+# ======================================================
+# Find Python3 to get the interpreter
+find_package(Python3 COMPONENTS Interpreter QUIET)
+
+if(Python3_FOUND AND TARGET basilisk)
+    # Determine the output directory for stubs (in the source tree, will be packaged)
+    set(STUB_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/basilisk)
+    
+    # Check if pybind11-stubgen is available
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c "import pybind11_stubgen; print('OK')"
+        OUTPUT_QUIET
+        ERROR_QUIET
+        RESULT_VARIABLE STUBGEN_AVAILABLE
+    )
+    
+    if(STUBGEN_AVAILABLE EQUAL 0)
+        # Create output directory (in source tree so it gets packaged)
+        file(MAKE_DIRECTORY ${STUB_OUTPUT_DIR})
+        
+        # Custom command to generate stubs after module is built
+        # We need to add the build directory to PYTHONPATH so stubgen can import the module
+        # The stub will be generated as basilisk.pyi in the output directory
+        add_custom_command(TARGET basilisk POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E env
+                PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}
+                ${Python3_EXECUTABLE} -m pybind11_stubgen
+                    --output-dir ${STUB_OUTPUT_DIR}
+                    basilisk
+                    --ignore-all-errors
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating Python type stubs for basilisk module"
+            VERBATIM
+        )
+        
+        message(STATUS "Python type stub generation enabled")
+        message(STATUS "  Stubs will be generated in: ${STUB_OUTPUT_DIR}/basilisk.pyi")
+    else()
+        message(WARNING "pybind11-stubgen not available - type stubs will not be generated")
+        message(WARNING "  Install with: pip install pybind11-stubgen")
+    endif()
+endif()
+
+# ======================================================
 # Engine executable
 # ======================================================
 set(BASILISK_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
