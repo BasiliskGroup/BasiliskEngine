@@ -129,9 +129,10 @@ std::string loadShaderSource(const std::string& filepath, std::unordered_set<std
         if (std::regex_search(line, match, includeRegex)) {
             std::string includeName = match[1].str();
             std::filesystem::path includePath = currentDir / includeName;
+            std::string includePathStr = includePath.string();
             
-            if (!includedFiles.contains(includePath)) {
-                fullSource << "\n" << loadShaderSource(includePath, includedFiles, false) << "\n";
+            if (!includedFiles.contains(includePathStr)) {
+                fullSource << "\n" << loadShaderSource(includePathStr, includedFiles, false) << "\n";
             }
         } 
         // Add line as is if not an include

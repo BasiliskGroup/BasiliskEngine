@@ -85,7 +85,6 @@ target_include_directories(stb INTERFACE
 # Assimp
 # ======================================================
 # Use system zlib instead of bundled zlib to avoid macOS compatibility issues
-set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "Build zlib" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -93,9 +92,13 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 
 # Find system zlib
-find_package(ZLIB QUIET)
-if(NOT ZLIB_FOUND)
-    message(WARNING "System zlib not found. Assimp may not work correctly.")
+if(WIN32)
+    # Windows CI does not provide system zlib
+    set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "Build zlib" FORCE)
+else()
+    # Linux/macOS use system zlib
+    set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "Build zlib" FORCE)
+    find_package(ZLIB REQUIRED)
 endif()
 
 FetchContent_Declare(
@@ -244,17 +247,23 @@ endif()
 # ======================================================
 # AddressSanitizer
 # ======================================================
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
-    target_compile_options(engine PRIVATE
-        -fsanitize=address
-        -fno-omit-frame-pointer
-        -g
-    )
-    target_link_options(engine PRIVATE
-        -fsanitize=address
-        -fno-omit-frame-pointer
-    )
-    set(ENV{ASAN_OPTIONS} "detect_leaks=1:halt_on_error=0:verbosity=1")
+# Only enable AddressSanitizer for Debug builds (not for Release/wheel builds)
+# Note: AddressSanitizer requires the sanitizer runtime library, which may not be
+# available in all build environments (e.g., cibuildwheel). For wheel builds,
+# AddressSanitizer is disabled.
+if(TARGET engine AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(engine PRIVATE
+            -fsanitize=address
+            -fno-omit-frame-pointer
+            -g
+        )
+        target_link_options(engine PRIVATE
+            -fsanitize=address
+            -fno-omit-frame-pointer
+        )
+        set(ENV{ASAN_OPTIONS} "detect_leaks=1:halt_on_error=0:verbosity=1")
+    endif()
 endif()
 
 # ======================================================
