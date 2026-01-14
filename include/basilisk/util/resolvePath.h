@@ -3,7 +3,11 @@
 
 #include <string>
 #include <filesystem>
-#include <unistd.h>
+#ifdef _WIN32
+    #include <direct.h>
+#else
+    #include <unistd.h>
+#endif
 
 namespace bsk::internal {
 

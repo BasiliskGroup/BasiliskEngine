@@ -244,17 +244,23 @@ endif()
 # ======================================================
 # AddressSanitizer
 # ======================================================
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
-    target_compile_options(engine PRIVATE
-        -fsanitize=address
-        -fno-omit-frame-pointer
-        -g
-    )
-    target_link_options(engine PRIVATE
-        -fsanitize=address
-        -fno-omit-frame-pointer
-    )
-    set(ENV{ASAN_OPTIONS} "detect_leaks=1:halt_on_error=0:verbosity=1")
+# Only enable AddressSanitizer for Debug builds (not for Release/wheel builds)
+# Note: AddressSanitizer requires the sanitizer runtime library, which may not be
+# available in all build environments (e.g., cibuildwheel). For wheel builds,
+# AddressSanitizer is disabled.
+if(TARGET engine AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(engine PRIVATE
+            -fsanitize=address
+            -fno-omit-frame-pointer
+            -g
+        )
+        target_link_options(engine PRIVATE
+            -fsanitize=address
+            -fno-omit-frame-pointer
+        )
+        set(ENV{ASAN_OPTIONS} "detect_leaks=1:halt_on_error=0:verbosity=1")
+    endif()
 endif()
 
 # ======================================================
