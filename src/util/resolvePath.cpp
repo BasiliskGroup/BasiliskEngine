@@ -1,7 +1,12 @@
 #include <basilisk/util/resolvePath.h>
-#include <dlfcn.h>
 #include <filesystem>
-#include <unistd.h>
+#ifdef _WIN32
+    #include <windows.h>
+    #include <direct.h>
+#else
+    #include <dlfcn.h>
+    #include <unistd.h>
+#endif
 
 namespace bsk::internal {
 
