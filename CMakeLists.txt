@@ -237,20 +237,20 @@ if(Python3_FOUND AND TARGET basilisk)
         # Custom command to generate stubs after module is built
         # We need to add the build directory to PYTHONPATH so stubgen can import the module
         # The stub will be generated as basilisk.pyi in the output directory
+        # Note: This may fail if runtime dependencies (like glm) are not available
+        # during build, so we use a wrapper script to make errors non-fatal
         add_custom_command(TARGET basilisk POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E env
-                PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{PYTHONPATH}
-                ${Python3_EXECUTABLE} -m pybind11_stubgen
-                    --output-dir ${STUB_OUTPUT_DIR}
-                    basilisk
-                    --ignore-all-errors
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_stubgen.py
+                ${CMAKE_CURRENT_BINARY_DIR}
+                ${STUB_OUTPUT_DIR}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            COMMENT "Generating Python type stubs for basilisk module"
-            VERBATIM
+            COMMENT "Generating Python type stubs for basilisk module (non-fatal)"
         )
         
         message(STATUS "Python type stub generation enabled")
         message(STATUS "  Stubs will be generated in: ${STUB_OUTPUT_DIR}/basilisk.pyi")
+        message(STATUS "  Note: Stub generation is non-fatal and may fail if runtime dependencies are missing")
     else()
         message(WARNING "pybind11-stubgen not available - type stubs will not be generated")
         message(WARNING "  Install with: pip install pybind11-stubgen")
