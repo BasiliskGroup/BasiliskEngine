@@ -6,7 +6,7 @@ requires = [
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "basilisk"
+name = "basilisk-engine"
 version = "0.2.0"
 description = "Python bindings for the Basilisk C++ library"
 readme = "README.md"
