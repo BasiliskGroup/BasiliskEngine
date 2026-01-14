@@ -85,7 +85,6 @@ target_include_directories(stb INTERFACE
 # Assimp
 # ======================================================
 # Use system zlib instead of bundled zlib to avoid macOS compatibility issues
-set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "Build zlib" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -93,9 +92,13 @@ set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 
 # Find system zlib
-find_package(ZLIB QUIET)
-if(NOT ZLIB_FOUND)
-    message(WARNING "System zlib not found. Assimp may not work correctly.")
+if(WIN32)
+    # Windows CI does not provide system zlib
+    set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "Build zlib" FORCE)
+else()
+    # Linux/macOS use system zlib
+    set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL "Build zlib" FORCE)
+    find_package(ZLIB REQUIRED)
 endif()
 
 FetchContent_Declare(
