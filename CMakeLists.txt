@@ -294,3 +294,9 @@ install(TARGETS basilisk
     LIBRARY DESTINATION basilisk
     RUNTIME DESTINATION basilisk
 )
+
+# Add internal files 
+install(
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders
+    DESTINATION basilisk
+)
