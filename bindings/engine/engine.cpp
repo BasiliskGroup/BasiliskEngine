@@ -14,7 +14,7 @@ void bind_engine(py::module_& m) {
         .def("update", &bsk::internal::Engine::update)
         .def("render", &bsk::internal::Engine::render)
         .def("useContext", &bsk::internal::Engine::useContext)
-        .def("setResolution", &bsk::internal::Engine::setResolution)
+        .def("setResolution", &bsk::internal::Engine::setResolution, py::arg("width"), py::arg("height"))
         .def("getWindow", &bsk::internal::Engine::getWindow)
         .def("getMouse", &bsk::internal::Engine::getMouse)
         .def("getKeyboard", &bsk::internal::Engine::getKeyboard)

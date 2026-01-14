@@ -26,9 +26,9 @@ void bind_node(py::module_& m) {
         py::arg("scene"),
         py::arg("mesh") = nullptr,
         py::arg("material") = nullptr,
-        py::arg("position"),
-        py::arg("rotation"),
-        py::arg("scale"))
+        py::arg("position") = glm::vec3(0.0f, 0.0f, 0.0f),
+        py::arg("rotation") = glm::quat(0.0f, 0.0f, 0.0f, 1.0f),
+        py::arg("scale") = glm::vec3(1.0f, 1.0f, 1.0f))
 
         // Node with parent
         .def(py::init<
@@ -42,15 +42,15 @@ void bind_node(py::module_& m) {
         py::arg("parent"),
         py::arg("mesh") = nullptr,
         py::arg("material") = nullptr,
-        py::arg("position"),
-        py::arg("rotation"),
-        py::arg("scale"))
+        py::arg("position") = glm::vec3(0.0f, 0.0f, 0.0f),
+        py::arg("rotation") = glm::quat(0.0f, 0.0f, 0.0f, 1.0f),
+        py::arg("scale") = glm::vec3(1.0f, 1.0f, 1.0f))
 
         // Other constructors
-        .def(py::init<Scene*, Node*>())
+        .def(py::init<Scene*, Node*>(), py::arg("scene"), py::arg("parent"))
 
         // Setters (casters apply automatically)
-        .def("setPosition", &Node::setPosition)
-        .def("setRotation", &Node::setRotation)
-        .def("setScale", &Node::setScale);
+        .def("setPosition", &Node::setPosition, py::arg("position"))
+        .def("setRotation", &Node::setRotation, py::arg("rotation"))
+        .def("setScale", &Node::setScale, py::arg("scale"));
 }
