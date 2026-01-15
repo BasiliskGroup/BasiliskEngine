@@ -91,8 +91,9 @@ std::string loadFile(const char* path) {
 }
 
 
-std::string loadShaderSource(const std::string& filepath, std::unordered_set<std::string>& includedFiles, bool isRootFile) {
+std::string loadShaderSource(std::string filepath, std::unordered_set<std::string>& includedFiles, bool isRootFile) {
     // Mark as included
+    std::replace(filepath.begin(), filepath.end(), '\\', '/');
     includedFiles.insert(filepath);
     
     // Open the file
@@ -130,9 +131,12 @@ std::string loadShaderSource(const std::string& filepath, std::unordered_set<std
             std::string includeName = match[1].str();
             std::filesystem::path includePath = currentDir / includeName;
             std::string includePathStr = includePath.string();
+            std::replace(includePathStr.begin(), includePathStr.end(), '\\', '/');
             
             if (!includedFiles.contains(includePathStr)) {
+                fullSource << "// == Begin "  << includePathStr << " include ==\n";
                 fullSource << "\n" << loadShaderSource(includePathStr, includedFiles, false) << "\n";
+                fullSource << "// == End "  << includePathStr << " include ==\n";
             }
         } 
         // Add line as is if not an include
