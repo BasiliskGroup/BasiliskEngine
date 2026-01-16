@@ -22,3 +22,7 @@ python/include/
 python/lib/
 python/basilisk/*
 !python/basilisk/__init__.py
+lines.py
+
+# separate main files
+src/main.cpp

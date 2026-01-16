@@ -31,14 +31,6 @@ private:
     std::vector<bool> updated;
     std::vector<int> color;
 
-    // updating forces
-    std::vector<std::size_t> oldIndex;
-    std::vector<std::size_t> inverseForceMap;
-
-    // solving
-    std::vector<glm::vec3> rhs;
-    std::vector<glm::mat3x3> lhs;
-
     BVH* bvh;
     
 public:
@@ -78,10 +70,6 @@ public:
     glm::mat2x2& getRmat(std::size_t index) { return rmat[index]; }
     bool getUpdated(std::size_t index) { return updated[index]; }
     int getColor(std::size_t index) { return color[index]; }
-    std::size_t getOldIndex(std::size_t index) { return oldIndex[index]; }
-    std::size_t getInverseForceMap(std::size_t index) { return inverseForceMap[index]; }
-    glm::vec3& getRhs(std::size_t index) { return rhs[index]; }
-    glm::mat3x3& getLhs(std::size_t index) { return lhs[index]; }
     BVH* getBVH() { return bvh; }
 
     // setters
@@ -103,10 +91,6 @@ public:
     void setRmat(std::size_t index, const glm::mat2x2& value) { rmat[index] = value; }
     void setUpdated(std::size_t index, bool value) { updated[index] = value; }
     void setColor(std::size_t index, int value) { color[index] = value; }
-    void setOldIndex(std::size_t index, std::size_t value) { oldIndex[index] = value; }
-    void setInverseForceMap(std::size_t index, std::size_t value) { inverseForceMap[index] = value; }
-    void setRhs(std::size_t index, const glm::vec3& value) { rhs[index] = value; }
-    void setLhs(std::size_t index, const glm::mat3x3& value) { lhs[index] = value; }
 };
 
 }

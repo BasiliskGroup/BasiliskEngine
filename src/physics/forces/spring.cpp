@@ -20,7 +20,7 @@ namespace bsk::internal {
 Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, float stiffness, float rest)
     : Force(solver, bodyA, bodyB), rA(rA), rB(rB), rest(rest)
 {
-    this->stiffness[0] = stiffness;
+    setStiffness(0, stiffness);
     if (this->rest < 0)
         this->rest = length(transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB));
 }
@@ -28,7 +28,7 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
 void Spring::computeConstraint(float alpha)
 {
     // Compute constraint function at current state C(x)
-    C[0] = length(transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB)) - rest;
+    setC(0, length(transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB)) - rest);
 }
 
 void Spring::computeDerivatives(Rigid* body)
@@ -55,18 +55,16 @@ void Spring::computeDerivatives(Rigid* body)
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
 
-        JA[0].x = n.x;
-        JA[0].y = n.y;
-        JA[0].z = dot(n, Sr);
+        setJ(0, bodyA, glm::vec3(n.x, n.y, dot(n, Sr)));
         // GLM 3x3 constructor: mat3(x1,y1,z1, x2,y2,z2, x3,y3,z3) = columns
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        HA[0] = glm::mat3(
+        setH(0, bodyA, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
-        );
+        ));
     }
     else
     {
@@ -75,16 +73,14 @@ void Spring::computeDerivatives(Rigid* body)
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 
-        JB[0].x = -n.x;
-        JB[0].y = -n.y;
-        JB[0].z = dot(n, -Sr);
+        setJ(0, bodyB, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        HB[0] = glm::mat3(
+        setH(0, bodyB, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
-        );
+        ));
     }
 }
 

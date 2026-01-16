@@ -84,7 +84,7 @@ void BodyTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, oldIndex, inverseForceMap, lhs, rhs
+        bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color
     );
 
     // update capacity
@@ -98,22 +98,12 @@ void BodyTable::compact() {
         return;
     }
 
-    // reset old indices
-    for (uint i = 0; i < size; i++) {
-        oldIndex[i] = i;
-    }
-
     // TODO check to see who needs to be compacted and who will just get cleared anyway
     compactTensors(toDelete, size,
         bodies, pos, initial, inertial, vel, prevVel,
         scale, friction, radius, mass, moment,
-        collider, mat, imat, rmat, updated, color, oldIndex, lhs, rhs
+        collider, mat, imat, rmat, updated, color
     );
-
-    // invert old indices so that forces can find their new indices
-    for (uint i = 0; i < size; i++) {
-        inverseForceMap[oldIndex[i]] = i;
-    }
 
     size = active;
 
@@ -165,30 +155,7 @@ glm::vec3 BodyTable::getGravity(Rigid* body) const {
 }
 
 glm::vec3 BodyTable::getGravity(std::size_t index) const {
-    glm::vec3 gravity = glm::vec3(0.0f);
-    glm::vec3 r;
-    float lenr;
-
-    // for (std::size_t i = 0; i < size; i++) {
-    //     if (i == index) {
-    //         continue;
-    //     }
-
-    //     // Newtonian gravity formula, acceleration form
-    //     r = pos[i] - pos[index];
-    //     lenr = glm::length2(r);
-
-    //     if (lenr < EPSILON) {
-    //         continue;
-    //     }
-
-    //     lenr = glm::sqrt(lenr);
-    //     gravity += (mass[i] / (lenr * lenr * lenr)) * r;
-    // }
-
-    // return gravity;
-
-    return { bvh->computeGravity(bodies[index]), 0 } ;
+    return { bvh->computeGravity(bodies[index]), 0.0f };
 }
 
 }

@@ -18,8 +18,8 @@ namespace bsk::internal {
 Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque)
     : Force(solver, bodyA, bodyB), speed(speed)
 {
-    fmax[0] = maxTorque;
-    fmin[0] = -maxTorque;
+    setFmax(0, maxTorque);
+    setFmin(0, -maxTorque);
 }
 
 void Motor::computeConstraint(float alpha)
@@ -30,7 +30,7 @@ void Motor::computeConstraint(float alpha)
     float deltaAngle = dAngleA - dAngleB;
 
     // Constraint tries to reach desired angular speed
-    C[0] = deltaAngle - speed * solver->getDt();
+    setC(0, deltaAngle - speed * solver->getDt());
 }
 
 void Motor::computeDerivatives(Rigid* body)
@@ -38,13 +38,13 @@ void Motor::computeDerivatives(Rigid* body)
     // Compute the first and second derivatives for the desired body
     if (body == bodyA)
     {
-        JA[0] = glm::vec3(0.0f, 0.0f, 1.0f);
-        HA[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        setJ(0, bodyA, glm::vec3(0.0f, 0.0f, 1.0f));
+        setH(0, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
     else
     {
-        JB[0] = glm::vec3(0.0f, 0.0f, -1.0f);
-        HB[0] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        setJ(0, bodyB, glm::vec3(0.0f, 0.0f, -1.0f));
+        setH(0, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 

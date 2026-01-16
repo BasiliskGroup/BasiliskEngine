@@ -16,10 +16,6 @@ void bind_solver(py::module_&);
 void bind_rigid(py::module_&);
 void bind_collider(py::module_&);
 void bind_force(py::module_&);
-void bind_joint(py::module_&);
-void bind_spring(py::module_&);
-void bind_motor(py::module_&);
-void bind_manifold(py::module_&);
 
 PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     m.doc() = "pybind11 example plugin"; // optional module docstring
@@ -49,9 +45,8 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     bind_solver(m);
     bind_collider(m);  // Collider is used by Rigid, so bind it before Rigid
     bind_rigid(m);
-    bind_force(m);  // Base class must be bound before derived classes
-    bind_joint(m);
-    bind_spring(m);
-    bind_motor(m);
-    bind_manifold(m);
+    
+    // Create forces submodule
+    auto forces = m.def_submodule("forces", "Physics forces submodule");
+    bind_force(forces);  // Base class must be bound before derived classes
 }

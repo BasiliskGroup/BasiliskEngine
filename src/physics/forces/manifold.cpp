@@ -20,8 +20,10 @@ namespace bsk::internal {
 Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     : Force(solver, bodyA, bodyB), numContacts(0)
 {
-    fmax[0] = fmax[2] = 0.0f;
-    fmin[0] = fmin[2] = -INFINITY;
+    setFmax(0, 0.0f);
+    setFmax(2, 0.0f);
+    setFmin(0, -INFINITY);
+    setFmin(2, -INFINITY);
 }
 
 bool Manifold::initialize()
@@ -31,8 +33,8 @@ bool Manifold::initialize()
 
     // Store previous contact state
     Contact oldContacts[2] = { contacts[0], contacts[1] };
-    float oldPenalty[4] = { penalty[0], penalty[1], penalty[2], penalty[3] };
-    float oldLambda[4] = { lambda[0], lambda[1], lambda[2], lambda[3] };
+    float oldPenalty[4] = { getPenalty(0), getPenalty(1), getPenalty(2), getPenalty(3) };
+    float oldLambda[4] = { getLambda(0), getLambda(1), getLambda(2), getLambda(3) };
     bool oldStick[2] = { contacts[0].stick, contacts[1].stick };
     int oldNumContacts = numContacts;
 
@@ -42,17 +44,19 @@ bool Manifold::initialize()
     // Merge old contact data with new contacts
     for (int i = 0; i < numContacts; i++)
     {
-        penalty[i * 2 + 0] = penalty[i * 2 + 1] = 0.0f;
-        lambda[i * 2 + 0] = lambda[i * 2 + 1] = 0.0f;
+        setPenalty(i * 2 + 0, 0.0f);
+        setPenalty(i * 2 + 1, 0.0f);
+        setLambda(i * 2 + 0, 0.0f);
+        setLambda(i * 2 + 1, 0.0f);
 
         for (int j = 0; j < oldNumContacts; j++)
         {
             if (contacts[i].feature.value == oldContacts[j].feature.value)
             {
-                penalty[i * 2 + 0] = oldPenalty[j * 2 + 0];
-                penalty[i * 2 + 1] = oldPenalty[j * 2 + 1];
-                lambda[i * 2 + 0] = oldLambda[j * 2 + 0];
-                lambda[i * 2 + 1] = oldLambda[j * 2 + 1];
+                setPenalty(i * 2 + 0, oldPenalty[j * 2 + 0]);
+                setPenalty(i * 2 + 1, oldPenalty[j * 2 + 1]);
+                setLambda(i * 2 + 0, oldLambda[j * 2 + 0]);
+                setLambda(i * 2 + 1, oldLambda[j * 2 + 1]);
                 contacts[i].stick = oldStick[j];
 
                 // If static friction in last frame, use the old contact points
@@ -99,16 +103,16 @@ void Manifold::computeConstraint(float alpha) {
         glm::vec3 dpA = bodyA->getPosition() - bodyA->getInitial();
         glm::vec3 dpB = bodyB->getPosition() - bodyB->getInitial();
         
-        C[i * 2 + 0] = contacts[i].C0.x * (1 - alpha) + dot(getJ(i * 2 + JN, bodyA), dpA) + dot(getJ(i * 2 + JN, bodyB), dpB);
-        C[i * 2 + 1] = contacts[i].C0.y * (1 - alpha) + dot(getJ(i * 2 + JT, bodyA), dpA) + dot(getJ(i * 2 + JT, bodyB), dpB);
+        setC(i * 2 + 0, contacts[i].C0.x * (1 - alpha) + dot(getJ(i * 2 + JN, bodyA), dpA) + dot(getJ(i * 2 + JN, bodyB), dpB));
+        setC(i * 2 + 1, contacts[i].C0.y * (1 - alpha) + dot(getJ(i * 2 + JT, bodyA), dpA) + dot(getJ(i * 2 + JT, bodyB), dpB));
 
         // Update the friction bounds using the latest lambda values
-        float frictionBound = glm::abs(lambda[i * 2 + 0]) * friction;
-        fmax[i * 2 + 1] = frictionBound;
-        fmin[i * 2 + 1] = -frictionBound;
+        float frictionBound = glm::abs(getLambda(i * 2 + 0)) * friction;
+        setFmax(i * 2 + 1, frictionBound);
+        setFmin(i * 2 + 1, -frictionBound);
 
         // Check if the contact is sticking, so that on the next frame we can use the old contact points for better static friction handling
-        contacts[i].stick = glm::abs(lambda[i * 2 + 1]) < frictionBound && glm::abs(contacts[i].C0.y) < STICK_THRESH;
+        contacts[i].stick = glm::abs(getLambda(i * 2 + 1)) < frictionBound && glm::abs(contacts[i].C0.y) < STICK_THRESH;
     }
 }
 
