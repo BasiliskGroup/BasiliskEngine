@@ -35,10 +35,15 @@ class Frame {
         void clear(float r=0.0, float g=0.0, float b=0.0, float a=1.0);
         void render();
         void render(int x, int y, int width, int height);
-        FBO* getFBO() { return fbo; }
-
+        
+        inline Shader* getShader() { return shader; }
+        inline VBO* getVBO() { return vbo; }
+        inline EBO* getEBO() { return ebo; }
+        inline VAO* getVAO() { return vao; }
+        inline FBO* getFBO() { return fbo; }
         inline unsigned int getWidth() { return width; }
         inline unsigned int getHeight() { return height; }
+        inline float getAspectRatio() { return aspectRatio; }
         unsigned int getRenderWidth();
         unsigned int getRenderHeight();
 };

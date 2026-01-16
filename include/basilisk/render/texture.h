@@ -8,6 +8,10 @@ namespace bsk::internal {
 class Texture {
     private:
         unsigned int id;
+        unsigned int width;
+        unsigned int height;
+
+        Image* image;
 
     public:
         Texture(Image* image);
@@ -17,7 +21,10 @@ class Texture {
         void setFilter(unsigned int magFilter, unsigned int minFilter);
         void setWrap(unsigned int wrap);
 
-        unsigned int getID() { return id; }
+        inline Image* getImage() { return image; }
+        inline unsigned int getID() { return id; }
+        inline unsigned int getWidth() { return width; }
+        inline unsigned int getHeight() { return height; }
 };
 
 }

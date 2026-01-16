@@ -7,7 +7,7 @@ namespace bsk::internal {
  * 
  * @param image 
  */
-Texture::Texture(Image* image) {
+Texture::Texture(Image* image) : image(image) {
     // Create one texture, and update texture with the ID
     glGenTextures(1, &id); 
     // Bind the texture to start working on it
@@ -16,6 +16,9 @@ Texture::Texture(Image* image) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->getWidth(), image->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image->getData());
     // Generate Mipmaps
     glGenerateMipmap(GL_TEXTURE_2D);
+    // Set internal width and height
+    width = image->getWidth();
+    height = image->getHeight();
 }
 
 /**
