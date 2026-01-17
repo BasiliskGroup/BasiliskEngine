@@ -20,12 +20,12 @@ namespace bsk::internal {
 Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, glm::vec3 stiffness, float fracture)
     : Force(solver, bodyA, bodyB), rA(rA), rB(rB)
 {
-    this->stiffness[0] = stiffness.x;
-    this->stiffness[1] = stiffness.y;
-    this->stiffness[2] = stiffness.z;
-    this->fmax[2] = fracture;
-    this->fmin[2] = -fracture;
-    this->fracture[2] = fracture;
+    setStiffness(0, stiffness.x);
+    setStiffness(1, stiffness.y);
+    setStiffness(2, stiffness.z);
+    setFmax(2, fracture);
+    setFmin(2, -fracture);
+    setFracture(2, fracture);
     this->restAngle = (bodyA ? bodyA->getPosition().z : 0.0f) - bodyB->getPosition().z;
     this->torqueArm = lengthSq((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize());
 }
@@ -38,7 +38,7 @@ bool Joint::initialize()
     C0.x = c0xy.x;
     C0.y = c0xy.y;
     C0.z = ((bodyA ? bodyA->getPosition().z : 0) - bodyB->getPosition().z - restAngle) * torqueArm;
-    return stiffness[0] != 0 || stiffness[1] != 0 || stiffness[2] != 0;
+    return getStiffness(0) != 0 || getStiffness(1) != 0 || getStiffness(2) != 0;
 }
 
 void Joint::computeConstraint(float alpha)
@@ -53,10 +53,10 @@ void Joint::computeConstraint(float alpha)
     for (int i = 0; i < rows(); i++)
     {
         // Store stabilized constraint function, if a hard constraint (Eq. 18)
-        if (glm::isinf(stiffness[i]))
-            C[i] = Cn[i] - C0[i] * alpha;
+        if (glm::isinf(getStiffness(i)))
+            setC(i, Cn[i] - C0[i] * alpha);
         else
-            C[i] = Cn[i];
+            setC(i, Cn[i]);
     }
 }
 
@@ -66,22 +66,22 @@ void Joint::computeDerivatives(Rigid* body)
     if (body == bodyA)
     {
         glm::vec2 r = rotate(bodyA->getPosition().z, rA);
-        JA[0] = glm::vec3(1.0f, 0.0f, -r.y);
-        JA[1] = glm::vec3(0.0f, 1.0f, r.x);
-        JA[2] = glm::vec3(0.0f, 0.0f, torqueArm);
-        HA[0] = glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0);
-        HA[1] = glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0);
-        HA[2] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        setJ(0, bodyA, glm::vec3(1.0f, 0.0f, -r.y));
+        setJ(1, bodyA, glm::vec3(0.0f, 1.0f, r.x));
+        setJ(2, bodyA, glm::vec3(0.0f, 0.0f, torqueArm));
+        setH(0, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
+        setH(1, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
+        setH(2, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
     else
     {
         glm::vec2 r = rotate(bodyB->getPosition().z, rB);
-        JB[0] = glm::vec3(-1.0f, 0.0f, r.y);
-        JB[1] = glm::vec3(0.0f, -1.0f, -r.x);
-        JB[2] = glm::vec3(0.0f, 0.0f, -torqueArm);
-        HB[0] = glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0);
-        HB[1] = glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0);
-        HB[2] = glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        setJ(0, bodyB, glm::vec3(-1.0f, 0.0f, r.y));
+        setJ(1, bodyB, glm::vec3(0.0f, -1.0f, -r.x));
+        setJ(2, bodyB, glm::vec3(0.0f, 0.0f, -torqueArm));
+        setH(0, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
+        setH(1, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
+        setH(2, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 

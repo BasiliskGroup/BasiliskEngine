@@ -20,12 +20,6 @@
 #include <semaphore>
 #include <atomic>
 
-
-#define PENALTY_MIN 1.0f              // Minimum penalty parameter
-#define PENALTY_MAX 1000000000.0f     // Maximum penalty parameter
-#define COLLISION_MARGIN 0.0005f      // Margin for collision detection to avoid flickering contacts
-#define STICK_THRESH 0.01f            // Position threshold for sticking contacts (ie static friction)
-
 namespace bsk::internal {
 
 // Forward declarations
@@ -33,6 +27,7 @@ class Rigid;
 class Force;
 class ColliderTable;
 class BodyTable;
+class ForceTable;
 struct ThreadScratch;
 struct WorkRange;
 
@@ -64,6 +59,7 @@ private:
 
     ColliderTable* colliderTable;
     BodyTable* bodyTable;
+    ForceTable* forceTable;
 
     // Coloring
     ColorQueue colorQueue;
@@ -96,6 +92,7 @@ public:
     // Getters
     ColliderTable* getColliderTable() const { return colliderTable; }
     BodyTable* getBodyTable() const { return bodyTable; }
+    ForceTable* getForceTable() const { return forceTable; }
     Rigid* getBodies() const { return bodies; }
     Force* getForces() const { return forces; }
     int getNumRigids() const { return numRigids; }
@@ -118,6 +115,7 @@ public:
     void setPostStabilize(bool value) { postStabilize = value; }
     void setBodies(Rigid* value) { bodies = value; }
     void setForces(Force* value) { forces = value; }
+    void setForceTable(ForceTable* value) { forceTable = value; }
 
     // Coloring
     void resetColoring();

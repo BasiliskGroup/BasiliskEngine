@@ -18,6 +18,7 @@
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/colliderTable.h>
 #include <basilisk/physics/tables/bodyTable.h>
+#include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/util/time.h>
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/physics/threading/scratch.h>
@@ -33,6 +34,7 @@ Solver::Solver() :
     numForces(0),
     colliderTable(nullptr), 
     bodyTable(nullptr),
+    forceTable(nullptr),
     stageBarrier(NUM_THREADS),
     startSignal(0),
     finishSignal(0),
@@ -44,6 +46,7 @@ Solver::Solver() :
 {
     this->colliderTable = new ColliderTable(64);
     this->bodyTable = new BodyTable(128);
+    this->forceTable = new ForceTable(128);
     defaultParams();
 
     workers.reserve(NUM_THREADS);
@@ -70,6 +73,12 @@ void Solver::clear()
 
     delete colliderTable;
     colliderTable = nullptr;
+
+    delete bodyTable;
+    bodyTable = nullptr;
+
+    delete forceTable;
+    forceTable = nullptr;
 
     // Signal workers to exit
     currentStage.store(Stage::STAGE_EXIT, std::memory_order_release);

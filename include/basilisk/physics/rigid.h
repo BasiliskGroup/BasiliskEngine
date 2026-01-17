@@ -26,8 +26,7 @@ class Manifold;
 struct CollisionPair;
 
 // Holds all the state for a single rigid body that is needed by AVBD
-class Rigid
-{
+class Rigid {
 private:
     Solver* solver;
     Node2D* node;

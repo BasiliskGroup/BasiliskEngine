@@ -10,29 +10,20 @@
 namespace py = pybind11;
 using namespace bsk::internal;
 
+void bind_joint(py::module_&);
+void bind_spring(py::module_&);
+void bind_motor(py::module_&);
+void bind_manifold(py::module_&);
+
 void bind_force(py::module_& m) {
     // Force is an abstract base class - cannot be instantiated directly
     // Only derived classes (Joint, Spring, Motor, Manifold) can be instantiated
     py::class_<Force>(m, "Force")
-        .def("disable", &Force::disable)
-        
-        // Getters
-        .def("getSolver", &Force::getSolver)
-        .def("getBodyA", &Force::getBodyA)
-        .def("getBodyB", &Force::getBodyB)
-        .def("getNext", &Force::getNext)
-        .def("getNextA", &Force::getNextA)
-        .def("getNextB", &Force::getNextB)
-        .def("getPrev", &Force::getPrev)
-        .def("getPrevA", &Force::getPrevA)
-        .def("getPrevB", &Force::getPrevB)
-        .def("getJ", &Force::getJ)
-        .def("getH", &Force::getH)
-        .def("getC", &Force::getC)
-        .def("getFmin", &Force::getFmin)
-        .def("getFmax", &Force::getFmax)
-        .def("getStiffness", &Force::getStiffness)
-        .def("getFracture", &Force::getFracture)
-        .def("getPenalty", &Force::getPenalty)
-        .def("getLambda", &Force::getLambda);
+        .def("disable", &Force::disable);
+
+    // bind derived classes to the same submodule
+    bind_joint(m);
+    bind_spring(m);
+    bind_motor(m);
+    bind_manifold(m);
 }
