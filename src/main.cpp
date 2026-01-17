@@ -46,35 +46,21 @@ int main() {
     // Load assets from file
     bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
 
+    // Create sample object
     bsk::VBO* vbo = new bsk::VBO(quad->getVertices());
     bsk::EBO* ebo = new bsk::EBO(quad->getIndices());
     bsk::Shader* shader = new bsk::Shader("shaders/test.vert", "shaders/test.frag");
-
     bsk::VAO* vao = new bsk::VAO(shader, vbo, ebo);
 
+    // Create a UBO
     std::vector<float> colors {1.0f, 0.2f, 0.2f, 1.0f, 0.2f, 1.0f, 0.2f, 1.0f};
-
     bsk::UBO* ubo = new bsk::UBO(colors);
     shader->bind("testBlock", ubo, 2);
-
-    // shader->use();
-    // unsigned int ubo;
-    // glGenBuffers(1, &ubo);
-    // glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-    // glBufferData(GL_UNIFORM_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
-    // glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    // unsigned int colors_index = glGetUniformBlockIndex(shader->getID(), "testBlock");
-    // glUniformBlockBinding(shader->getID(), colors_index, 2);
-    // glBindBufferBase(GL_UNIFORM_BUFFER, 2, ubo);
     
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
-        
-        shader->use();
         vao->render();
-
         engine->render();
     }
 
