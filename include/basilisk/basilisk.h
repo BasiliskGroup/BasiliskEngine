@@ -22,6 +22,7 @@
 #include "render/ebo.h"
 #include "render/tbo.h"
 #include "render/fbo.h"
+#include "render/ubo.h"
 #include "render/frame.h"
 #include "render/material.h"
 #include "resource/materialServer.h"
@@ -79,6 +80,7 @@ namespace bsk {
     using MaterialServer = internal::MaterialServer;
     using FBO = internal::FBO;
     using Frame = internal::Frame;
+    using UBO = internal::UBO;
 }
 
 #endif // BASILISK_H
