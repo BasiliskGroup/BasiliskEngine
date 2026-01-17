@@ -40,3 +40,4 @@ if __name__ == "__main__":
 
     total = count_non_empty_lines(DIRECTORIES)
     print(f"Total non-empty lines: {total}")
+
