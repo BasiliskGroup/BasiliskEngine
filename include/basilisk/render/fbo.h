@@ -24,6 +24,9 @@ class FBO {
 
         inline unsigned int getID() { return ID; }
         inline unsigned int getTextureID() { return texture; }
+        inline unsigned int getDepthID() { return depth; }
+        inline unsigned int getWidth() { return width; }
+        inline unsigned int getHeight() { return height; }
 };
 
 }

@@ -11,9 +11,15 @@ void bind_node(py::module_&);
 void bind_node2d(py::module_&);
 void bind_image(py::module_&);
 void bind_mesh(py::module_&);
+void bind_shader(py::module_&);
+void bind_vbo(py::module_&);
+void bind_ebo(py::module_&);
+void bind_vao(py::module_&);
+void bind_fbo(py::module_&);
+void bind_frame(py::module_&);
 void bind_material(py::module_&);
-void bind_solver(py::module_&);
 void bind_rigid(py::module_&);
+void bind_solver(py::module_&);
 void bind_collider(py::module_&);
 void bind_force(py::module_&);
 
@@ -40,6 +46,12 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     bind_mesh(m);
     bind_material(m);
     bind_node2d(m);
+    bind_shader(m);
+    bind_vbo(m);
+    bind_ebo(m);
+    bind_vao(m);
+    bind_fbo(m);
+    bind_frame(m);
     
     // Physics bindings - order matters: base classes before derived
     bind_solver(m);

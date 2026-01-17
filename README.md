@@ -32,3 +32,25 @@ cmake --install build --prefix ./python
 pip install build (run once)
 python -m build
 ```
+
+# Todo
+
+## Rendering
+- [ ] Lighting System
+    - [ ] Directional
+    - [ ] Point
+    - [ ] Spot
+    - [ ] Ambient
+- [ ] Skybox
+- [ ] Shadows
+- [ ] Basic PBR
+- [ ] Bloom
+- [ ] Text Rendering
+- [ ] SSAO
+
+## Optimizations
+- [ ] Frustum Culling
+- [ ] Auto LOD (meshoptimizer)
+- [ ] Instancing (After and with previous)
+
+## Physics
