@@ -57,7 +57,7 @@ void UBO::write(const void* data, unsigned int size, unsigned int offset) {
     // Bind the vbo to start working on it
     glBindBuffer(GL_UNIFORM_BUFFER, ID);
     // Write the data 
-    glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
     // Unbind for safety
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
