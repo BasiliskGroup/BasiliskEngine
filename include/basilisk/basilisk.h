@@ -91,6 +91,9 @@ namespace bsk {
     using DirectionalLight = internal::DirectionalLight;
     using PointLight = internal::PointLight;
     using LightServer = internal::LightServer;
+
+    // keyboard
+    using Key = internal::KeyCode;
 }
 
 #endif // BASILISK_H

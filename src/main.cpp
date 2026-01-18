@@ -37,6 +37,7 @@ int main() {
     
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
+        std::cout << engine->getKeyboard()->getPressed(bsk::Key::K_A) << std::endl;
         engine->update();
         scene->update();
         scene->render();

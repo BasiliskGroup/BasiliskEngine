@@ -15,10 +15,10 @@ void bind_engine(py::module_& m) {
         .def("render", &bsk::internal::Engine::render)
         .def("useContext", &bsk::internal::Engine::useContext)
         .def("setResolution", &bsk::internal::Engine::setResolution, py::arg("width"), py::arg("height"))
-        .def("getWindow", &bsk::internal::Engine::getWindow)
-        .def("getMouse", &bsk::internal::Engine::getMouse)
-        .def("getKeyboard", &bsk::internal::Engine::getKeyboard)
-        .def("getFrame", &bsk::internal::Engine::getFrame)
-        .def("getResourceServer", &bsk::internal::Engine::getResourceServer);
-        // .def("getDeltaTime", &bsk::internal::Engine::getDeltaTime);
+        .def("getWindow", &bsk::internal::Engine::getWindow, py::return_value_policy::reference_internal)
+        .def("getMouse", &bsk::internal::Engine::getMouse, py::return_value_policy::reference_internal)
+        .def("getKeyboard", &bsk::internal::Engine::getKeyboard, py::return_value_policy::reference_internal)
+        .def("getFrame", &bsk::internal::Engine::getFrame, py::return_value_policy::reference_internal)
+        .def("getResourceServer", &bsk::internal::Engine::getResourceServer, py::return_value_policy::reference_internal)
+        .def("getDeltaTime", &bsk::internal::Engine::getDeltaTime);
 }

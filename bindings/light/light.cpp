@@ -9,7 +9,7 @@ void bind_light(py::module_& m) {
     py::class_<Light>(m, "Light")
         .def("getColor", &Light::getColor)
         .def("getIntensity", &Light::getIntensity)
-        .def("setColor", &Light::setColor)
-        .def("setIntensity", &Light::setIntensity);
+        .def("setColor", &Light::setColor, py::arg("color"))
+        .def("setIntensity", &Light::setIntensity, py::arg("intensity"));
 }
 

@@ -34,8 +34,8 @@ class Engine {
         inline Mouse* getMouse() const { return mouse; }
         inline Keyboard* getKeyboard() const { return keyboard; }
         inline Frame* getFrame() const { return frame; }
-        inline ResourceServer* getResourceServer() const { return resourceServer; }
         inline double getDeltaTime() { return window->getDeltaTime(); }
+        inline ResourceServer* getResourceServer() const { return resourceServer; }
 };
 
 }

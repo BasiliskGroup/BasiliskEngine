@@ -22,12 +22,12 @@ void Camera::update() {
     pitch = std::max(-89.0f, std::min(89.0f, pitch));
 
     // Movement
-    float dt = 0.005;
-    float velocity = (speed * dt) * (keys->getPressed(GLFW_KEY_CAPS_LOCK) * 3 + 1);
+    float dt = engine->getDeltaTime();
+    float velocity = (speed * dt) * (keys->getDown(KeyCode::K_CAPS_LOCK) * 3 + 1);
 
-    moveForward((keys->getPressed(GLFW_KEY_W) - keys->getPressed(GLFW_KEY_S)) * velocity);
-    moveSide((keys->getPressed(GLFW_KEY_D) - keys->getPressed(GLFW_KEY_A)) * velocity);
-    moveUp((keys->getPressed(GLFW_KEY_SPACE) - keys->getPressed(GLFW_KEY_LEFT_SHIFT)) * velocity);
+    moveForward((keys->getDown(KeyCode::K_W) - keys->getDown(KeyCode::K_S)) * velocity);
+    moveSide((keys->getDown(KeyCode::K_D) - keys->getDown(KeyCode::K_A)) * velocity);
+    moveUp((keys->getDown(KeyCode::K_SPACE) - keys->getDown(KeyCode::K_LEFT_SHIFT)) * velocity);
 
     updateProjection();
     updateView();
