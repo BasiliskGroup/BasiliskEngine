@@ -10,5 +10,6 @@ void bind_scene(py::module_& m) {
         .def("render", &bsk::internal::Scene::render)
         .def("setCamera", &bsk::internal::Scene::setCamera, py::arg("camera"))
         .def("getShader", &bsk::internal::Scene::getShader)
-        .def("getCamera", &bsk::internal::Scene::getCamera);
+        .def("getCamera", &bsk::internal::Scene::getCamera)
+        .def("add", &bsk::internal::Scene::add, py::arg("light"));
 }

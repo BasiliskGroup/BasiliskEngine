@@ -30,6 +30,10 @@
 #include "camera/staticCamera2d.h"
 #include "camera/camera.h"
 #include "camera/camera2d.h"
+#include "light/ambientLight.h"
+#include "light/directionalLight.h"
+#include "light/pointLight.h"
+#include "resource/lightServer.h"
 
 #include "physics/solver.h"
 #include "physics/forces/force.h"
@@ -81,6 +85,12 @@ namespace bsk {
     using FBO = internal::FBO;
     using Frame = internal::Frame;
     using UBO = internal::UBO;
+
+    // light
+    using AmbientLight = internal::AmbientLight;
+    using DirectionalLight = internal::DirectionalLight;
+    using PointLight = internal::PointLight;
+    using LightServer = internal::LightServer;
 }
 
 #endif // BASILISK_H
