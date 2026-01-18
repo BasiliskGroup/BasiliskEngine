@@ -50,6 +50,10 @@ void Scene::update() {
  * 
  */
 void Scene::render() {
+    if (skybox) {
+        skybox->render(camera);
+    }
+
     shader->use();
     for (auto it = ++root->begin(); it != root->end(); ++it) {
         Node* node = *it;

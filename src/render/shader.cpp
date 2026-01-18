@@ -375,6 +375,11 @@ void Shader::bind(const char* name, UBO* ubo, unsigned int slot) {
     glBindBufferBase(GL_UNIFORM_BUFFER, slot, ubo->getID());
 }
 
+void Shader::bind(const char* name, Cubemap* cubemap, unsigned int slot) {
+    use();
+    bindTextureToSlot(name, cubemap->getID(), GL_TEXTURE_CUBE_MAP, slot);
+}
+
 /**
  * @brief Get the location of a uniform on this shader. 
  * 

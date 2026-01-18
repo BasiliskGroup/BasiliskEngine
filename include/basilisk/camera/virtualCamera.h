@@ -17,6 +17,9 @@ class VirtualCamera {
     public:
         virtual void update() = 0;
         virtual void use(Shader* shader) = 0;
+
+        inline glm::mat4 getView() { return view; }
+        inline glm::mat4 getProjection() { return projection; }
 };
 
 }
