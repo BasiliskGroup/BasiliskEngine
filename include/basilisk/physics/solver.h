@@ -15,6 +15,7 @@
 #include <basilisk/util/includes.h>
 #include <optional>
 #include <basilisk/physics/coloring/color_queue.h>
+#include <basilisk/physics/tables/adjacency.h>
 #include <thread>
 #include <barrier>
 #include <semaphore>
@@ -64,6 +65,10 @@ private:
     // Coloring
     ColorQueue colorQueue;
     std::vector<std::vector<Rigid*>> colorGroups;
+
+    // Graph Condensation
+    std::vector<ForceRange> forceRanges;
+    std::vector<ForceEdgeIndices> forceEdgeIndices;
 
     // Threading
     std::barrier<> stageBarrier;
@@ -120,6 +125,9 @@ public:
     // Coloring
     void resetColoring();
     void dsatur();
+
+    // Graph Condensation
+    void buildCondensedGraph();
 
     // Threading
     void workerLoop(unsigned int threadID);

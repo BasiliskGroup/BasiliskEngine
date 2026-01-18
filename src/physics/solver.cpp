@@ -42,7 +42,9 @@ Solver::Solver() :
     currentAlpha(0.0f),
     currentColor(0),
     running(true),
-    workers()
+    workers(),
+    forceRanges(),
+    forceEdgeIndices()
 {
     this->colliderTable = new ColliderTable(64);
     this->bodyTable = new BodyTable(128);
@@ -55,13 +57,11 @@ Solver::Solver() :
     }
 }
 
-Solver::~Solver()
-{
+Solver::~Solver() {
     clear();
 }
 
-void Solver::clear()
-{
+void Solver::clear() {
     while (forces)
         delete forces;
 
@@ -88,18 +88,15 @@ void Solver::clear()
         w.join();
 }
 
-void Solver::insert(Rigid* body)
-{
-    if (body == nullptr)
-    {
+void Solver::insert(Rigid* body) {
+    if (body == nullptr) {
         return;
     }
 
     body->setNext(bodies);
     body->setPrev(nullptr);
 
-    if (bodies)
-    {
+    if (bodies) {
         bodies->setPrev(body);
     }
 
@@ -107,25 +104,20 @@ void Solver::insert(Rigid* body)
     numRigids++;
 }
 
-void Solver::remove(Rigid* body)
-{
-    if (body == nullptr)
-    {
+void Solver::remove(Rigid* body) {
+    if (body == nullptr) {
         return;
     }
 
-    if (body->getPrev())
-    {
+    if (body->getPrev()) {
         body->getPrev()->setNext(body->getNext());
     }
-    else
-    {
+    else {
         // This was the head of the list
         bodies = body->getNext();
     }
 
-    if (body->getNext())
-    {
+    if (body->getNext()) {
         body->getNext()->setPrev(body->getPrev());
     }
 
@@ -135,18 +127,15 @@ void Solver::remove(Rigid* body)
     numRigids--;
 }
 
-void Solver::insert(Force* force)
-{
-    if (force == nullptr)
-    {
+void Solver::insert(Force* force) {
+    if (force == nullptr) {
         return;
     }
 
     force->setNext(forces);
     force->setPrev(nullptr);
 
-    if (forces)
-    {
+    if (forces) {
         forces->setPrev(force);
     }
 
@@ -154,25 +143,19 @@ void Solver::insert(Force* force)
     numForces++;
 }
 
-void Solver::remove(Force* force)
-{
-    if (force == nullptr)
-    {
+void Solver::remove(Force* force) {
+    if (force == nullptr) {
         return;
     }
 
-    if (force->getPrev())
-    {
+    if (force->getPrev()) {
         force->getPrev()->setNext(force->getNext());
-    }
-    else
-    {
+    } else {
         // This was the head of the list
         forces = force->getNext();
     }
 
-    if (force->getNext())
-    {
+    if (force->getNext()) {
         force->getNext()->setPrev(force->getPrev());
     }
 
@@ -182,8 +165,7 @@ void Solver::remove(Force* force)
     numForces--;
 }
 
-void Solver::defaultParams()
-{
+void Solver::defaultParams() {
     // gravity = { 0.0f, -9.81f, 0.0f };
     gravity = std::nullopt;
     iterations = 10;
@@ -210,22 +192,25 @@ void Solver::defaultParams()
     postStabilize = true;
 }
 
-void Solver::step(float dtIncoming)
-{
+void Solver::step(float dtIncoming) {
     auto stepStart = timeNow();
     
     this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
+
+    // compact body table
+    auto compactBodyTableStart = timeNow();
+    bodyTable->compact();
+    auto compactBodyTableEnd = timeNow();
+    printDurationUS(compactBodyTableStart, compactBodyTableEnd, "Compact Body Table: ");
 
     // Perform broadphase collision detection
     auto broadphaseStart = timeNow();
     bodyTable->getBVH()->update();
 
     // Use BVH to find potential collisions
-    for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext())
-    {
+    for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext()) {
         std::vector<Rigid*> results = bodyTable->getBVH()->query(bodyA);
-        for (Rigid* bodyB : results)
-        {
+        for (Rigid* bodyB : results) {
             // Skip self-collision and already constrained pairs
             if (bodyB == bodyA || bodyA->constrainedTo(bodyB))
                 continue;
@@ -239,18 +224,14 @@ void Solver::step(float dtIncoming)
 
     // Initialize and warmstart forces
     auto warmstartForcesStart = timeNow();
-    for (Force* force = forces; force != nullptr;)
-    {
+    for (Force* force = forces; force != nullptr;) {
         // Initialization can including caching anything that is constant over the step
-        if (!force->initialize())
-        {
+        if (!force->initialize()) {
             // Force has returned false meaning it is inactive, so remove it from the solver
             Force* next = force->getNext();
             delete force;
             force = next;
-        }
-        else
-        {
+        } else {
             for (int i = 0; i < force->rows(); i++)
             {
                 if (postStabilize)
@@ -287,8 +268,16 @@ void Solver::step(float dtIncoming)
     auto warmstartBodiesEnd = timeNow();
     printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
 
+    // compact force table
+    auto compactForceTableStart = timeNow();
+    forceTable->compact();
+    auto compactForceTableEnd = timeNow();
+    printDurationUS(compactForceTableStart, compactForceTableEnd, "Compact Force Table: ");
+
     // Print number of bodies and forces before coloring
     std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
+    std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
+    std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
 
     // Coloring
     auto coloringStart = timeNow();
@@ -296,6 +285,12 @@ void Solver::step(float dtIncoming)
     dsatur();
     auto coloringEnd = timeNow();
     printDurationUS(coloringStart, coloringEnd, "Coloring: ");
+
+    // Build condensed graph
+    auto buildCondensedGraphStart = timeNow();
+    buildCondensedGraph();
+    auto buildCondensedGraphEnd = timeNow();
+    printDurationUS(buildCondensedGraphStart, buildCondensedGraphEnd, "Build Condensed Graph: ");
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
@@ -437,8 +432,7 @@ void Solver::dsatur() {
     std::cout << "Number of colors used: " << colorGroups.size() << std::endl;
 }
 
-Rigid* Solver::pick(glm::vec2 at, glm::vec2& local)
-{
+Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {
     // Find which body is at the given point
     for (Rigid* body = bodies; body != nullptr; body = body->getNext())
     {
@@ -451,6 +445,31 @@ Rigid* Solver::pick(glm::vec2 at, glm::vec2& local)
             return body;
     }
     return nullptr;
+}
+
+void Solver::buildCondensedGraph() {
+    // reset condensed graph
+    forceRanges.clear();
+    forceEdgeIndices.clear();
+    
+    for (int activeColor = 0; activeColor < colorGroups.size(); activeColor++) {
+        // Skip empty color groups (shouldn't happen with proper dsatur, but be safe)
+        if (colorGroups[activeColor].empty()) {
+            continue;
+        }
+
+        for (Rigid* body : colorGroups[activeColor]) {
+            std::size_t start = forceEdgeIndices.size();
+            std::size_t count = 0;
+
+            for (Force* force = body->getForces(); force != nullptr; force = force->getNext()) {
+                forceEdgeIndices.emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                count++;
+            }
+
+            forceRanges.emplace_back(start, count);
+        }
+    }
 }
 
 }

@@ -72,7 +72,6 @@ void BodyTable::updateVelocities(float dt) {
         // update node positions
         bodies[i]->getNode()->setPosition(pos[i]);
     }
-    
 }
 
 void BodyTable::markAsDeleted(std::size_t index) {

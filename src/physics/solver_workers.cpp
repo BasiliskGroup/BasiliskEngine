@@ -79,7 +79,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, Rigid* body) {
     float alpha = currentAlpha.load(std::memory_order_acquire);
     for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB())
         {
-            // Compute constraint and its derivatives
+        // Compute constraint and its derivatives
         force->computeConstraint(alpha);
         force->computeDerivatives(body);
 
