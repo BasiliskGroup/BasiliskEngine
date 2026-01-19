@@ -1,5 +1,4 @@
 #include <basilisk/resource/lightServer.h>
-#include <basilisk/nodes/node.h>
 
 namespace bsk::internal {
 
@@ -69,6 +68,13 @@ void LightServer::update(StaticCamera* camera, Shader* shader, std::string name,
         directionalLightData[i * 2 + 1] = glm::vec4(directionalLights[i]->getDirection(), 0.0);
     }
 
+    // Get point lights data
+    size_t lightCount = std::min(pointLights.size(), static_cast<size_t>(MAX_POINT_LIGHTS));
+    for (size_t i = 0; i < lightCount; i++) {
+        pointLightData[i * 2] = glm::vec4(pointLights[i]->getColor(), pointLights[i]->getIntensity());
+        pointLightData[i * 2 + 1] = glm::vec4(pointLights[i]->getPosition(), pointLights[i]->getRange());
+    }
+
     // Calculate total ambient light data
     ambientLightData = glm::vec3(0.0, 0.0, 0.0);
     for (AmbientLight* light : ambientLights) {
@@ -98,39 +104,105 @@ void LightServer::bind(Shader* shader, std::string name, unsigned int slot) {
     shader->setUniform("uPointLightCount", std::min((int)pointLights.size(), MAX_POINT_LIGHTS));
 }
 
-void LightServer::perObjectWrite(Node* node, Shader* shader, std::string name, unsigned int slot) {
-    // Cache node position to avoid repeated calls
-    const glm::vec3 nodePos = node->getPosition();
+glm::vec3 unproject(const glm::mat4& inverseProjection, float x, float y) {
+    glm::vec4 clip(x, y, -1.0f, 1.0f);
+    glm::vec4 view = inverseProjection * clip;
+    return glm::normalize(glm::vec3(view) / view.w);
+}
 
-    // Get point lights in range of the node
-    std::vector<PointLight*> pointLightsInRange;
-    pointLightsInRange.reserve(std::min(pointLights.size(), static_cast<size_t>(MAX_POINT_LIGHTS)));
+bool lightIntersectsTile(glm::vec3& lightPositionViewSpace, float lightRadius, Tile& tile) {
+    if (lightPositionViewSpace.z - lightRadius > 0.0f) {
+        return false;
+    }
+    for (int i = 0; i < 4; i++) {
+        float distance = glm::dot(tile.planes[i].normal, lightPositionViewSpace);
+        if (distance < -lightRadius) { return false; }
+    }
+    return true;
+}
+
+void LightServer::setTiles(StaticCamera* camera, unsigned int screenWidth, unsigned int screenHeight) {
+    tilesX = (unsigned int)ceil((float)screenWidth  / (float)TILE_SIZE);
+    tilesY = (unsigned int)ceil((float)screenHeight / (float)TILE_SIZE);
+    unsigned int tileCount = tilesX * tilesY;
+
+    tiles.resize(tileCount);
+    tileInfos.resize(tileCount);
+
+    glm::mat4 projection = camera->getProjection();
+    glm::mat4 inverseProjection = glm::inverse(projection);
+
+    for (unsigned int ty = 0; ty < tilesY; ++ty) {
+        for (unsigned int tx = 0; tx < tilesX; ++tx) {
+            unsigned int tileIndex = ty * tilesX + tx;
+            Tile& tile = tiles.at(tileIndex);
+
+            // Calculate the corners of the tile ([0, 1] spae)
+            float x0 = float(tx * TILE_SIZE) / screenWidth;
+            float x1 = float((tx + 1) * TILE_SIZE) / screenWidth;
+            float y0 = float(ty * TILE_SIZE) / screenHeight;
+            float y1 = float((ty + 1) * TILE_SIZE) / screenHeight;
+
+            // Convert to NDC space ([-1, 1] space)
+            float ndcX0 = x0 * 2.0f - 1.0f;
+            float ndcX1 = x1 * 2.0f - 1.0f;
+            float ndcY0 = y0 * 2.0f - 1.0f;
+            float ndcY1 = y1 * 2.0f - 1.0f;
+
+            // Unproject to view space
+            glm::vec3 rayBL = unproject(inverseProjection, ndcX0, ndcY0);
+            glm::vec3 rayBR = unproject(inverseProjection, ndcX1, ndcY0);
+            glm::vec3 rayTR = unproject(inverseProjection, ndcX1, ndcY1);
+            glm::vec3 rayTL = unproject(inverseProjection, ndcX0, ndcY1);
+
+            // Calculate the planes of the tile (normals pointing inward)
+            tile.planes[0].normal = glm::normalize(glm::cross(rayTL, rayBL));
+            tile.planes[1].normal = glm::normalize(glm::cross(rayBR, rayTR));
+            tile.planes[2].normal = glm::normalize(glm::cross(rayBL, rayBR));
+            tile.planes[3].normal = glm::normalize(glm::cross(rayTR, rayTL));
+        }
+    }    
+}
+
+void LightServer::updateTiles(StaticCamera* camera) {
+    unsigned int MAX_LIGHTS_PER_TILE = 16;
+
+    lightIndices.clear();
+    lightIndices.reserve(tiles.size() * MAX_LIGHTS_PER_TILE);
     
-    for (PointLight* light : pointLights) {
-        float range = light->getRange();
-        float distanceSquared = glm::length2(light->getPosition() - nodePos);
-        if (distanceSquared <= range * range) {
-            pointLightsInRange.push_back(light);
+    glm::mat4 view = camera->getView();
+
+    for (unsigned int t = 0; t < tiles.size(); ++t) {
+        TileInfo& info = tileInfos.at(t);
+        info.offset = (uint32_t)lightIndices.size();
+        info.count  = 0;
+
+        Tile& tile = tiles.at(t);
+
+        for (unsigned int i = 0; i < pointLights.size(); ++i) {
+            PointLight* light = pointLights.at(i);
+            glm::vec3 lightPositionViewSpace = glm::vec3(view * glm::vec4(light->getPosition(), 1.0f));
+            float lightRadius = light->getRange();
+
+            if (lightIntersectsTile(lightPositionViewSpace, lightRadius, tile)) {
+                lightIndices.push_back(i);
+                info.count++;
+                if (info.count >= MAX_LIGHTS_PER_TILE) { break; }
+            }
         }
     }
-    
-    // Sort point lights by squared distance from node (avoid expensive sqrt)
-    std::sort(pointLightsInRange.begin(), pointLightsInRange.end(), [nodePos](PointLight* a, PointLight* b) {
-        return glm::length2(a->getPosition() - nodePos) < glm::length2(b->getPosition() - nodePos);
-    });
-    
-    // Get point lights data (only up to MAX_POINT_LIGHTS)
-    size_t lightCount = std::min(pointLightsInRange.size(), static_cast<size_t>(MAX_POINT_LIGHTS));
-    for (size_t i = 0; i < lightCount; i++) {
-        pointLightData[i * 2] = glm::vec4(pointLightsInRange[i]->getColor(), pointLightsInRange[i]->getIntensity());
-        pointLightData[i * 2 + 1] = glm::vec4(pointLightsInRange[i]->getPosition(), pointLightsInRange[i]->getRange());
+
+
+    std::cout << "================================================================================" << std::endl;
+    for (unsigned int y = 0; y < tilesY; ++y) {
+        for (unsigned int x = 0; x < tilesX; ++x) {
+            unsigned int tileIndex = y * tilesX + x;
+            TileInfo& info = tileInfos.at(tileIndex);
+            std::cout << info.count << ", ";
+        }
+        std::cout << std::endl;
     }
-    
-    // Write point lights data to UBO (only the portion actually used)
-    ubo->write(pointLightData.data(), lightCount * 2 * sizeof(glm::vec4), MAX_DIRECTIONAL_LIGHTS * 2 * sizeof(glm::vec4));
-
-    // Bind the light data to the shader
-    shader->setUniform("uPointLightCount", static_cast<int>(lightCount));
-}
 
 }
+
+}   

@@ -11,11 +11,23 @@
 #include <basilisk/render/ubo.h>
 
 #define MAX_DIRECTIONAL_LIGHTS 5
-#define MAX_POINT_LIGHTS 10
+#define MAX_POINT_LIGHTS 50
+#define TILE_SIZE 16
+
+struct Plane {
+    glm::vec3 normal;
+};
+
+struct Tile {
+    Plane planes[4];
+};
+
+struct TileInfo {
+    uint32_t offset;
+    uint32_t count;
+};
 
 namespace bsk::internal {
-
-class Node;  // Forward declaration to avoid circular dependency
 
 class LightServer {
 
@@ -29,6 +41,12 @@ class LightServer {
         std::vector<glm::vec4> pointLightData;
         glm::vec3 ambientLightData;
 
+        unsigned int tilesX;
+        unsigned int tilesY;
+        std::vector<Tile> tiles;
+        std::vector<TileInfo> tileInfos;
+        std::vector<uint32_t> lightIndices;
+
     public:
         LightServer();
         ~LightServer();
@@ -39,7 +57,9 @@ class LightServer {
 
         void update(StaticCamera* camera, Shader* shader, std::string name = "lights", unsigned int slot = 6);
         void bind(Shader* shader, std::string name = "lights", unsigned int slot = 0);
-        void perObjectWrite(Node* node, Shader* shader, std::string name = "lights", unsigned int slot = 6);
+        
+        void setTiles(StaticCamera* camera, unsigned int screenWidth, unsigned int screenHeight);
+        void updateTiles(StaticCamera* camera);
 };
 
 }
