@@ -90,6 +90,10 @@ public:
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
     Positional& getPositional(std::size_t index) { return positional[index]; }
+    glm::vec3& getPosA(std::size_t index) { return positional[index].posA; }
+    glm::vec3& getPosB(std::size_t index) { return positional[index].posB; }
+    glm::vec3& getInitialA(std::size_t index) { return positional[index].initialA; }
+    glm::vec3& getInitialB(std::size_t index) { return positional[index].initialB; }
 
     // index specific
     glm::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
@@ -125,6 +129,10 @@ public:
     void setRows(std::size_t index, int value) { rows[index] = value; }
     void setForceType(std::size_t index, ForceType value);
     void setPositional(std::size_t index, const Positional& value) { positional[index] = value; }
+    void setPosA(std::size_t index, const glm::vec3& value) { positional[index].posA = value; }
+    void setPosB(std::size_t index, const glm::vec3& value) { positional[index].posB = value; }
+    void setInitialA(std::size_t index, const glm::vec3& value) { positional[index].initialA = value; }
+    void setInitialB(std::size_t index, const glm::vec3& value) { positional[index].initialB = value; }
     
     // index specific
     void setJA(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesA[forceIndex][row].J = value; }

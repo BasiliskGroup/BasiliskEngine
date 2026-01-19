@@ -102,11 +102,11 @@ bool Manifold::initialize()
 void Manifold::computeConstraint(float alpha) {
     for (int i = 0; i < getNumContacts(); i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
-        glm::vec3 dpA = bodyA->getPosition() - bodyA->getInitial();
-        glm::vec3 dpB = bodyB->getPosition() - bodyB->getInitial();
+        glm::vec3 dpA = solver->getForceTable()->getPositional(index).posA - solver->getForceTable()->getPositional(index).initialA;
+        glm::vec3 dpB = solver->getForceTable()->getPositional(index).posB - solver->getForceTable()->getPositional(index).initialB;
         
-        setC(i * 2 + JN, getContact(i).C0.x * (1 - alpha) + glm::dot(getJ(i * 2 + JN, bodyA), dpA) + glm::dot(getJ(i * 2 + JN, bodyB), dpB));
-        setC(i * 2 + JT, getContact(i).C0.y * (1 - alpha) + glm::dot(getJ(i * 2 + JT, bodyA), dpA) + glm::dot(getJ(i * 2 + JT, bodyB), dpB));
+        setC(i * 2 + JN, getContact(i).C0.x * (1 - alpha) + glm::dot(getJA(i * 2 + JN), dpA) + glm::dot(getJB(i * 2 + JN), dpB));
+        setC(i * 2 + JT, getContact(i).C0.y * (1 - alpha) + glm::dot(getJA(i * 2 + JT), dpA) + glm::dot(getJB(i * 2 + JT), dpB));
 
         // Update the friction bounds using the latest lambda values
         float frictionBound = glm::abs(getLambda(i * 2 + JN)) * getFriction();

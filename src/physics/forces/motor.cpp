@@ -25,29 +25,24 @@ Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxT
     solver->getForceTable()->setForceType(this->index, ForceType::MOTOR);
 }
 
-void Motor::computeConstraint(float alpha)
-{
+void Motor::computeConstraint(float alpha) {
     // Compute delta angular position between the two bodies
-    float dAngleA = (bodyA ? (bodyA->getPosition().z - bodyA->getInitial().z) : 0.0f);
-    float dAngleB = bodyB->getPosition().z - bodyB->getInitial().z;
+    float dAngleA = (bodyA ? (getPosA().z - getInitialA().z) : 0.0f);
+    float dAngleB = getPosB().z - getInitialB().z;
     float deltaAngle = dAngleA - dAngleB;
 
     // Constraint tries to reach desired angular speed
     setC(0, deltaAngle - getSpeed() * solver->getDt());
 }
 
-void Motor::computeDerivatives(Rigid* body)
-{
+void Motor::computeDerivatives(Rigid* body) {
     // Compute the first and second derivatives for the desired body
-    if (body == bodyA)
-    {
-        setJ(0, bodyA, glm::vec3(0.0f, 0.0f, 1.0f));
-        setH(0, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
-    }
-    else
-    {
-        setJ(0, bodyB, glm::vec3(0.0f, 0.0f, -1.0f));
-        setH(0, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+    if (body == bodyA) {
+        setJA(0, glm::vec3(0.0f, 0.0f, 1.0f));
+        setHA(0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+    } else {
+        setJB(0, glm::vec3(0.0f, 0.0f, -1.0f));
+        setHB(0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 

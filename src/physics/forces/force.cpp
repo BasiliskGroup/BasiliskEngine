@@ -39,13 +39,11 @@ Force::~Force() {
     solver->getForceTable()->markAsDeleted(this->index);
 
     // Remove from body linked lists
-    if (bodyA)
-    {
+    if (bodyA) {
         bodyA->remove(this);
     }
 
-    if (bodyB)
-    {
+    if (bodyB) {
         bodyB->remove(this);
     }
 
@@ -79,6 +77,10 @@ glm::mat3x3& Force::getH(int index, Rigid* body) const {
         solver->getForceTable()->getHB(this->index, index); 
 }
 
+glm::vec3& Force::getJA(int index) const { return solver->getForceTable()->getJA(this->index, index); }
+glm::vec3& Force::getJB(int index) const { return solver->getForceTable()->getJB(this->index, index); }
+glm::mat3x3& Force::getHA(int index) const { return solver->getForceTable()->getHA(this->index, index); }
+glm::mat3x3& Force::getHB(int index) const { return solver->getForceTable()->getHB(this->index, index); }
 float Force::getC(int index) const { return solver->getForceTable()->getC(this->index, index); }
 float Force::getFmin(int index) const { return solver->getForceTable()->getFmin(this->index, index); }
 float Force::getFmax(int index) const { return solver->getForceTable()->getFmax(this->index, index); }
@@ -86,6 +88,11 @@ float Force::getStiffness(int index) const { return solver->getForceTable()->get
 float Force::getFracture(int index) const { return solver->getForceTable()->getFracture(this->index, index); }
 float Force::getPenalty(int index) const { return solver->getForceTable()->getPenalty(this->index, index); }
 float Force::getLambda(int index) const { return solver->getForceTable()->getLambda(this->index, index); }
+
+glm::vec3& Force::getPosA() const { return solver->getForceTable()->getPosA(index); }
+glm::vec3& Force::getPosB() const { return solver->getForceTable()->getPosB(index); }
+glm::vec3& Force::getInitialA() const { return solver->getForceTable()->getInitialA(index); }
+glm::vec3& Force::getInitialB() const { return solver->getForceTable()->getInitialB(index); }
 
 // setters
 void Force::setJ(int index, Rigid* body, const glm::vec3& value) { 
@@ -98,7 +105,10 @@ void Force::setH(int index, Rigid* body, const glm::mat3& value) {
     else { solver->getForceTable()->setHB(this->index, index, value); } 
 }
 
-// index specific
+void Force::setJA(int index, const glm::vec3& value) { solver->getForceTable()->setJA(this->index, index, value); }
+void Force::setJB(int index, const glm::vec3& value) { solver->getForceTable()->setJB(this->index, index, value); }
+void Force::setHA(int index, const glm::mat3& value) { solver->getForceTable()->setHA(this->index, index, value); }
+void Force::setHB(int index, const glm::mat3& value) { solver->getForceTable()->setHB(this->index, index, value); }
 void Force::setC(int index, float value) { solver->getForceTable()->setC(this->index, index, value); }
 void Force::setFmin(int index, float value) { solver->getForceTable()->setFmin(this->index, index, value); }
 void Force::setFmax(int index, float value) { solver->getForceTable()->setFmax(this->index, index, value); }
@@ -106,4 +116,9 @@ void Force::setStiffness(int index, float value) { solver->getForceTable()->setS
 void Force::setFracture(int index, float value) { solver->getForceTable()->setFracture(this->index, index, value); }
 void Force::setPenalty(int index, float value) { solver->getForceTable()->setPenalty(this->index, index, value); }
 void Force::setLambda(int index, float value) { solver->getForceTable()->setLambda(this->index, index, value); }
+
+void Force::setPosA(const glm::vec3& value) { solver->getForceTable()->setPosA(index, value); }
+void Force::setPosB(const glm::vec3& value) { solver->getForceTable()->setPosB(index, value); }
+void Force::setInitialA(const glm::vec3& value) { solver->getForceTable()->setInitialA(index, value); }
+void Force::setInitialB(const glm::vec3& value) { solver->getForceTable()->setInitialB(index, value); }
 }

@@ -33,7 +33,7 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
 void Spring::computeConstraint(float alpha)
 {
     // Compute constraint function at current state C(x)
-    setC(0, length(transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB())) - getRest());
+    setC(0, length(transform(getPosA(), getRA()) - transform(getPosB(), getRB())) - getRest());
 }
 
 void Spring::computeDerivatives(Rigid* body)
@@ -43,7 +43,7 @@ void Spring::computeDerivatives(Rigid* body)
     glm::mat2 S = glm::mat2(0, 1, -1, 0);  // [0 -1; 1 0] -> columns (0,1), (-1,0)
     glm::mat2 I = glm::mat2(1, 0, 0, 1);   // Identity: columns (1,0), (0,1)
 
-    glm::vec2 d = transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB());
+    glm::vec2 d = transform(getPosA(), getRA()) - transform(getPosB(), getRB());
     float dlen2 = dot(d, d);
     if (dlen2 == 0)
         return;
@@ -54,18 +54,18 @@ void Spring::computeDerivatives(Rigid* body)
 
     if (body == bodyA)
     {
-        glm::vec2 Sr = rotate(bodyA->getPosition().z, S * getRA());
-        glm::vec2 r = rotate(bodyA->getPosition().z, getRA());
+        glm::vec2 Sr = rotate(getPosA().z, S * getRA());
+        glm::vec2 r = rotate(getPosA().z, getRA());
 
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
 
-        setJ(0, bodyA, glm::vec3(n.x, n.y, dot(n, Sr)));
+        setJA(0, glm::vec3(n.x, n.y, dot(n, Sr)));
         // GLM 3x3 constructor: mat3(x1,y1,z1, x2,y2,z2, x3,y3,z3) = columns
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        setH(0, bodyA, glm::mat3(
+        setHA(0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
@@ -73,15 +73,15 @@ void Spring::computeDerivatives(Rigid* body)
     }
     else
     {
-        glm::vec2 Sr = rotate(bodyB->getPosition().z, S * getRB());
-        glm::vec2 r = rotate(bodyB->getPosition().z, getRB());
+        glm::vec2 Sr = rotate(getPosB().z, S * getRB());
+        glm::vec2 r = rotate(getPosB().z, getRB());
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 
-        setJ(0, bodyB, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
+        setJB(0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        setH(0, bodyB, glm::mat3(
+        setHB(0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2

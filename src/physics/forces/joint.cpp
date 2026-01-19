@@ -48,18 +48,19 @@ void Joint::computeConstraint(float alpha)
 {
     // Compute constraint function at current state C(x)
     glm::vec3 Cn;
-    glm::vec2 cnxy = (bodyA ? transform(bodyA->getPosition(), getRA()) : getRA()) - transform(bodyB->getPosition(), getRB());
+    glm::vec2 cnxy = (bodyA ? transform(getPosA(), getRA()) : getRA()) - (bodyB ? transform(getPosB(), getRB()) : getRB());
     Cn.x = cnxy.x;
     Cn.y = cnxy.y;
-    Cn.z = ((bodyA ? bodyA->getPosition().z : 0) - bodyB->getPosition().z - getRestAngle()) * getTorqueArm();
+    Cn.z = ((bodyA ? getPosA().z : 0) - (bodyB ? getPosB().z : 0) - getRestAngle()) * getTorqueArm();
 
     for (int i = 0; i < rows(); i++)
     {
         // Store stabilized constraint function, if a hard constraint (Eq. 18)
-        if (glm::isinf(getStiffness(i)))
+        if (glm::isinf(getStiffness(i))) {
             setC(i, Cn[i] - getC0()[i] * alpha);
-        else
+        } else {
             setC(i, Cn[i]);
+        }
     }
 }
 
@@ -68,23 +69,23 @@ void Joint::computeDerivatives(Rigid* body)
     // Compute the first and second derivatives for the desired body
     if (body == bodyA)
     {
-        glm::vec2 r = rotate(bodyA->getPosition().z, getRA());
-        setJ(0, bodyA, glm::vec3(1.0f, 0.0f, -r.y));
-        setJ(1, bodyA, glm::vec3(0.0f, 1.0f, r.x));
-        setJ(2, bodyA, glm::vec3(0.0f, 0.0f, getTorqueArm()));
-        setH(0, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
-        setH(1, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
-        setH(2, bodyA, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        glm::vec2 r = rotate(getPosA().z, getRA());
+        setJA(0, glm::vec3(1.0f, 0.0f, -r.y));
+        setJA(1, glm::vec3(0.0f, 1.0f, r.x));
+        setJA(2, glm::vec3(0.0f, 0.0f, getTorqueArm()));
+        setHA(0, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
+        setHA(1, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
+        setHA(2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
     else
     {
-        glm::vec2 r = rotate(bodyB->getPosition().z, getRB());
-        setJ(0, bodyB, glm::vec3(-1.0f, 0.0f, r.y));
-        setJ(1, bodyB, glm::vec3(0.0f, -1.0f, -r.x));
-        setJ(2, bodyB, glm::vec3(0.0f, 0.0f, -getTorqueArm()));
-        setH(0, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
-        setH(1, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
-        setH(2, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        glm::vec2 r = rotate(getPosB().z, getRB());
+        setJB(0, glm::vec3(-1.0f, 0.0f, r.y));
+        setJB(1, glm::vec3(0.0f, -1.0f, -r.x));
+        setJB(2, glm::vec3(0.0f, 0.0f, -getTorqueArm()));
+        setHB(0, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
+        setHB(1, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
+        setHB(2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 
