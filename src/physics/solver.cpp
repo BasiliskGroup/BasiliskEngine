@@ -377,6 +377,10 @@ void Solver::resetColoring() {
 void Solver::dsatur() {
     // Use a set instead of priority_queue for O(log n) updates
     std::set<Rigid*, RigidComparator> colorSet;
+    std::vector<std::vector<ForceEdgeIndices>> tempIndices;
+
+    // add vector in temp indices for each force type
+    tempIndices.resize(ForceType::NUM_FORCE_TYPES);
     
     // Add all bodies to the set
     for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
@@ -402,16 +406,38 @@ void Solver::dsatur() {
         forceEdgeIndices.resize(color + 1);
 
         // add body to color group
-        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, body->getMass(), body->getMoment(), body->getInertial());
-        std::size_t forceCount = 0;
+        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, 0, 0, 0, body->getMass(), body->getMoment(), body->getInertial());
+
+        // clear temp indices
+        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+            tempIndices[i].clear();
+        }
 
         // update uncolored bodies connected to this body
         for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB()) {
             Rigid* other = (force->getBodyA() == body) ? force->getBodyB() : force->getBodyA();
 
-            // add force to force edge indices
-            forceEdgeIndices[color].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
-            forceCount++;
+            switch (force->getForceType()) {
+                case ForceType::JOINT:
+                    colorGroups[color].back().joint++;
+                    tempIndices[ForceType::JOINT].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                case ForceType::MANIFOLD:
+                    colorGroups[color].back().manifold++;
+                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                case ForceType::SPRING:
+                    colorGroups[color].back().spring++;
+                    tempIndices[ForceType::SPRING].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                case ForceType::MOTOR:
+                    colorGroups[color].back().motor++;
+                    tempIndices[ForceType::MOTOR].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                default:
+                    throw std::runtime_error("Invalid force type");
+                    break;
+            }
 
             // Skip if already colored or has already used this color
             if (other == nullptr || other->isColored() || other->isColorUsed(color)) {
@@ -425,8 +451,10 @@ void Solver::dsatur() {
             colorSet.insert(other);
         }
 
-        // update the number of forces for this body
-        colorGroups[color].back().count = forceCount;
+        // insert forces in sorted order into edge indices
+        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+            forceEdgeIndices[color].insert(forceEdgeIndices[color].end(), tempIndices[i].begin(), tempIndices[i].end());
+        }
     }
 
     // Print number of colors used

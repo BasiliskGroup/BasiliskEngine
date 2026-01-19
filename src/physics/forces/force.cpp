@@ -93,6 +93,7 @@ glm::vec3& Force::getPosA() const { return solver->getForceTable()->getPosA(inde
 glm::vec3& Force::getPosB() const { return solver->getForceTable()->getPosB(index); }
 glm::vec3& Force::getInitialA() const { return solver->getForceTable()->getInitialA(index); }
 glm::vec3& Force::getInitialB() const { return solver->getForceTable()->getInitialB(index); }
+ForceType Force::getForceType() const { return solver->getForceTable()->getForceType(index); }
 
 // setters
 void Force::setJ(int index, Rigid* body, const glm::vec3& value) { 
@@ -121,4 +122,5 @@ void Force::setPosA(const glm::vec3& value) { solver->getForceTable()->setPosA(i
 void Force::setPosB(const glm::vec3& value) { solver->getForceTable()->setPosB(index, value); }
 void Force::setInitialA(const glm::vec3& value) { solver->getForceTable()->setInitialA(index, value); }
 void Force::setInitialB(const glm::vec3& value) { solver->getForceTable()->setInitialB(index, value); }
+void Force::setForceType(ForceType value) { solver->getForceTable()->setForceType(index, value); }
 }

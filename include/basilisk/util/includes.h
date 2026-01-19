@@ -72,7 +72,8 @@ enum ForceType {
     JOINT,
     SPRING,
     IGNORE_COLLISION,
-    MOTOR
+    MOTOR,
+    NUM_FORCE_TYPES // DONT REMOVE THIS, USED FOR ITERATING
 };
 
 struct Vertex {

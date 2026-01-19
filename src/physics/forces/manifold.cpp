@@ -28,8 +28,7 @@ Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     solver->getForceTable()->setForceType(this->index, ForceType::MANIFOLD);
 }
 
-bool Manifold::initialize()
-{
+bool Manifold::initialize() {
     // Compute friction
     setFriction(sqrtf(bodyA->getFriction() * bodyB->getFriction()));
 
@@ -44,17 +43,14 @@ bool Manifold::initialize()
     setNumContacts(collide(bodyA, bodyB, &getContactRef(0)));
 
     // Merge old contact data with new contacts
-    for (int i = 0; i < getNumContacts(); i++)
-    {
+    for (int i = 0; i < getNumContacts(); i++) {
         setPenalty(i * 2 + 0, 0.0f);
         setPenalty(i * 2 + 1, 0.0f);
         setLambda(i * 2 + 0, 0.0f);
         setLambda(i * 2 + 1, 0.0f);
 
-        for (int j = 0; j < oldNumContacts; j++)
-        {
-            if (getContact(i).feature.value == oldContacts[j].feature.value)
-            {
+        for (int j = 0; j < oldNumContacts; j++) {
+            if (getContact(i).feature.value == oldContacts[j].feature.value) {
                 setPenalty(i * 2 + 0, oldPenalty[j * 2 + 0]);
                 setPenalty(i * 2 + 1, oldPenalty[j * 2 + 1]);
                 setLambda(i * 2 + 0, oldLambda[j * 2 + 0]);

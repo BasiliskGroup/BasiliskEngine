@@ -75,6 +75,7 @@ void ForceTable::insert(Force* force) {
 
 void ForceTable::setForceType(std::size_t index, ForceType value) {
     SpecialParameters& sp = specialParameters[index];
+    forceTypes[index] = value;
 
     switch (forceTypes[index]) {
         case ForceType::MANIFOLD:

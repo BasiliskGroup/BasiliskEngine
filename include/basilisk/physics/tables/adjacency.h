@@ -12,10 +12,13 @@ enum class ForceBodyOffset { A, B };
 struct ColoredData {
     Rigid* body;
     std::size_t start;
-    std::size_t count;
+    std::size_t joint, manifold, spring, motor;
+
     float mass;
     float moment;
     glm::vec3 inertial;
+
+    std::size_t getCount() const { return joint + manifold + spring + motor; }
 };
 
 struct ForceEdgeIndices {

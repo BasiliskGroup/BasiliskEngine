@@ -79,7 +79,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     // Iterate over all forces acting on the body
     // Load currentAlpha once per body (it's constant during the stage)
     float alpha = currentAlpha.load(std::memory_order_acquire);
-    for (std::size_t i = data.start; i < data.start + data.count; ++i) {
+    for (std::size_t i = data.start; i < data.start + data.getCount(); ++i) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][i];
         const std::size_t& forceIndex = forceData.force;
         Force* force = forceTable->getForce(forceIndex);
@@ -116,7 +116,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     body->setPosition(pos);
 
     // update position in force table
-    for (std::size_t i = data.start; i < data.start + data.count; ++i) {
+    for (std::size_t i = data.start; i < data.start + data.getCount(); ++i) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][i];
         const std::size_t& forceIndex = forceData.force;
         Force* force = forceTable->getForce(forceIndex);

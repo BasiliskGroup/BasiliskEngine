@@ -60,6 +60,7 @@ public:
     glm::vec3& getPosB() const;
     glm::vec3& getInitialA() const;
     glm::vec3& getInitialB() const;
+    ForceType getForceType() const;
 
     glm::vec3& getJ(int index, Rigid* body) const;
     glm::mat3x3& getH(int index, Rigid* body) const;
@@ -74,7 +75,7 @@ public:
     float getFracture(int index) const;
     float getPenalty(int index) const;
     float getLambda(int index) const;
-    
+
     // Setters
     void setNext(Force* value) { next = value; }
     void setPrev(Force* value) { prev = value; }
@@ -87,6 +88,7 @@ public:
     void setPosB(const glm::vec3& value);
     void setInitialA(const glm::vec3& value);
     void setInitialB(const glm::vec3& value);
+    void setForceType(ForceType value);
 
     void setJ(int index, Rigid* body, const glm::vec3& value);
     void setH(int index, Rigid* body, const glm::mat3& value);
