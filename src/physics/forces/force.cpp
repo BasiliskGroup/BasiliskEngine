@@ -22,6 +22,7 @@ Force::Force(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     // Add to solver linked list
     solver->insert(this);
     solver->getForceTable()->insert(this);
+    solver->getForceTable()->setForceType(this->index, ForceType::NULL_FORCE);
 
     // Add to body linked lists
     if (bodyA) {

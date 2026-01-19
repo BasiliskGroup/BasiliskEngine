@@ -15,13 +15,18 @@
 
 namespace bsk::internal {
 
+// ------------------------------------------------------------
+// Table Struct
+// ------------------------------------------------------------
+struct SpringStruct {
+    glm::vec2 rA;
+    glm::vec2 rB;
+    float rest;
+};
+
 // Standard spring force
 class Spring : public Force
 {
-private:
-    glm::vec2 rA, rB;
-    float rest;
-
 public:
     Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, float stiffness, float rest = -1);
 
@@ -32,19 +37,22 @@ public:
     void computeDerivatives(Rigid* body) override;
     
     // Getters
-    glm::vec2 getRA() const { return rA; }
-    glm::vec2 getRB() const { return rB; }
-    float getRest() const { return rest; }
+    glm::vec2 getRA() const;
+    glm::vec2 getRB() const;
+    float getRest() const;
+    SpringStruct& getData();
+    const SpringStruct& getData() const;
     
     // Setters
-    void setRA(const glm::vec2& value) { rA = value; }
-    void setRB(const glm::vec2& value) { rB = value; }
-    void setRest(float value) { rest = value; }
-    
+    void setRA(const glm::vec2& value);
+    void setRB(const glm::vec2& value);
+    void setRest(float value);
+    void setData(const SpringStruct& value);
+
     // Mutable references
-    glm::vec2& getRARef() { return rA; }
-    glm::vec2& getRBRef() { return rB; }
-    float& getRestRef() { return rest; }
+    glm::vec2& getRARef();
+    glm::vec2& getRBRef();
+    float& getRestRef();
 };
 
 }

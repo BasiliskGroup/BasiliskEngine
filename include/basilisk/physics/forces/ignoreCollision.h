@@ -14,7 +14,7 @@
 #include <basilisk/physics/forces/force.h>
 
 namespace bsk::internal {
-
+    
 // Force which has no physical effect, but is used to ignore collisions between two bodies
 class IgnoreCollision : public Force
 {

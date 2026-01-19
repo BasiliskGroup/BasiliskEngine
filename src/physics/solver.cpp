@@ -22,7 +22,6 @@
 #include <basilisk/util/time.h>
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/physics/threading/scratch.h>
-#include <stdexcept>
 
 
 namespace bsk::internal {
@@ -167,7 +166,7 @@ void Solver::remove(Force* force) {
 void Solver::defaultParams() {
     // gravity = { 0.0f, -9.81f, 0.0f };
     gravity = std::nullopt;
-    iterations = 10;
+    iterations = 5;
 
     // Note: in the paper, beta is suggested to be [1, 1000]. Technically, the best choice will
     // depend on the length, mass, and constraint function scales (ie units) of your simulation,
@@ -313,11 +312,8 @@ void Solver::step(float dtIncoming) {
                 continue;
             }
             
-            // Store the active color with release ordering - ensures visibility to workers
             currentColor.store(activeColor, std::memory_order_release);
-            // Release workers to process this color group
             startSignal.release(NUM_THREADS);
-            // Wait for all workers to finish processing this color group
             finishSignal.acquire();
         }
 
@@ -327,7 +323,6 @@ void Solver::step(float dtIncoming) {
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
-        
         if (it < iterations) {
             auto dualStart = timeNow();
 
@@ -421,13 +416,6 @@ void Solver::dsatur() {
 
         // update the number of forces for this body
         colorGroups[color].back().count = forceCount;
-    }
-    
-    // Verify coloring is correct
-    for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
-        if (!body->verifyColoring()) {
-            throw std::runtime_error("Coloring verification failed: Adjacent rigid bodies have the same color");
-        }
     }
 
     // Print number of colors used

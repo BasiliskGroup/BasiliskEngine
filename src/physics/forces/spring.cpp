@@ -14,21 +14,26 @@
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/maths.h>
+#include <basilisk/physics/tables/forceTable.h>
 
 namespace bsk::internal {
 
 Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, float stiffness, float rest)
-    : Force(solver, bodyA, bodyB), rA(rA), rB(rB), rest(rest)
+    : Force(solver, bodyA, bodyB)
 {
+    setRA(rA);
+    setRB(rB);
+    setRest(rest);
     setStiffness(0, stiffness);
-    if (this->rest < 0)
-        this->rest = length(transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB));
+    if (getRest() < 0)
+        setRest(length(transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB())));
+    solver->getForceTable()->setForceType(this->index, ForceType::SPRING);
 }
 
 void Spring::computeConstraint(float alpha)
 {
     // Compute constraint function at current state C(x)
-    setC(0, length(transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB)) - rest);
+    setC(0, length(transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB())) - getRest());
 }
 
 void Spring::computeDerivatives(Rigid* body)
@@ -38,7 +43,7 @@ void Spring::computeDerivatives(Rigid* body)
     glm::mat2 S = glm::mat2(0, 1, -1, 0);  // [0 -1; 1 0] -> columns (0,1), (-1,0)
     glm::mat2 I = glm::mat2(1, 0, 0, 1);   // Identity: columns (1,0), (0,1)
 
-    glm::vec2 d = transform(bodyA->getPosition(), rA) - transform(bodyB->getPosition(), rB);
+    glm::vec2 d = transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB());
     float dlen2 = dot(d, d);
     if (dlen2 == 0)
         return;
@@ -49,8 +54,8 @@ void Spring::computeDerivatives(Rigid* body)
 
     if (body == bodyA)
     {
-        glm::vec2 Sr = rotate(bodyA->getPosition().z, S * rA);
-        glm::vec2 r = rotate(bodyA->getPosition().z, rA);
+        glm::vec2 Sr = rotate(bodyA->getPosition().z, S * getRA());
+        glm::vec2 r = rotate(bodyA->getPosition().z, getRA());
 
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
@@ -68,8 +73,8 @@ void Spring::computeDerivatives(Rigid* body)
     }
     else
     {
-        glm::vec2 Sr = rotate(bodyB->getPosition().z, S * rB);
-        glm::vec2 r = rotate(bodyB->getPosition().z, rB);
+        glm::vec2 Sr = rotate(bodyB->getPosition().z, S * getRB());
+        glm::vec2 r = rotate(bodyB->getPosition().z, getRB());
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 
@@ -83,5 +88,20 @@ void Spring::computeDerivatives(Rigid* body)
         ));
     }
 }
+
+// Getters
+SpringStruct& Spring::getData() { return solver->getForceTable()->getSprings(index); }
+const SpringStruct& Spring::getData() const { return solver->getForceTable()->getSprings(index); }
+glm::vec2 Spring::getRA() const { return getData().rA; }
+glm::vec2 Spring::getRB() const { return getData().rB; }
+float Spring::getRest() const { return getData().rest; }
+
+// Setters
+void Spring::setData(const SpringStruct& value) { getData() = value; }
+
+// Mutable references for direct access (for performance-critical code)
+glm::vec2& Spring::getRARef() { return getData().rA; }
+glm::vec2& Spring::getRBRef() { return getData().rB; }
+float& Spring::getRestRef() { return getData().rest; }
 
 }

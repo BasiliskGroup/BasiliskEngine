@@ -11,15 +11,18 @@
 
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/rigid.h>
-#include <basilisk/physics/solver.h>
+#include <basilisk/physics/solver.h>    
+#include <basilisk/physics/tables/forceTable.h>
 
 namespace bsk::internal {
 
 Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque)
-    : Force(solver, bodyA, bodyB), speed(speed)
+    : Force(solver, bodyA, bodyB)
 {
+    setSpeed(speed);
     setFmax(0, maxTorque);
     setFmin(0, -maxTorque);
+    solver->getForceTable()->setForceType(this->index, ForceType::MOTOR);
 }
 
 void Motor::computeConstraint(float alpha)
@@ -30,7 +33,7 @@ void Motor::computeConstraint(float alpha)
     float deltaAngle = dAngleA - dAngleB;
 
     // Constraint tries to reach desired angular speed
-    setC(0, deltaAngle - speed * solver->getDt());
+    setC(0, deltaAngle - getSpeed() * solver->getDt());
 }
 
 void Motor::computeDerivatives(Rigid* body)
@@ -47,5 +50,14 @@ void Motor::computeDerivatives(Rigid* body)
         setH(0, bodyB, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
+
+// Getters
+MotorStruct& Motor::getData() { return solver->getForceTable()->getMotors(index); }
+const MotorStruct& Motor::getData() const { return solver->getForceTable()->getMotors(index); }
+float Motor::getSpeed() const { return getData().speed; }
+
+// Setters
+void Motor::setData(const MotorStruct& value) { getData() = value; }
+void Motor::setSpeed(float value) { getData().speed = value; }
 
 }

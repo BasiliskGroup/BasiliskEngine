@@ -134,20 +134,22 @@ void Solver::dualStage(ThreadScratch& scratch, int threadID) {
 void Solver::dualUpdateSingle(Force* force) {
     // Compute constraint
     force->computeConstraint(currentAlpha.load(std::memory_order_acquire));
+    const std::size_t& forceIndex = force->getIndex();
 
-    for (int i = 0; i < force->rows(); i++)
-    {
+    for (int i = 0; i < force->rows(); i++) {
+        ParameterStruct& parameters = forceTable->getParameter(forceIndex, i);
+
         // Use lambda as 0 if it's not a hard constraint
-        float stiffness = force->getStiffness(i);
-        float lambda = glm::isinf(stiffness) ? force->getLambda(i) : 0.0f;
+        float stiffness = parameters.stiffness;
+        float lambda = glm::isinf(stiffness) ? parameters.lambda : 0.0f;
 
         // Update lambda (Eq 11)
-        float penalty = force->getPenalty(i);
-        float C = force->getC(i);
-        float fmin = force->getFmin(i);
-        float fmax = force->getFmax(i);
+        float penalty = parameters.penalty;
+        float C = parameters.C;
+        float fmin = parameters.fmin;
+        float fmax = parameters.fmax;
         float newLambda = glm::clamp(penalty * C + lambda, fmin, fmax);
-        force->setLambda(i, newLambda);
+        parameters.lambda = newLambda;
 
         // Disable the force if it has exceeded its fracture threshold
         float fracture = force->getFracture(i);
@@ -157,7 +159,7 @@ void Solver::dualUpdateSingle(Force* force) {
         // Update the penalty parameter and clamp to material stiffness if we are within the force bounds (Eq. 16)
         if (newLambda > fmin && newLambda < fmax) {
             float newPenalty = glm::min(penalty + beta * glm::abs(C), glm::min(PENALTY_MAX, stiffness));
-            force->setPenalty(i, newPenalty);
+            parameters.penalty = newPenalty;
         }
     }
 }

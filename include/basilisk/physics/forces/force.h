@@ -14,11 +14,9 @@
 #include <basilisk/util/includes.h>
 
 namespace bsk::internal {
-    class Solver;
-    class Rigid;
-}
 
-namespace bsk::internal {
+class Solver;
+class Rigid;
 
 // Holds all user defined and derived constraint parameters, and provides a common interface for all forces.
 class Force

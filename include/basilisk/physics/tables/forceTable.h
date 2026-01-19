@@ -5,10 +5,19 @@
 #include <basilisk/physics/tables/virtualTable.h>
 #include <basilisk/util/constants.h>
 
+#include <basilisk/physics/forces/ignoreCollision.h>
+#include <basilisk/physics/forces/joint.h>
+#include <basilisk/physics/forces/manifold.h>
+#include <basilisk/physics/forces/motor.h>
+#include <basilisk/physics/forces/spring.h>
+
 namespace bsk::internal {
 
 using ::bsk::internal::MAX_ROWS;
 
+// ------------------------------------------------------------
+// Force Structs
+// ------------------------------------------------------------
 struct ParameterStruct {
     float C;
     float fmin;
@@ -24,11 +33,26 @@ struct DerivativeStruct {
     glm::mat3x3 H;
 };
 
+union SpecialParameters {
+    ManifoldData manifold;
+    JointStruct joint;
+    SpringStruct spring;
+    MotorStruct motor;
+
+    SpecialParameters() : manifold() {}
+};
+
+// ------------------------------------------------------------
+// Force Table Types
+// ------------------------------------------------------------
 using Derivatives = std::array<DerivativeStruct, MAX_ROWS>;
 using Parameters = std::array<ParameterStruct, MAX_ROWS>;
 
 class Force;
 
+// ------------------------------------------------------------
+// Force Table Class
+// ------------------------------------------------------------
 class ForceTable : public VirtualTable {
 private:
     // compute variables
@@ -37,6 +61,8 @@ private:
     std::vector<Parameters> parameters;
     std::vector<Derivatives> derivativesA;
     std::vector<Derivatives> derivativesB;
+    std::vector<ForceType> forceTypes;
+    std::vector<SpecialParameters> specialParameters;
 
     // structure variables
     std::vector<int> rows;
@@ -54,6 +80,7 @@ public:
     Force* getForce(std::size_t index) { return forces[index]; }
     bool getToDelete(std::size_t index) { return toDelete[index]; }
     int getRows(std::size_t index) { return rows[index]; }
+    ForceType getForceType(std::size_t index) { return forceTypes[index]; }
 
     // index specific
     glm::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
@@ -77,10 +104,17 @@ public:
     Derivatives& getDerivativesA(std::size_t forceIndex) { return derivativesA[forceIndex]; }
     Derivatives& getDerivativesB(std::size_t forceIndex) { return derivativesB[forceIndex]; }
 
+    SpecialParameters& getSpecialParameters(std::size_t forceIndex) { return specialParameters[forceIndex]; }
+    ManifoldData& getManifolds(std::size_t forceIndex) { return specialParameters[forceIndex].manifold; }
+    JointStruct& getJoints(std::size_t forceIndex) { return specialParameters[forceIndex].joint; }
+    SpringStruct& getSprings(std::size_t forceIndex) { return specialParameters[forceIndex].spring; }
+    MotorStruct& getMotors(std::size_t forceIndex) { return specialParameters[forceIndex].motor; }
+
     // setters
     void setForces(std::size_t index, Force* value) { forces[index] = value; }
     void setToDelete(std::size_t index, bool value) { toDelete[index] = value; }
     void setRows(std::size_t index, int value) { rows[index] = value; }
+    void setForceType(std::size_t index, ForceType value);
 
     // index specific
     void setJA(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesA[forceIndex][row].J = value; }
@@ -103,6 +137,12 @@ public:
     void setParameters(std::size_t forceIndex, const Parameters& value) { parameters[forceIndex] = value; }
     void setDerivativesA(std::size_t forceIndex, const Derivatives& value) { derivativesA[forceIndex] = value; }
     void setDerivativesB(std::size_t forceIndex, const Derivatives& value) { derivativesB[forceIndex] = value; }
+
+    void setSpecialParameters(std::size_t forceIndex, const SpecialParameters& value) { specialParameters[forceIndex] = value; }
+    void setManifolds(std::size_t forceIndex, const ManifoldData& value) { specialParameters[forceIndex].manifold = value; }
+    void setJoints(std::size_t forceIndex, const JointStruct& value) { specialParameters[forceIndex].joint = value; }
+    void setSprings(std::size_t forceIndex, const SpringStruct& value) { specialParameters[forceIndex].spring = value; }
+    void setMotors(std::size_t forceIndex, const MotorStruct& value) { specialParameters[forceIndex].motor = value; }
 };
 
 }

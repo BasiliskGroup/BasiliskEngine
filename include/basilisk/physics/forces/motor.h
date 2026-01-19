@@ -15,12 +15,15 @@
 
 namespace bsk::internal {
 
-// Motor force which applies a torque to two rigid bodies to achieve a desired angular speed
-class Motor : public Force
-{
-private:
-    float speed;
+// ------------------------------------------------------------
+// Table Struct
+// ------------------------------------------------------------
+struct MotorStruct {
+    float speed = 0.0f;
+};
 
+// Motor force which applies a torque to two rigid bodies to achieve a desired angular speed
+class Motor : public Force {
 public:
     Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque);
 
@@ -31,10 +34,13 @@ public:
     void computeDerivatives(Rigid* body) override;
     
     // Getters
-    float getSpeed() const { return speed; }
+    float getSpeed() const;
+    MotorStruct& getData();
+    const MotorStruct& getData() const;
     
     // Setters
-    void setSpeed(float value) { speed = value; }
+    void setSpeed(float value);
+    void setData(const MotorStruct& value);
 };
 
 }

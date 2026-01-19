@@ -20,7 +20,7 @@ void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        forces, toDelete, parameters, derivativesA, derivativesB, rows
+        forces, toDelete, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows
     );
 
     capacity = newCapacity;
@@ -34,7 +34,7 @@ void ForceTable::compact() {
     }
 
     compactTensors(toDelete, size,
-        forces, parameters, derivativesA, derivativesB, rows
+        forces, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows
     );
 
     size = active;
@@ -71,6 +71,31 @@ void ForceTable::insert(Force* force) {
 
     force->setIndex(size);
     size++;
+}
+
+void ForceTable::setForceType(std::size_t index, ForceType value) {
+    SpecialParameters& sp = specialParameters[index];
+
+    switch (forceTypes[index]) {
+        case ForceType::MANIFOLD:
+            new (&sp.manifold) ManifoldData();
+            break;
+
+        case ForceType::JOINT:
+            new (&sp.joint) JointStruct();
+            break;
+
+        case ForceType::SPRING:
+            new (&sp.spring) SpringStruct();
+            break;
+
+        case ForceType::MOTOR:
+            new (&sp.motor) MotorStruct();
+            break;
+
+        default:
+            break;
+    }
 }
 
 }

@@ -15,43 +15,42 @@
 
 namespace bsk::internal {
 
-// Collision manifold between two rigid bodies, which contains up to two frictional contact points
-class Manifold : public Force
-{
-public:
-    // Used to track contact features between frames
-    union FeaturePair
-    {
-        struct Edges
-        {
-            char inEdge1;
-            char outEdge1;
-            char inEdge2;
-            char outEdge2;
-        } e;
-        int value;
-    };
+// ------------------------------------------------------------
+// Table Struct
+// ------------------------------------------------------------
+// Used to track contact features between frames
+union FeaturePair {
+    struct Edges {
+        char inEdge1;
+        char outEdge1;
+        char inEdge2;
+        char outEdge2;
+    } e;
+    int value;
+};
 
-    // Contact point information for a single contact
-    struct Contact
-    {
-        FeaturePair feature;
-        glm::vec2 rA;
-        glm::vec2 rB;
-        glm::vec2 normal;
-        glm::vec2 C0;
-        bool stick;
-    };
+// Contact point information for a single contact
+struct Contact {
+    FeaturePair feature;
+    glm::vec2 rA;
+    glm::vec2 rB;
+    glm::vec2 normal;
+    glm::vec2 C0;
+    bool stick;
+};
 
-private:
+struct ManifoldData {
     Contact contacts[2];
-    int numContacts;
-    float friction;
+    int numContacts = 0;
+    float friction = 0.5f;
+};
 
+// Collision manifold between two rigid bodies, which contains up to two frictional contact points
+class Manifold : public Force {
 public:
     Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB);
 
-    int rows() const override { return numContacts * 2; }
+    int rows() const override;
 
     bool initialize() override;
     void computeConstraint(float alpha) override;
@@ -60,14 +59,17 @@ public:
     static int collide(Rigid* bodyA, Rigid* bodyB, Contact* contacts);
     
     // Getters
-    const Contact& getContact(int index) const { return contacts[index]; }
-    Contact& getContactRef(int index) { return contacts[index]; }
-    int getNumContacts() const { return numContacts; }
-    float getFriction() const { return friction; }
+    const Contact& getContact(int index) const;
+    Contact& getContactRef(int index);
+    int getNumContacts() const;
+    float getFriction() const;
+    ManifoldData& getData();
+    const ManifoldData& getData() const;
     
     // Setters
-    void setNumContacts(int value) { numContacts = value; }
-    void setFriction(float value) { friction = value; }
+    void setNumContacts(int value);
+    void setFriction(float value);
+    void setData(const ManifoldData& value);
 };
 
 }
