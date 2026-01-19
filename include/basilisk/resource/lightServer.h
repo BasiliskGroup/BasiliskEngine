@@ -2,6 +2,7 @@
 #define BSK_LIGHT_SERVER_H
 
 #include <basilisk/util/includes.h>
+#include <basilisk/camera/staticCamera.h>
 #include <basilisk/light/light.h>
 #include <basilisk/light/ambientLight.h>
 #include <basilisk/light/directionalLight.h>
@@ -10,9 +11,11 @@
 #include <basilisk/render/ubo.h>
 
 #define MAX_DIRECTIONAL_LIGHTS 5
-#define MAX_POINT_LIGHTS 50
+#define MAX_POINT_LIGHTS 10
 
 namespace bsk::internal {
+
+class Node;  // Forward declaration to avoid circular dependency
 
 class LightServer {
 
@@ -34,8 +37,9 @@ class LightServer {
         void add(PointLight* light);
         void add(AmbientLight* light);
 
-        void refresh();
+        void update(StaticCamera* camera, Shader* shader, std::string name = "lights", unsigned int slot = 6);
         void bind(Shader* shader, std::string name = "lights", unsigned int slot = 0);
+        void perObjectWrite(Node* node, Shader* shader, std::string name = "lights", unsigned int slot = 6);
 };
 
 }

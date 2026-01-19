@@ -41,8 +41,7 @@ Scene::~Scene() {
 void Scene::update() {
     camera->update();
     camera->use(shader);
-    lightServer->refresh();
-    lightServer->bind(shader, "lights", 2);
+    lightServer->update(camera, shader);
 }
 
 /**
@@ -57,6 +56,7 @@ void Scene::render() {
     shader->use();
     for (auto it = ++root->begin(); it != root->end(); ++it) {
         Node* node = *it;
+        lightServer->perObjectWrite(node, shader, "lights", 6);
         node->render();
     }
 }

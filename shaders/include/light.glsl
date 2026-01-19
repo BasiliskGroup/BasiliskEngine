@@ -1,5 +1,5 @@
 #define MAX_DIRECTIONAL_LIGHTS 5
-#define MAX_POINT_LIGHTS 50
+#define MAX_POINT_LIGHTS 10
 
 uniform int uDirectionalLightCount;
 uniform int uPointLightCount;

@@ -18,9 +18,9 @@ out vec3 normal;
 flat out Material material;
 
 void main() {
-    position = vPosition;
+    position = (uModel * vec4(vPosition, 1.0)).xyz;
     uv = vUV;
-    normal = vNormal;
+    normal = (uModel * vec4(vNormal, 0.0)).xyz;
     material = getMaterial(uMaterialID);
 
     gl_Position = uProjection * uView * uModel * vec4(vPosition, 1.0);
