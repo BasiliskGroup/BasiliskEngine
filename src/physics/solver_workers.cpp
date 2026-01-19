@@ -72,11 +72,9 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
         return;
 
     // Initialize left and right hand sides of the linear system (Eqs. 5, 6)
-    float mass = body->getMass();
-    float moment = body->getMoment();
-    scratch.lhs = diagonal(mass, mass, moment) / (dt * dt);
+    scratch.lhs = diagonal(data.mass, data.mass, data.moment) / (dt * dt);
     glm::vec3 pos = body->getPosition();
-    scratch.rhs = scratch.lhs * (pos - body->getInertial());
+    scratch.rhs = scratch.lhs * (pos - data.inertial);
 
     // Iterate over all forces acting on the body
     // Load currentAlpha once per body (it's constant during the stage)
@@ -116,6 +114,19 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     // Solve the SPD linear system using LDL and apply the update (Eq. 4)
     pos -= solve(scratch.lhs, scratch.rhs);
     body->setPosition(pos);
+
+    // update position in force table
+    for (std::size_t i = data.start; i < data.start + data.count; ++i) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][i];
+        const std::size_t& forceIndex = forceData.force;
+        Force* force = forceTable->getForce(forceIndex);
+
+        if (force->getBodyA() == body) {
+            forceTable->getPositional(forceIndex).posA = pos;
+        } else {
+            forceTable->getPositional(forceIndex).posB = pos;
+        }
+    }
 }
 
 // ------------------------------------------------------------

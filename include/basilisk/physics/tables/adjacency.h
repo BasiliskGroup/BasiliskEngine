@@ -13,6 +13,9 @@ struct ColoredData {
     Rigid* body;
     std::size_t start;
     std::size_t count;
+    float mass;
+    float moment;
+    glm::vec3 inertial;
 };
 
 struct ForceEdgeIndices {

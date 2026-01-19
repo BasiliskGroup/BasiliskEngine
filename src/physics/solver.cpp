@@ -285,6 +285,17 @@ void Solver::step(float dtIncoming) {
     auto coloringEnd = timeNow();
     printDurationUS(coloringStart, coloringEnd, "Coloring: ");
 
+    // Load initial positions into forces
+    auto loadPositionalStart = timeNow();
+    for (Force* force = forces; force != nullptr; force = force->getNext()) {
+        if (force->getBodyA()) forceTable->getPositional(force->getIndex()).posA = force->getBodyA()->getPosition();
+        if (force->getBodyB()) forceTable->getPositional(force->getIndex()).posB = force->getBodyB()->getPosition();
+        if (force->getBodyA()) forceTable->getPositional(force->getIndex()).initialA = force->getBodyA()->getInitial();
+        if (force->getBodyB()) forceTable->getPositional(force->getIndex()).initialB = force->getBodyB()->getInitial();
+    }
+    auto loadPositionalEnd = timeNow();
+    printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
+
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
     int totalIterations = iterations + (postStabilize ? 1 : 0);
@@ -391,7 +402,7 @@ void Solver::dsatur() {
         forceEdgeIndices.resize(color + 1);
 
         // add body to color group
-        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0);
+        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, body->getMass(), body->getMoment(), body->getInertial());
         std::size_t forceCount = 0;
 
         // update uncolored bodies connected to this body

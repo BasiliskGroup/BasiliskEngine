@@ -42,6 +42,13 @@ union SpecialParameters {
     SpecialParameters() : manifold() {}
 };
 
+struct Positional {
+    glm::vec3 posA = glm::vec3(0.0f);
+    glm::vec3 posB = glm::vec3(0.0f);
+    glm::vec3 initialA = glm::vec3(0.0f);
+    glm::vec3 initialB = glm::vec3(0.0f);
+};
+
 // ------------------------------------------------------------
 // Force Table Types
 // ------------------------------------------------------------
@@ -63,6 +70,7 @@ private:
     std::vector<Derivatives> derivativesB;
     std::vector<ForceType> forceTypes;
     std::vector<SpecialParameters> specialParameters;
+    std::vector<Positional> positional;
 
     // structure variables
     std::vector<int> rows;
@@ -81,6 +89,7 @@ public:
     bool getToDelete(std::size_t index) { return toDelete[index]; }
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
+    Positional& getPositional(std::size_t index) { return positional[index]; }
 
     // index specific
     glm::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
@@ -115,7 +124,8 @@ public:
     void setToDelete(std::size_t index, bool value) { toDelete[index] = value; }
     void setRows(std::size_t index, int value) { rows[index] = value; }
     void setForceType(std::size_t index, ForceType value);
-
+    void setPositional(std::size_t index, const Positional& value) { positional[index] = value; }
+    
     // index specific
     void setJA(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesA[forceIndex][row].J = value; }
     void setJB(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesB[forceIndex][row].J = value; }
