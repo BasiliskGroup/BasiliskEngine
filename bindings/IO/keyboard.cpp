@@ -7,7 +7,7 @@ using namespace bsk::internal;
 void bind_keyboard(py::module_& m) {
     py::class_<Keyboard>(m, "Keyboard")
         .def("update", &Keyboard::update)
-        .def("getDown", &Keyboard::getDown, py::arg("keyCode"))
-        .def("getPressed", &Keyboard::getPressed, py::arg("keyCode"))
-        .def("getReleased", &Keyboard::getReleased, py::arg("keyCode"));
+        .def("get_down", &Keyboard::getDown, py::arg("keyCode"))
+        .def("get_pressed", &Keyboard::getPressed, py::arg("keyCode"))
+        .def("get_released", &Keyboard::getReleased, py::arg("keyCode"));
 }

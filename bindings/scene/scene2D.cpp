@@ -9,7 +9,7 @@ void bind_scene2d(py::module_& m) {
         .def(py::init<bsk::internal::Engine*>(), py::arg("engine"))
         .def("update", &bsk::internal::Scene2D::update)
         .def("render", &bsk::internal::Scene2D::render)
-        .def("setCamera", &bsk::internal::Scene2D::setCamera, py::arg("camera"))
-        .def("getShader", &bsk::internal::Scene2D::getShader)
-        .def("getCamera", &bsk::internal::Scene2D::getCamera);
+        .def("set_camera", &bsk::internal::Scene2D::setCamera, py::arg("camera"))
+        .def("get_shader", &bsk::internal::Scene2D::getShader)
+        .def("get_camera", &bsk::internal::Scene2D::getCamera);
 }

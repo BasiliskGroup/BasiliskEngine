@@ -11,5 +11,5 @@ void bind_cubemap(py::module_& m) {
         .def(py::init<const std::vector<std::string>&>(), py::arg("faces"))
         .def("bind", &Cubemap::bind)
         .def("unbind", &Cubemap::unbind)
-        .def("getID", &Cubemap::getID);
+        .def("get_id", &Cubemap::getID);
 }

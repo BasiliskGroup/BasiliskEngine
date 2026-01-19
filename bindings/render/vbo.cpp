@@ -18,5 +18,5 @@ void bind_vbo(py::module_& m) {
         }), py::arg("data"), py::arg("drawType") = GL_STATIC_DRAW)
         .def("bind", &VBO::bind)
         .def("unbind", &VBO::unbind)
-        .def("getSize", &VBO::getSize);
+        .def("get_size", &VBO::getSize);
 }

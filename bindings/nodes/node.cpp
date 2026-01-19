@@ -50,7 +50,7 @@ void bind_node(py::module_& m) {
         .def(py::init<Scene*, Node*>(), py::arg("scene"), py::arg("parent"))
 
         // Setters (casters apply automatically)
-        .def("setPosition", &Node::setPosition, py::arg("position"))
-        .def("setRotation", &Node::setRotation, py::arg("rotation"))
-        .def("setScale", &Node::setScale, py::arg("scale"));
+        .def("set_position", &Node::setPosition, py::arg("position"))
+        .def("set_rotation", &Node::setRotation, py::arg("rotation"))
+        .def("set_scale", &Node::setScale, py::arg("scale"));
 }

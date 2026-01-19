@@ -12,6 +12,6 @@ void bind_ubo(py::module_& m) {
         }), py::arg("data"), py::arg("drawType") = GL_STATIC_DRAW)
         .def("bind", &UBO::bind)
         .def("unbind", &UBO::unbind)
-        .def("getSize", &UBO::getSize)
+        .def("get_size", &UBO::getSize)
         .def("write", static_cast<void (UBO::*)(const void*, unsigned int, unsigned int)>(&UBO::write), py::arg("data"), py::arg("size"), py::arg("offset"));
 }

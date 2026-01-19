@@ -10,9 +10,9 @@ void bind_fbo(py::module_& m) {
         .def("bind", &FBO::bind)
         .def("unbind", &FBO::unbind)
         .def("clear", &FBO::clear, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
-        .def("getID", &FBO::getID)
-        .def("getTextureID", &FBO::getTextureID)
-        .def("getDepthID", &FBO::getDepthID)
-        .def("getWidth", &FBO::getWidth)
-        .def("getHeight", &FBO::getHeight);
+        .def("get_id", &FBO::getID)
+        .def("get_texture_id", &FBO::getTextureID)
+        .def("get_depth_id", &FBO::getDepthID)
+        .def("get_width", &FBO::getWidth)
+        .def("get_height", &FBO::getHeight);
 }
