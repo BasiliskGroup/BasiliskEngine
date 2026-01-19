@@ -9,6 +9,7 @@ void bind_scene(py::module_& m) {
         .def("update", &bsk::internal::Scene::update)
         .def("render", &bsk::internal::Scene::render)
         .def("setCamera", &bsk::internal::Scene::setCamera, py::arg("camera"))
+        .def("setSkybox", &bsk::internal::Scene::setSkybox, py::arg("skybox"))
         .def("getShader", &bsk::internal::Scene::getShader)
         .def("getCamera", &bsk::internal::Scene::getCamera)
         .def("add", &bsk::internal::Scene::add, py::arg("light"));

@@ -28,7 +28,6 @@ class Skybox {
         ~Skybox();
 
         void render(StaticCamera* camera);
-        void use();
 
         inline Cubemap* getCubemap() { return cubemap; }
         inline Shader* getShader() { return shader; }

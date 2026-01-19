@@ -13,6 +13,7 @@ void bind_shader(py::module_& m) {
         .def("bind", py::overload_cast<const char*, TextureArray*, unsigned int>(&Shader::bind), py::arg("name"), py::arg("textureArray"), py::arg("slot"))
         .def("bind", py::overload_cast<const char*, TBO*, unsigned int>(&Shader::bind), py::arg("name"), py::arg("tbo"), py::arg("slot"))
         .def("bind", py::overload_cast<const char*, FBO*, unsigned int>(&Shader::bind), py::arg("name"), py::arg("fbo"), py::arg("slot"))
+        .def("bind", py::overload_cast<const char*, Cubemap*, unsigned int>(&Shader::bind), py::arg("name"), py::arg("cubemap"), py::arg("slot"))
         .def("getUniformLocation", &Shader::getUniformLocation, py::arg("name"))
         .def("getStride", &Shader::getStride)
         .def("getAttributes", &Shader::getAttributes)

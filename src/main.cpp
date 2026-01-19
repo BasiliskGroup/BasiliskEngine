@@ -43,7 +43,7 @@ int main() {
         engine->update();
         scene->update();
         scene->render();
-        engine->render();   
+        engine->render();
     }
 
     // Free memory allocations
@@ -54,38 +54,3 @@ int main() {
     delete scene;
     delete engine;
 }
-
-// int main() {
-//     // Make a Basilisk Engine instance 
-//     bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk");
-
-//     // Load assets from file
-//     bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
-
-//     // Create sample object
-//     bsk::VBO* vbo = new bsk::VBO(quad->getVertices());
-//     bsk::EBO* ebo = new bsk::EBO(quad->getIndices());
-//     bsk::Shader* shader = new bsk::Shader("shaders/test.vert", "shaders/test.frag");
-//     bsk::VAO* vao = new bsk::VAO(shader, vbo, ebo);
-
-//     // Create a UBO
-//     std::vector<float> colors {1.0f, 0.2f, 0.2f, 1.0f, 0.2f, 1.0f, 0.2f, 1.0f};
-//     bsk::UBO* ubo = new bsk::UBO(colors);
-//     shader->bind("testBlock", ubo, 2);
-    
-//     // Main loop continues as long as the window is open
-//     while (engine->isRunning()) {
-//         engine->update();
-//         vao->render();
-//         engine->render();
-//     }
-
-//     // Free memory allocations
-//     delete vbo;
-//     delete ebo;
-//     delete ubo;
-//     delete quad;
-//     delete shader;
-//     delete vao;
-//     delete engine;
-// }

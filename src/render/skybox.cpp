@@ -58,8 +58,6 @@ Skybox::Skybox(Cubemap* cubemap, bool ownsCubemap): cubemap(cubemap), ownsCubema
 
     vbo = new VBO(skyboxVertices, sizeof(skyboxVertices));
     vao = new VAO(shader, vbo);
-    // Use the skybox
-    use();
 }
 
 Skybox::~Skybox() {
@@ -69,10 +67,6 @@ Skybox::~Skybox() {
     delete shader;
     delete vbo;
     delete vao;
-}
-
-void Skybox::use() {
-    shader->bind("skybox", cubemap, 6);
 }
 
 void Skybox::render(StaticCamera* camera) {

@@ -20,6 +20,8 @@ void bind_vao(py::module_&);
 void bind_fbo(py::module_&);
 void bind_ubo(py::module_&);
 void bind_frame(py::module_&);
+void bind_cubemap(py::module_&);
+void bind_skybox(py::module_&);
 void bind_material(py::module_&);
 void bind_light(py::module_&);
 void bind_ambientLight(py::module_&);
@@ -65,6 +67,8 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     bind_fbo(m);
     bind_frame(m);
     bind_ubo(m);
+    bind_cubemap(m);
+    bind_skybox(m);
     
     // Light bindings
     bind_light(m);
