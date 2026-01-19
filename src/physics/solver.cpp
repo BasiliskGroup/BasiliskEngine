@@ -327,27 +327,23 @@ void Solver::step(float dtIncoming) {
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
-        auto dualStart = timeNow();
-        if (it < iterations)
-        {
-            for (Force* force = forces; force != nullptr; force = force->getNext())
-            {
-                dualUpdateSingle(force);
-            }
-        }
-        auto dualEnd = timeNow();
+        
         if (it < iterations) {
+            auto dualStart = timeNow();
+
+            currentStage.store(Stage::STAGE_DUAL, std::memory_order_release);
+            startSignal.release(NUM_THREADS);
+            finishSignal.acquire();
+
+            auto dualEnd = timeNow();
             printDurationUS(dualStart, dualEnd, "  Dual Update: ");
         }
 
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
-        auto velocityStart = timeNow();
-        if (it == iterations - 1)
-        {
-            bodyTable->updateVelocities(dt);
-        }
-        auto velocityEnd = timeNow();
         if (it == iterations - 1) {
+            auto velocityStart = timeNow();
+            bodyTable->updateVelocities(dt);
+            auto velocityEnd = timeNow();
             printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
         }
     }
