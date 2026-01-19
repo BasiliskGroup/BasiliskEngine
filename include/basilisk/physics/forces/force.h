@@ -69,17 +69,6 @@ public:
     float getFracture(int index) const;
     float getPenalty(int index) const;
     float getLambda(int index) const;
-
-    // full row
-    std::array<glm::vec3, MAX_ROWS>& getJ(Rigid* body) const;
-    std::array<glm::mat3x3, MAX_ROWS>& getH(Rigid* body) const;
-    std::array<float, MAX_ROWS>& getC() const;
-    std::array<float, MAX_ROWS>& getFmin() const;
-    std::array<float, MAX_ROWS>& getFmax() const;
-    std::array<float, MAX_ROWS>& getStiffness() const;
-    std::array<float, MAX_ROWS>& getFracture() const;
-    std::array<float, MAX_ROWS>& getPenalty() const;
-    std::array<float, MAX_ROWS>& getLambda() const;
     
     // Setters
     void setNext(Force* value) { next = value; }
@@ -100,17 +89,6 @@ public:
     void setFracture(int index, float value);
     void setPenalty(int index, float value);
     void setLambda(int index, float value);
-
-    // full row
-    void setJ(Rigid* body, const std::array<glm::vec3, MAX_ROWS>& value);
-    void setH(Rigid* body, const std::array<glm::mat3x3, MAX_ROWS>& value);
-    void setC(const std::array<float, MAX_ROWS>& value);
-    void setFmin(const std::array<float, MAX_ROWS>& value);
-    void setFmax(const std::array<float, MAX_ROWS>& value);
-    void setStiffness(const std::array<float, MAX_ROWS>& value);
-    void setFracture(const std::array<float, MAX_ROWS>& value);
-    void setPenalty(const std::array<float, MAX_ROWS>& value);
-    void setLambda(const std::array<float, MAX_ROWS>& value);
 };
 
 }

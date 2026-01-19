@@ -57,9 +57,12 @@ Force::~Force() {
 void Force::disable() {
     // Disable this force by clearing the relavent fields
     static const std::array<float, MAX_ROWS> zeros = { 0 }; // zero initialized array
-    setStiffness(zeros);
-    setPenalty(zeros);
-    setLambda(zeros);
+
+    for (int i = 0; i < MAX_ROWS; i++) {
+        setStiffness(i, 0.0f);
+        setPenalty(i, 0.0f);
+        setLambda(i, 0.0f);
+    }
 }
 
 // getters
@@ -83,27 +86,6 @@ float Force::getFracture(int index) const { return solver->getForceTable()->getF
 float Force::getPenalty(int index) const { return solver->getForceTable()->getPenalty(this->index, index); }
 float Force::getLambda(int index) const { return solver->getForceTable()->getLambda(this->index, index); }
 
-// full row
-std::array<glm::vec3, MAX_ROWS>& Force::getJ(Rigid* body) const { 
-    return (body == bodyA) ? 
-    solver->getForceTable()->getJA(this->index) : 
-    solver->getForceTable()->getJB(this->index); 
-}
-
-std::array<glm::mat3x3, MAX_ROWS>& Force::getH(Rigid* body) const { 
-    return (body == bodyA) ? 
-    solver->getForceTable()->getHA(this->index) : 
-    solver->getForceTable()->getHB(this->index); 
-}
-
-std::array<float, MAX_ROWS>& Force::getC() const { return solver->getForceTable()->getC(this->index); }
-std::array<float, MAX_ROWS>& Force::getFmin() const { return solver->getForceTable()->getFmin(this->index); }
-std::array<float, MAX_ROWS>& Force::getFmax() const { return solver->getForceTable()->getFmax(this->index); }
-std::array<float, MAX_ROWS>& Force::getStiffness() const { return solver->getForceTable()->getStiffness(this->index); }
-std::array<float, MAX_ROWS>& Force::getFracture() const { return solver->getForceTable()->getFracture(this->index); }
-std::array<float, MAX_ROWS>& Force::getPenalty() const { return solver->getForceTable()->getPenalty(this->index); }
-std::array<float, MAX_ROWS>& Force::getLambda() const { return solver->getForceTable()->getLambda(this->index); }
-
 // setters
 void Force::setJ(int index, Rigid* body, const glm::vec3& value) { 
     if (body == bodyA) { solver->getForceTable()->setJA(this->index, index, value); } 
@@ -123,23 +105,4 @@ void Force::setStiffness(int index, float value) { solver->getForceTable()->setS
 void Force::setFracture(int index, float value) { solver->getForceTable()->setFracture(this->index, index, value); }
 void Force::setPenalty(int index, float value) { solver->getForceTable()->setPenalty(this->index, index, value); }
 void Force::setLambda(int index, float value) { solver->getForceTable()->setLambda(this->index, index, value); }
-
-// full row
-void Force::setJ(Rigid* body, const std::array<glm::vec3, MAX_ROWS>& value) { 
-    if (body == bodyA) { solver->getForceTable()->setJA(this->index, value); } 
-    else { solver->getForceTable()->setJB(this->index, value); } 
-}
-
-void Force::setH(Rigid* body, const std::array<glm::mat3x3, MAX_ROWS>& value) { 
-    if (body == bodyA) { solver->getForceTable()->setHA(this->index, value); } 
-    else { solver->getForceTable()->setHB(this->index, value); } 
-}
-
-void Force::setC(const std::array<float, MAX_ROWS>& value) { solver->getForceTable()->setC(this->index, value); }
-void Force::setFmin(const std::array<float, MAX_ROWS>& value) { solver->getForceTable()->setFmin(this->index, value); }
-void Force::setFmax(const std::array<float, MAX_ROWS>& value) { solver->getForceTable()->setFmax(this->index, value); }
-void Force::setStiffness(const std::array<float, MAX_ROWS>& value) { solver->getForceTable()->setStiffness(this->index, value); }
-void Force::setFracture(const std::array<float, MAX_ROWS>& value) { solver->getForceTable()->setFracture(this->index, value); }
-void Force::setPenalty(const std::array<float, MAX_ROWS>& value) { solver->getForceTable()->setPenalty(this->index, value); }
-void Force::setLambda(const std::array<float, MAX_ROWS>& value) { solver->getForceTable()->setLambda(this->index, value); }
 }

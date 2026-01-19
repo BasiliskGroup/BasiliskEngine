@@ -103,16 +103,16 @@ void Manifold::computeConstraint(float alpha) {
         glm::vec3 dpA = bodyA->getPosition() - bodyA->getInitial();
         glm::vec3 dpB = bodyB->getPosition() - bodyB->getInitial();
         
-        setC(i * 2 + 0, contacts[i].C0.x * (1 - alpha) + dot(getJ(i * 2 + JN, bodyA), dpA) + dot(getJ(i * 2 + JN, bodyB), dpB));
-        setC(i * 2 + 1, contacts[i].C0.y * (1 - alpha) + dot(getJ(i * 2 + JT, bodyA), dpA) + dot(getJ(i * 2 + JT, bodyB), dpB));
+        setC(i * 2 + JN, contacts[i].C0.x * (1 - alpha) + glm::dot(getJ(i * 2 + JN, bodyA), dpA) + glm::dot(getJ(i * 2 + JN, bodyB), dpB));
+        setC(i * 2 + JT, contacts[i].C0.y * (1 - alpha) + glm::dot(getJ(i * 2 + JT, bodyA), dpA) + glm::dot(getJ(i * 2 + JT, bodyB), dpB));
 
         // Update the friction bounds using the latest lambda values
-        float frictionBound = glm::abs(getLambda(i * 2 + 0)) * friction;
-        setFmax(i * 2 + 1, frictionBound);
-        setFmin(i * 2 + 1, -frictionBound);
+        float frictionBound = glm::abs(getLambda(i * 2 + JN)) * friction;
+        setFmax(i * 2 + JT, frictionBound);
+        setFmin(i * 2 + JT, -frictionBound);
 
         // Check if the contact is sticking, so that on the next frame we can use the old contact points for better static friction handling
-        contacts[i].stick = glm::abs(getLambda(i * 2 + 1)) < frictionBound && glm::abs(contacts[i].C0.y) < STICK_THRESH;
+        contacts[i].stick = glm::abs(getLambda(i * 2 + JT)) < frictionBound && glm::abs(contacts[i].C0.y) < STICK_THRESH;
     }
 }
 

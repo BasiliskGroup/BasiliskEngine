@@ -64,11 +64,8 @@ private:
 
     // Coloring
     ColorQueue colorQueue;
-    std::vector<std::vector<Rigid*>> colorGroups;
-
-    // Graph Condensation
-    std::vector<ForceRange> forceRanges;
-    std::vector<ForceEdgeIndices> forceEdgeIndices;
+    std::vector<std::vector<ColoredData>> colorGroups;
+    std::vector<std::vector<ForceEdgeIndices>> forceEdgeIndices;
 
     // Threading
     std::barrier<> stageBarrier;
@@ -126,15 +123,12 @@ public:
     void resetColoring();
     void dsatur();
 
-    // Graph Condensation
-    void buildCondensedGraph();
-
     // Threading
     void workerLoop(unsigned int threadID);
 
     // Stages
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
-    void primalUpdateSingle(PrimalScratch& scratch, Rigid* body);
+    void primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex);
     void dualStage(ThreadScratch& scratch, int threadID);
     void dualUpdateSingle(Force* force);
 

@@ -43,7 +43,6 @@ Solver::Solver() :
     currentColor(0),
     running(true),
     workers(),
-    forceRanges(),
     forceEdgeIndices()
 {
     this->colliderTable = new ColliderTable(64);
@@ -278,6 +277,7 @@ void Solver::step(float dtIncoming) {
     std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
     std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
     std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
+    std::cout << "Number of threads: " << NUM_THREADS << std::endl;
 
     // Coloring
     auto coloringStart = timeNow();
@@ -285,12 +285,6 @@ void Solver::step(float dtIncoming) {
     dsatur();
     auto coloringEnd = timeNow();
     printDurationUS(coloringStart, coloringEnd, "Coloring: ");
-
-    // Build condensed graph
-    auto buildCondensedGraphStart = timeNow();
-    buildCondensedGraph();
-    auto buildCondensedGraphEnd = timeNow();
-    printDurationUS(buildCondensedGraphStart, buildCondensedGraphEnd, "Build Condensed Graph: ");
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
@@ -375,6 +369,7 @@ void Solver::resetColoring() {
     ColorQueue empty;
     colorQueue.swap(empty);
     colorGroups.clear();
+    forceEdgeIndices.clear();
 }
 
 void Solver::dsatur() {
@@ -400,13 +395,21 @@ void Solver::dsatur() {
         body->setColor(color);
         body->useColor(color);
 
-        // add body to color group
+        // ensure we have enough colors
         colorGroups.resize(color + 1);
-        colorGroups[color].push_back(body);
+        forceEdgeIndices.resize(color + 1);
+
+        // add body to color group
+        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0);
+        std::size_t forceCount = 0;
 
         // update uncolored bodies connected to this body
         for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB()) {
             Rigid* other = (force->getBodyA() == body) ? force->getBodyB() : force->getBodyA();
+
+            // add force to force edge indices
+            forceEdgeIndices[color].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+            forceCount++;
 
             // Skip if already colored or has already used this color
             if (other == nullptr || other->isColored() || other->isColorUsed(color)) {
@@ -419,6 +422,9 @@ void Solver::dsatur() {
             other->incrSatur();
             colorSet.insert(other);
         }
+
+        // update the number of forces for this body
+        colorGroups[color].back().count = forceCount;
     }
     
     // Verify coloring is correct
@@ -445,31 +451,6 @@ Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {
             return body;
     }
     return nullptr;
-}
-
-void Solver::buildCondensedGraph() {
-    // reset condensed graph
-    forceRanges.clear();
-    forceEdgeIndices.clear();
-    
-    for (int activeColor = 0; activeColor < colorGroups.size(); activeColor++) {
-        // Skip empty color groups (shouldn't happen with proper dsatur, but be safe)
-        if (colorGroups[activeColor].empty()) {
-            continue;
-        }
-
-        for (Rigid* body : colorGroups[activeColor]) {
-            std::size_t start = forceEdgeIndices.size();
-            std::size_t count = 0;
-
-            for (Force* force = body->getForces(); force != nullptr; force = force->getNext()) {
-                forceEdgeIndices.emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
-                count++;
-            }
-
-            forceRanges.emplace_back(start, count);
-        }
-    }
 }
 
 }

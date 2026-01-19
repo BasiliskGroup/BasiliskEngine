@@ -5,9 +5,12 @@
 
 namespace bsk::internal {
 
+class Rigid;
+
 enum class ForceBodyOffset { A, B };
 
-struct ForceRange {
+struct ColoredData {
+    Rigid* body;
     std::size_t start;
     std::size_t count;
 };

@@ -9,6 +9,24 @@ namespace bsk::internal {
 
 using ::bsk::internal::MAX_ROWS;
 
+struct ParameterStruct {
+    float C;
+    float fmin;
+    float fmax;
+    float stiffness;
+    float fracture;
+    float penalty;
+    float lambda;
+};
+
+struct DerivativeStruct {
+    glm::vec3 J;
+    glm::mat3x3 H;
+};
+
+using Derivatives = std::array<DerivativeStruct, MAX_ROWS>;
+using Parameters = std::array<ParameterStruct, MAX_ROWS>;
+
 class Force;
 
 class ForceTable : public VirtualTable {
@@ -16,17 +34,9 @@ private:
     // compute variables
     std::vector<Force*> forces;
     std::vector<bool> toDelete;
-    std::vector<std::array<glm::vec3, MAX_ROWS>> JA;
-    std::vector<std::array<glm::vec3, MAX_ROWS>> JB;
-    std::vector<std::array<glm::mat3, MAX_ROWS>> HA;
-    std::vector<std::array<glm::mat3, MAX_ROWS>> HB;
-    std::vector<std::array<float, MAX_ROWS>> C;
-    std::vector<std::array<float, MAX_ROWS>> fmin;
-    std::vector<std::array<float, MAX_ROWS>> fmax;
-    std::vector<std::array<float, MAX_ROWS>> stiffness;
-    std::vector<std::array<float, MAX_ROWS>> fracture;
-    std::vector<std::array<float, MAX_ROWS>> penalty;
-    std::vector<std::array<float, MAX_ROWS>> lambda;
+    std::vector<Parameters> parameters;
+    std::vector<Derivatives> derivativesA;
+    std::vector<Derivatives> derivativesB;
 
     // structure variables
     std::vector<int> rows;
@@ -41,35 +51,31 @@ public:
     void insert(Force* force);
 
     // getters 
-    Force* getForces(std::size_t index) { return forces[index]; }
+    Force* getForce(std::size_t index) { return forces[index]; }
     bool getToDelete(std::size_t index) { return toDelete[index]; }
     int getRows(std::size_t index) { return rows[index]; }
 
     // index specific
-    glm::vec3& getJA(std::size_t forceIndex, int row) { return JA[forceIndex][row]; }
-    glm::vec3& getJB(std::size_t forceIndex, int row) { return JB[forceIndex][row]; }
-    glm::mat3& getHA(std::size_t forceIndex, int row) { return HA[forceIndex][row]; }
-    glm::mat3& getHB(std::size_t forceIndex, int row) { return HB[forceIndex][row]; }
-    float getC(std::size_t forceIndex, int row) { return C[forceIndex][row]; }
-    float getFmin(std::size_t forceIndex, int row) { return fmin[forceIndex][row]; }
-    float getFmax(std::size_t forceIndex, int row) { return fmax[forceIndex][row]; }
-    float getStiffness(std::size_t forceIndex, int row) { return stiffness[forceIndex][row]; }
-    float getFracture(std::size_t forceIndex, int row) { return fracture[forceIndex][row]; }
-    float getPenalty(std::size_t forceIndex, int row) { return penalty[forceIndex][row]; }
-    float getLambda(std::size_t forceIndex, int row) { return lambda[forceIndex][row]; }
+    glm::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
+    glm::vec3& getJB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].J; }
+    glm::mat3& getHA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].H; }
+    glm::mat3& getHB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].H; }
+    float getC(std::size_t forceIndex, int row) { return parameters[forceIndex][row].C; }
+    float getFmin(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fmin; }
+    float getFmax(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fmax; }
+    float getStiffness(std::size_t forceIndex, int row) { return parameters[forceIndex][row].stiffness; }
+    float getFracture(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fracture; }
+    float getPenalty(std::size_t forceIndex, int row) { return parameters[forceIndex][row].penalty; }
+    float getLambda(std::size_t forceIndex, int row) { return parameters[forceIndex][row].lambda; }
 
-    // getters full row
-    std::array<glm::vec3, MAX_ROWS>& getJA(std::size_t forceIndex) { return JA[forceIndex]; }
-    std::array<glm::vec3, MAX_ROWS>& getJB(std::size_t forceIndex) { return JB[forceIndex]; }
-    std::array<glm::mat3x3, MAX_ROWS>& getHA(std::size_t forceIndex) { return HA[forceIndex]; }
-    std::array<glm::mat3x3, MAX_ROWS>& getHB(std::size_t forceIndex) { return HB[forceIndex]; }
-    std::array<float, MAX_ROWS>& getC(std::size_t forceIndex) { return C[forceIndex]; }
-    std::array<float, MAX_ROWS>& getFmin(std::size_t forceIndex) { return fmin[forceIndex]; }
-    std::array<float, MAX_ROWS>& getFmax(std::size_t forceIndex) { return fmax[forceIndex]; }
-    std::array<float, MAX_ROWS>& getStiffness(std::size_t forceIndex) { return stiffness[forceIndex]; }
-    std::array<float, MAX_ROWS>& getFracture(std::size_t forceIndex) { return fracture[forceIndex]; }
-    std::array<float, MAX_ROWS>& getPenalty(std::size_t forceIndex) { return penalty[forceIndex]; }
-    std::array<float, MAX_ROWS>& getLambda(std::size_t forceIndex) { return lambda[forceIndex]; }
+    ParameterStruct& getParameter(std::size_t forceIndex, int row) { return parameters[forceIndex][row]; }
+    DerivativeStruct& getDerivativeA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row]; }
+    DerivativeStruct& getDerivativeB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row]; }
+
+    // full row
+    Parameters& getParameters(std::size_t forceIndex) { return parameters[forceIndex]; }
+    Derivatives& getDerivativesA(std::size_t forceIndex) { return derivativesA[forceIndex]; }
+    Derivatives& getDerivativesB(std::size_t forceIndex) { return derivativesB[forceIndex]; }
 
     // setters
     void setForces(std::size_t index, Force* value) { forces[index] = value; }
@@ -77,30 +83,26 @@ public:
     void setRows(std::size_t index, int value) { rows[index] = value; }
 
     // index specific
-    void setJA(std::size_t forceIndex, int row, const glm::vec3& value) { JA[forceIndex][row] = value; }
-    void setJB(std::size_t forceIndex, int row, const glm::vec3& value) { JB[forceIndex][row] = value; }
-    void setHA(std::size_t forceIndex, int row, const glm::mat3& value) { HA[forceIndex][row] = value; }
-    void setHB(std::size_t forceIndex, int row, const glm::mat3& value) { HB[forceIndex][row] = value; }
-    void setC(std::size_t forceIndex, int row, float value) { C[forceIndex][row] = value; }
-    void setFmin(std::size_t forceIndex, int row, float value) { fmin[forceIndex][row] = value; }
-    void setFmax(std::size_t forceIndex, int row, float value) { fmax[forceIndex][row] = value; }
-    void setStiffness(std::size_t forceIndex, int row, float value) { stiffness[forceIndex][row] = value; }
-    void setFracture(std::size_t forceIndex, int row, float value) { fracture[forceIndex][row] = value; }
-    void setPenalty(std::size_t forceIndex, int row, float value) { penalty[forceIndex][row] = value; }
-    void setLambda(std::size_t forceIndex, int row, float value) { lambda[forceIndex][row] = value; }
-    
+    void setJA(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesA[forceIndex][row].J = value; }
+    void setJB(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesB[forceIndex][row].J = value; }
+    void setHA(std::size_t forceIndex, int row, const glm::mat3& value) { derivativesA[forceIndex][row].H = value; }
+    void setHB(std::size_t forceIndex, int row, const glm::mat3& value) { derivativesB[forceIndex][row].H = value; }
+    void setC(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].C = value; }
+    void setFmin(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].fmin = value; }
+    void setFmax(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].fmax = value; }
+    void setStiffness(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].stiffness = value; }
+    void setFracture(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].fracture = value; }
+    void setPenalty(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].penalty = value; }
+    void setLambda(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].lambda = value; }
+
+    void setParameter(std::size_t forceIndex, int row, const ParameterStruct& value) { parameters[forceIndex][row] = value; }
+    void setDerivativeA(std::size_t forceIndex, int row, const DerivativeStruct& value) { derivativesA[forceIndex][row] = value; }
+    void setDerivativeB(std::size_t forceIndex, int row, const DerivativeStruct& value) { derivativesB[forceIndex][row] = value; }
+
     // full row
-    void setJA(std::size_t forceIndex, const std::array<glm::vec3, MAX_ROWS>& value) { JA[forceIndex] = value; }
-    void setJB(std::size_t forceIndex, const std::array<glm::vec3, MAX_ROWS>& value) { JB[forceIndex] = value; }
-    void setHA(std::size_t forceIndex, const std::array<glm::mat3x3, MAX_ROWS>& value) { HA[forceIndex] = value; }
-    void setHB(std::size_t forceIndex, const std::array<glm::mat3x3, MAX_ROWS>& value) { HB[forceIndex] = value; }
-    void setC(std::size_t forceIndex, const std::array<float, MAX_ROWS>& value) { C[forceIndex] = value; }
-    void setFmin(std::size_t forceIndex, const std::array<float, MAX_ROWS>& value) { fmin[forceIndex] = value; }
-    void setFmax(std::size_t forceIndex, const std::array<float, MAX_ROWS>& value) { fmax[forceIndex] = value; }
-    void setStiffness(std::size_t forceIndex, const std::array<float, MAX_ROWS>& value) { stiffness[forceIndex] = value; }
-    void setFracture(std::size_t forceIndex, const std::array<float, MAX_ROWS>& value) { fracture[forceIndex] = value; }
-    void setPenalty(std::size_t forceIndex, const std::array<float, MAX_ROWS>& value) { penalty[forceIndex] = value; }
-    void setLambda(std::size_t forceIndex, const std::array<float, MAX_ROWS>& value) { lambda[forceIndex] = value; }
+    void setParameters(std::size_t forceIndex, const Parameters& value) { parameters[forceIndex] = value; }
+    void setDerivativesA(std::size_t forceIndex, const Derivatives& value) { derivativesA[forceIndex] = value; }
+    void setDerivativesB(std::size_t forceIndex, const Derivatives& value) { derivativesB[forceIndex] = value; }
 };
 
 }
