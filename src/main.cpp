@@ -23,10 +23,10 @@ int main() {
 
     bsk::Node* node = new bsk::Node(scene, cube, material, {0, 0, 0}, {1, 0, 0, 0}, {1, 1, 1});
 
-    bsk::DirectionalLight* directionalLight = new bsk::DirectionalLight({1, 1, 1}, 0.8);
-    bsk::PointLight* pointLight = new bsk::PointLight({1, 0, 0}, 2.0, {2, 3, 2}, 5.0);
-    bsk::PointLight* pointLight2 = new bsk::PointLight({0, 0, 1}, 2.0, {2, 3, -2}, 5.0);
-    bsk::PointLight* pointLight3 = new bsk::PointLight({0, 1, 0}, 2.0, {5, 0, 0}, 5.0);
+    bsk::DirectionalLight* directionalLight = new bsk::DirectionalLight({1, 0, 1}, 0.8);
+    bsk::PointLight* pointLight = new bsk::PointLight({1, 0, 0}, 8.0, {2, 3, 2}, 5.0);
+    bsk::PointLight* pointLight2 = new bsk::PointLight({0, 0, 1}, 8.0, {2, 3, -2}, 5.0);
+    bsk::PointLight* pointLight3 = new bsk::PointLight({0, 1, 0}, 8.0, {5, 0, 0}, 5.0);
     bsk::AmbientLight* ambientLight = new bsk::AmbientLight({1, 1, 1}, 0.3);
 
     scene->add(directionalLight);

@@ -73,4 +73,7 @@ void UBO::write(const std::vector<T>& data, unsigned int offset) {
     write(data.data(), data.size() * sizeof(T), offset);
 }
 
+// Explicit instantiations for common types used in uniform buffers
+template void UBO::write<glm::vec4>(const std::vector<glm::vec4>& data, unsigned int offset);
+
 }
