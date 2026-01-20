@@ -46,12 +46,14 @@ void Scene2D::update() {
  * 
  */
 void Scene2D::render() {
+    engine->disableCullFace();
     shader->use();
     for (auto it = ++root->begin(); it != root->end(); ++it) {
         
         Node2D* node = *it;
         node->render();
     }
+    engine->enableCullFace();
 }
 
 }
