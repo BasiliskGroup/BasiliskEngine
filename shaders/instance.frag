@@ -34,13 +34,8 @@ void main() {
         PointLight pointLight = getLightByIndex(i);
         pointLightColor += calculatePointLight(pointLight, position, N, V);
     }
-    // for (int i = 0; i < 20; i++) {
-    //     PointLight pointLight = getPointLight(i);
-    //     pointLightColor += calculatePointLight(pointLight, position, N, V);
-    // }
-    
-    vec3 ambientColor = ambientLight.color;
-    
+
+    vec3 ambientColor = uAmbientLight;
 
     fragColor = vec4((directionalLightColor + pointLightColor + ambientColor) * textureColor.rgb, textureColor.a);
 } 

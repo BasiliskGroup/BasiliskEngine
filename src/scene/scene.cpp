@@ -43,8 +43,7 @@ Scene::~Scene() {
 void Scene::update() {
     camera->update();
     camera->use(shader);
-    lightServer->update(camera, shader);
-    lightServer->updateTiles(camera);
+    lightServer->update(shader, camera);
 }
 
 /**

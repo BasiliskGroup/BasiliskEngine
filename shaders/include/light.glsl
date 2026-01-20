@@ -3,9 +3,10 @@
 
 uniform int uDirectionalLightCount;
 uniform int uPointLightCount;
-uniform usamplerBuffer lightTiles;
-uniform usamplerBuffer lightIndices;
-uniform samplerBuffer pointLights;
+uniform usamplerBuffer uLightTiles;
+uniform usamplerBuffer uLightIndices;
+uniform samplerBuffer uPointLights;
+uniform vec3 uAmbientLight;
 
 struct DirectionalLight {
     vec3 color;
@@ -29,14 +30,13 @@ struct Tile {
     uint count;
 };
 
-layout (std140) uniform lights {
+layout (std140) uniform uDirectionalLights {
     DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
-    AmbientLight ambientLight;
 };
 
 PointLight getPointLight(int index) {
-    vec4 t1 = texelFetch(pointLights, 2 * index);
-    vec4 t2 = texelFetch(pointLights, 2 * index + 1);
+    vec4 t1 = texelFetch(uPointLights, 2 * index);
+    vec4 t2 = texelFetch(uPointLights, 2 * index + 1);
 
     PointLight light;
     light.color = t1.rgb;
@@ -53,7 +53,7 @@ Tile getTile() {
     ivec2 tileCoord = ivec2(gl_FragCoord.xy) / TILE_SIZE;
     int tileIndex = tileCoord.y * tilesX + tileCoord.x;
 
-    uvec4 texelData = texelFetch(lightTiles, tileIndex);
+    uvec4 texelData = texelFetch(uLightTiles, tileIndex);
 
     Tile tile;
     tile.offset = texelData.x;
@@ -62,10 +62,10 @@ Tile getTile() {
 }
 
 PointLight getLightByIndex(uint linearIndex) {
-    int texelIndex = int(linearIndex) / 4;      // divide by 4
-    int component  = int(linearIndex) % 4;      // modulo 4
+    int texelIndex = int(linearIndex) / 4;
+    int component  = int(linearIndex) % 4;
 
-    uvec4 texelData = texelFetch(lightIndices, texelIndex);
+    uvec4 texelData = texelFetch(uLightIndices, texelIndex);
     uint lightIndex = texelData[component];
 
     return getPointLight(int(lightIndex));
