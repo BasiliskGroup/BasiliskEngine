@@ -15,6 +15,7 @@
 #include <basilisk/util/includes.h>
 #include <optional>
 #include <basilisk/physics/coloring/color_queue.h>
+#include <basilisk/physics/tables/adjacency.h>
 #include <thread>
 #include <barrier>
 #include <semaphore>
@@ -63,7 +64,8 @@ private:
 
     // Coloring
     ColorQueue colorQueue;
-    std::vector<std::vector<Rigid*>> colorGroups;
+    std::vector<std::vector<ColoredData>> colorGroups;
+    std::vector<std::vector<ForceEdgeIndices>> forceEdgeIndices;
 
     // Threading
     std::barrier<> stageBarrier;
@@ -126,9 +128,12 @@ public:
 
     // Stages
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
-    void primalUpdateSingle(PrimalScratch& scratch, Rigid* body);
+    void primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex);
     void dualStage(ThreadScratch& scratch, int threadID);
     void dualUpdateSingle(Force* force);
+
+    template<class TForce>
+    inline void processForce(ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);

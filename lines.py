@@ -15,28 +15,39 @@ def count_non_empty_lines_in_file(path: Path) -> int:
 
 
 def count_non_empty_lines(directories, extensions=None):
-    total_lines = 0
+    totals_by_dir = {}
+    grand_total = 0
 
     for directory in directories:
         root = Path(directory)
+        dir_total = 0
+
         if not root.exists():
+            totals_by_dir[directory] = 0
             continue
 
         for path in root.rglob("*"):
             if path.is_file():
                 if extensions is None or path.suffix in extensions:
-                    total_lines += count_non_empty_lines_in_file(path)
+                    lines = count_non_empty_lines_in_file(path)
+                    dir_total += lines
 
-    return total_lines
+        totals_by_dir[directory] = dir_total
+        grand_total += dir_total
+
+    return totals_by_dir, grand_total
 
 
 if __name__ == "__main__":
-    # Directories to search (edit these)
     DIRECTORIES = [
         "./src",
         "./bindings",
         "./include/basilisk"
     ]
 
-    total = count_non_empty_lines(DIRECTORIES)
+    totals, total = count_non_empty_lines(DIRECTORIES)
+
+    for directory, lines in totals.items():
+        print(f"{directory}: {lines}")
+
     print(f"Total non-empty lines: {total}")

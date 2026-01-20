@@ -65,10 +65,10 @@ struct ClipVertex
 {
 	ClipVertex() { fp.value = 0; }
 	glm::vec2 v;
-	Manifold::FeaturePair fp;
+	FeaturePair fp;
 };
 
-static void Flip(Manifold::FeaturePair& fp)
+static void Flip(FeaturePair& fp)
 {
 	char temp = fp.e.inEdge1;
 	fp.e.inEdge1 = fp.e.inEdge2;

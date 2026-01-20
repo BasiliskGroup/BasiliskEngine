@@ -22,7 +22,6 @@
 #include <basilisk/util/time.h>
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/physics/threading/scratch.h>
-#include <stdexcept>
 
 
 namespace bsk::internal {
@@ -42,11 +41,13 @@ Solver::Solver() :
     currentAlpha(0.0f),
     currentColor(0),
     running(true),
-    workers()
+    workers(),
+    forceEdgeIndices()
 {
     this->colliderTable = new ColliderTable(64);
     this->bodyTable = new BodyTable(128);
     this->forceTable = new ForceTable(128);
+    this->forceTable->setSolver(this);
     defaultParams();
 
     workers.reserve(NUM_THREADS);
@@ -55,13 +56,11 @@ Solver::Solver() :
     }
 }
 
-Solver::~Solver()
-{
+Solver::~Solver() {
     clear();
 }
 
-void Solver::clear()
-{
+void Solver::clear() {
     while (forces)
         delete forces;
 
@@ -88,18 +87,15 @@ void Solver::clear()
         w.join();
 }
 
-void Solver::insert(Rigid* body)
-{
-    if (body == nullptr)
-    {
+void Solver::insert(Rigid* body) {
+    if (body == nullptr) {
         return;
     }
 
     body->setNext(bodies);
     body->setPrev(nullptr);
 
-    if (bodies)
-    {
+    if (bodies) {
         bodies->setPrev(body);
     }
 
@@ -107,25 +103,20 @@ void Solver::insert(Rigid* body)
     numRigids++;
 }
 
-void Solver::remove(Rigid* body)
-{
-    if (body == nullptr)
-    {
+void Solver::remove(Rigid* body) {
+    if (body == nullptr) {
         return;
     }
 
-    if (body->getPrev())
-    {
+    if (body->getPrev()) {
         body->getPrev()->setNext(body->getNext());
     }
-    else
-    {
+    else {
         // This was the head of the list
         bodies = body->getNext();
     }
 
-    if (body->getNext())
-    {
+    if (body->getNext()) {
         body->getNext()->setPrev(body->getPrev());
     }
 
@@ -135,18 +126,15 @@ void Solver::remove(Rigid* body)
     numRigids--;
 }
 
-void Solver::insert(Force* force)
-{
-    if (force == nullptr)
-    {
+void Solver::insert(Force* force) {
+    if (force == nullptr) {
         return;
     }
 
     force->setNext(forces);
     force->setPrev(nullptr);
 
-    if (forces)
-    {
+    if (forces) {
         forces->setPrev(force);
     }
 
@@ -154,25 +142,19 @@ void Solver::insert(Force* force)
     numForces++;
 }
 
-void Solver::remove(Force* force)
-{
-    if (force == nullptr)
-    {
+void Solver::remove(Force* force) {
+    if (force == nullptr) {
         return;
     }
 
-    if (force->getPrev())
-    {
+    if (force->getPrev()) {
         force->getPrev()->setNext(force->getNext());
-    }
-    else
-    {
+    } else {
         // This was the head of the list
         forces = force->getNext();
     }
 
-    if (force->getNext())
-    {
+    if (force->getNext()) {
         force->getNext()->setPrev(force->getPrev());
     }
 
@@ -182,8 +164,7 @@ void Solver::remove(Force* force)
     numForces--;
 }
 
-void Solver::defaultParams()
-{
+void Solver::defaultParams() {
     // gravity = { 0.0f, -9.81f, 0.0f };
     gravity = std::nullopt;
     iterations = 10;
@@ -210,22 +191,25 @@ void Solver::defaultParams()
     postStabilize = true;
 }
 
-void Solver::step(float dtIncoming)
-{
+void Solver::step(float dtIncoming) {
     auto stepStart = timeNow();
     
     this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
+
+    // compact body table
+    auto compactBodyTableStart = timeNow();
+    bodyTable->compact();
+    auto compactBodyTableEnd = timeNow();
+    printDurationUS(compactBodyTableStart, compactBodyTableEnd, "Compact Body Table: ");
 
     // Perform broadphase collision detection
     auto broadphaseStart = timeNow();
     bodyTable->getBVH()->update();
 
     // Use BVH to find potential collisions
-    for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext())
-    {
+    for (Rigid* bodyA = bodies; bodyA != nullptr; bodyA = bodyA->getNext()) {
         std::vector<Rigid*> results = bodyTable->getBVH()->query(bodyA);
-        for (Rigid* bodyB : results)
-        {
+        for (Rigid* bodyB : results) {
             // Skip self-collision and already constrained pairs
             if (bodyB == bodyA || bodyA->constrainedTo(bodyB))
                 continue;
@@ -239,18 +223,14 @@ void Solver::step(float dtIncoming)
 
     // Initialize and warmstart forces
     auto warmstartForcesStart = timeNow();
-    for (Force* force = forces; force != nullptr;)
-    {
+    for (Force* force = forces; force != nullptr;) {
         // Initialization can including caching anything that is constant over the step
-        if (!force->initialize())
-        {
+        if (!force->initialize()) {
             // Force has returned false meaning it is inactive, so remove it from the solver
             Force* next = force->getNext();
             delete force;
             force = next;
-        }
-        else
-        {
+        } else {    
             for (int i = 0; i < force->rows(); i++)
             {
                 if (postStabilize)
@@ -287,8 +267,17 @@ void Solver::step(float dtIncoming)
     auto warmstartBodiesEnd = timeNow();
     printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
 
+    // compact force table
+    auto compactForceTableStart = timeNow();
+    forceTable->compact();
+    auto compactForceTableEnd = timeNow();
+    printDurationUS(compactForceTableStart, compactForceTableEnd, "Compact Force Table: ");
+
     // Print number of bodies and forces before coloring
     std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
+    std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
+    std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
+    std::cout << "Number of threads: " << NUM_THREADS << std::endl;
 
     // Coloring
     auto coloringStart = timeNow();
@@ -297,13 +286,23 @@ void Solver::step(float dtIncoming)
     auto coloringEnd = timeNow();
     printDurationUS(coloringStart, coloringEnd, "Coloring: ");
 
+    // Load initial positions into forces
+    auto loadPositionalStart = timeNow();
+    for (Force* force = forces; force != nullptr; force = force->getNext()) {
+        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
+    }
+    auto loadPositionalEnd = timeNow();
+    printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
+
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
     int totalIterations = iterations + (postStabilize ? 1 : 0);
     
     auto solverLoopStart = timeNow();
-    for (int it = 0; it < totalIterations; it++)
-    {
+    for (int it = 0; it < totalIterations; it++) {
         // If using post stabilization, either remove all or none of the pre-existing constraint error
         float alphaValue = alpha;
         if (postStabilize)
@@ -324,11 +323,8 @@ void Solver::step(float dtIncoming)
                 continue;
             }
             
-            // Store the active color with release ordering - ensures visibility to workers
             currentColor.store(activeColor, std::memory_order_release);
-            // Release workers to process this color group
             startSignal.release(NUM_THREADS);
-            // Wait for all workers to finish processing this color group
             finishSignal.acquire();
         }
 
@@ -338,27 +334,22 @@ void Solver::step(float dtIncoming)
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
-        auto dualStart = timeNow();
-        if (it < iterations)
-        {
-            for (Force* force = forces; force != nullptr; force = force->getNext())
-            {
-                dualUpdateSingle(force);
-            }
-        }
-        auto dualEnd = timeNow();
         if (it < iterations) {
+            auto dualStart = timeNow();
+
+            currentStage.store(Stage::STAGE_DUAL, std::memory_order_release);
+            startSignal.release(NUM_THREADS);
+            finishSignal.acquire();
+
+            auto dualEnd = timeNow();
             printDurationUS(dualStart, dualEnd, "  Dual Update: ");
         }
 
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
-        auto velocityStart = timeNow();
-        if (it == iterations - 1)
-        {
-            bodyTable->updateVelocities(dt);
-        }
-        auto velocityEnd = timeNow();
         if (it == iterations - 1) {
+            auto velocityStart = timeNow();
+            bodyTable->updateVelocities(dt);
+            auto velocityEnd = timeNow();
             printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
         }
     }
@@ -380,11 +371,16 @@ void Solver::resetColoring() {
     ColorQueue empty;
     colorQueue.swap(empty);
     colorGroups.clear();
+    forceEdgeIndices.clear();
 }
 
 void Solver::dsatur() {
     // Use a set instead of priority_queue for O(log n) updates
     std::set<Rigid*, RigidComparator> colorSet;
+    std::vector<std::vector<ForceEdgeIndices>> tempIndices;
+
+    // add vector in temp indices for each force type
+    tempIndices.resize(ForceType::NUM_FORCE_TYPES);
     
     // Add all bodies to the set
     for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
@@ -405,13 +401,43 @@ void Solver::dsatur() {
         body->setColor(color);
         body->useColor(color);
 
-        // add body to color group
+        // ensure we have enough colors
         colorGroups.resize(color + 1);
-        colorGroups[color].push_back(body);
+        forceEdgeIndices.resize(color + 1);
+
+        // add body to color group
+        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, 0, 0, 0, body->getMass(), body->getMoment(), body->getInertial());
+
+        // clear temp indices
+        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+            tempIndices[i].clear();
+        }
 
         // update uncolored bodies connected to this body
         for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB()) {
             Rigid* other = (force->getBodyA() == body) ? force->getBodyB() : force->getBodyA();
+
+            switch (force->getForceType()) {
+                case ForceType::JOINT:
+                    colorGroups[color].back().joint++;
+                    tempIndices[ForceType::JOINT].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                case ForceType::MANIFOLD:
+                    colorGroups[color].back().manifold++;
+                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                case ForceType::SPRING:
+                    colorGroups[color].back().spring++;
+                    tempIndices[ForceType::SPRING].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                case ForceType::MOTOR:
+                    colorGroups[color].back().motor++;
+                    tempIndices[ForceType::MOTOR].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    break;
+                default:
+                    throw std::runtime_error("Invalid force type");
+                    break;
+            }
 
             // Skip if already colored or has already used this color
             if (other == nullptr || other->isColored() || other->isColorUsed(color)) {
@@ -424,12 +450,10 @@ void Solver::dsatur() {
             other->incrSatur();
             colorSet.insert(other);
         }
-    }
-    
-    // Verify coloring is correct
-    for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
-        if (!body->verifyColoring()) {
-            throw std::runtime_error("Coloring verification failed: Adjacent rigid bodies have the same color");
+
+        // insert forces in sorted order into edge indices
+        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+            forceEdgeIndices[color].insert(forceEdgeIndices[color].end(), tempIndices[i].begin(), tempIndices[i].end());
         }
     }
 
@@ -437,8 +461,7 @@ void Solver::dsatur() {
     std::cout << "Number of colors used: " << colorGroups.size() << std::endl;
 }
 
-Rigid* Solver::pick(glm::vec2 at, glm::vec2& local)
-{
+Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {
     // Find which body is at the given point
     for (Rigid* body = bodies; body != nullptr; body = body->getNext())
     {

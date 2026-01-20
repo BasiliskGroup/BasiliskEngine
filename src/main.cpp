@@ -25,7 +25,7 @@ int main() {
     new bsk::Node(scene, cube, material, {0, -5, 0}, {1, 0, 0, 0}, {30, .1, 30});
     
     std::vector<bsk::PointLight*> lights;
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 100; i++) {
         glm::vec3 color(bsk::internal::uniform(0.0f, 1.0f), bsk::internal::uniform(0.0f, 1.0f), bsk::internal::uniform(0.0f, 1.0f));
         float d = 30.0f;
         glm::vec3 position(bsk::internal::uniform(-d, d), bsk::internal::uniform(-5.0f, 5.0f), bsk::internal::uniform(-d, d));

@@ -20,7 +20,7 @@ void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        forces, toDelete, JA, JB, HA, HB, C, fmin, fmax, stiffness, fracture, penalty, lambda, rows
+        forces, toDelete, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional
     );
 
     capacity = newCapacity;
@@ -34,7 +34,7 @@ void ForceTable::compact() {
     }
 
     compactTensors(toDelete, size,
-        forces, JA, JB, HA, HB, C, fmin, fmax, stiffness, fracture, penalty, lambda, rows
+        forces, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional
     );
 
     size = active;
@@ -56,21 +56,47 @@ void ForceTable::insert(Force* force) {
     rows[size] = 0;
 
     for (int i = 0; i < MAX_ROWS; i++) {
-        JA[size][i] = glm::vec3(0.0f);
-        JB[size][i] = glm::vec3(0.0f);
-        HA[size][i] = glm::mat3x3(0.0f);
-        HB[size][i] = glm::mat3x3(0.0f);
-        C[size][i] = 0.0f;
-        fmin[size][i] = -INFINITY;
-        fmax[size][i] = INFINITY;
-        stiffness[size][i] = INFINITY;
-        fracture[size][i] = INFINITY;
-        penalty[size][i] = 0.0f;
-        lambda[size][i] = 0.0f;
+        derivativesA[size][i].J = glm::vec3(0.0f);
+        derivativesB[size][i].J = glm::vec3(0.0f);
+        derivativesA[size][i].H = glm::mat3x3(0.0f);
+        derivativesB[size][i].H = glm::mat3x3(0.0f);
+        parameters[size][i].C = 0.0f;
+        parameters[size][i].fmin = -INFINITY;
+        parameters[size][i].fmax = INFINITY;
+        parameters[size][i].stiffness = INFINITY;
+        parameters[size][i].fracture = INFINITY;
+        parameters[size][i].penalty = 0.0f;
+        parameters[size][i].lambda = 0.0f;
     }
 
     force->setIndex(size);
     size++;
+}
+
+void ForceTable::setForceType(std::size_t index, ForceType value) {
+    SpecialParameters& sp = specialParameters[index];
+    forceTypes[index] = value;
+
+    switch (forceTypes[index]) {
+        case ForceType::MANIFOLD:
+            new (&sp.manifold) ManifoldData();
+            break;
+
+        case ForceType::JOINT:
+            new (&sp.joint) JointStruct();
+            break;
+
+        case ForceType::SPRING:
+            new (&sp.spring) SpringStruct();
+            break;
+
+        case ForceType::MOTOR:
+            new (&sp.motor) MotorStruct();
+            break;
+
+        default:
+            break;
+    }
 }
 
 }
