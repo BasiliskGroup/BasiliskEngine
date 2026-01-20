@@ -1,6 +1,6 @@
 #define MAX_DIRECTIONAL_LIGHTS 5
 #define MAX_POINT_LIGHTS 50
-#define TILE_SIZE 16
+#define TILE_SIZE 32
 
 uniform int uDirectionalLightCount;
 uniform int uPointLightCount;

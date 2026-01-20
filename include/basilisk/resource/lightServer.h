@@ -13,8 +13,8 @@
 
 #define MAX_DIRECTIONAL_LIGHTS 5
 #define MAX_POINT_LIGHTS 50
-#define TILE_SIZE 16
-#define MAX_LIGHTS_PER_TILE 16
+#define TILE_SIZE 32
+#define MAX_LIGHTS_PER_TILE 32
 
 struct Plane {
     glm::vec3 normal;

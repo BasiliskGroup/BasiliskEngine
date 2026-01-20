@@ -184,6 +184,13 @@ void LightServer::updateTiles(StaticCamera* camera) {
     
     glm::mat4 view = camera->getView();
 
+    std::vector<glm::vec3> lightPositions;
+    for (unsigned int i = 0; i < pointLights.size(); ++i) {
+        PointLight* light = pointLights.at(i);
+        glm::vec3 lightPositionViewSpace = glm::vec3(view * glm::vec4(light->getPosition(), 1.0f));
+        lightPositions.push_back(lightPositionViewSpace);
+    }
+
     for (unsigned int t = 0; t < tiles.size(); ++t) {
         TileInfo& info = tileInfos.at(t);
         info.offset = (uint32_t)lightIndices.size();
@@ -193,7 +200,7 @@ void LightServer::updateTiles(StaticCamera* camera) {
 
         for (unsigned int i = 0; i < pointLights.size(); ++i) {
             PointLight* light = pointLights.at(i);
-            glm::vec3 lightPositionViewSpace = glm::vec3(view * glm::vec4(light->getPosition(), 1.0f));
+            glm::vec3 lightPositionViewSpace = lightPositions.at(i);
             float lightRadius = light->getRange();
 
             if (lightIntersectsTile(lightPositionViewSpace, lightRadius, tile)) {
