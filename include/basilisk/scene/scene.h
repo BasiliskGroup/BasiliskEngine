@@ -7,6 +7,9 @@
 #include <basilisk/scene/virtualScene.h>
 #include <basilisk/camera/camera.h>
 #include <basilisk/render/shader.h>
+#include <basilisk/resource/lightServer.h>
+#include <basilisk/light/light.h>
+#include <basilisk/render/skybox.h>
 
 namespace bsk::internal {
 
@@ -17,6 +20,8 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         StaticCamera* camera;
         StaticCamera* internalCamera;
         Shader* shader;
+        LightServer* lightServer;
+        Skybox* skybox = nullptr;
 
     public:
         Scene(Engine* engine);
@@ -26,8 +31,11 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         void update();
         void render();
 
-        void setCamera(StaticCamera* camera) { this->camera = camera; }
-
+        void add(Light* light);
+        
+        inline void setCamera(StaticCamera* camera) { this->camera = camera; }
+        inline void setSkybox(Skybox* skybox) { this->skybox = skybox; }
+        
         inline Shader* getShader() { return shader; }
         inline StaticCamera* getCamera() { return camera; }
 };

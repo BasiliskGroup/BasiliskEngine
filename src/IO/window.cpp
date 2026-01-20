@@ -100,7 +100,7 @@ Window::Window(int width, int height, const char* title): width(width), height(h
     // Draws closer objects in front of futher objects
     glEnable(GL_DEPTH_TEST);  
     // Does not draw faces that are not facing the camera
-    // glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     // Antialiasing 
     glEnable(GL_MULTISAMPLE);
     // Blending

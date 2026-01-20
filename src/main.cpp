@@ -9,6 +9,7 @@
 #include <basilisk/util/random.h>
 #include <basilisk/util/maths.h>
 
+
 int main() {
     // Make a Basilisk Engine instance 
     bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk");
@@ -17,67 +18,44 @@ int main() {
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
     bsk::Scene2D* voidScene = new bsk::Scene2D(engine);
 
-    // Load assets
-    bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
-    bsk::Image* images[] = {
-        new bsk::Image("textures/metal.png"),
-        new bsk::Image("textures/rope.png"),
-        new bsk::Image("textures/bricks.jpg"),
-        new bsk::Image("textures/container.jpg"),
-        new bsk::Image("textures/mouse.png")
-    };
-    bsk::Material* metalMaterial = new bsk::Material({1, 1, 1}, images[0]);
-    bsk::Material* ropeMaterial = new bsk::Material({1, 1, 1}, images[1]);
-    bsk::Material* bricksMaterial = new bsk::Material({1, 1, 1}, images[2]);
-    bsk::Material* containerMaterial = new bsk::Material({1, 1, 1}, images[3]);
-    bsk::Material* mouseMaterial = new bsk::Material({1, 1, 1}, images[4]);
+    // Load assets from file
+    bsk::Mesh* cube = new bsk::Mesh("models/cube.obj");
+    bsk::Image* image = new bsk::Image("textures/container.jpg");
+    bsk::Material* material = new bsk::Material({1, 1, 1}, image);
 
-    // Create a box collider (unit box vertices) - can be shared by all box-shaped objects
-    bsk::Collider* boxCollider = new bsk::Collider(scene->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
-
-    // Create a 50x50 grid of quads with some missing
-    const int gridSize = 20;
-    const float spacing = 2.0f;  // Space between quads
-    const float quadSize = 0.8f;  // Size of each quad
-    const float missingProbability = 0.0f;
-
-    scene->getCamera()->setScale(gridSize * 3.0f);  // Zoom out to see the full grid
+    new bsk::Node(scene, cube, material, {0, -5, 0}, {1, 0, 0, 0}, {30, .1, 30});
     
-    // Increase camera speed by 5x (default is 3.0, so set to 15.0)
-    if (auto* camera2D = dynamic_cast<bsk::Camera2D*>(scene->getCamera())) {
-        camera2D->setSpeed(15.0f);
-    }
-    
-    // Calculate grid offset to center it
-    float gridOffset = -(gridSize - 1) * spacing * 0.5f;
-    
-    std::vector<bsk::Node2D*> gridNodes;
-    gridNodes.reserve(gridSize * gridSize);
-    
-    for (int row = 0; row < gridSize; row++) {
-        for (int col = 0; col < gridSize; col++) {
-            // Randomly skip some quads
-            if (bsk::internal::uniform() < missingProbability) {
-                continue;
-            }
-            
-            float x = gridOffset + col * spacing;
-            float y = gridOffset + row * spacing;
-            
-            bsk::Node2D* node = new bsk::Node2D(scene, quad, bricksMaterial, {x, y}, 0.0f, {quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)}, {0, 0, 0}, boxCollider, 1.0e1f, 0.5f);
-            gridNodes.push_back(node);
-        }
+    std::vector<bsk::PointLight*> lights;
+    for (int i = 0; i < 50; i++) {
+        glm::vec3 color(bsk::internal::uniform(0.0f, 1.0f), bsk::internal::uniform(0.0f, 1.0f), bsk::internal::uniform(0.0f, 1.0f));
+        float d = 30.0f;
+        glm::vec3 position(bsk::internal::uniform(-d, d), bsk::internal::uniform(-5.0f, 5.0f), bsk::internal::uniform(-d, d));
+        lights.push_back(new bsk::PointLight(color, 1.0f, position, 5.0f));
+        scene->add(lights.back());
     }
 
-    float mouseScale = 1.5f;
-    
-    // Create a Node2D that follows the mouse (no physics)
-    bsk::Node2D* mouseCursor = new bsk::Node2D(scene, quad, mouseMaterial, {0.0f, 0.0f}, 0.0f, {mouseScale, mouseScale}, {0, 0, 0}, nullptr, 0.5f, 0.5f);
-    mouseCursor->setLayer(1.0f);
-    
-    // Drag joint for mouse interaction
-    bsk::Joint* drag = nullptr;
-    
+    // bsk::Node* node = new bsk::Node(scene, cube, material, {0, 0, 0}, {1, 0, 0, 0}, {1, 1, 1});
+
+    // bsk::DirectionalLight* directionalLight = new bsk::DirectionalLight({1, 0, 1}, 0.8);
+    // bsk::PointLight* pointLight = new bsk::PointLight({1, 0, 0}, 8.0, {2, 3, 2}, 5.0);
+    // bsk::PointLight* pointLight2 = new bsk::PointLight({0, 0, 1}, 8.0, {2, 3, -2}, 5.0);
+    // bsk::PointLight* pointLight3 = new bsk::PointLight({0, 1, 0}, 8.0, {5, 0, 0}, 5.0);
+    // bsk::AmbientLight* ambientLight = new bsk::AmbientLight({1, 1, 1}, 0.3);
+
+    // scene->add(directionalLight);
+    // scene->add(pointLight);   
+    // scene->add(pointLight2);
+    // scene->add(pointLight3);
+    // scene->add(ambientLight);
+
+    bsk::Skybox* skybox = new bsk::Skybox({"textures/skybox/right.jpg", "textures/skybox/left.jpg", "textures/skybox/top.jpg", "textures/skybox/bottom.jpg", "textures/skybox/front.jpg", "textures/skybox/back.jpg"});
+    scene->setSkybox(skybox);
+
+    bsk::Keyboard* keys = engine->getKeyboard();
+
+
+    float t = 0.0;
+
     // Main loop continues as long as the window is open
     while (engine->isRunning()) {
         engine->update();
@@ -125,15 +103,26 @@ int main() {
         scene->update();
         scene->render();
         engine->render();
+
+        t += engine->getDeltaTime();
+        if (t > 1.0) {
+            std::cout << "FPS: " << engine->getWindow()->getFPS() << std::endl;
+            t = 0.0;
+        }
+
+        if (keys->getPressed(bsk::Key::K_1)) {
+            engine->getWindow()->enableVSync();
+        }
+        if (keys->getPressed(bsk::Key::K_2)) {
+            engine->getWindow()->disableVSync();
+        }
     }
 
-    // Cleanup
-    for (auto* img : images) delete img;
-    delete metalMaterial;
-    delete ropeMaterial;
-    delete bricksMaterial;
-    delete containerMaterial;
-    delete quad;
+    // Free memory allocations
+    delete image;
+    delete material;
+    delete cube;
+    delete skybox;
     delete scene;
     delete voidScene;
     delete engine;

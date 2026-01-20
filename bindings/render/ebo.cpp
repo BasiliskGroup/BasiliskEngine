@@ -12,6 +12,6 @@ void bind_ebo(py::module_& m) {
         }), py::arg("data"), py::arg("drawType") = GL_STATIC_DRAW)
         .def("bind", &EBO::bind)
         .def("unbind", &EBO::unbind)
-        .def("getSize", &EBO::getSize)
+        .def("get_size", &EBO::getSize)
         .def("write", static_cast<void (EBO::*)(const void*, unsigned int, unsigned int)>(&EBO::write), py::arg("data"), py::arg("size"), py::arg("offset"));
 }

@@ -16,19 +16,26 @@
 #include "render/mesh.h"
 #include "render/texture.h"
 #include "render/image.h"
+#include "render/cubemap.h"
 #include "render/shader.h"
 #include "render/vao.h"
 #include "render/vbo.h"
 #include "render/ebo.h"
 #include "render/tbo.h"
 #include "render/fbo.h"
+#include "render/ubo.h"
 #include "render/frame.h"
 #include "render/material.h"
+#include "render/skybox.h"
 #include "resource/materialServer.h"
 #include "camera/staticCamera.h"
 #include "camera/staticCamera2d.h"
 #include "camera/camera.h"
 #include "camera/camera2d.h"
+#include "light/ambientLight.h"
+#include "light/directionalLight.h"
+#include "light/pointLight.h"
+#include "resource/lightServer.h"
 
 #include "physics/solver.h"
 #include "physics/forces/force.h"
@@ -66,6 +73,7 @@ namespace bsk {
     using Mesh = internal::Mesh;
     using Texture = internal::Texture;
     using Image = internal::Image;
+    using Cubemap = internal::Cubemap;
     using Shader = internal::Shader;
     using Material = internal::Material;
     using VAO = internal::VAO;
@@ -79,6 +87,17 @@ namespace bsk {
     using MaterialServer = internal::MaterialServer;
     using FBO = internal::FBO;
     using Frame = internal::Frame;
+    using UBO = internal::UBO;
+    using Skybox = internal::Skybox;
+
+    // light
+    using AmbientLight = internal::AmbientLight;
+    using DirectionalLight = internal::DirectionalLight;
+    using PointLight = internal::PointLight;
+    using LightServer = internal::LightServer;
+
+    // keyboard
+    using Key = internal::KeyCode;
 }
 
 #endif // BASILISK_H

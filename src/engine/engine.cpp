@@ -29,11 +29,13 @@ void Engine::update() {
     frame->use();
     frame->clear();
 
-    // Mouse Updates
+    // Input Updates
+    keyboard->update();
     mouse->update();
+
     // Auto mouse grab if enabled
     if (autoMouseGrab) {
-        if (keyboard->getPressed(GLFW_KEY_ESCAPE)) {
+        if (keyboard->getPressed(KeyCode::K_ESCAPE)) {
             mouse->setVisible();
         }
         if (mouse->getClicked()) {

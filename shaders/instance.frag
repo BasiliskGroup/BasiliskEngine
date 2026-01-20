@@ -2,6 +2,8 @@
 
 #include "include/material.glsl"
 #include "include/texture.glsl"
+#include "include/light.glsl"
+#include "include/blinn_phong.glsl"
 
 in vec3 position;
 in vec2 uv;
@@ -15,16 +17,25 @@ uniform vec3 uViewDirection;
 out vec4 fragColor;
 
 void main() {
-    vec3 N = normalize(normal);
-    vec3 L = normalize(vec3(.5, 1.0, .25));
-    vec3 V = normalize(uCameraPosition - position);
-    vec3 H = normalize(L + V);
-
-    float ambient = 0.1;
-    float diffuse = max(dot(N, L), 0.0);
-    float specular = pow(max(dot(N, H), 0.0), 64);
-    float brightness = (ambient + diffuse + specular);
-
+    Tile tile = getTile();
     vec4 textureColor = getTextureValue(material, uv);
-    fragColor = vec4(brightness * textureColor.rgb, textureColor.a);
+    
+    vec3 N = normalize(normal);
+    vec3 V = normalize(uCameraPosition - position);
+
+    vec3 directionalLightColor = vec3(0.0, 0.0, 0.0);
+    for (int i = 0; i < uDirectionalLightCount; i++) {
+        DirectionalLight directionalLight = directionalLights[i];
+        directionalLightColor += calculateDirectionalLight(directionalLight, N, V);
+    }
+    
+    vec3 pointLightColor = vec3(0.0, 0.0, 0.0);
+    for (uint i = tile.offset; i < tile.offset + tile.count; i++) {
+        PointLight pointLight = getLightByIndex(i);
+        pointLightColor += calculatePointLight(pointLight, position, N, V);
+    }
+
+    vec3 ambientColor = uAmbientLight;
+
+    fragColor = vec4((directionalLightColor + pointLightColor + ambientColor) * textureColor.rgb, textureColor.a);
 } 

@@ -43,6 +43,10 @@ class StaticCamera : public VirtualCamera {
         float getZ() { return position.z; }
         float getYaw() { return yaw; }
         float getPitch() { return pitch; }
+        float getFOV() { return fov; }
+        float getAspect() { return aspect; }
+        float getNear() { return near; }
+        float getFar() { return far; }
 
         void setX(float x) { position.x = x; updateView(); }
         void setY(float y) { position.y = y; updateView(); }

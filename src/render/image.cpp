@@ -9,8 +9,8 @@ namespace bsk::internal {
  * 
  * @param file Path to the image to load
  */
-Image::Image(std::string file) {
-    stbi_set_flip_vertically_on_load(true);  
+Image::Image(std::string file, bool flip_vertically) {
+    stbi_set_flip_vertically_on_load(flip_vertically);  
     std::string resolvedPath = externalPath(file);
     data = stbi_load(resolvedPath.c_str(), &width, &height, &nChannels, 4);
     if (!data) {

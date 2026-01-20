@@ -1,15 +1,16 @@
 #version 330 core
 
-in vec2 uv;
-
-struct textArray {
-    sampler2DArray array;
+struct Color {
+    vec4 value;
 };
 
-uniform textArray textureArrays[4];
+layout (std140) uniform testBlock {
+    Color colors[2];
+};
 
+in vec2 uv;
 out vec4 fragColor;
 
 void main() {
-    fragColor = texture(textureArrays[1].array, vec3(uv, 0));
-} 
+    fragColor = vec4(vec3(1.0, uv), 1.0) * colors[1].value;
+}

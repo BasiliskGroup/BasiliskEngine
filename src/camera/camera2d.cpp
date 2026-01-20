@@ -14,11 +14,11 @@ void Camera2D::update() {
     Keyboard* keys = engine->getKeyboard();
     
     // Movement
-    float dt = 0.005;
+    float dt = engine->getDeltaTime();
     float velocity = (speed * dt);
 
-    position.x += (keys->getPressed(GLFW_KEY_D) - keys->getPressed(GLFW_KEY_A)) * velocity;
-    position.y += (keys->getPressed(GLFW_KEY_W) - keys->getPressed(GLFW_KEY_S)) * velocity;
+    position.x += (keys->getDown(KeyCode::K_D) - keys->getDown(KeyCode::K_A)) * velocity;
+    position.y += (keys->getDown(KeyCode::K_W) - keys->getDown(KeyCode::K_S)) * velocity;
 
     updateView();
 }

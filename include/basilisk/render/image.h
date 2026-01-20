@@ -13,7 +13,7 @@ class Image {
         int nChannels;
     
     public:
-        Image(std::string file);
+        Image(std::string file, bool flip_vertically=true);
         ~Image();
         
         unsigned char* getData() { return data; }

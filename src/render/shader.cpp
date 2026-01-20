@@ -362,6 +362,25 @@ void Shader::bind(const char* name, FBO* fbo, unsigned int slot) {
 }
 
 /**
+ * @brief Binds a ubo to the shader
+ * 
+ * @param name Name of the uniform block on the shader
+ * @param ubo Pointer to the UBO object
+ * @param slot Slot to bind the ubo [0-15]
+ */
+void Shader::bind(const char* name, UBO* ubo, unsigned int slot) {
+    use();
+    unsigned int blockIndex = glGetUniformBlockIndex(ID, name);
+    glUniformBlockBinding(ID, blockIndex, slot);
+    glBindBufferBase(GL_UNIFORM_BUFFER, slot, ubo->getID());
+}
+
+void Shader::bind(const char* name, Cubemap* cubemap, unsigned int slot) {
+    use();
+    bindTextureToSlot(name, cubemap->getID(), GL_TEXTURE_CUBE_MAP, slot);
+}
+
+/**
  * @brief Get the location of a uniform on this shader. 
  * 
  * @param name C-String name of the uniform 

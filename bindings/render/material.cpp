@@ -18,7 +18,7 @@ void bind_material(py::module_& m) {
         py::arg("normal") = nullptr)
 
         // Getters
-        .def("getColor", &Material::getColor)
-        .def("getAlbedo", &Material::getAlbedo)
-        .def("getNormal", &Material::getNormal);
+        .def("get_color", &Material::getColor)
+        .def("get_albedo", &Material::getAlbedo)
+        .def("get_normal", &Material::getNormal);
 }

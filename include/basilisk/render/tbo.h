@@ -28,7 +28,7 @@ class TBO {
 
         void write(const void* data, unsigned int size, unsigned int offset=0);
         template<typename T>
-        inline void write(const std::vector<T>& data, unsigned int offset) {
+        inline void write(const std::vector<T>& data, unsigned int offset=0) {
             write(data.data(), data.size() * sizeof(T), offset);
         }
 

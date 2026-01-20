@@ -63,9 +63,8 @@ void bind_node2d(py::module_& m) {
         .def(py::init<Scene2D*, Node2D*>())
 
         // Setters (casters apply automatically)
-        .def("setPosition", py::overload_cast<glm::vec2>(&Node2D::setPosition))
-        .def("setPosition", py::overload_cast<glm::vec3>(&Node2D::setPosition))
-        .def("setRotation", &Node2D::setRotation)
-        .def("setScale", &Node2D::setScale)
-        .def("setVelocity", &Node2D::setVelocity);
+        .def("set_position", py::overload_cast<glm::vec2>(&Node2D::setPosition))
+        .def("set_rotation", &Node2D::setRotation)
+        .def("set_scale", &Node2D::setScale)
+        .def("set_velocity", &Node2D::setVelocity);
 }
