@@ -9,10 +9,12 @@
 #include <basilisk/light/pointLight.h>
 #include <basilisk/render/shader.h>
 #include <basilisk/render/ubo.h>
+#include <basilisk/render/tbo.h>
 
 #define MAX_DIRECTIONAL_LIGHTS 5
 #define MAX_POINT_LIGHTS 50
 #define TILE_SIZE 16
+#define MAX_LIGHTS_PER_TILE 16
 
 struct Plane {
     glm::vec3 normal;
@@ -25,6 +27,8 @@ struct Tile {
 struct TileInfo {
     uint32_t offset;
     uint32_t count;
+    uint32_t pad0;
+    uint32_t pad1;
 };
 
 namespace bsk::internal {
@@ -41,6 +45,8 @@ class LightServer {
         std::vector<glm::vec4> pointLightData;
         glm::vec3 ambientLightData;
 
+        TBO* tileTBO;
+        TBO* lightIndicesTBO;
         unsigned int tilesX;
         unsigned int tilesY;
         std::vector<Tile> tiles;
@@ -58,7 +64,7 @@ class LightServer {
         void update(StaticCamera* camera, Shader* shader, std::string name = "lights", unsigned int slot = 6);
         void bind(Shader* shader, std::string name = "lights", unsigned int slot = 0);
         
-        void setTiles(StaticCamera* camera, unsigned int screenWidth, unsigned int screenHeight);
+        void setTiles(Shader* shader, StaticCamera* camera, unsigned int screenWidth, unsigned int screenHeight);
         void updateTiles(StaticCamera* camera);
 };
 

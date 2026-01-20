@@ -14,7 +14,7 @@ Scene::Scene(Engine* engine) : VirtualScene(engine) {
     shader = new Shader(internalPath("shaders/instance.vert").c_str(), internalPath("shaders/instance.frag").c_str());
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
     lightServer = new LightServer();
-    lightServer->setTiles(camera, (unsigned int)engine->getWindow()->getWidth(), (unsigned int)engine->getWindow()->getHeight());
+    lightServer->setTiles(shader, camera, (unsigned int)engine->getWindow()->getWidth(), (unsigned int)engine->getWindow()->getHeight());
 }
 
 Scene::Scene(Engine* engine, Shader* shader) : VirtualScene(engine) {
@@ -23,7 +23,7 @@ Scene::Scene(Engine* engine, Shader* shader) : VirtualScene(engine) {
     this->shader = shader;
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
     lightServer = new LightServer();
-    lightServer->setTiles(camera, (unsigned int)engine->getWindow()->getWidth(), (unsigned int)engine->getWindow()->getHeight());
+    lightServer->setTiles(shader, camera, (unsigned int)engine->getWindow()->getWidth(), (unsigned int)engine->getWindow()->getHeight());
 }
 
 /**

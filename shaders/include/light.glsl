@@ -1,8 +1,11 @@
 #define MAX_DIRECTIONAL_LIGHTS 5
 #define MAX_POINT_LIGHTS 50
+#define TILE_SIZE 16
 
 uniform int uDirectionalLightCount;
 uniform int uPointLightCount;
+uniform usamplerBuffer lightTiles;
+uniform usamplerBuffer lightIndices;
 
 struct DirectionalLight {
     vec3 color;
@@ -21,8 +24,37 @@ struct AmbientLight {
     vec3 color;
 };
 
+struct Tile {
+    uint offset;
+    uint count;
+};
+
 layout (std140) uniform lights {
     DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
     PointLight pointLights[MAX_POINT_LIGHTS];
     AmbientLight ambientLight;
 };
+
+Tile getTile() {
+    int tilesX = int(ceil(800.0 / float(TILE_SIZE)));
+
+    ivec2 tileCoord = ivec2(gl_FragCoord.xy) / TILE_SIZE;
+    int tileIndex = tileCoord.y * tilesX + tileCoord.x;
+
+    uvec4 texelData = texelFetch(lightTiles, tileIndex);
+
+    Tile tile;
+    tile.offset = texelData.x;
+    tile.count  = texelData.y;
+    return tile;
+}
+
+PointLight getLightByIndex(uint linearIndex) {
+    int texelIndex = int(linearIndex) / 4;      // divide by 4
+    int component  = int(linearIndex) % 4;      // modulo 4
+
+    uvec4 texelData = texelFetch(lightIndices, texelIndex);
+    uint lightIndex = texelData[component];
+
+    return pointLights[lightIndex];
+}

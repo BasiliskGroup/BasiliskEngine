@@ -9,7 +9,8 @@ namespace bsk::internal {
 LightServer::LightServer() {
     unsigned int bufferSize = MAX_DIRECTIONAL_LIGHTS * 2 * sizeof(glm::vec4) + MAX_POINT_LIGHTS * 2 * sizeof(glm::vec4) + sizeof(glm::vec4);
     ubo = new UBO(nullptr, bufferSize, GL_DYNAMIC_DRAW);
-
+    tileTBO = nullptr;
+    lightIndicesTBO = nullptr;
     directionalLightData = std::vector<glm::vec4>(MAX_DIRECTIONAL_LIGHTS * 2);
     pointLightData = std::vector<glm::vec4>(MAX_POINT_LIGHTS * 2);
     ambientLightData = glm::vec3(0.0, 0.0, 0.0);
@@ -68,6 +69,10 @@ void LightServer::update(StaticCamera* camera, Shader* shader, std::string name,
         directionalLightData[i * 2 + 1] = glm::vec4(directionalLights[i]->getDirection(), 0.0);
     }
 
+    // Sort point lights by distance from camera
+    std::sort(pointLights.begin(), pointLights.end(), [camera](PointLight* a, PointLight* b) {
+        return glm::length(camera->getPosition() - a->getPosition()) < glm::length(camera->getPosition() - b->getPosition());
+    });
     // Get point lights data
     size_t lightCount = std::min(pointLights.size(), static_cast<size_t>(MAX_POINT_LIGHTS));
     for (size_t i = 0; i < lightCount; i++) {
@@ -101,7 +106,7 @@ void LightServer::update(StaticCamera* camera, Shader* shader, std::string name,
 void LightServer::bind(Shader* shader, std::string name, unsigned int slot) {
     shader->bind(name.c_str(), ubo, slot);
     shader->setUniform("uDirectionalLightCount", std::min((int)directionalLights.size(), MAX_DIRECTIONAL_LIGHTS));
-    shader->setUniform("uPointLightCount", std::min((int)pointLights.size(), MAX_POINT_LIGHTS));
+    // shader->setUniform("uPointLightCount", std::min((int)pointLights.size(), MAX_POINT_LIGHTS));
 }
 
 glm::vec3 unproject(const glm::mat4& inverseProjection, float x, float y) {
@@ -111,9 +116,8 @@ glm::vec3 unproject(const glm::mat4& inverseProjection, float x, float y) {
 }
 
 bool lightIntersectsTile(glm::vec3& lightPositionViewSpace, float lightRadius, Tile& tile) {
-    if (lightPositionViewSpace.z - lightRadius > 0.0f) {
+    if (lightPositionViewSpace.z - lightRadius > 0.0f)
         return false;
-    }
     for (int i = 0; i < 4; i++) {
         float distance = glm::dot(tile.planes[i].normal, lightPositionViewSpace);
         if (distance < -lightRadius) { return false; }
@@ -121,13 +125,23 @@ bool lightIntersectsTile(glm::vec3& lightPositionViewSpace, float lightRadius, T
     return true;
 }
 
-void LightServer::setTiles(StaticCamera* camera, unsigned int screenWidth, unsigned int screenHeight) {
+void LightServer::setTiles(Shader* shader, StaticCamera* camera, unsigned int screenWidth, unsigned int screenHeight) {
     tilesX = (unsigned int)ceil((float)screenWidth  / (float)TILE_SIZE);
     tilesY = (unsigned int)ceil((float)screenHeight / (float)TILE_SIZE);
     unsigned int tileCount = tilesX * tilesY;
 
     tiles.resize(tileCount);
     tileInfos.resize(tileCount);
+    lightIndices.resize(tileCount * MAX_LIGHTS_PER_TILE);
+
+    if (tileTBO) { delete tileTBO; }
+    if (lightIndicesTBO) { delete lightIndicesTBO; }
+
+    tileTBO = new TBO(tileInfos);
+    lightIndicesTBO = new TBO(lightIndices);
+
+    shader->bind("lightTiles", tileTBO, 7);
+    shader->bind("lightIndices", lightIndicesTBO, 14);
 
     glm::mat4 projection = camera->getProjection();
     glm::mat4 inverseProjection = glm::inverse(projection);
@@ -165,8 +179,6 @@ void LightServer::setTiles(StaticCamera* camera, unsigned int screenWidth, unsig
 }
 
 void LightServer::updateTiles(StaticCamera* camera) {
-    unsigned int MAX_LIGHTS_PER_TILE = 16;
-
     lightIndices.clear();
     lightIndices.reserve(tiles.size() * MAX_LIGHTS_PER_TILE);
     
@@ -192,16 +204,27 @@ void LightServer::updateTiles(StaticCamera* camera) {
         }
     }
 
+    tileTBO->write(tileInfos);
+    lightIndicesTBO->write(lightIndices);
 
-    std::cout << "================================================================================" << std::endl;
-    for (unsigned int y = 0; y < tilesY; ++y) {
-        for (unsigned int x = 0; x < tilesX; ++x) {
-            unsigned int tileIndex = y * tilesX + x;
-            TileInfo& info = tileInfos.at(tileIndex);
-            std::cout << info.count << ", ";
-        }
-        std::cout << std::endl;
-    }
+
+    // std::cout << "================================================================================" << std::endl;
+    // for (unsigned int y = 0; y < tilesY; ++y) {
+    //     for (unsigned int x = 0; x < tilesX; ++x) {
+    //         std::cout << "[";
+
+    //         TileInfo& info = tileInfos.at(y * tilesX + x);
+    //         for (unsigned int i = info.offset; i < info.offset + info.count; ++i) {
+    //             std::cout << lightIndices.at(i) << ",";
+    //         }
+    //         std::cout << "]";
+
+    //         // unsigned int tileIndex = y * tilesX + x;
+    //         // TileInfo& info = tileInfos.at(tileIndex);
+    //         // std::cout << info.count << ", ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
 }
 
