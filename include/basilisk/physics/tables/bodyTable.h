@@ -14,6 +14,7 @@ class BodyTable : public VirtualTable {
 private:
     std::vector<Rigid*> bodies;
     std::vector<bool> toDelete;
+    std::vector<bool> sleeping;
     std::vector<glm::vec3> pos;
     std::vector<glm::vec3> initial;
     std::vector<glm::vec3> inertial;

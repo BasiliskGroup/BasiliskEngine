@@ -83,7 +83,7 @@ void BodyTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color
+    bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping
     );
 
     // update capacity
@@ -99,9 +99,7 @@ void BodyTable::compact() {
 
     // TODO check to see who needs to be compacted and who will just get cleared anyway
     compactTensors(toDelete, size,
-        bodies, pos, initial, inertial, vel, prevVel,
-        scale, friction, radius, mass, moment,
-        collider, mat, imat, rmat, updated, color
+bodies, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping
     );
 
     size = active;
@@ -120,6 +118,7 @@ void BodyTable::insert(Rigid* body, glm::vec3 position, glm::vec2 size, float de
     // insert into table
     this->bodies[this->size] = body;
     this->toDelete[this->size] = false;
+    this->sleeping[this->size] = false;
     this->pos[this->size] = position;
     this->vel[this->size] = velocity;
     this->prevVel[this->size] = velocity;
