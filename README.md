@@ -36,21 +36,29 @@ python -m build
 # Todo
 
 ## Rendering
-- [ ] Lighting System
-    - [ ] Directional
-    - [ ] Point
+- [x] Lighting System
+    - [x] Directional
+    - [x] Point
     - [ ] Spot
-    - [ ] Ambient
-- [ ] Skybox
+    - [x] Ambient
+- [x] Skybox
 - [ ] Shadows
 - [ ] Basic PBR
 - [ ] Bloom
 - [ ] Text Rendering
 - [ ] SSAO
 
+## QOL
+- [ ] Default lights
+- [ ] Default material/texture
+- [ ] Material from path
+- [ ] Default Mesh
+
 ## Optimizations
+- [x] Forward+
+- [ ] CSM
 - [ ] Frustum Culling
 - [ ] Auto LOD (meshoptimizer)
-- [ ] Instancing (After and with previous)
+- [ ] Instancing
 
 ## Physics
