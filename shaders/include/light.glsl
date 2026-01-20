@@ -1,11 +1,11 @@
 #define MAX_DIRECTIONAL_LIGHTS 5
-#define MAX_POINT_LIGHTS 50
 #define TILE_SIZE 32
 
 uniform int uDirectionalLightCount;
 uniform int uPointLightCount;
 uniform usamplerBuffer lightTiles;
 uniform usamplerBuffer lightIndices;
+uniform samplerBuffer pointLights;
 
 struct DirectionalLight {
     vec3 color;
@@ -31,9 +31,21 @@ struct Tile {
 
 layout (std140) uniform lights {
     DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
-    PointLight pointLights[MAX_POINT_LIGHTS];
     AmbientLight ambientLight;
 };
+
+PointLight getPointLight(int index) {
+    vec4 t1 = texelFetch(pointLights, 2 * index);
+    vec4 t2 = texelFetch(pointLights, 2 * index + 1);
+
+    PointLight light;
+    light.color = t1.rgb;
+    light.intensity = t1.a;
+    light.position = t2.xyz;
+    light.range = t2.w;
+
+    return light;
+}
 
 Tile getTile() {
     int tilesX = int(ceil(800.0 / float(TILE_SIZE)));
@@ -56,5 +68,5 @@ PointLight getLightByIndex(uint linearIndex) {
     uvec4 texelData = texelFetch(lightIndices, texelIndex);
     uint lightIndex = texelData[component];
 
-    return pointLights[lightIndex];
+    return getPointLight(int(lightIndex));
 }

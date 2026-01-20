@@ -4,8 +4,8 @@ float getAttenuation(float distance, float range) {
     float q = 1.0 / (range * range);
     float attenuation = 1.0 / (1.0 + q * distance * distance);
 
-    // float fade = 1.0 - smoothstep(0.8 * range, range, distance);
-    float fade = clamp((range - distance) / (0.2 * range), 0.0, 1.0);
+    float fade = 1.0 - smoothstep(0.8 * range, range, distance);
+    // float fade = clamp((range - distance) / (0.2 * range), 0.0, 1.0);
     return attenuation * fade;
 }
 

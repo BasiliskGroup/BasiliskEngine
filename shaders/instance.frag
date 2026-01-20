@@ -34,8 +34,8 @@ void main() {
         PointLight pointLight = getLightByIndex(i);
         pointLightColor += calculatePointLight(pointLight, position, N, V);
     }
-    // for (int i = 0; i < uPointLightCount; i++) {
-    //     PointLight pointLight = pointLights[i];
+    // for (int i = 0; i < 20; i++) {
+    //     PointLight pointLight = getPointLight(i);
     //     pointLightColor += calculatePointLight(pointLight, position, N, V);
     // }
     

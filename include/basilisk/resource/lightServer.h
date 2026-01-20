@@ -12,7 +12,7 @@
 #include <basilisk/render/tbo.h>
 
 #define MAX_DIRECTIONAL_LIGHTS 5
-#define MAX_POINT_LIGHTS 50
+#define MAX_POINT_LIGHTS 1000
 #define TILE_SIZE 32
 #define MAX_LIGHTS_PER_TILE 32
 
@@ -47,6 +47,7 @@ class LightServer {
 
         TBO* tileTBO;
         TBO* lightIndicesTBO;
+        TBO* pointLightsTBO;
         unsigned int tilesX;
         unsigned int tilesY;
         std::vector<Tile> tiles;

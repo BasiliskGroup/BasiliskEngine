@@ -7,13 +7,17 @@ namespace bsk::internal {
  * 
  */
 LightServer::LightServer() {
-    unsigned int bufferSize = MAX_DIRECTIONAL_LIGHTS * 2 * sizeof(glm::vec4) + MAX_POINT_LIGHTS * 2 * sizeof(glm::vec4) + sizeof(glm::vec4);
-    ubo = new UBO(nullptr, bufferSize, GL_DYNAMIC_DRAW);
-    tileTBO = nullptr;
-    lightIndicesTBO = nullptr;
+
     directionalLightData = std::vector<glm::vec4>(MAX_DIRECTIONAL_LIGHTS * 2);
     pointLightData = std::vector<glm::vec4>(MAX_POINT_LIGHTS * 2);
     ambientLightData = glm::vec3(0.0, 0.0, 0.0);
+
+    unsigned int bufferSize = MAX_DIRECTIONAL_LIGHTS * 2 * sizeof(glm::vec4) + MAX_POINT_LIGHTS * 2 * sizeof(glm::vec4) + sizeof(glm::vec4);
+    ubo = new UBO(nullptr, bufferSize, GL_DYNAMIC_DRAW);
+
+    tileTBO = nullptr;
+    lightIndicesTBO = nullptr;
+    pointLightsTBO = new TBO(pointLightData);
 }
 
 /**
@@ -68,6 +72,20 @@ void LightServer::update(StaticCamera* camera, Shader* shader, std::string name,
         directionalLightData[i * 2] = glm::vec4(directionalLights[i]->getColor(), directionalLights[i]->getIntensity());
         directionalLightData[i * 2 + 1] = glm::vec4(directionalLights[i]->getDirection(), 0.0);
     }
+    // Calculate total ambient light data
+    ambientLightData = glm::vec3(0.0, 0.0, 0.0);
+    for (AmbientLight* light : ambientLights) {
+        ambientLightData += light->getColor() * light->getIntensity();
+    }
+
+    // Write data to UBO (only the portion actually used)
+    size_t directionalDataSize = directionalCount * 2 * sizeof(glm::vec4);
+    ubo->write(directionalLightData.data(), directionalDataSize, 0);
+    ubo->write(glm::value_ptr(ambientLightData), sizeof(glm::vec3), MAX_DIRECTIONAL_LIGHTS * 2 * sizeof(glm::vec4));
+    
+    // Bind the light data to the shader
+    bind(shader, name, slot);
+
 
     // Sort point lights by distance from camera
     std::sort(pointLights.begin(), pointLights.end(), [camera](PointLight* a, PointLight* b) {
@@ -79,21 +97,7 @@ void LightServer::update(StaticCamera* camera, Shader* shader, std::string name,
         pointLightData[i * 2] = glm::vec4(pointLights[i]->getColor(), pointLights[i]->getIntensity());
         pointLightData[i * 2 + 1] = glm::vec4(pointLights[i]->getPosition(), pointLights[i]->getRange());
     }
-
-    // Calculate total ambient light data
-    ambientLightData = glm::vec3(0.0, 0.0, 0.0);
-    for (AmbientLight* light : ambientLights) {
-        ambientLightData += light->getColor() * light->getIntensity();
-    }
-
-    // Write data to UBO (only the portion actually used)
-    size_t directionalDataSize = directionalCount * 2 * sizeof(glm::vec4);
-    ubo->write(directionalLightData.data(), directionalDataSize, 0);
-    ubo->write(pointLightData.data(), pointLightData.size() * sizeof(glm::vec4), MAX_DIRECTIONAL_LIGHTS * 2 * sizeof(glm::vec4));
-    ubo->write(glm::value_ptr(ambientLightData), sizeof(glm::vec3), MAX_DIRECTIONAL_LIGHTS * 2 * sizeof(glm::vec4) + MAX_POINT_LIGHTS * 2 * sizeof(glm::vec4));
-    
-    // Bind the light data to the shader
-    bind(shader, name, slot);
+    pointLightsTBO->write(pointLightData);
 }
 
 /**
@@ -105,6 +109,7 @@ void LightServer::update(StaticCamera* camera, Shader* shader, std::string name,
  */
 void LightServer::bind(Shader* shader, std::string name, unsigned int slot) {
     shader->bind(name.c_str(), ubo, slot);
+    shader->bind("pointLights", pointLightsTBO, 15);
     shader->setUniform("uDirectionalLightCount", std::min((int)directionalLights.size(), MAX_DIRECTIONAL_LIGHTS));
     // shader->setUniform("uPointLightCount", std::min((int)pointLights.size(), MAX_POINT_LIGHTS));
 }
@@ -120,7 +125,7 @@ bool lightIntersectsTile(glm::vec3& lightPositionViewSpace, float lightRadius, T
         return false;
     for (int i = 0; i < 4; i++) {
         float distance = glm::dot(tile.planes[i].normal, lightPositionViewSpace);
-        if (distance < -lightRadius) { return false; }
+        if (distance < -(lightRadius + 1)) { return false; }
     }
     return true;
 }
@@ -213,26 +218,6 @@ void LightServer::updateTiles(StaticCamera* camera) {
 
     tileTBO->write(tileInfos);
     lightIndicesTBO->write(lightIndices);
-
-
-    // std::cout << "================================================================================" << std::endl;
-    // for (unsigned int y = 0; y < tilesY; ++y) {
-    //     for (unsigned int x = 0; x < tilesX; ++x) {
-    //         std::cout << "[";
-
-    //         TileInfo& info = tileInfos.at(y * tilesX + x);
-    //         for (unsigned int i = info.offset; i < info.offset + info.count; ++i) {
-    //             std::cout << lightIndices.at(i) << ",";
-    //         }
-    //         std::cout << "]";
-
-    //         // unsigned int tileIndex = y * tilesX + x;
-    //         // TileInfo& info = tileInfos.at(tileIndex);
-    //         // std::cout << info.count << ", ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
 }
 
 }   
