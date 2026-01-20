@@ -95,13 +95,16 @@ bool Manifold::initialize() {
     return getNumContacts() > 0;
 }
 
+int Manifold::rows() { return getData().numContacts * 2; }
+int Manifold::rows(ForceTable* forceTable, std::size_t index) { return forceTable->getManifolds(index).numContacts * 2; }
+
 void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
     ManifoldData& manifolds = forceTable->getManifolds(index);
 
     for (int i = 0; i < manifolds.numContacts; i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
-        glm::vec3 dpA = forceTable->getPositional(index).posA - forceTable->getPositional(index).initialA;
-        glm::vec3 dpB = forceTable->getPositional(index).posB - forceTable->getPositional(index).initialB;
+        glm::vec3 dpA = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::A)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::A)];
+        glm::vec3 dpB = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::B)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::B)];
         
         forceTable->setC(index, i * 2 + JN, manifolds.contacts[i].C0.x * (1 - alpha) + glm::dot(forceTable->getJA(index, i * 2 + JN), dpA) + glm::dot(forceTable->getJB(index, i * 2 + JN), dpB));
         forceTable->setC(index, i * 2 + JT, manifolds.contacts[i].C0.y * (1 - alpha) + glm::dot(forceTable->getJA(index, i * 2 + JT), dpA) + glm::dot(forceTable->getJB(index, i * 2 + JT), dpB));
@@ -121,7 +124,6 @@ void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t index, For
 }
 
 // getters
-int Manifold::rows() const { return getNumContacts() * 2; }
 Contact& Manifold::getContactRef(int index) { return getData().contacts[index]; }
 int Manifold::getNumContacts() const { return getData().numContacts; }
 float Manifold::getFriction() const { return getData().friction; }

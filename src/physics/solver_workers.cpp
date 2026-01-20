@@ -45,15 +45,11 @@ void Solver::workerLoop(unsigned int threadID) {
 
 void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) {
     // Verify activeColor is within bounds (defensive programming)
-    if (activeColor < 0 || activeColor >= static_cast<int>(colorGroups.size())) {
-        return;
-    }
+    assert ((activeColor < 0 || activeColor >= static_cast<int>(colorGroups.size())) == false);
     
     // Get the bodies for this color group - all bodies in the same color can be processed in parallel
     std::size_t colorSize = colorGroups[activeColor].size();
-    if (colorSize == 0) {
-        return; // Empty color group
-    }
+    assert (colorSize != 0);
     
     PrimalScratch& primalScratch = reinterpret_cast<PrimalScratch&>(scratch.storage);
     WorkRange range = partition(colorSize, threadID, NUM_THREADS);
@@ -64,17 +60,18 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
 }
 
 template<class TForce>
-inline void Solver::processForce(TForce* force, ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha) {
+inline void Solver::processForce(ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha) {
     TForce::computeConstraint(forceTable, forceIndex, alpha);
     TForce::computeDerivatives(forceTable, forceIndex, body);
 
-    for (int r = 0; r < force->rows(); ++r) {
+    int rows = TForce::rows(forceTable, forceIndex);
+    for (int r = 0; r < TForce::rows(forceTable, forceIndex); ++r) {
         const ParameterStruct& parameters = forceTable->getParameter(forceIndex, r);
-        DerivativeStruct derivatives = (body == ForceBodyOffset::A) ? forceTable->getDerivativeA(forceIndex, r) : forceTable->getDerivativeB(forceIndex, r);
+        const DerivativeStruct& derivatives = (body == ForceBodyOffset::A) ? forceTable->getDerivativeA(forceIndex, r) : forceTable->getDerivativeB(forceIndex, r); // TODO replace with size calculation
 
         // Use lambda as 0 if it's not a hard constraint
         float stiffness = parameters.stiffness;
-        float lambda = glm::isinf(stiffness) ? parameters.lambda : 0.0f;
+        float lambda = glm::isinf(stiffness) ? parameters.lambda : 0.0f; // no branch
 
         // Compute the clamped force magnitude (Sec 3.2)
         float penalty = parameters.penalty;
@@ -114,7 +111,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
         const std::size_t& forceIndex = forceData.force;
-        processForce<Manifold>((Manifold*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
+        processForce<Manifold>(forceTable, forceIndex, forceData.offset, scratch, alpha);
     }
 
     // JOINT
@@ -122,7 +119,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
         const std::size_t& forceIndex = forceData.force;
-        processForce<Joint>((Joint*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
+        processForce<Joint>(forceTable, forceIndex, forceData.offset, scratch, alpha);
     }
 
     // SPRING
@@ -130,7 +127,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
         const std::size_t& forceIndex = forceData.force;
-        processForce<Spring>((Spring*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
+        processForce<Spring>(forceTable, forceIndex, forceData.offset, scratch, alpha);
     }
 
     // MOTOR
@@ -138,7 +135,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
         const std::size_t& forceIndex = forceData.force;
-        processForce<Motor>((Motor*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
+        processForce<Motor>(forceTable, forceIndex, forceData.offset, scratch, alpha);
     }
 
     // Solve the SPD linear system using LDL and apply the update (Eq. 4)
@@ -148,14 +145,8 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     // update position in force table
     for (std::size_t i = data.start; i < data.start + data.getCount(); ++i) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][i];
-        const std::size_t& forceIndex = forceData.force;
-        Force* force = forceTable->getForce(forceIndex);
-
-        if (force->getBodyA() == body) {
-            forceTable->getPositional(forceIndex).posA = pos;
-        } else {
-            forceTable->getPositional(forceIndex).posB = pos;
-        }
+        Positional& positional = forceTable->getPositional(forceData.force);
+        positional.pos[(std::size_t) forceData.offset] = pos;
     }
 }
 
@@ -165,7 +156,6 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
 
 void Solver::dualStage(ThreadScratch& scratch, int threadID) {
     WorkRange range = partition(numForces, threadID, NUM_THREADS);
-
     for (std::size_t i = range.start; i < range.end; i++) {
         Force* force = forceTable->getForce(i);
         dualUpdateSingle(force);
@@ -216,8 +206,7 @@ void Solver::dualUpdateSingle(Force* force) {
 
         // Update the penalty parameter and clamp to material stiffness if we are within the force bounds (Eq. 16)
         if (newLambda > fmin && newLambda < fmax) {
-            float newPenalty = glm::min(penalty + beta * glm::abs(C), glm::min(PENALTY_MAX, stiffness));
-            parameters.penalty = newPenalty;
+            parameters.penalty = glm::min(penalty + beta * glm::abs(C), glm::min(PENALTY_MAX, stiffness));
         }
     }
 }

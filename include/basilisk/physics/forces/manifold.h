@@ -39,8 +39,8 @@ class Manifold : public Force {
 public:
     Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB);
 
-    int rows() const override;
-
+    static int rows(ForceTable* forceTable, std::size_t index);
+    int rows() override;
     bool initialize() override;
     static void computeConstraint(ForceTable* forceTable, std::size_t index, float alpha);
     static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body);

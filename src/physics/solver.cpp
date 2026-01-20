@@ -230,7 +230,7 @@ void Solver::step(float dtIncoming) {
             Force* next = force->getNext();
             delete force;
             force = next;
-        } else {
+        } else {    
             for (int i = 0; i < force->rows(); i++)
             {
                 if (postStabilize)
@@ -289,10 +289,10 @@ void Solver::step(float dtIncoming) {
     // Load initial positions into forces
     auto loadPositionalStart = timeNow();
     for (Force* force = forces; force != nullptr; force = force->getNext()) {
-        forceTable->getPositional(force->getIndex()).posA = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).posB = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).initialA = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).initialB = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
     }
     auto loadPositionalEnd = timeNow();
     printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
@@ -302,8 +302,7 @@ void Solver::step(float dtIncoming) {
     int totalIterations = iterations + (postStabilize ? 1 : 0);
     
     auto solverLoopStart = timeNow();
-    for (int it = 0; it < totalIterations; it++)
-    {
+    for (int it = 0; it < totalIterations; it++) {
         // If using post stabilization, either remove all or none of the pre-existing constraint error
         float alphaValue = alpha;
         if (postStabilize)

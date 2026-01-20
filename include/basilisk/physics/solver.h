@@ -133,7 +133,7 @@ public:
     void dualUpdateSingle(Force* force);
 
     template<class TForce>
-    inline void processForce(TForce* force, ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha);
+    inline void processForce(ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);

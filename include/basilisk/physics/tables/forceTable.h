@@ -10,6 +10,7 @@
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
+#include <basilisk/physics/tables/adjacency.h>
 
 namespace bsk::internal {
 
@@ -43,10 +44,8 @@ union SpecialParameters {
 };
 
 struct Positional {
-    glm::vec3 posA = glm::vec3(0.0f);
-    glm::vec3 posB = glm::vec3(0.0f);
-    glm::vec3 initialA = glm::vec3(0.0f);
-    glm::vec3 initialB = glm::vec3(0.0f);
+    std::array<glm::vec3, 2> pos;
+    std::array<glm::vec3, 2> initial;
 };
 
 // ------------------------------------------------------------
@@ -92,10 +91,10 @@ public:
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
     Positional& getPositional(std::size_t index) { return positional[index]; }
-    glm::vec3& getPosA(std::size_t index) { return positional[index].posA; }
-    glm::vec3& getPosB(std::size_t index) { return positional[index].posB; }
-    glm::vec3& getInitialA(std::size_t index) { return positional[index].initialA; }
-    glm::vec3& getInitialB(std::size_t index) { return positional[index].initialB; }
+    glm::vec3& getPosA(std::size_t index) { return positional[index].pos[0]; }
+    glm::vec3& getPosB(std::size_t index) { return positional[index].pos[1]; }
+    glm::vec3& getInitialA(std::size_t index) { return positional[index].initial[0]; }
+    glm::vec3& getInitialB(std::size_t index) { return positional[index].initial[1]; }
     Solver* getSolver() { return solver; }
 
     // index specific
@@ -132,10 +131,10 @@ public:
     void setRows(std::size_t index, int value) { rows[index] = value; }
     void setForceType(std::size_t index, ForceType value);
     void setPositional(std::size_t index, const Positional& value) { positional[index] = value; }
-    void setPosA(std::size_t index, const glm::vec3& value) { positional[index].posA = value; }
-    void setPosB(std::size_t index, const glm::vec3& value) { positional[index].posB = value; }
-    void setInitialA(std::size_t index, const glm::vec3& value) { positional[index].initialA = value; }
-    void setInitialB(std::size_t index, const glm::vec3& value) { positional[index].initialB = value; }
+    void setPosA(std::size_t index, const glm::vec3& value) { positional[index].pos[static_cast<std::size_t>(ForceBodyOffset::A)] = value; }
+    void setPosB(std::size_t index, const glm::vec3& value) { positional[index].pos[static_cast<std::size_t>(ForceBodyOffset::B)] = value; }
+    void setInitialA(std::size_t index, const glm::vec3& value) { positional[index].initial[static_cast<std::size_t>(ForceBodyOffset::A)] = value; }
+    void setInitialB(std::size_t index, const glm::vec3& value) { positional[index].initial[static_cast<std::size_t>(ForceBodyOffset::B)] = value; }
     void setSolver(Solver* value) { solver = value; }
     
     // index specific

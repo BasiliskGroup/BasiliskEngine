@@ -7,7 +7,7 @@ namespace bsk::internal {
 
 class Rigid;
 
-enum class ForceBodyOffset { A, B };
+enum class ForceBodyOffset : unsigned long { A, B };
 
 struct ColoredData {
     Rigid* body;

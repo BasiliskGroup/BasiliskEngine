@@ -21,8 +21,8 @@ public:
     Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, glm::vec3 stiffness = glm::vec3{ INFINITY, INFINITY, INFINITY },
         float fracture = INFINITY);
 
-    int rows() const override { return 3; }
-
+    static int rows(ForceTable* forceTable, std::size_t index) { return 3; }
+    int rows() override { return 3; }
     bool initialize() override;
     static void computeConstraint(ForceTable* forceTable, std::size_t index, float alpha);
     static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body);

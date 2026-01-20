@@ -31,7 +31,7 @@ public:
 
     void disable();
 
-    virtual int rows() const = 0;
+    virtual int rows() = 0;
     virtual bool initialize() = 0;
     
     // Getters
