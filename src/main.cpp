@@ -41,7 +41,7 @@ int main() {
     const float quadSize = 0.8f;  // Size of each quad
     const float missingProbability = 0.0f;
 
-    scene->getCamera()->setScale(gridSize * 1.5f);  // Zoom out to see the full grid
+    scene->getCamera()->setScale(gridSize * 3.0f);  // Zoom out to see the full grid
     
     // Increase camera speed by 5x (default is 3.0, so set to 15.0)
     if (auto* camera2D = dynamic_cast<bsk::Camera2D*>(scene->getCamera())) {

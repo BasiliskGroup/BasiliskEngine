@@ -63,6 +63,34 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
     }
 }
 
+template<class TForce>
+inline void Solver::processForce(TForce* force, ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha) {
+    TForce::computeConstraint(forceTable, forceIndex, alpha);
+    TForce::computeDerivatives(forceTable, forceIndex, body);
+
+    for (int r = 0; r < force->rows(); ++r) {
+        const ParameterStruct& parameters = forceTable->getParameter(forceIndex, r);
+        DerivativeStruct derivatives = (body == ForceBodyOffset::A) ? forceTable->getDerivativeA(forceIndex, r) : forceTable->getDerivativeB(forceIndex, r);
+
+        // Use lambda as 0 if it's not a hard constraint
+        float stiffness = parameters.stiffness;
+        float lambda = glm::isinf(stiffness) ? parameters.lambda : 0.0f;
+
+        // Compute the clamped force magnitude (Sec 3.2)
+        float penalty = parameters.penalty;
+        float f = glm::clamp(penalty * parameters.C + lambda, parameters.fmin, parameters.fmax);
+
+        // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
+        scratch.GoH = derivatives.H;
+        scratch.GoH = diagonal(glm::length(scratch.GoH[0]), glm::length(scratch.GoH[1]), glm::length(scratch.GoH[2])) * glm::abs(f);
+
+        // Accumulate force (Eq. 13) and hessian (Eq. 17)
+        scratch.J = derivatives.J;
+        scratch.rhs += scratch.J * f;
+        scratch.lhs += outer(scratch.J, scratch.J * penalty) + scratch.GoH;
+    }
+}
+
 void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex) {
     const ColoredData& data = colorGroups[activeColor][bodyColorIndex];
     Rigid* body = data.body; // TODO load mass, moment, and interial in here for entire solving stage
@@ -79,36 +107,38 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     // Iterate over all forces acting on the body
     // Load currentAlpha once per body (it's constant during the stage)
     float alpha = currentAlpha.load(std::memory_order_acquire);
-    for (std::size_t i = data.start; i < data.start + data.getCount(); ++i) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][i];
+
+    // MANIFOLD
+    std::size_t start = data.start;
+    std::size_t end = data.start + data.manifold;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
         const std::size_t& forceIndex = forceData.force;
-        Force* force = forceTable->getForce(forceIndex);
+        processForce<Manifold>((Manifold*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
+    }
 
-        // Compute constraint and its derivatives
-        force->computeConstraint(alpha);
-        force->computeDerivatives(body);
+    // JOINT
+    end = start + data.joint;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        const std::size_t& forceIndex = forceData.force;
+        processForce<Joint>((Joint*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
+    }
 
-        for (int i = 0; i < force->rows(); i++) {
-            const ParameterStruct& parameters = forceTable->getParameter(forceIndex, i);
-            DerivativeStruct derivatives = (body == force->getBodyA()) ? forceTable->getDerivativeA(forceIndex, i) : forceTable->getDerivativeB(forceIndex, i);
+    // SPRING
+    end = start + data.spring;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        const std::size_t& forceIndex = forceData.force;
+        processForce<Spring>((Spring*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
+    }
 
-            // Use lambda as 0 if it's not a hard constraint
-            float stiffness = parameters.stiffness;
-            float lambda = glm::isinf(stiffness) ? parameters.lambda : 0.0f;
-
-            // Compute the clamped force magnitude (Sec 3.2)
-            float penalty = parameters.penalty;
-            float f = glm::clamp(penalty * parameters.C + lambda, parameters.fmin, parameters.fmax);
-
-            // Compute the diagonally lumped geometric stiffness term (Sec 3.5)
-            scratch.GoH = derivatives.H;
-            scratch.GoH = diagonal(glm::length(scratch.GoH[0]), glm::length(scratch.GoH[1]), glm::length(scratch.GoH[2])) * glm::abs(f);
-
-            // Accumulate force (Eq. 13) and hessian (Eq. 17)
-            scratch.J = derivatives.J;
-            scratch.rhs += scratch.J * f;
-            scratch.lhs += outer(scratch.J, scratch.J * penalty) + scratch.GoH;
-        }
+    // MOTOR
+    end = start + data.motor;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        const std::size_t& forceIndex = forceData.force;
+        processForce<Motor>((Motor*)forceTable->getForce(forceIndex), forceTable, forceIndex, forceData.offset, scratch, alpha);
     }
 
     // Solve the SPD linear system using LDL and apply the update (Eq. 4)
@@ -142,10 +172,27 @@ void Solver::dualStage(ThreadScratch& scratch, int threadID) {
     }
 }
 
+
 void Solver::dualUpdateSingle(Force* force) {
     // Compute constraint
-    force->computeConstraint(currentAlpha.load(std::memory_order_acquire));
     const std::size_t& forceIndex = force->getIndex();
+
+    switch (force->getForceType()) {
+        case ForceType::JOINT:
+            Joint::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
+            break;
+        case ForceType::MANIFOLD:
+            Manifold::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
+            break;
+        case ForceType::SPRING:
+            Spring::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
+            break;
+        case ForceType::MOTOR:
+            Motor::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
+            break;
+        default:
+            break;
+    }
 
     for (int i = 0; i < force->rows(); i++) {
         ParameterStruct& parameters = forceTable->getParameter(forceIndex, i);

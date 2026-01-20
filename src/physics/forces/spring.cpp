@@ -30,20 +30,21 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
     solver->getForceTable()->setForceType(this->index, ForceType::SPRING);
 }
 
-void Spring::computeConstraint(float alpha)
-{
+void Spring::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
     // Compute constraint function at current state C(x)
-    setC(0, length(transform(getPosA(), getRA()) - transform(getPosB(), getRB())) - getRest());
+    SpringStruct& springs = forceTable->getSprings(index);
+    forceTable->setC(index, 0, length(transform(forceTable->getPosA(index), springs.rA) - transform(forceTable->getPosB(index), springs.rB)) - springs.rest);
 }
 
-void Spring::computeDerivatives(Rigid* body)
-{
+void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
+    SpringStruct& springs = forceTable->getSprings(index);
+
     // Compute the first and second derivatives for the desired body
     // GLM matrices are column-major: mat2(x1, y1, x2, y2) = columns (x1,x2), (y1,y2)
     glm::mat2 S = glm::mat2(0, 1, -1, 0);  // [0 -1; 1 0] -> columns (0,1), (-1,0)
     glm::mat2 I = glm::mat2(1, 0, 0, 1);   // Identity: columns (1,0), (0,1)
 
-    glm::vec2 d = transform(getPosA(), getRA()) - transform(getPosB(), getRB());
+    glm::vec2 d = transform(forceTable->getPosA(index), springs.rA) - transform(forceTable->getPosB(index), springs.rB);
     float dlen2 = dot(d, d);
     if (dlen2 == 0)
         return;
@@ -52,20 +53,20 @@ void Spring::computeDerivatives(Rigid* body)
     glm::vec2 n = d / dlen;
     glm::mat2 dxx = (I - outer(n, n)) / dlen;
 
-    if (body == bodyA)
+    if (body == ForceBodyOffset::A)
     {
-        glm::vec2 Sr = rotate(getPosA().z, S * getRA());
-        glm::vec2 r = rotate(getPosA().z, getRA());
+        glm::vec2 Sr = rotate(forceTable->getPosA(index).z, S * springs.rA);
+        glm::vec2 r = rotate(forceTable->getPosA(index).z, springs.rA);
 
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
 
-        setJA(0, glm::vec3(n.x, n.y, dot(n, Sr)));
+        forceTable->setJA(index, 0, glm::vec3(n.x, n.y, dot(n, Sr)));
         // GLM 3x3 constructor: mat3(x1,y1,z1, x2,y2,z2, x3,y3,z3) = columns
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        setHA(0, glm::mat3(
+        forceTable->setHA(index, 0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
@@ -73,15 +74,15 @@ void Spring::computeDerivatives(Rigid* body)
     }
     else
     {
-        glm::vec2 Sr = rotate(getPosB().z, S * getRB());
-        glm::vec2 r = rotate(getPosB().z, getRB());
+        glm::vec2 Sr = rotate(forceTable->getPosB(index).z, S * springs.rB);
+        glm::vec2 r = rotate(forceTable->getPosB(index).z, springs.rB);
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 
-        setJB(0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
+        forceTable->setJB(index, 0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        setHB(0, glm::mat3(
+        forceTable->setHB(index, 0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
@@ -98,6 +99,9 @@ float Spring::getRest() const { return getData().rest; }
 
 // Setters
 void Spring::setData(const SpringStruct& value) { getData() = value; }
+void Spring::setRest(float value) { getData().rest = value; }
+void Spring::setRA(const glm::vec2& value) { getData().rA = value; }
+void Spring::setRB(const glm::vec2& value) { getData().rB = value; }
 
 // Mutable references for direct access (for performance-critical code)
 glm::vec2& Spring::getRARef() { return getData().rA; }

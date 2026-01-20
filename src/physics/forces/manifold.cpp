@@ -95,26 +95,28 @@ bool Manifold::initialize() {
     return getNumContacts() > 0;
 }
 
-void Manifold::computeConstraint(float alpha) {
-    for (int i = 0; i < getNumContacts(); i++) {
+void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
+    ManifoldData& manifolds = forceTable->getManifolds(index);
+
+    for (int i = 0; i < manifolds.numContacts; i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
-        glm::vec3 dpA = solver->getForceTable()->getPositional(index).posA - solver->getForceTable()->getPositional(index).initialA;
-        glm::vec3 dpB = solver->getForceTable()->getPositional(index).posB - solver->getForceTable()->getPositional(index).initialB;
+        glm::vec3 dpA = forceTable->getPositional(index).posA - forceTable->getPositional(index).initialA;
+        glm::vec3 dpB = forceTable->getPositional(index).posB - forceTable->getPositional(index).initialB;
         
-        setC(i * 2 + JN, getContact(i).C0.x * (1 - alpha) + glm::dot(getJA(i * 2 + JN), dpA) + glm::dot(getJB(i * 2 + JN), dpB));
-        setC(i * 2 + JT, getContact(i).C0.y * (1 - alpha) + glm::dot(getJA(i * 2 + JT), dpA) + glm::dot(getJB(i * 2 + JT), dpB));
+        forceTable->setC(index, i * 2 + JN, manifolds.contacts[i].C0.x * (1 - alpha) + glm::dot(forceTable->getJA(index, i * 2 + JN), dpA) + glm::dot(forceTable->getJB(index, i * 2 + JN), dpB));
+        forceTable->setC(index, i * 2 + JT, manifolds.contacts[i].C0.y * (1 - alpha) + glm::dot(forceTable->getJA(index, i * 2 + JT), dpA) + glm::dot(forceTable->getJB(index, i * 2 + JT), dpB));
 
         // Update the friction bounds using the latest lambda values
-        float frictionBound = glm::abs(getLambda(i * 2 + JN)) * getFriction();
-        setFmax(i * 2 + JT, frictionBound);
-        setFmin(i * 2 + JT, -frictionBound);
+        float frictionBound = glm::abs(forceTable->getLambda(index, i * 2 + JN)) * manifolds.friction;
+        forceTable->setFmax(index, i * 2 + JT, frictionBound);
+        forceTable->setFmin(index, i * 2 + JT, -frictionBound);
 
         // Check if the contact is sticking, so that on the next frame we can use the old contact points for better static friction handling
-        getContactRef(i).stick = glm::abs(getLambda(i * 2 + JT)) < frictionBound && glm::abs(getContact(i).C0.y) < STICK_THRESH;
+        manifolds.contacts[i].stick = glm::abs(forceTable->getLambda(index, i * 2 + JT)) < frictionBound && glm::abs(manifolds.contacts[i].C0.y) < STICK_THRESH;
     }
 }
 
-void Manifold::computeDerivatives(Rigid* body) {
+void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
     return; // should already be stored, doesn't change after initialization
 }
 

@@ -1,28 +1,19 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
 #pragma once
 
 #include <basilisk/util/includes.h>
+#include <basilisk/physics/tables/adjacency.h>
 
 namespace bsk::internal {
 
 class Solver;
 class Rigid;
+class ForceTable;
 
 // Holds all user defined and derived constraint parameters, and provides a common interface for all forces.
-class Force
-{
+class Force {
 protected:
     Solver* solver;
+    ForceTable* forceTable;
     Rigid* bodyA;
     Rigid* bodyB;
     Force* nextA;
@@ -42,8 +33,6 @@ public:
 
     virtual int rows() const = 0;
     virtual bool initialize() = 0;
-    virtual void computeConstraint(float alpha) = 0;
-    virtual void computeDerivatives(Rigid* body) = 0;
     
     // Getters
     Solver* getSolver() const { return solver; }

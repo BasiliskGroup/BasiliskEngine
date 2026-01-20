@@ -47,6 +47,7 @@ Solver::Solver() :
     this->colliderTable = new ColliderTable(64);
     this->bodyTable = new BodyTable(128);
     this->forceTable = new ForceTable(128);
+    this->forceTable->setSolver(this);
     defaultParams();
 
     workers.reserve(NUM_THREADS);
@@ -166,7 +167,7 @@ void Solver::remove(Force* force) {
 void Solver::defaultParams() {
     // gravity = { 0.0f, -9.81f, 0.0f };
     gravity = std::nullopt;
-    iterations = 5;
+    iterations = 10;
 
     // Note: in the paper, beta is suggested to be [1, 1000]. Technically, the best choice will
     // depend on the length, mass, and constraint function scales (ie units) of your simulation,
@@ -288,10 +289,10 @@ void Solver::step(float dtIncoming) {
     // Load initial positions into forces
     auto loadPositionalStart = timeNow();
     for (Force* force = forces; force != nullptr; force = force->getNext()) {
-        if (force->getBodyA()) forceTable->getPositional(force->getIndex()).posA = force->getBodyA()->getPosition();
-        if (force->getBodyB()) forceTable->getPositional(force->getIndex()).posB = force->getBodyB()->getPosition();
-        if (force->getBodyA()) forceTable->getPositional(force->getIndex()).initialA = force->getBodyA()->getInitial();
-        if (force->getBodyB()) forceTable->getPositional(force->getIndex()).initialB = force->getBodyB()->getInitial();
+        forceTable->getPositional(force->getIndex()).posA = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).posB = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).initialA = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
+        forceTable->getPositional(force->getIndex()).initialB = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
     }
     auto loadPositionalEnd = timeNow();
     printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");

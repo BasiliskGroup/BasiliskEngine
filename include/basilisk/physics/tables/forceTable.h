@@ -62,6 +62,8 @@ class Force;
 // ------------------------------------------------------------
 class ForceTable : public VirtualTable {
 private:
+    Solver* solver;
+
     // compute variables
     std::vector<Force*> forces;
     std::vector<bool> toDelete;
@@ -94,6 +96,7 @@ public:
     glm::vec3& getPosB(std::size_t index) { return positional[index].posB; }
     glm::vec3& getInitialA(std::size_t index) { return positional[index].initialA; }
     glm::vec3& getInitialB(std::size_t index) { return positional[index].initialB; }
+    Solver* getSolver() { return solver; }
 
     // index specific
     glm::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
@@ -133,6 +136,7 @@ public:
     void setPosB(std::size_t index, const glm::vec3& value) { positional[index].posB = value; }
     void setInitialA(std::size_t index, const glm::vec3& value) { positional[index].initialA = value; }
     void setInitialB(std::size_t index, const glm::vec3& value) { positional[index].initialB = value; }
+    void setSolver(Solver* value) { solver = value; }
     
     // index specific
     void setJA(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesA[forceIndex][row].J = value; }
