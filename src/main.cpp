@@ -33,7 +33,7 @@ int main() {
     bsk::Material* mouseMaterial = new bsk::Material({1, 1, 1}, images[4]);
 
     // Create a box collider (unit box vertices) - can be shared by all box-shaped objects
-    bsk::Collider* boxCollider = new bsk::Collider(scene->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
+    bsk::Collider* boxCollider = new bsk::Collider({{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
 
     // Create a 50x50 grid of quads with some missing
     const int gridSize = 20;

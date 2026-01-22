@@ -14,7 +14,7 @@ private:
     std::size_t index;
 
 public: 
-    Collider(Solver* solver, std::vector<glm::vec2> vertices);
+    Collider(std::vector<glm::vec2> vertices);
     ~Collider();
 
     // getters

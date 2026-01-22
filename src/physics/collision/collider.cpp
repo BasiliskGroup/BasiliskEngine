@@ -4,8 +4,8 @@
 
 namespace bsk::internal {
 
-Collider::Collider(Solver* solver, std::vector<glm::vec2> vertices)
-    : table(solver->getColliderTable())
+Collider::Collider(std::vector<glm::vec2> vertices)
+    : table(Solver::getColliderTable())
 {
     table->insert(this, vertices); // sets index
 }
