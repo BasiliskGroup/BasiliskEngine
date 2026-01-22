@@ -76,4 +76,12 @@ void Scene::add(Light* light) {
     }
 }
 
+void Scene::add(Node* node) {
+    root->add(node);
+}
+
+void Scene::remove(Node* node) {
+    root->remove(node);
+}
+
 }

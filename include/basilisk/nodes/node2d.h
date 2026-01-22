@@ -5,6 +5,7 @@
 #include <basilisk/nodes/virtualNode.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/collision/collider.h>
+#include <basilisk/physics/rigid.h>
 
 namespace bsk::internal {
 
@@ -20,7 +21,8 @@ private:
 public:
     Node2D(VirtualScene2D* scene, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
     Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
-    Node2D(VirtualScene2D* scene, Node2D* parent);
+    Node2D(VirtualScene2D* scene);
+    Node2D(Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
     Node2D(const Node2D& other) noexcept;
     Node2D(Node2D&& other) noexcept;
     
@@ -29,10 +31,10 @@ public:
     Node2D& operator=(const Node2D& other) noexcept;
     Node2D& operator=(Node2D&& other) noexcept;
 
-    void setPosition(glm::vec2 position);
+    void setPosition(glm::vec2 position) override;
     void setPosition(glm::vec3 position);
-    void setRotation(float rotation);
-    void setScale(glm::vec2 scale);
+    void setRotation(float rotation) override;
+    void setScale(glm::vec2 scale) override;
     void setVelocity(glm::vec3 velocity);
     void setLayer(float layer) { this->layer = layer; updateModel(); }
     // void setManifoldMask(float x, float y, float z) { rigid->setManifoldMask(x, y, z); }

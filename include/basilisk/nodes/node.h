@@ -14,7 +14,8 @@ class Node : public VirtualNode<Node, glm::vec3, glm::quat, glm::vec3> {
     public:
         Node(VirtualScene3D* scene, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale);
         Node(Node* parent, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale);
-        Node(VirtualScene3D* scene, Node* parent);
+        Node(VirtualScene3D* scene);
+        Node(Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale);
 
         // already defined in VirtualNode
         Node(const Node& other) noexcept = default;

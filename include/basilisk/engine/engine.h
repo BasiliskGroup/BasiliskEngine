@@ -17,7 +17,7 @@ class Engine {
         Mouse* mouse;
 
         Frame* frame;
-        ResourceServer* resourceServer;
+        static std::unique_ptr<ResourceServer> resourceServer;
         bool autoMouseGrab;
 
     public:
@@ -35,7 +35,7 @@ class Engine {
         inline Keyboard* getKeyboard() const { return keyboard; }
         inline Frame* getFrame() const { return frame; }
         inline double getDeltaTime() { return window->getDeltaTime(); }
-        inline ResourceServer* getResourceServer() const { return resourceServer; }
+        static ResourceServer* getResourceServer() { return resourceServer.get(); }
 
         inline void enableDepthTest() { window->enableDepthTest(); }
         inline void enableCullFace() { window->enableCullFace(); }

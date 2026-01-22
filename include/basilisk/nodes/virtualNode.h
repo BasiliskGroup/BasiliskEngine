@@ -67,7 +67,8 @@ public:
     };
 
     // we don't want a default constructor, every node must be a part of a tree
-    VirtualNode(VirtualScene<Derived, P, R, S>* scene, Derived* parent); // used to create root nodes
+    VirtualNode(VirtualScene<Derived, P, R, S>* scene); // used to create root nodes
+    VirtualNode(Mesh* mesh, Material* material, P position, R rotation, S scale); // orphaned node
     VirtualNode(VirtualScene<Derived, P, R, S>* scene, Mesh* mesh, Material* material, P position, R rotation, S scale);
     VirtualNode(Derived* parent, Mesh* mesh, Material* material, P position, R rotation, S scale);
     VirtualNode(const VirtualNode& other) noexcept;
@@ -111,6 +112,11 @@ private:
     void clear();
     void createBuffers();
     void deleteBuffers();
+    
+    // Helper methods for add/remove logic
+    bool hasCycle(Derived* potential_ancestor);
+    void setSceneRecursive(VirtualScene<Derived, P, R, S>* new_scene);
+    void orphanRecursive();
 };
 
 }

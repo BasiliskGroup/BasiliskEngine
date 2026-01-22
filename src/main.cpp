@@ -64,8 +64,9 @@ int main() {
             float x = gridOffset + col * spacing;
             float y = gridOffset + row * spacing;
             
-            bsk::Node2D* node = new bsk::Node2D(scene, quad, bricksMaterial, {x, y}, 0.0f, {quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)}, {0, 0, 0}, boxCollider, 1.0e1f, 0.5f);
+            bsk::Node2D* node = new bsk::Node2D(quad, bricksMaterial, {x, y}, 0.0f, {quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)}, {0, 0, 0}, boxCollider, 1.0e1f, 0.5f);
             gridNodes.push_back(node);
+            scene->add(node);
         }
     }
 

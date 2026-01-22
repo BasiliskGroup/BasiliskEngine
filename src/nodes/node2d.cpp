@@ -7,17 +7,23 @@ Node2D::Node2D(VirtualScene2D* scene, Mesh* mesh, Material* material, glm::vec2 
     : VirtualNode(scene, mesh, material, position, rotation, scale), rigid(nullptr) {
     updateModel();
     bindRigid(mesh, material, position, rotation, scale, velocity, collider, density, friction);
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
+    Engine::getResourceServer()->getMaterialServer()->add(material);
 }
 
 Node2D::Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
     : VirtualNode(parent, mesh, material, position, rotation, scale), rigid(nullptr) {
     updateModel();
     bindRigid(mesh, material, position, rotation, scale, velocity, collider, density, friction);
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
+    Engine::getResourceServer()->getMaterialServer()->add(material);
 }
 
-Node2D::Node2D(VirtualScene2D* scene, Node2D* parent) : VirtualNode(scene, parent), rigid(nullptr) {}
+Node2D::Node2D(VirtualScene2D* scene) : VirtualNode(scene), rigid(nullptr) {}
+
+Node2D::Node2D(Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
+    : VirtualNode(mesh, material, position, rotation, scale), rigid(nullptr) {
+    updateModel();
+    Engine::getResourceServer()->getMaterialServer()->add(material);
+}
 
 Node2D::Node2D(const Node2D& other) noexcept : VirtualNode(other), rigid(nullptr) {
     if (this == &other) return;
@@ -110,9 +116,9 @@ void Node2D::clear() {
     }
 }
 
-// -------------------
+// -------------------------------------------------------------------
 // used in copy constructors, rigids already have same stats as nodes
-// -------------------
+// -------------------------------------------------------------------
 void Node2D::setRigid(const Node2D& other) {
     clear();
     if (other.rigid == nullptr) return;
@@ -162,5 +168,7 @@ glm::vec3 Node2D::getVelocity() {
     }
     return rigid->getVelocity();
 }
+
+// TODO add add/remove functions overrides so that we can attach rigids to the solver
 
 }

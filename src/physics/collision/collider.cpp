@@ -12,6 +12,11 @@ Collider::Collider(std::vector<glm::vec2> vertices)
 
 Collider::~Collider() {
     // ColliderTable destructor handles cleanup of this collider
+    markForDeletion();
+}
+
+void Collider::markForDeletion() {
+    table->markAsDeleted(index);
 }
 
 std::vector<glm::vec2>& Collider::getVertices() const {
