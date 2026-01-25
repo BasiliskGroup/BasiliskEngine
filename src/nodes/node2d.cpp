@@ -23,6 +23,12 @@ Node2D::Node2D(Mesh* mesh, Material* material, glm::vec2 position, float rotatio
     : VirtualNode(mesh, material, position, rotation, scale), rigid(nullptr) {
     updateModel();
     Engine::getResourceServer()->getMaterialServer()->add(material);
+
+    // save data here so that we can adopt it when the node is adopted
+    physicsData.collider = collider;
+    physicsData.density = density;
+    physicsData.friction = friction;
+    physicsData.velocity = velocity;
 }
 
 Node2D::Node2D(const Node2D& other) noexcept : VirtualNode(other), rigid(nullptr) {
@@ -107,6 +113,12 @@ void Node2D::bindRigid(Mesh* mesh, Material* material, glm::vec2 position, float
         Scene2D* scene2d = static_cast<Scene2D*>(scene);
         rigid = new Rigid(scene2d->getSolver(), this, collider, { this->position, this->rotation }, this->scale, density, friction, velocity);
     }
+
+    // save data here so that we can adopt it when the node is adopted
+    physicsData.collider = collider;
+    physicsData.density = density;
+    physicsData.friction = friction;
+    physicsData.velocity = velocity;
 }
 
 void Node2D::clear() {
@@ -169,6 +181,19 @@ glm::vec3 Node2D::getVelocity() {
     return rigid->getVelocity();
 }
 
-// TODO add add/remove functions overrides so that we can attach rigids to the solver
+void Node2D::onAdoption() {
+    assert(rigid == nullptr);
+    bindRigid(getMesh(), getMaterial(), getPosition(), getRotation(), getScale(), physicsData.velocity, physicsData.collider, physicsData.density, physicsData.friction);
+}
+
+void Node2D::onOrphan() {
+    if (rigid != nullptr) {
+        // save current velocity
+        physicsData.velocity = rigid->getVelocity();
+
+        delete rigid;
+        rigid = nullptr;
+    }
+}
 
 }

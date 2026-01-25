@@ -122,6 +122,8 @@ int main() {
             delete drag;
             drag = nullptr;
         }
+
+        std::cout << "Number of rigid bodies: " << scene->getSolver()->getNumRigids() << std::endl;
         
         scene->update();
         scene->render();

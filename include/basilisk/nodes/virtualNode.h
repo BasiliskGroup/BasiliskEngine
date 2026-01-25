@@ -102,6 +102,9 @@ public:
     void add(Derived* child);
     void remove(Derived* child);
 
+    virtual void onAdoption() = 0;
+    virtual void onOrphan() = 0;
+
     iterator begin() { return iterator(asNode()); }
     iterator end() { return iterator(nullptr); }
 

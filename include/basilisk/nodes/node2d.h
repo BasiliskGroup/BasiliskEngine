@@ -18,6 +18,14 @@ private:
     Rigid* rigid;
     float layer=0.0;
 
+    // save data here so that we can adopt it when the node is adopted
+    struct PhysicsData {
+        Collider* collider = nullptr;
+        float density = 1.0f;
+        float friction = 0.5f;
+        glm::vec3 velocity = glm::vec3(0.0f);
+    } physicsData;
+
 public:
     Node2D(VirtualScene2D* scene, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
     Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
@@ -45,6 +53,9 @@ public:
     glm::vec3 getVelocity();
     // float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
     float getLayer() { return layer; }
+
+    void onAdoption() override;
+    void onOrphan() override;
 
     // collision exposure
     ForceType constrainedTo(Node2D* other);

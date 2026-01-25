@@ -60,12 +60,14 @@ void Scene2D::add(Node2D* node) {
     // Use the new VirtualNode::add() logic through root
     // This handles: reparenting, scene assignment, cycle detection, orphan adoption
     root->add(node);
+    node->onAdoption();
 }
 
 void Scene2D::remove(Node2D* node) {
     // Use the new VirtualNode::remove() logic through root
     // This handles: orphaning and recursive scene nullification
     root->remove(node);
+    node->onOrphan();
 }
 
 }
