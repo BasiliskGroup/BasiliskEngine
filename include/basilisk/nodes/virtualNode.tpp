@@ -73,9 +73,9 @@ VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Mesh* mesh, Material
  * @param parent 
  */
 template<typename Derived, typename P, typename R, typename S>
-VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene, Derived* parent) : 
+VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene) : 
     scene(scene), 
-    parent(parent), 
+    parent(nullptr), 
     shader(nullptr), 
     mesh(nullptr), 
     material(nullptr), 
@@ -85,10 +85,23 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     vbo(nullptr), 
     ebo(nullptr), 
     vao(nullptr) 
+{}
+
+template<typename Derived, typename P, typename R, typename S>
+VirtualNode<Derived, P, R, S>::VirtualNode(Mesh* mesh, Material* material, P position, R rotation, S scale) : 
+    scene(nullptr), 
+    parent(nullptr), 
+    shader(nullptr), 
+    mesh(mesh), 
+    material(material), 
+    position(position), 
+    rotation(rotation), 
+    scale(scale), 
+    vbo(nullptr), 
+    ebo(nullptr), 
+    vao(nullptr) 
 {
-    if (parent != nullptr) {
-        parent->children.push_back(asNode());
-    }
+    // Don't create buffers yet - shader is nullptr. Buffers will be created when adopted into a scene
 }
 
 /**
@@ -325,18 +338,88 @@ Engine* VirtualNode<Derived, P, R, S>::getEngine() {
 }
 
 /**
- * @brief Safely adds a VirtualNode to this VirtualNode's subtree
+ * @brief Check if adding this child would create a cycle
  * 
  * @tparam Derived 
  * @tparam P 
  * @tparam R 
  * @tparam S 
  * @param child 
+ * @return true if cycle would be created
+ */
+template<typename Derived, typename P, typename R, typename S>
+bool VirtualNode<Derived, P, R, S>::hasCycle(Derived* potential_ancestor) {
+    Derived* current = asNode();
+    while (current != nullptr) {
+        if (current == potential_ancestor) {
+            return true;
+        }
+        current = current->parent;
+    }
+    return false;
+}
+
+/**
+ * @brief Recursively set scene for this node and all descendants
+ * Also sets shader if this node didn't have one (orphaned node adoption)
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param new_scene 
+ */
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::setSceneRecursive(VirtualScene<Derived, P, R, S>* new_scene) {
+    this->scene = new_scene;
+    // If this node was orphaned (shader is nullptr), set it from the new scene
+    if (this->shader == nullptr && new_scene != nullptr) {
+        this->shader = new_scene->getShader();
+        // Recreate buffers with proper shader
+        deleteBuffers();
+        if (this->mesh != nullptr) {
+            createBuffers();
+        }
+    }
+    for (Derived* child : children) {
+        child->setSceneRecursive(new_scene);
+    }
+}
+
+/**
+ * @brief Safely adds a VirtualNode to this VirtualNode's subtree
+ * Handles reparenting from old parent/scene, cycle detection, and scene updates for all descendants
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ * @param child 
+ * @throws std::runtime_error if adding child would create a cycle
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::add(Derived* child) {
-    child->parent->remove(child);
+    // Cycle detection: ensure child is not an ancestor of this node
+    if (hasCycle(child)) {
+        throw std::runtime_error("Cannot add node as child: would create a cycle in the tree");
+    }
+    
+    // Remove child from its old parent if it has one
+    if (child->parent != nullptr) {
+        child->parent->remove(child);
+    }
+    
+    // If child has a scene (either from old parent or orphaned), remove it from old scene
+    if (child->scene != nullptr && child->scene != this->scene) {
+        // Recursively remove child from old scene's root
+        child->scene->getRoot()->remove(child);
+    }
+    
+    // Set new parent and scene for child and all descendants
     child->parent = asNode();
+    child->setSceneRecursive(this->scene);
+    
+    // Add to children list
     children.push_back(child);
 }
 
@@ -352,7 +435,24 @@ void VirtualNode<Derived, P, R, S>::setMaterial(Material* material) {
 }
 
 /**
- * @brief Safely removes a Vurtual from the children subtree
+ * @brief Recursively clear scene pointers for this node and all descendants
+ * 
+ * @tparam Derived 
+ * @tparam P 
+ * @tparam R 
+ * @tparam S 
+ */
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::orphanRecursive() {
+    this->scene = nullptr;
+    for (Derived* child : children) {
+        child->orphanRecursive();
+    }
+}
+
+/**
+ * @brief Safely removes a Virtual from the children subtree
+ * Orphans the node and all descendants (sets scene to nullptr)
  * 
  * @tparam Derived 
  * @tparam P 
@@ -365,6 +465,9 @@ void VirtualNode<Derived, P, R, S>::remove(Derived* child) {
     auto it = std::find(children.begin(), children.end(), child);
     if (it != children.end()) {
         children.erase(it);
+        // Orphan the child and all its descendants
+        child->orphanRecursive();
+        child->parent = nullptr;
     }
 }
 

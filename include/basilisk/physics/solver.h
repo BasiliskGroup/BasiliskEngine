@@ -58,9 +58,9 @@ private:
     int numRigids;
     int numForces;
 
-    ColliderTable* colliderTable;
     BodyTable* bodyTable;
     ForceTable* forceTable;
+    static std::unique_ptr<ColliderTable> colliderTable;
 
     // Coloring
     ColorQueue colorQueue;
@@ -92,7 +92,7 @@ public:
     void step(float dt);
 
     // Getters
-    ColliderTable* getColliderTable() const { return colliderTable; }
+    static ColliderTable* getColliderTable() { return colliderTable.get(); }
     BodyTable* getBodyTable() const { return bodyTable; }
     ForceTable* getForceTable() const { return forceTable; }
     Rigid* getBodies() const { return bodies; }

@@ -26,12 +26,13 @@
 
 namespace bsk::internal {
 
+std::unique_ptr<ColliderTable> Solver::colliderTable(new ColliderTable(64));
+
 Solver::Solver() : 
     bodies(nullptr), 
     forces(nullptr),
     numRigids(0),
     numForces(0),
-    colliderTable(nullptr), 
     bodyTable(nullptr),
     forceTable(nullptr),
     stageBarrier(NUM_THREADS),
@@ -44,7 +45,6 @@ Solver::Solver() :
     workers(),
     forceEdgeIndices()
 {
-    this->colliderTable = new ColliderTable(64);
     this->bodyTable = new BodyTable(128);
     this->forceTable = new ForceTable(128);
     this->forceTable->setSolver(this);
@@ -69,9 +69,6 @@ void Solver::clear() {
 
     numRigids = 0;
     numForces = 0;
-
-    delete colliderTable;
-    colliderTable = nullptr;
 
     delete bodyTable;
     bodyTable = nullptr;

@@ -27,9 +27,12 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         void update();
         void render();
 
+        void add(Node2D* node) override;
+        void remove(Node2D* node) override;
+
         void setCamera(StaticCamera2D* camera) { this->camera = camera; }
 
-        inline Shader* getShader() { return shader; }
+        inline Shader* getShader() override { return shader; }
         inline StaticCamera2D* getCamera() { return camera; }
         inline Solver* getSolver() { return solver; }
 };

@@ -12,8 +12,7 @@ using namespace bsk::internal;
 
 void bind_collider(py::module_& m) {
     py::class_<Collider>(m, "Collider")
-        .def(py::init<Solver*, std::vector<glm::vec2>>(),
-             py::arg("solver"),
+        .def(py::init<std::vector<glm::vec2>>(),
              py::arg("vertices"))
         
         // Getters

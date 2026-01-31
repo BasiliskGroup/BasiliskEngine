@@ -4,14 +4,19 @@
 
 namespace bsk::internal {
 
-Collider::Collider(Solver* solver, std::vector<glm::vec2> vertices)
-    : table(solver->getColliderTable())
+Collider::Collider(std::vector<glm::vec2> vertices)
+    : table(Solver::getColliderTable())
 {
     table->insert(this, vertices); // sets index
 }
 
 Collider::~Collider() {
     // ColliderTable destructor handles cleanup of this collider
+    markForDeletion();
+}
+
+void Collider::markForDeletion() {
+    table->markAsDeleted(index);
 }
 
 std::vector<glm::vec2>& Collider::getVertices() const {
