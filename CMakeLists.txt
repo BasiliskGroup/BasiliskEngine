@@ -9,6 +9,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
+set(CMAKE_BUILD_TYPE Debug)
+
+
 # Architecture settings (can be overridden with -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" for universal)
 # Options: "arm64", "x86_64", or "x86_64;arm64" for universal
 if(NOT DEFINED CMAKE_OSX_ARCHITECTURES)

@@ -2,12 +2,17 @@
 
 namespace bsk::internal {
 
+std::unique_ptr<ResourceServer> Engine::resourceServer(nullptr);
+
 Engine::Engine(int width, int height, const char* title, bool autoMouseGrab) {
     window = new Window(width, height, title);
     mouse = new Mouse(this);
     keyboard = new Keyboard(window);
     frame = new Frame(this, width, height);
-    resourceServer = new ResourceServer();
+
+    if (!resourceServer) {
+        resourceServer = std::make_unique<ResourceServer>();
+    }
 
     this->autoMouseGrab = autoMouseGrab;
 
@@ -19,7 +24,6 @@ Engine::Engine(int width, int height, const char* title, bool autoMouseGrab) {
 Engine::~Engine() {
     delete mouse;
     delete keyboard;
-    delete resourceServer;
     delete frame;
     delete window;
 }

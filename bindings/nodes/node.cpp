@@ -47,7 +47,8 @@ void bind_node(py::module_& m) {
         py::arg("scale") = glm::vec3(1.0f, 1.0f, 1.0f))
 
         // Other constructors
-        .def(py::init<Scene*, Node*>(), py::arg("scene"), py::arg("parent"))
+        .def(py::init<Scene*>(), py::arg("scene"))
+        .def(py::init<Mesh*, Material*, glm::vec3, glm::quat, glm::vec3>(), py::arg("mesh"), py::arg("material"), py::arg("position"), py::arg("rotation"), py::arg("scale"))
 
         // Setters (casters apply automatically)
         .def("set_position", &Node::setPosition, py::arg("position"))

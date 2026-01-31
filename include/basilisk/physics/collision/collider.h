@@ -17,6 +17,8 @@ public:
     Collider(std::vector<glm::vec2> vertices);
     ~Collider();
 
+    void markForDeletion();
+
     // getters
     std::size_t getIndex() const { return index; }
     ColliderTable* getTable() const { return table; }

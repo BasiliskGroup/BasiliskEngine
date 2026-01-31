@@ -15,7 +15,7 @@ protected:
     
 public:
     VirtualScene(Engine* engine) : engine(engine) {
-        root = new NodeType(this, nullptr); // parent = nullptr
+        root = new NodeType(this); // parent = nullptr
     }
 
     virtual ~VirtualScene() {
@@ -24,6 +24,9 @@ public:
 
     inline Engine* getEngine() { return engine; }
     inline NodeType* getRoot() const { return root; }
+
+    virtual void add(NodeType* node) = 0;
+    virtual void remove(NodeType* node) = 0;
     
     virtual Shader* getShader() = 0;
 

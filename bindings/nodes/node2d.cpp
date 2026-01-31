@@ -60,7 +60,8 @@ void bind_node2d(py::module_& m) {
         py::arg("friction"))
 
         // Other constructors
-        .def(py::init<Scene2D*, Node2D*>())
+        .def(py::init<Scene2D*>(), py::arg("scene"))
+        .def(py::init<Mesh*, Material*, glm::vec2, float, glm::vec2, glm::vec3, Collider*, float, float>(), py::arg("mesh"), py::arg("material"), py::arg("position"), py::arg("rotation"), py::arg("scale"), py::arg("velocity"), py::arg("collider"), py::arg("density"), py::arg("friction"))
 
         // Setters (casters apply automatically)
         .def("set_position", py::overload_cast<glm::vec2>(&Node2D::setPosition))
