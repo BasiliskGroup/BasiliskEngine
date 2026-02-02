@@ -9,9 +9,9 @@ namespace bsk::internal {
  */
 Texture::Texture(Image* image) : image(image) {
     // Create one texture, and update texture with the ID
-    glGenTextures(1, &id); 
+    glGenTextures(1, &ID); 
     // Bind the texture to start working on it
-    glBindTexture(GL_TEXTURE_2D, id);
+    glBindTexture(GL_TEXTURE_2D, ID);
     // Add image data to the texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->getWidth(), image->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image->getData());
     // Generate Mipmaps
@@ -27,7 +27,7 @@ Texture::Texture(Image* image) : image(image) {
  * 
  */
 Texture::~Texture() {
-    glDeleteTextures(1, &id);
+    glDeleteTextures(1, &ID);
 }
 
 /**
@@ -35,7 +35,7 @@ Texture::~Texture() {
  * 
  */
 void Texture::bind() {
-    glBindTexture(GL_TEXTURE_2D, id);
+    glBindTexture(GL_TEXTURE_2D, ID);
 }
 
 /**
@@ -65,4 +65,14 @@ void Texture::setWrap(unsigned int wrap) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 }
 
+void Texture::write(const void* data, unsigned int width, unsigned int height, unsigned int xOffset, unsigned int yOffset) {
+    // Bind the vbo to start working on it
+    glBindBuffer(GL_TEXTURE_2D, ID);
+    // Get dimensions
+    if (!width) { width = this->width; }
+    if (!height) { height = this->height; }
+    // Write the data 
+    glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    // Unbind for safety
+    glBindBuffer(GL_TEXTURE_2D, 0);
 }
