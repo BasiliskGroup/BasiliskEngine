@@ -5,16 +5,22 @@ namespace bsk::internal {
 Node::Node(VirtualScene3D* scene, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
     : VirtualNode(scene, mesh, material, position, rotation, scale) {
     updateModel();
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
+    Engine::getResourceServer()->getMaterialServer()->add(material);
 }
 
 Node::Node(Node* parent, Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
     : VirtualNode(parent, mesh, material, position, rotation, scale) {
     updateModel();
-    getScene()->getEngine()->getResourceServer()->getMaterialServer()->add(material);
+    Engine::getResourceServer()->getMaterialServer()->add(material);
 }
 
-Node::Node(VirtualScene3D* scene, Node* parent) : VirtualNode(scene, parent) {}
+Node::Node(VirtualScene3D* scene) : VirtualNode(scene) {}
+
+Node::Node(Mesh* mesh, Material* material, glm::vec3 position, glm::quat rotation, glm::vec3 scale)
+    : VirtualNode(mesh, material, position, rotation, scale) {
+    updateModel();
+    Engine::getResourceServer()->getMaterialServer()->add(material);
+}
 
 void Node::updateModel() {
     model = glm::translate(glm::mat4(1.0f), position)
@@ -35,6 +41,14 @@ void Node::setRotation(glm::quat rotation) {
 void Node::setScale(glm::vec3 scale) {
     this->scale = scale;
     updateModel();
+}
+
+void Node::onAdoption() {
+    
+}
+
+void Node::onOrphan() {
+    
 }
 
 }

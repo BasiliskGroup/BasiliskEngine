@@ -33,7 +33,7 @@ int main() {
     bsk::Material* mouseMaterial = new bsk::Material({1, 1, 1}, images[4]);
 
     // Create a box collider (unit box vertices) - can be shared by all box-shaped objects
-    bsk::Collider* boxCollider = new bsk::Collider(scene->getSolver(), {{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
+    bsk::Collider* boxCollider = new bsk::Collider({{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
 
     // Create a 50x50 grid of quads with some missing
     const int gridSize = 20;
@@ -64,8 +64,9 @@ int main() {
             float x = gridOffset + col * spacing;
             float y = gridOffset + row * spacing;
             
-            bsk::Node2D* node = new bsk::Node2D(scene, quad, bricksMaterial, {x, y}, 0.0f, {quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)}, {0, 0, 0}, boxCollider, 1.0e1f, 0.5f);
+            bsk::Node2D* node = new bsk::Node2D(quad, bricksMaterial, {x, y}, 0.0f, {quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)}, {0, 0, 0}, boxCollider, 1.0e1f, 0.5f);
             gridNodes.push_back(node);
+            scene->add(node);
         }
     }
 
@@ -121,6 +122,8 @@ int main() {
             delete drag;
             drag = nullptr;
         }
+
+        std::cout << "Number of rigid bodies: " << scene->getSolver()->getNumRigids() << std::endl;
         
         scene->update();
         scene->render();

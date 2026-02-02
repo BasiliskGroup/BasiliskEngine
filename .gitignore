@@ -26,3 +26,4 @@ lines.py
 
 # separate main files
 src/main.cpp
+tests/
