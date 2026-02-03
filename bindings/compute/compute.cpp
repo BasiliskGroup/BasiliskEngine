@@ -4,9 +4,10 @@
 #include <cstddef>
 #include <stdexcept>
 
-#include "compute/gpuWrapper.hpp"
+#include <basilisk/compute/gpuWrapper.hpp>
 
 namespace py = pybind11;
+using namespace bsk::internal;
 
 namespace {
 

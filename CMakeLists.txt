@@ -286,14 +286,6 @@ if(Python3_FOUND AND TARGET basilisk)
     endif()
 endif()
 
-# Copy Python examples to build dir (run from build: PYTHONPATH=. python examples/compute_example.py)
-add_custom_command(TARGET basilisk POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/examples
-        ${CMAKE_BINARY_DIR}/examples
-    COMMENT "Copying Python examples to build directory"
-)
-
 # ======================================================
 # Engine executable
 # ======================================================
