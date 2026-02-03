@@ -32,6 +32,7 @@ void bind_solver(py::module_&);
 void bind_collider(py::module_&);
 void bind_force(py::module_&);
 void bind_key(py::module_&);
+void bind_compute(py::module_&);
 
 PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     m.doc() = "pybind11 example plugin"; // optional module docstring
@@ -85,4 +86,6 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     auto forces = m.def_submodule("forces", "Physics forces submodule");
     bind_force(forces);  // Base class must be bound before derived classes
 
+    // Compute (GPU) bindings
+    bind_compute(m);
 }

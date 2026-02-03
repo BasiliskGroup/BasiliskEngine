@@ -8,17 +8,17 @@
 
 // bound from Rust
 extern "C" {
-    void gpu_init();
+    void  gpu_init();
     
     void* gpu_buffer_create(size_t len);
-    void gpu_buffer_destroy(void* buffer);
-    void gpu_buffer_write(void* buffer, const uint32_t* ptr, size_t len);
-    void gpu_buffer_read(void* buffer, uint32_t* out_ptr, size_t len);
+    void  gpu_buffer_destroy(void* buffer);
+    void  gpu_buffer_write(void* buffer, const uint32_t* ptr, size_t len);
+    void  gpu_buffer_read(void* buffer, uint32_t* out_ptr, size_t len);
     
     void* gpu_shader_create(const char* wgsl, void** buffers, size_t buffer_count, uint64_t uniform_size);
-    void gpu_shader_destroy(void* shader);
-    void gpu_shader_set_uniform(void* shader, const uint8_t* ptr, size_t len);
-    void gpu_shader_dispatch(void* shader, uint32_t x, uint32_t y, uint32_t z);
+    void  gpu_shader_destroy(void* shader);
+    void  gpu_shader_set_uniform(void* shader, const uint8_t* ptr, size_t len);
+    void  gpu_shader_dispatch(void* shader, uint32_t x, uint32_t y, uint32_t z);
 }
 
 template<typename T>
@@ -72,6 +72,43 @@ using GpuBufferU32 = GpuBuffer<uint32_t>;
 using GpuBufferF32 = GpuBuffer<float>;
 using GpuBufferI32 = GpuBuffer<int32_t>;
 
+// Single buffer type for bindings: dtype + length; user handles the type.
+enum class GpuBufferDtype { U32, F32, I32 };
+
+class GpuBufferAny {
+public:
+    explicit GpuBufferAny(GpuBufferDtype dtype, size_t element_count)
+        : dtype_(dtype), element_count_(element_count), element_size_(4) {
+        size_t size_bytes = element_count_ * element_size_;
+        size_t size_u32 = (size_bytes + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+        handle_ = gpu_buffer_create(size_u32);
+    }
+
+    ~GpuBufferAny() { gpu_buffer_destroy(handle_); }
+
+    void writeBytes(const uint8_t* ptr, size_t byte_count) {
+        size_t size_u32 = (byte_count + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+        gpu_buffer_write(handle_, reinterpret_cast<const uint32_t*>(ptr), size_u32);
+    }
+
+    void readBytes(uint8_t* out, size_t byte_count) const {
+        size_t size_u32 = (byte_count + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+        gpu_buffer_read(handle_, reinterpret_cast<uint32_t*>(out), size_u32);
+    }
+
+    void* handle() { return handle_; }
+    size_t len() const { return element_count_; }
+    size_t element_size() const { return element_size_; }
+    size_t size_bytes() const { return element_count_ * element_size_; }
+    GpuBufferDtype dtype() const { return dtype_; }
+
+private:
+    void* handle_;
+    size_t element_count_;
+    size_t element_size_;
+    GpuBufferDtype dtype_;
+};
+
 class ComputeShader {
 public:
     template<typename... Buffers>
@@ -97,6 +134,10 @@ public:
     template<typename T>
     void setUniform(const T& uniform) {
         gpu_shader_set_uniform(handle_, reinterpret_cast<const uint8_t*>(&uniform), sizeof(T));
+    }
+    
+    void setUniformBytes(const uint8_t* ptr, size_t len) {
+        gpu_shader_set_uniform(handle_, ptr, len);
     }
     
     void dispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1) {

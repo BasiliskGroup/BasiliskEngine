@@ -42,7 +42,8 @@ if __name__ == "__main__":
     DIRECTORIES = [
         "./src",
         "./bindings",
-        "./include/basilisk"
+        "./include/basilisk",
+        "./rust_gpu/src"
     ]
 
     totals, total = count_non_empty_lines(DIRECTORIES)

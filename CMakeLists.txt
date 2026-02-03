@@ -219,11 +219,27 @@ pybind11_add_module(basilisk ${BINDING_SOURCES})
 target_include_directories(basilisk PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/bindings
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(basilisk PRIVATE
     basilisk_lib
 )
+
+# Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
+if(APPLE)
+    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.dylib")
+elseif(UNIX)
+    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so")
+elseif(WIN32)
+    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll")
+else()
+    set(RUST_GPU_LIB "")
+endif()
+if(RUST_GPU_LIB)
+    target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
+    add_dependencies(basilisk rust_gpu_lib)
+endif()
 
 # ======================================================
 # Generate Python type stubs with pybind11-stubgen
@@ -269,6 +285,14 @@ if(Python3_FOUND AND TARGET basilisk)
         message(WARNING "  Install with: pip install pybind11-stubgen")
     endif()
 endif()
+
+# Copy Python examples to build dir (run from build: PYTHONPATH=. python examples/compute_example.py)
+add_custom_command(TARGET basilisk POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/examples
+        ${CMAKE_BINARY_DIR}/examples
+    COMMENT "Copying Python examples to build directory"
+)
 
 # ======================================================
 # Engine executable

@@ -76,3 +76,5 @@ void Texture::write(const void* data, unsigned int width, unsigned int height, u
     // Unbind for safety
     glBindBuffer(GL_TEXTURE_2D, 0);
 }
+
+}
