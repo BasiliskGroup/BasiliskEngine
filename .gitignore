@@ -27,3 +27,7 @@ lines.py
 # separate main files
 src/main.cpp
 tests/
+
+# rust
+rust_gpu/target/
+rust_gpu/Cargo.lock
