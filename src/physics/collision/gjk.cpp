@@ -141,4 +141,5 @@ void getFar(const Rigid* body, const glm::vec2 &dir, glm::vec2 &simplexLocal) {
     }
     simplexLocal = collider->getVertices()[farIndex];
 }
+
 }

@@ -158,6 +158,16 @@ target_include_directories(clipper2 PUBLIC
 target_compile_features(clipper2 PUBLIC cxx_std_20)
 
 # ======================================================
+# Rust GPU library
+# ======================================================
+add_custom_target(rust_gpu_lib ALL
+    COMMAND cargo build --release
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.dylib
+    COMMENT "Building Rust GPU compute library..."
+)
+
+# ======================================================
 # Basilisk Engine Sources
 # ======================================================
 file(GLOB_RECURSE BASILISK_SOURCES
@@ -291,6 +301,12 @@ if(EXISTS ${BASILISK_MAIN})
 else()
     message(WARNING "main.cpp not found — skipping engine build.")
 endif()
+
+# ======================================================
+# Rust Dependency
+# ======================================================
+add_dependencies(engine rust_gpu_lib)
+add_dependencies(basilisk_lib rust_gpu_lib)
 
 # ======================================================
 # AddressSanitizer
