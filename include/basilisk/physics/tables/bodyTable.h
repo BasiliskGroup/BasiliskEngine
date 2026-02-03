@@ -3,6 +3,7 @@
 
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/tables/virtualTable.h>
+#include <basilisk/compute/gpuWrapper.hpp>
 
 namespace bsk::internal {
 
@@ -12,9 +13,10 @@ class BVH;
 
 class BodyTable : public VirtualTable {
 private:
+    // CPU side data
     std::vector<Rigid*> bodies;
     std::vector<bool> toDelete;
-    std::vector<bool> sleeping;
+    std::vector<bool> sleeping; // TODO, currently unused
     std::vector<glm::vec3> pos;
     std::vector<glm::vec3> initial;
     std::vector<glm::vec3> inertial;
@@ -33,7 +35,19 @@ private:
     std::vector<int> color;
 
     BVH* bvh;
-    
+
+    // GPU side data
+    GpuBuffer<glm::vec3> posBuffer;
+    GpuBuffer<glm::vec3> initialBuffer;
+    GpuBuffer<glm::vec3> inertialBuffer;
+    GpuBuffer<glm::vec3> velBuffer;
+    GpuBuffer<float> frictionBuffer;
+    GpuBuffer<float> massBuffer;
+    GpuBuffer<float> momentBuffer;
+    GpuBuffer<glm::mat2x2> matBuffer;
+    GpuBuffer<glm::mat2x2> imatBuffer;
+    GpuBuffer<glm::mat2x2> rmatBuffer;
+
 public:
     BodyTable(std::size_t capacity);
     ~BodyTable();

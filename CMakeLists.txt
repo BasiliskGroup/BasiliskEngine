@@ -304,6 +304,11 @@ if(EXISTS ${BASILISK_MAIN})
             clipper2
     )
 
+    # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
+    if(RUST_GPU_LIB)
+        target_link_libraries(engine PRIVATE ${RUST_GPU_LIB})
+    endif()
+
     set_target_properties(engine PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )

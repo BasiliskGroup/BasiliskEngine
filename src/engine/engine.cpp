@@ -1,4 +1,5 @@
 #include <basilisk/engine/engine.h>
+#include <basilisk/compute/gpuWrapper.hpp>
 
 namespace bsk::internal {
 
@@ -12,6 +13,9 @@ Engine::Engine(int width, int height, const char* title, bool autoMouseGrab) {
 
     if (!resourceServer) {
         resourceServer = std::make_unique<ResourceServer>();
+
+        // only initialize the GPU once, we'll use the fact that resourceServer is a singleton to ensure this
+        initGpu();
     }
 
     this->autoMouseGrab = autoMouseGrab;

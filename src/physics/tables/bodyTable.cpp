@@ -7,7 +7,19 @@
 
 namespace bsk::internal {
 
-BodyTable::BodyTable(std::size_t capacity) : bvh(new BVH()) {
+BodyTable::BodyTable(std::size_t capacity) : 
+    bvh(new BVH()),
+    posBuffer(capacity),
+    initialBuffer(capacity),
+    inertialBuffer(capacity),
+    velBuffer(capacity),
+    frictionBuffer(capacity),
+    massBuffer(capacity),
+    momentBuffer(capacity),
+    matBuffer(capacity),
+    imatBuffer(capacity),
+    rmatBuffer(capacity)
+{
     resize(capacity);   
 }
 
