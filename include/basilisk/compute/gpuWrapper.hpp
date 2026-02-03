@@ -6,13 +6,9 @@
 #include <vector>
 #include <string>
 
-
 namespace bsk::internal {
 
-// ----------------------------------------
-// Bound from Rust
-// ----------------------------------------
-
+// bound from Rust
 extern "C" {
     void  gpu_init();
     
@@ -27,34 +23,51 @@ extern "C" {
     void  gpu_shader_dispatch(void* shader, uint32_t x, uint32_t y, uint32_t z);
 }
 
-// ----------------------------------------
-// GpuBuffer
-// ----------------------------------------
-
 template<typename T>
 class GpuBuffer {
-private:
-    void* handle_;
-    size_t len_;  // Number of T elements
-
 public:
-    GpuBuffer(size_t len);
-    ~GpuBuffer();
+    GpuBuffer(size_t len) : len_(len) {
+        // Create buffer with size in bytes
+        size_t size_bytes = len * sizeof(T);
+        // Round up to uint32_t alignment
+        size_t size_u32 = (size_bytes + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+        handle_ = gpu_buffer_create(size_u32);
+    }
     
-    void write(const std::vector<T>& data);
-    void write(const T* data, size_t count);
+    ~GpuBuffer() {
+        gpu_buffer_destroy(handle_);
+    }
     
-    std::vector<T> read();
-    void read(T* out, size_t count);
+    void write(const std::vector<T>& data) {
+        write(data.data(), data.size());
+    }
+    
+    void write(const T* data, size_t count) {
+        size_t size_bytes = count * sizeof(T);
+        size_t size_u32 = (size_bytes + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+        gpu_buffer_write(handle_, reinterpret_cast<const uint32_t*>(data), size_u32);
+    }
+    
+    std::vector<T> read() {
+        std::vector<T> result(len_);
+        read(result.data(), len_);
+        return result;
+    }
+    
+    void read(T* out, size_t count) {
+        size_t size_bytes = count * sizeof(T);
+        size_t size_u32 = (size_bytes + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+        gpu_buffer_read(handle_, reinterpret_cast<uint32_t*>(out), size_u32);
+    }
     
     void* handle() { return handle_; }
     size_t len() const { return len_; }
     size_t size_bytes() const { return len_ * sizeof(T); }
+    
+private:
+    void* handle_;
+    size_t len_;  // Number of T elements
 };
-
-// ----------------------------------------
-// Other GPU Buffer types
-// ----------------------------------------
 
 // Convenience typedefs
 using GpuBufferU32 = GpuBuffer<uint32_t>;
@@ -98,29 +111,43 @@ private:
     GpuBufferDtype dtype_;
 };
 
-// ----------------------------------------
-// ComputeShader
-// ----------------------------------------
-
 class ComputeShader {
-private:
-    void* handle_;
-
 public:
     template<typename... Buffers>
-    ComputeShader(const std::string& wgsl, std::vector<void*> buffer_handles, size_t uniform_size = 0);
+    ComputeShader(const std::string& wgsl, std::vector<void*> buffer_handles, size_t uniform_size = 0) {
+        handle_ = gpu_shader_create(
+            wgsl.c_str(),
+            buffer_handles.data(),
+            buffer_handles.size(),
+            uniform_size
+        );
+    }
     
     // Helper constructor that takes GpuBuffer pointers directly
     template<typename... BufferTypes>
-    static ComputeShader create(const std::string& wgsl, std::initializer_list<void*> buffers, size_t uniform_size = 0);
+    static ComputeShader create(const std::string& wgsl, std::initializer_list<void*> buffers, size_t uniform_size = 0) {
+        return ComputeShader(wgsl, std::vector<void*>(buffers), uniform_size);
+    }
     
-    ~ComputeShader();
+    ~ComputeShader() {
+        gpu_shader_destroy(handle_);
+    }
     
     template<typename T>
-    void setUniform(const T& uniform);
+    void setUniform(const T& uniform) {
+        gpu_shader_set_uniform(handle_, reinterpret_cast<const uint8_t*>(&uniform), sizeof(T));
+    }
     
-    void setUniformBytes(const uint8_t* ptr, size_t len);
-    void dispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1);
+    void setUniformBytes(const uint8_t* ptr, size_t len) {
+        gpu_shader_set_uniform(handle_, ptr, len);
+    }
+    
+    void dispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1) {
+        gpu_shader_dispatch(handle_, x, y, z);
+    }
+    
+private:
+    void* handle_;
 };
 
 // Initialize GPU once at startup
