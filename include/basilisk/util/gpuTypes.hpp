@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace bsk::internal {
+namespace bsk {
 
 // Padded vec3 for WGSL compatibility (16-byte aligned)
 // Inherits all glm::vec3 functionality while adding padding
