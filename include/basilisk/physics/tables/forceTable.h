@@ -11,6 +11,7 @@
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/tables/adjacency.h>
+#include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
 
@@ -27,11 +28,14 @@ struct ParameterStruct {
     float fracture;
     float penalty;
     float lambda;
+
+    // TODO determine if we need padding (vec4 aligned)
+    // float _padding;
 };
 
 struct DerivativeStruct {
-    glm::vec3 J;
-    glm::mat3x3 H;
+    bsk::vec3 J;
+    bsk::mat3x3 H;
 };
 
 union SpecialParameters {
@@ -44,8 +48,8 @@ union SpecialParameters {
 };
 
 struct Positional {
-    std::array<glm::vec3, 2> pos;
-    std::array<glm::vec3, 2> initial;
+    std::array<bsk::vec3, 2> pos;
+    std::array<bsk::vec3, 2> initial;
 };
 
 // ------------------------------------------------------------
@@ -91,17 +95,17 @@ public:
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
     Positional& getPositional(std::size_t index) { return positional[index]; }
-    glm::vec3& getPosA(std::size_t index) { return positional[index].pos[0]; }
-    glm::vec3& getPosB(std::size_t index) { return positional[index].pos[1]; }
-    glm::vec3& getInitialA(std::size_t index) { return positional[index].initial[0]; }
-    glm::vec3& getInitialB(std::size_t index) { return positional[index].initial[1]; }
+    bsk::vec3& getPosA(std::size_t index) { return positional[index].pos[0]; }
+    bsk::vec3& getPosB(std::size_t index) { return positional[index].pos[1]; }
+    bsk::vec3& getInitialA(std::size_t index) { return positional[index].initial[0]; }
+    bsk::vec3& getInitialB(std::size_t index) { return positional[index].initial[1]; }
     Solver* getSolver() { return solver; }
 
     // index specific
-    glm::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
-    glm::vec3& getJB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].J; }
-    glm::mat3& getHA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].H; }
-    glm::mat3& getHB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].H; }
+    bsk::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
+    bsk::vec3& getJB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].J; }
+    bsk::mat3x3& getHA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].H; }
+    bsk::mat3x3& getHB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].H; }
     float getC(std::size_t forceIndex, int row) { return parameters[forceIndex][row].C; }
     float getFmin(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fmin; }
     float getFmax(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fmax; }

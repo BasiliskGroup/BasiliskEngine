@@ -34,6 +34,24 @@ struct ManifoldData {
     float friction = 0.5f;
 };
 
+// Structs for GPU buffers
+struct GpuContact {
+    glm::vec2 rA;
+    glm::vec2 rB;
+    glm::vec2 normal;
+    glm::vec2 C0;
+    bool stick;
+};
+
+struct GpuManifoldData {
+    GpuContact contacts[2];
+    int numContacts = 0;
+    float friction = 0.5f;
+
+    // padding to 16 bytes
+    char _padding[6];
+};
+
 // Collision manifold between two rigid bodies, which contains up to two frictional contact points
 class Manifold : public Force {
 public:

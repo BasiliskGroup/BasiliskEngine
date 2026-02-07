@@ -2,6 +2,7 @@
 
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/tables/adjacency.h>
+#include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
 
@@ -45,18 +46,18 @@ public:
     Force* getPrevA() const { return prevA; }
     Force* getPrevB() const { return prevB; }
     std::size_t getIndex() const { return index; }
-    glm::vec3& getPosA() const;
-    glm::vec3& getPosB() const;
-    glm::vec3& getInitialA() const;
-    glm::vec3& getInitialB() const;
+    bsk::vec3& getPosA() const;
+    bsk::vec3& getPosB() const;
+    bsk::vec3& getInitialA() const;
+    bsk::vec3& getInitialB() const;
     ForceType getForceType() const;
 
-    glm::vec3& getJ(int index, Rigid* body) const;
-    glm::mat3x3& getH(int index, Rigid* body) const;
-    glm::vec3& getJA(int index) const;
-    glm::vec3& getJB(int index) const;
-    glm::mat3x3& getHA(int index) const;
-    glm::mat3x3& getHB(int index) const;
+    bsk::vec3& getJ(int index, Rigid* body) const;
+    bsk::mat3x3& getH(int index, Rigid* body) const;
+    bsk::vec3& getJA(int index) const;
+    bsk::vec3& getJB(int index) const;
+    bsk::mat3x3& getHA(int index) const;
+    bsk::mat3x3& getHB(int index) const;
     float getC(int index) const;
     float getFmin(int index) const;
     float getFmax(int index) const;

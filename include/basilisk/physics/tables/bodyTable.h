@@ -4,7 +4,7 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/tables/virtualTable.h>       
 #include <basilisk/compute/gpuWrapper.hpp>
-#include <basilisk/util/gpuTypes.hpp>
+#include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
 
