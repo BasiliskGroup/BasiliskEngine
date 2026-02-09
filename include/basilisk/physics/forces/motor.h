@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_FORCES_MOTOR_H
+#define BSK_PHYSICS_FORCES_MOTOR_H
 
 #include <basilisk/physics/forces/force.h>
 
@@ -38,3 +39,4 @@ public:
 
 }
 
+#endif

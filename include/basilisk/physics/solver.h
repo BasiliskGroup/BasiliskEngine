@@ -1,15 +1,5 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
-#pragma once
+#ifndef BSK_PHYSICS_SOLVER_H
+#define BSK_PHYSICS_SOLVER_H
 
 #include "basilisk/physics/threading/scratch.h"
 #include <basilisk/util/includes.h>
@@ -188,3 +178,5 @@ public:
 };
 
 }
+
+#endif

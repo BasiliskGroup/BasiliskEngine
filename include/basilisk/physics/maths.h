@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_MATHS_H
+#define BSK_PHYSICS_MATHS_H
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -155,3 +156,5 @@ inline float AABBArea(glm::vec2 blA, glm::vec2 trA, glm::vec2 blB, glm::vec2 trB
 }
 
 }
+
+#endif

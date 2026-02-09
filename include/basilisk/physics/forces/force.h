@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_FORCES_FORCE_H
+#define BSK_PHYSICS_FORCES_FORCE_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/tables/adjacency.h>
@@ -100,3 +101,4 @@ public:
 
 }
 
+#endif
