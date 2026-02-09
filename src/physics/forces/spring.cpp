@@ -1,20 +1,10 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -28,6 +18,9 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
     if (getRest() < 0)
         setRest(length(transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB())));
     solver->getForceTable()->setForceType(this->index, ForceType::SPRING);
+
+    // register to spring table
+    solver->getForceTable()->getSpringTable()->insert(this);
 }
 
 void Spring::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {

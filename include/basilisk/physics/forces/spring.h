@@ -11,6 +11,9 @@ struct SpringStruct {
     glm::vec2 rA;
     glm::vec2 rB;
     float rest;
+
+    // padding to 16 bytes
+    char _padding[12] = { 0 };
 };
 
 // Standard spring force

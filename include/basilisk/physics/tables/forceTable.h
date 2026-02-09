@@ -15,6 +15,9 @@
 
 namespace bsk::internal {
 
+template<typename T>
+class ForceTypeTable;
+
 using ::bsk::internal::MAX_ROWS;
 
 // ------------------------------------------------------------
@@ -77,6 +80,15 @@ private:
     std::vector<SpecialParameters> specialParameters;
     std::vector<Positional> positional;
 
+    // used to map row vectors to new indices
+    std::vector<std::size_t> indexMap;
+
+    // force specific tables
+    ForceTypeTable<ManifoldData>* manifoldTable;
+    ForceTypeTable<JointStruct>* jointTable;
+    ForceTypeTable<SpringStruct>* springTable;
+    ForceTypeTable<MotorStruct>* motorTable;
+
     // structure variables
     std::vector<int> rows;
 
@@ -99,7 +111,12 @@ public:
     bsk::vec3& getPosB(std::size_t index) { return positional[index].pos[1]; }
     bsk::vec3& getInitialA(std::size_t index) { return positional[index].initial[0]; }
     bsk::vec3& getInitialB(std::size_t index) { return positional[index].initial[1]; }
+
     Solver* getSolver() { return solver; }
+    ForceTypeTable<ManifoldData>* getManifoldTable() { return manifoldTable; }
+    ForceTypeTable<JointStruct>* getJointTable() { return jointTable; }
+    ForceTypeTable<SpringStruct>* getSpringTable() { return springTable; }
+    ForceTypeTable<MotorStruct>* getMotorTable() { return motorTable; }
 
     // index specific
     bsk::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }

@@ -4,6 +4,7 @@
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -12,7 +13,6 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
 {
     setRA(rA);
     setRB(rB);
-
     setStiffness(0, stiffness.x);
     setStiffness(1, stiffness.y);
     setStiffness(2, stiffness.z);
@@ -22,6 +22,9 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
     setRestAngle((bodyA ? bodyA->getPosition().z : 0.0f) - bodyB->getPosition().z);
     setTorqueArm(lengthSq((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize()));
     solver->getForceTable()->setForceType(this->index, ForceType::JOINT);
+
+    // register to joint table
+    solver->getForceTable()->getJointTable()->insert(this);
 }
 
 bool Joint::initialize() {

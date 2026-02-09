@@ -10,9 +10,12 @@ namespace bsk::internal {
 struct JointStruct {
     glm::vec2 rA = glm::vec2(0.0f);
     glm::vec2 rB = glm::vec2(0.0f);
-    glm::vec3 C0 = glm::vec3(0.0f);
+    bsk::vec3 C0 = bsk::vec3(0.0f);
     float torqueArm = 0.0f;
     float restAngle = 0.0f;
+
+    // padding to 16 bytes
+    char _padding[8] = { 0 };
 };
 
 // Revolute joint + angle constraint between two rigid bodies, with optional fracture

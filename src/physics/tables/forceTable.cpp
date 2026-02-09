@@ -1,14 +1,23 @@
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
-ForceTable::ForceTable(std::size_t capacity) {
+ForceTable::ForceTable(std::size_t capacity) :
+    manifoldTable(new ForceTypeTable<ManifoldData>(capacity, this)),
+    jointTable(new ForceTypeTable<JointStruct>(capacity, this)),
+    springTable(new ForceTypeTable<SpringStruct>(capacity, this)),
+    motorTable(new ForceTypeTable<MotorStruct>(capacity, this))
+{
     resize(capacity);
 }
 
 ForceTable::~ForceTable() {
-
+    delete manifoldTable; manifoldTable = nullptr;
+    delete jointTable; jointTable = nullptr;
+    delete springTable; springTable = nullptr;
+    delete motorTable; motorTable = nullptr;
 }
 
 void ForceTable::markAsDeleted(std::size_t index) {
@@ -20,7 +29,7 @@ void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        forces, toDelete, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional
+        forces, toDelete, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional, indexMap
     );
 
     capacity = newCapacity;
@@ -34,7 +43,7 @@ void ForceTable::compact() {
     }
 
     compactTensors(toDelete, size,
-        forces, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional
+        forces, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional, indexMap
     );
 
     size = active;

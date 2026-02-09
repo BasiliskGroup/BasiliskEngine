@@ -9,6 +9,9 @@ namespace bsk::internal {
 // ------------------------------------------------------------
 struct MotorStruct {
     float speed = 0.0f;
+
+    // padding to 16 bytes
+    char _padding[12] = { 0 };
 };
 
 // Motor force which applies a torque to two rigid bodies to achieve a desired angular speed

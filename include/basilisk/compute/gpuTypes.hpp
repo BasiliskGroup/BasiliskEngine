@@ -22,17 +22,14 @@ struct alignas(16) vec3 : public glm::vec3 {
     // Copy constructor from glm::vec3
     vec3(const glm::vec3& v) : glm::vec3(v), _padding(0.0f) {}
     
-    // Copy constructor
-    vec3(const vec3& v) : glm::vec3(v), _padding(0.0f) {}
+    // Trivial copy/move (enables use in unions and std::vector)
+    vec3(const vec3&) = default;
+    vec3(vec3&&) = default;
+    vec3& operator=(const vec3&) = default;
+    vec3& operator=(vec3&&) = default;
     
     // Assignment from glm::vec3
     vec3& operator=(const glm::vec3& v) {
-        glm::vec3::operator=(v);
-        return *this;
-    }
-    
-    // Assignment operator
-    vec3& operator=(const vec3& v) {
         glm::vec3::operator=(v);
         return *this;
     }

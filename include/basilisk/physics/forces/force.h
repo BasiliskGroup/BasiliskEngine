@@ -25,6 +25,7 @@ protected:
     Force* prevB;
 
     std::size_t index;
+    std::size_t specialIndex = -1; // default to invalid index
 
 public:
     Force(Solver* solver, Rigid* bodyA, Rigid* bodyB);
@@ -46,6 +47,7 @@ public:
     Force* getPrevA() const { return prevA; }
     Force* getPrevB() const { return prevB; }
     std::size_t getIndex() const { return index; }
+    std::size_t getSpecialIndex() const { return specialIndex; }
     bsk::vec3& getPosA() const;
     bsk::vec3& getPosB() const;
     bsk::vec3& getInitialA() const;
@@ -74,6 +76,7 @@ public:
     void setPrevA(Force* value) { prevA = value; }
     void setPrevB(Force* value) { prevB = value; }
     void setIndex(std::size_t index) { this->index = index; }
+    void setSpecialIndex(std::size_t index) { this->specialIndex = index; }
     void setPosA(const glm::vec3& value);
     void setPosB(const glm::vec3& value);
     void setInitialA(const glm::vec3& value);

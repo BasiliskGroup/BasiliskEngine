@@ -1,20 +1,10 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -26,6 +16,9 @@ Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     setFmin(0, -INFINITY);
     setFmin(2, -INFINITY);
     solver->getForceTable()->setForceType(this->index, ForceType::MANIFOLD);
+
+    // register to manifold table
+    solver->getForceTable()->getManifoldTable()->insert(this);
 }
 
 bool Manifold::initialize() {
