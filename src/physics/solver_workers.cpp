@@ -1,10 +1,16 @@
 #include "basilisk/physics/tables/adjacency.h"
 #include <basilisk/physics/solver.h>
 
+#include <basilisk/util/constants.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/forces/joint.h>
+#include <basilisk/physics/forces/manifold.h>
+#include <basilisk/physics/forces/motor.h>
+#include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -155,60 +161,23 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
 // ------------------------------------------------------------
 
 void Solver::dualStage(ThreadScratch& scratch, int threadID) {
-    WorkRange range = partition(numForces, threadID, NUM_THREADS);
-    for (std::size_t i = range.start; i < range.end; i++) {
-        Force* force = forceTable->getForce(i);
-        dualUpdateSingle(force);
-    }
-}
+    // 4-pass dual update: one pass per force type, barrier between passes
+    // startSignal semaphore gates stage entry; dualPassBarrier syncs threads between passes
 
+    // Pass 1: Joints
+    dualUpdatePass<Joint, JointStruct>(forceTable->getJointTable(), threadID);
+    dualPassBarrier.arrive_and_wait();
 
-void Solver::dualUpdateSingle(Force* force) {
-    // Compute constraint
-    const std::size_t& forceIndex = force->getIndex();
+    // Pass 2: Manifolds
+    dualUpdatePass<Manifold, ManifoldData>(forceTable->getManifoldTable(), threadID);
+    dualPassBarrier.arrive_and_wait();
 
-    switch (force->getForceType()) {
-        case ForceType::JOINT:
-            Joint::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
-            break;
-        case ForceType::MANIFOLD:
-            Manifold::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
-            break;
-        case ForceType::SPRING:
-            Spring::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
-            break;
-        case ForceType::MOTOR:
-            Motor::computeConstraint(forceTable, forceIndex, currentAlpha.load(std::memory_order_acquire));
-            break;
-        default:
-            break;
-    }
+    // Pass 3: Springs
+    dualUpdatePass<Spring, SpringStruct>(forceTable->getSpringTable(), threadID);
+    dualPassBarrier.arrive_and_wait();
 
-    for (int i = 0; i < force->rows(); i++) {
-        ParameterStruct& parameters = forceTable->getParameter(forceIndex, i);
-
-        // Use lambda as 0 if it's not a hard constraint
-        float stiffness = parameters.stiffness;
-        float lambda = glm::isinf(stiffness) ? parameters.lambda : 0.0f;
-
-        // Update lambda (Eq 11)
-        float penalty = parameters.penalty;
-        float C = parameters.C;
-        float fmin = parameters.fmin;
-        float fmax = parameters.fmax;
-        float newLambda = glm::clamp(penalty * C + lambda, fmin, fmax);
-        parameters.lambda = newLambda;
-
-        // Disable the force if it has exceeded its fracture threshold
-        float fracture = force->getFracture(i);
-        if (fabsf(newLambda) >= fracture)
-            force->disable();
-
-        // Update the penalty parameter and clamp to material stiffness if we are within the force bounds (Eq. 16)
-        if (newLambda > fmin && newLambda < fmax) {
-            parameters.penalty = glm::min(penalty + beta * glm::abs(C), glm::min(PENALTY_MAX, stiffness));
-        }
-    }
+    // Pass 4: Motors
+    dualUpdatePass<Motor, MotorStruct>(forceTable->getMotorTable(), threadID);
 }
 
 }

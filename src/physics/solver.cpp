@@ -36,6 +36,7 @@ Solver::Solver() :
     bodyTable(nullptr),
     forceTable(nullptr),
     stageBarrier(NUM_THREADS),
+    dualPassBarrier(NUM_THREADS),
     startSignal(0),
     finishSignal(0),
     currentStage(Stage::STAGE_NONE),

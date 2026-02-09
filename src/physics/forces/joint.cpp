@@ -29,7 +29,7 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
 
 Joint::~Joint() {
     // unregister from joint table
-    solver->getForceTable()->getJointTable()->markAsDeleted(this->index);
+    solver->getForceTable()->getJointTable()->markAsDeleted(this->specialIndex);
 }
 
 bool Joint::initialize() {

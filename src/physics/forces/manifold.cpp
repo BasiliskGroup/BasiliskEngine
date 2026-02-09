@@ -23,7 +23,7 @@ Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
 
 Manifold::~Manifold() {
     // unregister from manifold table
-    solver->getForceTable()->getManifoldTable()->markAsDeleted(this->index);
+    solver->getForceTable()->getManifoldTable()->markAsDeleted(this->specialIndex);
 }
 
 bool Manifold::initialize() {

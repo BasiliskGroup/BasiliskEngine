@@ -20,7 +20,7 @@ Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxT
 
 Motor::~Motor() {
     // unregister from motor table
-    solver->getForceTable()->getMotorTable()->markAsDeleted(this->index);
+    solver->getForceTable()->getMotorTable()->markAsDeleted(this->specialIndex);
 }
 
 void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {

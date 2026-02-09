@@ -15,6 +15,7 @@ ForceTypeTable<T>::ForceTypeTable(std::size_t capacity, ForceTable* forceTable) 
 template<typename T>
 void ForceTypeTable<T>::markAsDeleted(std::size_t index) {
     toDelete[index] = true;
+    forces[index] = nullptr;
 }
 
 template<typename T>
@@ -22,7 +23,7 @@ void ForceTypeTable<T>::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
     
     expandTensors(newCapacity,
-        toDelete, indexMap, data
+        forces, toDelete, indexMap, data
     );
 
     capacity = newCapacity;
@@ -37,7 +38,7 @@ void ForceTypeTable<T>::compact() {
     }
 
     compactTensors(toDelete, size,
-        indexMap, data
+        forces, indexMap, data
     );
 
     size = active;
@@ -45,6 +46,7 @@ void ForceTypeTable<T>::compact() {
     // TODO check process with remapping
     for (std::size_t i = 0; i < size; i++) {
         toDelete[i] = false;
+        forces[i]->setSpecialIndex(i);
     }
 }
 
@@ -71,6 +73,7 @@ void ForceTypeTable<T>::insert(Force* force) {
 
     // set default arguments
     toDelete[size] = false;
+    forces[size] = force;
     indexMap[size] = force->getIndex();
     data[size] = T();
 

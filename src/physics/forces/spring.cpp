@@ -25,7 +25,7 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
 
 Spring::~Spring() {
     // unregister from spring table
-    solver->getForceTable()->getSpringTable()->markAsDeleted(this->index);
+    solver->getForceTable()->getSpringTable()->markAsDeleted(this->specialIndex);
 }
 
 void Spring::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
