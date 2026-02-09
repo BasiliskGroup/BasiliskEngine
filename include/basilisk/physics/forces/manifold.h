@@ -57,6 +57,7 @@ struct GpuManifoldData {
 class Manifold : public Force {
 public:
     Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB);
+    ~Manifold();
 
     static int rows(ForceTable* forceTable, std::size_t index);
     int rows() override;

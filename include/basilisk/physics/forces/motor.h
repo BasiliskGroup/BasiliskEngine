@@ -18,6 +18,7 @@ struct MotorStruct {
 class Motor : public Force {
 public:
     Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque);
+    ~Motor();
 
     static int rows(ForceTable* forceTable, std::size_t index) { return 1; }
     int rows() override { return 1; }

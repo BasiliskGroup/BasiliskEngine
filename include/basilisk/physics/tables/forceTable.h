@@ -135,6 +135,8 @@ public:
     DerivativeStruct& getDerivativeA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row]; }
     DerivativeStruct& getDerivativeB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row]; }
 
+    std::size_t& getMappedIndex(std::size_t forceIndex) { return indexMap[forceIndex]; }
+
     // full row
     Parameters& getParameters(std::size_t forceIndex) { return parameters[forceIndex]; }
     Derivatives& getDerivativesA(std::size_t forceIndex) { return derivativesA[forceIndex]; }

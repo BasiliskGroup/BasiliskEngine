@@ -42,16 +42,40 @@ void ForceTable::compact() {
         return;
     }
 
+    // Build index map: indexMap[oldIndex] = newIndex (SIZE_MAX for deleted)
+    std::size_t dst = 0;
+    for (std::size_t src = 0; src < size; ++src) {
+        if (!toDelete[src]) {
+            indexMap[src] = dst;
+            ++dst;
+        } else {
+            indexMap[src] = SIZE_MAX;
+        }
+    }
+
     compactTensors(toDelete, size,
-        forces, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional, indexMap
+        forces, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional
     );
 
     size = active;
 
+    // remap forces
     for (uint i = 0; i < size; i++) {
         toDelete[i] = false;
         forces[i]->setIndex(i);
     }
+
+    // compact type tables
+    manifoldTable->compact();
+    jointTable->compact();
+    springTable->compact();
+    motorTable->compact();
+
+    // remap type tables
+    manifoldTable->remap();
+    jointTable->remap();
+    springTable->remap();
+    motorTable->remap();
 }
 
 void ForceTable::insert(Force* force) {

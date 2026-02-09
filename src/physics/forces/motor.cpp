@@ -18,6 +18,11 @@ Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxT
     solver->getForceTable()->getMotorTable()->insert(this);
 }
 
+Motor::~Motor() {
+    // unregister from motor table
+    solver->getForceTable()->getMotorTable()->markAsDeleted(this->index);
+}
+
 void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
     MotorStruct& motors = forceTable->getMotors(index);
 

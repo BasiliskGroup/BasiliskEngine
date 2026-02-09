@@ -1,4 +1,5 @@
 #include <basilisk/physics/tables/forceTypeTable.h>
+#include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/forces/joint.h>
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/forces/motor.h>
@@ -30,7 +31,7 @@ void ForceTypeTable<T>::resize(std::size_t newCapacity) {
 template<typename T>
 void ForceTypeTable<T>::compact() {
     // do a quick check to see if we need to run more complex compact function
-    uint active = numValid(toDelete, size);
+    std::size_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
@@ -42,14 +43,24 @@ void ForceTypeTable<T>::compact() {
     size = active;
 
     // TODO check process with remapping
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         toDelete[i] = false;
     }
 }
 
 template<typename T>
 void ForceTypeTable<T>::remap() {
-    // TODO implement remapping
+    for (std::size_t i = 0; i < size; i++) {
+        if (toDelete[i]) {
+            continue;
+        }
+
+        std::size_t oldForceIndex = indexMap[i];
+        if (oldForceIndex >= forceTable->getCapacity()) continue;
+        std::size_t newForceIndex = forceTable->getMappedIndex(oldForceIndex);
+        if (newForceIndex == SIZE_MAX) continue;  // deleted force (orphaned entry)
+        indexMap[i] = newForceIndex;
+    }
 }
 
 template<typename T>

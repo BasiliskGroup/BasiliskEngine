@@ -27,6 +27,11 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
     solver->getForceTable()->getJointTable()->insert(this);
 }
 
+Joint::~Joint() {
+    // unregister from joint table
+    solver->getForceTable()->getJointTable()->markAsDeleted(this->index);
+}
+
 bool Joint::initialize() {
     // Store constraint function at beginnning of timestep C(x-)
     // Note: if bodyA is null, it is assumed that the joint connects a body to the world space position rA

@@ -23,6 +23,11 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
     solver->getForceTable()->getSpringTable()->insert(this);
 }
 
+Spring::~Spring() {
+    // unregister from spring table
+    solver->getForceTable()->getSpringTable()->markAsDeleted(this->index);
+}
+
 void Spring::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
     // Compute constraint function at current state C(x)
     SpringStruct& springs = forceTable->getSprings(index);

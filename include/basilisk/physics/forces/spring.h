@@ -21,6 +21,7 @@ class Spring : public Force
 {
 public:
     Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, float stiffness, float rest = -1);
+    ~Spring();
 
     static int rows(ForceTable* forceTable, std::size_t index) { return 1; }
     int rows() override { return 1; }

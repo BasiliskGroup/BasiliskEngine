@@ -21,6 +21,11 @@ Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     solver->getForceTable()->getManifoldTable()->insert(this);
 }
 
+Manifold::~Manifold() {
+    // unregister from manifold table
+    solver->getForceTable()->getManifoldTable()->markAsDeleted(this->index);
+}
+
 bool Manifold::initialize() {
     // Compute friction
     setFriction(sqrtf(bodyA->getFriction() * bodyB->getFriction()));
