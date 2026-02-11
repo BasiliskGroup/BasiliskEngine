@@ -25,6 +25,8 @@ struct Contact {
     glm::vec2 rA;
     glm::vec2 rB;
     glm::vec2 normal;
+
+    bsk::vec3 JAn, JAt, JBn, JBt;
     glm::vec2 C0;
     bool stick;
 };

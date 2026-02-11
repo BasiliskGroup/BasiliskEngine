@@ -38,11 +38,11 @@ void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float a
 void Motor::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A) {
-        forceTable->setJA(index, 0, glm::vec3(0.0f, 0.0f, 1.0f));
-        forceTable->setHA(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, 1.0f));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     } else {
-        forceTable->setJB(index, 0, glm::vec3(0.0f, 0.0f, -1.0f));
-        forceTable->setHB(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, -1.0f));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 

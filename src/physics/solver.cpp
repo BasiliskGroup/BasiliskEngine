@@ -1,14 +1,3 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
 #include "basilisk/util/constants.h"
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/rigid.h>
@@ -163,8 +152,8 @@ void Solver::remove(Force* force) {
 }
 
 void Solver::defaultParams() {
-    // gravity = { 0.0f, -9.81f, 0.0f };
-    gravity = std::nullopt;
+    gravity = { 0.0f, -9.81f, 0.0f };
+    // gravity = std::nullopt;
     iterations = 10;
 
     // Note: in the paper, beta is suggested to be [1, 1000]. Technically, the best choice will

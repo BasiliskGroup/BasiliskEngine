@@ -67,6 +67,7 @@ namespace bsk {
     using Manifold = internal::Manifold;
     using Joint = internal::Joint;
     using Spring = internal::Spring;
+    using Motor = internal::Motor;
     using Collider = internal::Collider;
 
     // render

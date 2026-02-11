@@ -82,10 +82,11 @@ bool Manifold::initialize() {
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 basisRow0 = glm::vec2(basis[0][0], basis[1][0]);  // row 0: (normal.x, normal.y)
         glm::vec2 basisRow1 = glm::vec2(basis[0][1], basis[1][1]);  // row 1: (tangent.x, tangent.y)
-        setJ(i * 2 + JN, bodyA, glm::vec3(basisRow0.x, basisRow0.y, cross(rAW, normal)));
-        setJ(i * 2 + JN, bodyB, glm::vec3(-basisRow0.x, -basisRow0.y, -cross(rBW, normal)));
-        setJ(i * 2 + JT, bodyA, glm::vec3(basisRow1.x, basisRow1.y, cross(rAW, tangent)));
-        setJ(i * 2 + JT, bodyB, glm::vec3(-basisRow1.x, -basisRow1.y, -cross(rBW, tangent)));
+        Contact& contact = getContactRef(i);
+        contact.JAn = glm::vec3(basisRow0.x, basisRow0.y, cross(rAW, normal));
+        contact.JAt = glm::vec3(basisRow1.x, basisRow1.y, cross(rAW, tangent));
+        contact.JBn = glm::vec3(-basisRow0.x, -basisRow0.y, -cross(rBW, normal));
+        contact.JBt = glm::vec3(-basisRow1.x, -basisRow1.y, -cross(rBW, tangent));
 
         getContactRef(i).C0 = basis * (glm::vec2(bodyA->getPosition().x, bodyA->getPosition().y) + rAW - glm::vec2(bodyB->getPosition().x, bodyB->getPosition().y) - rBW) + glm::vec2(COLLISION_MARGIN, 0);
     }
@@ -101,11 +102,13 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, floa
 
     for (int i = 0; i < manifolds.numContacts; i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
+        // Use contact Jacobians directly: C = C0 + J_A·dpA + J_B·dpB (table stores only one J per row)
         glm::vec3 dpA = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::A)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::A)];
         glm::vec3 dpB = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::B)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::B)];
-        
-        forceTable->setC(index, i * 2 + JN, manifolds.contacts[i].C0.x * (1 - alpha) + glm::dot(forceTable->getJA(index, i * 2 + JN), dpA) + glm::dot(forceTable->getJB(index, i * 2 + JN), dpB));
-        forceTable->setC(index, i * 2 + JT, manifolds.contacts[i].C0.y * (1 - alpha) + glm::dot(forceTable->getJA(index, i * 2 + JT), dpA) + glm::dot(forceTable->getJB(index, i * 2 + JT), dpB));
+
+        const Contact& c = manifolds.contacts[i];
+        forceTable->setC(index, i * 2 + JN, c.C0.x * (1 - alpha) + glm::dot(c.JAn, dpA) + glm::dot(c.JBn, dpB));
+        forceTable->setC(index, i * 2 + JT, c.C0.y * (1 - alpha) + glm::dot(c.JAt, dpA) + glm::dot(c.JBt, dpB));
 
         // Update the friction bounds using the latest lambda values
         float frictionBound = glm::abs(forceTable->getLambda(index, i * 2 + JN)) * manifolds.friction;
@@ -118,7 +121,15 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, floa
 }
 
 void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
-    return; // should already be stored, doesn't change after initialization
+    for (int i = 0; i < forceTable->getManifolds(index).numContacts; i++) {
+        if (body == ForceBodyOffset::A) {
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JAn);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JAt);
+        } else {
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JBn);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JBt);
+        }
+    }
 }
 
 // getters

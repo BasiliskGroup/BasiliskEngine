@@ -59,12 +59,12 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, Force
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
 
-        forceTable->setJA(index, 0, glm::vec3(n.x, n.y, dot(n, Sr)));
+        forceTable->setJ(index, 0, glm::vec3(n.x, n.y, dot(n, Sr)));
         // GLM 3x3 constructor: mat3(x1,y1,z1, x2,y2,z2, x3,y3,z3) = columns
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        forceTable->setHA(index, 0, glm::mat3(
+        forceTable->setH(index, 0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
@@ -77,10 +77,10 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, Force
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 
-        forceTable->setJB(index, 0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
+        forceTable->setJ(index, 0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        forceTable->setHB(index, 0, glm::mat3(
+        forceTable->setH(index, 0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2

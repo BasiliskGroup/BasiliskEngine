@@ -73,7 +73,7 @@ inline void Solver::processForce(ForceTable* forceTable, std::size_t forceIndex,
     int rows = TForce::rows(forceTable, forceIndex);
     for (int r = 0; r < TForce::rows(forceTable, forceIndex); ++r) {
         const ParameterStruct& parameters = forceTable->getParameter(forceIndex, r);
-        const DerivativeStruct& derivatives = (body == ForceBodyOffset::A) ? forceTable->getDerivativeA(forceIndex, r) : forceTable->getDerivativeB(forceIndex, r); // TODO replace with size calculation
+        const DerivativeStruct& derivatives = forceTable->getDerivative(forceIndex, r);
 
         // Use lambda as 0 if it's not a hard constraint
         float stiffness = parameters.stiffness;

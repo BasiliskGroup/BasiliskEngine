@@ -55,12 +55,8 @@ public:
     bsk::vec3& getInitialB() const;
     ForceType getForceType() const;
 
-    bsk::vec3& getJ(int index, Rigid* body) const;
-    bsk::mat3x3& getH(int index, Rigid* body) const;
-    bsk::vec3& getJA(int index) const;
-    bsk::vec3& getJB(int index) const;
-    bsk::mat3x3& getHA(int index) const;
-    bsk::mat3x3& getHB(int index) const;
+    bsk::vec3& getJ(int index) const;
+    bsk::mat3x3& getH(int index) const;
     float getC(int index) const;
     float getFmin(int index) const;
     float getFmax(int index) const;
@@ -84,12 +80,8 @@ public:
     void setInitialB(const glm::vec3& value);
     void setForceType(ForceType value);
 
-    void setJ(int index, Rigid* body, const glm::vec3& value);
-    void setH(int index, Rigid* body, const glm::mat3& value);
-    void setJA(int index, const glm::vec3& value);
-    void setJB(int index, const glm::vec3& value);
-    void setHA(int index, const glm::mat3& value);
-    void setHB(int index, const glm::mat3& value);
+    void setJ(int index, const glm::vec3& value);
+    void setH(int index, const glm::mat3& value);
     void setC(int index, float value);
     void setFmin(int index, float value);
     void setFmax(int index, float value);

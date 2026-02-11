@@ -54,22 +54,8 @@ void Force::disable() {
 }
 
 // getters
-bsk::vec3& Force::getJ(int index, Rigid* body) const { 
-    return (body == bodyA) ? 
-        solver->getForceTable()->getJA(this->index, index) : 
-        solver->getForceTable()->getJB(this->index, index); 
-}
-
-bsk::mat3x3& Force::getH(int index, Rigid* body) const { 
-    return (body == bodyA) ? 
-        solver->getForceTable()->getHA(this->index, index) : 
-        solver->getForceTable()->getHB(this->index, index); 
-}
-
-bsk::vec3& Force::getJA(int index) const { return forceTable->getJA(this->index, index); }
-bsk::vec3& Force::getJB(int index) const { return forceTable->getJB(this->index, index); }
-bsk::mat3x3& Force::getHA(int index) const { return forceTable->getHA(this->index, index); }
-bsk::mat3x3& Force::getHB(int index) const { return forceTable->getHB(this->index, index); }
+bsk::vec3& Force::getJ(int index) const { return forceTable->getJ(this->index, index); }
+bsk::mat3x3& Force::getH(int index) const { return forceTable->getH(this->index, index); }
 float Force::getC(int index) const { return forceTable->getC(this->index, index); }
 float Force::getFmin(int index) const { return forceTable->getFmin(this->index, index); }
 float Force::getFmax(int index) const { return forceTable->getFmax(this->index, index); }
@@ -85,20 +71,8 @@ bsk::vec3& Force::getInitialB() const { return forceTable->getInitialB(index); }
 ForceType Force::getForceType() const { return forceTable->getForceType(index); }
 
 // setters
-void Force::setJ(int index, Rigid* body, const glm::vec3& value) { 
-    if (body == bodyA) { forceTable->setJA(this->index, index, value); } 
-    else { forceTable->setJB(this->index, index, value); } 
-}
-
-void Force::setH(int index, Rigid* body, const glm::mat3& value) { 
-    if (body == bodyA) { forceTable->setHA(this->index, index, value); } 
-    else { forceTable->setHB(this->index, index, value); } 
-}
-
-void Force::setJA(int index, const glm::vec3& value) { forceTable->setJA(this->index, index, value); }
-void Force::setJB(int index, const glm::vec3& value) { forceTable->setJB(this->index, index, value); }
-void Force::setHA(int index, const glm::mat3& value) { forceTable->setHA(this->index, index, value); }
-void Force::setHB(int index, const glm::mat3& value) { forceTable->setHB(this->index, index, value); }
+void Force::setJ(int index, const glm::vec3& value) { forceTable->setJ(this->index, index, value); }
+void Force::setH(int index, const glm::mat3& value) { forceTable->setH(this->index, index, value); }
 void Force::setC(int index, float value) { forceTable->setC(this->index, index, value); }
 void Force::setFmin(int index, float value) { forceTable->setFmin(this->index, index, value); }
 void Force::setFmax(int index, float value) { forceTable->setFmax(this->index, index, value); }

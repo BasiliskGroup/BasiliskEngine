@@ -66,20 +66,20 @@ void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceB
     if (body == ForceBodyOffset::A)
     {
         glm::vec2 r = rotate(forceTable->getPosA(index).z, joints.rA);
-        forceTable->setJA(index, 0, glm::vec3(1.0f, 0.0f, -r.y));
-        forceTable->setJA(index, 1, glm::vec3(0.0f, 1.0f, r.x));
-        forceTable->setJA(index, 2, glm::vec3(0.0f, 0.0f, joints.torqueArm));
-        forceTable->setHA(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
-        forceTable->setHA(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
-        forceTable->setHA(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(1.0f, 0.0f, -r.y));
+        forceTable->setJ(index, 1, glm::vec3(0.0f, 1.0f, r.x));
+        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, joints.torqueArm));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
+        forceTable->setH(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
+        forceTable->setH(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     } else {
         glm::vec2 r = rotate(forceTable->getPosB(index).z, joints.rB);
-        forceTable->setJB(index, 0, glm::vec3(-1.0f, 0.0f, r.y));
-        forceTable->setJB(index, 1, glm::vec3(0.0f, -1.0f, -r.x));
-        forceTable->setJB(index, 2, glm::vec3(0.0f, 0.0f, -joints.torqueArm));
-        forceTable->setHB(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
-        forceTable->setHB(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
-        forceTable->setHB(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(-1.0f, 0.0f, r.y));
+        forceTable->setJ(index, 1, glm::vec3(0.0f, -1.0f, -r.x));
+        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, -joints.torqueArm));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
+        forceTable->setH(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
+        forceTable->setH(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 

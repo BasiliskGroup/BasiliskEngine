@@ -29,7 +29,7 @@ void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        forces, toDelete, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional, indexMap
+        forces, toDelete, parameters, derivatives, specialParameters, forceTypes, rows, positional, indexMap
     );
 
     capacity = newCapacity;
@@ -54,7 +54,7 @@ void ForceTable::compact() {
     }
 
     compactTensors(toDelete, size,
-        forces, parameters, derivativesA, derivativesB, specialParameters, forceTypes, rows, positional
+        forces, parameters, derivatives, specialParameters, forceTypes, rows, positional
     );
 
     size = active;
@@ -89,10 +89,8 @@ void ForceTable::insert(Force* force) {
     rows[size] = 0;
 
     for (int i = 0; i < MAX_ROWS; i++) {
-        derivativesA[size][i].J = glm::vec3(0.0f);
-        derivativesB[size][i].J = glm::vec3(0.0f);
-        derivativesA[size][i].H = glm::mat3x3(0.0f);
-        derivativesB[size][i].H = glm::mat3x3(0.0f);
+        derivatives[size][i].J = glm::vec3(0.0f);
+        derivatives[size][i].H = glm::mat3x3(0.0f);
         parameters[size][i].C = 0.0f;
         parameters[size][i].fmin = -INFINITY;
         parameters[size][i].fmax = INFINITY;
