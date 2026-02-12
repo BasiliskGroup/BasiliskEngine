@@ -9,6 +9,7 @@ void bind_engine(py::module_&);
 void bind_keyboard(py::module_&);
 void bind_mouse(py::module_&);
 void bind_scene(py::module_&);
+void bind_scene2d(py::module_&);
 void bind_node(py::module_&);
 void bind_node2d(py::module_&);
 void bind_image(py::module_&);
@@ -56,6 +57,7 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     bind_keyboard(m);
     bind_mouse(m);
     bind_scene(m);
+    bind_scene2d(m);
     bind_node(m);
     bind_image(m);
     bind_mesh(m);
