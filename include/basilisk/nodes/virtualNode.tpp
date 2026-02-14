@@ -26,7 +26,7 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     material(material), 
     position(position), 
     rotation(rotation), 
-    scale(scale) 
+    scale(scale)
 {
     parent->children.push_back(asNode());
     createBuffers();
@@ -399,6 +399,12 @@ void VirtualNode<Derived, P, R, S>::setSceneRecursive(VirtualScene<Derived, P, R
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::add(Derived* child) {
+    // Prevent adding duplicates
+    if (childrenSet.find(child) != childrenSet.end()) {
+        return;
+    }
+    childrenSet.insert(child);
+
     // Cycle detection: ensure child is not an ancestor of this node
     if (hasCycle(child)) {
         throw std::runtime_error("Cannot add node as child: would create a cycle in the tree");
@@ -462,6 +468,11 @@ void VirtualNode<Derived, P, R, S>::orphanRecursive() {
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::remove(Derived* child) {
+    if (childrenSet.find(child) == childrenSet.end()) {
+        return;
+    }
+    childrenSet.erase(child);
+
     auto it = std::find(children.begin(), children.end(), child);
     if (it != children.end()) {
         children.erase(it);

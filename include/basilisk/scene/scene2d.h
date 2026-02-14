@@ -28,7 +28,9 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         void render();
 
         void add(Node2D* node) override;
+        void add(std::shared_ptr<Node2D> node) override;
         void remove(Node2D* node) override;
+        void remove(std::shared_ptr<Node2D> node) override;
 
         void setCamera(StaticCamera2D* camera) { this->camera = camera; }
 

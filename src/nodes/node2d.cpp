@@ -182,7 +182,6 @@ glm::vec3 Node2D::getVelocity() {
 }
 
 void Node2D::onAdoption() {
-    assert(rigid == nullptr);
     bindRigid(getMesh(), getMaterial(), getPosition(), getRotation(), getScale(), physicsData.velocity, physicsData.collider, physicsData.density, physicsData.friction);
 }
 

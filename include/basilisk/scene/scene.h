@@ -35,7 +35,9 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         // TODO add remove light
 
         void add(Node* node) override;
+        void add(std::shared_ptr<Node> node) override;
         void remove(Node* node) override;
+        void remove(std::shared_ptr<Node> node) override;
 
         inline void setCamera(StaticCamera* camera) { this->camera = camera; }
         inline void setSkybox(Skybox* skybox) { this->skybox = skybox; }

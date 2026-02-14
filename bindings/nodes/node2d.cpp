@@ -1,6 +1,7 @@
+#include <memory>
 #include <pybind11/pybind11.h>
-
 #include <basilisk/nodes/node2d.h>
+#include <basilisk/scene/scene2d.h>
 
 // IMPORTANT: include GLM casters
 #include "glm/glmCasters.hpp" // DO NOT REMOVE THIS LINE
@@ -18,21 +19,17 @@ const float default_friction = 0.5f;
 }  // namespace
 
 void bind_node2d(py::module_& m) {
-    py::class_<Node2D>(m, "Node2D")
+    py::class_<Node2D, std::shared_ptr<Node2D>>(m, "Node2D")
 
-        // Node2D with scene
-        .def(py::init<
-            Scene2D*,
-            Mesh*,
-            Material*,
-            glm::vec2,
-            float,
-            glm::vec2,
-            glm::vec3,
-            Collider*,
-            float,
-            float
-        >(),
+        // Node2D with scene - use lambda to add to childrenPythonMap
+        .def(py::init([](Scene2D* scene, Mesh* mesh, Material* material, 
+                         glm::vec2 position, float rotation, glm::vec2 scale, 
+                         glm::vec3 velocity, Collider* collider, float density, float friction) {
+            auto node = std::make_shared<Node2D>(scene, mesh, material, position, rotation, 
+                                                  scale, velocity, collider, density, friction);
+            scene->add(node);
+            return node;
+        }),
         py::arg("scene"),
         py::arg("mesh"),
         py::arg("material"),
@@ -44,19 +41,17 @@ void bind_node2d(py::module_& m) {
         py::arg("density") = default_density,
         py::arg("friction") = default_friction)
 
-        // Node2D with parent
-        .def(py::init<
-            Node2D*,
-            Mesh*,
-            Material*,
-            glm::vec2,
-            float,
-            glm::vec2,
-            glm::vec3,
-            Collider*,
-            float,
-            float
-        >(),
+        // Node2D with parent - use lambda to add to childrenPythonMap
+        .def(py::init([](Node2D* parent, Mesh* mesh, Material* material, 
+                         glm::vec2 position, float rotation, glm::vec2 scale, 
+                         glm::vec3 velocity, Collider* collider, float density, float friction) {
+            auto node = std::make_shared<Node2D>(parent, mesh, material, position, rotation, 
+                                                  scale, velocity, collider, density, friction);
+            if (parent && parent->getScene()) {
+                parent->getScene()->add(node);
+            }
+            return node;
+        }),
         py::arg("parent"),
         py::arg("mesh"),
         py::arg("material"),
@@ -68,10 +63,15 @@ void bind_node2d(py::module_& m) {
         py::arg("density") = default_density,
         py::arg("friction") = default_friction)
 
-        // Empty Node2D with scene
-        .def(py::init<Scene2D*>(), py::arg("scene"))
+        // Empty Node2D with scene - use lambda to add to childrenPythonMap
+        .def(py::init([](Scene2D* scene) {
+            auto node = std::make_shared<Node2D>(scene);
+            scene->add(node);
+            return node;
+        }),
+        py::arg("scene"))
 
-        // Orphan Node2D (mesh, material, ...)
+        // Orphan Node2D (mesh, material, ...) - no scene, so no need to add
         .def(py::init<Mesh*, Material*, glm::vec2, float, glm::vec2, glm::vec3, Collider*, float, float>(),
         py::arg("mesh"),
         py::arg("material"),

@@ -81,8 +81,20 @@ void Scene::add(Node* node) {
     node->onAdoption();
 }
 
+void Scene::add(std::shared_ptr<Node> node) {
+    childrenPythonMap.emplace(node.get(), node);
+    root->add(node.get());
+    node->onAdoption();
+}
+
 void Scene::remove(Node* node) {
     root->remove(node);
+    node->onOrphan();
+}
+
+void Scene::remove(std::shared_ptr<Node> node) {
+    childrenPythonMap.erase(node.get());
+    root->remove(node.get());
     node->onOrphan();
 }
 
