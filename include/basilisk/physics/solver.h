@@ -1,21 +1,19 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
-#pragma once
+#ifndef BSK_PHYSICS_SOLVER_H
+#define BSK_PHYSICS_SOLVER_H
 
 #include "basilisk/physics/threading/scratch.h"
 #include <basilisk/util/includes.h>
+#include <basilisk/util/constants.h>
 #include <optional>
 #include <basilisk/physics/coloring/color_queue.h>
 #include <basilisk/physics/tables/adjacency.h>
+#include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
+#include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/forces/joint.h>
+#include <basilisk/physics/forces/manifold.h>
+#include <basilisk/physics/forces/motor.h>
+#include <basilisk/physics/forces/spring.h>
 #include <thread>
 #include <barrier>
 #include <semaphore>
@@ -29,6 +27,7 @@ class Force;
 class ColliderTable;
 class BodyTable;
 class ForceTable;
+template<typename T> class ForceTypeTable;
 struct ThreadScratch;
 struct WorkRange;
 
@@ -69,6 +68,7 @@ private:
 
     // Threading
     std::barrier<> stageBarrier;
+    std::barrier<> dualPassBarrier;
     std::counting_semaphore<> startSignal;
     std::counting_semaphore<> finishSignal;
     std::atomic<Stage> currentStage;
@@ -130,7 +130,45 @@ public:
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
     void primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex);
     void dualStage(ThreadScratch& scratch, int threadID);
-    void dualUpdateSingle(Force* force);
+
+    template<class TForce, typename T>
+    void dualUpdatePass(ForceTypeTable<T>* table, int threadID) {
+        std::size_t tableSize = table->getSize();
+        if (tableSize == 0) return;
+
+        WorkRange range = partition(tableSize, threadID, NUM_THREADS);
+        float alpha = currentAlpha.load(std::memory_order_acquire);
+
+        for (std::size_t i = range.start; i < range.end; i++) {
+            std::size_t forceIndex = table->getForceIndex(i);
+            Force* force = forceTable->getForce(forceIndex);
+            if (!force) continue;
+
+            TForce::computeConstraint(forceTable, forceIndex, alpha);
+
+            for (int r = 0; r < force->rows(); r++) {
+                ParameterStruct& parameters = forceTable->getParameter(forceIndex, r);
+
+                float stiffness = parameters.stiffness;
+                float lambda = glm::isinf(stiffness) ? parameters.lambda : 0.0f;
+
+                float penalty = parameters.penalty;
+                float C = parameters.C;
+                float fmin = parameters.fmin;
+                float fmax = parameters.fmax;
+                float newLambda = glm::clamp(penalty * C + lambda, fmin, fmax);
+                parameters.lambda = newLambda;
+
+                float fracture = force->getFracture(r);
+                if (fabsf(newLambda) >= fracture)
+                    force->disable();
+
+                if (newLambda > fmin && newLambda < fmax) {
+                    parameters.penalty = glm::min(penalty + beta * glm::abs(C), glm::min(PENALTY_MAX, stiffness));
+                }
+            }
+        }
+    }
 
     template<class TForce>
     inline void processForce(ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha);
@@ -140,3 +178,5 @@ public:
 };
 
 }
+
+#endif

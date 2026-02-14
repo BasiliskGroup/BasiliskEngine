@@ -1,18 +1,8 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>    
 #include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -23,6 +13,14 @@ Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxT
     setFmax(0, maxTorque);
     setFmin(0, -maxTorque);
     solver->getForceTable()->setForceType(this->index, ForceType::MOTOR);
+
+    // register to motor table
+    solver->getForceTable()->getMotorTable()->insert(this);
+}
+
+Motor::~Motor() {
+    // unregister from motor table
+    solver->getForceTable()->getMotorTable()->markAsDeleted(this->specialIndex);
 }
 
 void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
@@ -40,11 +38,11 @@ void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float a
 void Motor::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A) {
-        forceTable->setJA(index, 0, glm::vec3(0.0f, 0.0f, 1.0f));
-        forceTable->setHA(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, 1.0f));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     } else {
-        forceTable->setJB(index, 0, glm::vec3(0.0f, 0.0f, -1.0f));
-        forceTable->setHB(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, -1.0f));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 

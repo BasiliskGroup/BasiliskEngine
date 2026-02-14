@@ -3,29 +3,52 @@
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/collision/bvh.h>
+#include <basilisk/util/fileHandling.h>
+#include <basilisk/util/print.h>
 
 
 namespace bsk::internal {
 
 BodyTable::BodyTable(std::size_t capacity) : 
     bvh(new BVH()),
-    posBuffer(capacity),
-    initialBuffer(capacity),
-    inertialBuffer(capacity),
-    velBuffer(capacity),
-    frictionBuffer(capacity),
-    massBuffer(capacity),
-    momentBuffer(capacity),
-    matBuffer(capacity),
-    imatBuffer(capacity),
-    rmatBuffer(capacity)
+    posBuffer(new GpuBuffer<bsk::vec3>(capacity)),
+    initialBuffer(new GpuBuffer<bsk::vec3>(capacity)),
+    inertialBuffer(new GpuBuffer<bsk::vec3>(capacity)),
+    velBuffer(new GpuBuffer<bsk::vec3>(capacity)),
+    prevVelBuffer(new GpuBuffer<bsk::vec3>(capacity)),
+    frictionBuffer(new GpuBuffer<float>(capacity)),
+    massBuffer(new GpuBuffer<float>(capacity)),
+    momentBuffer(new GpuBuffer<float>(capacity))
 {
-    resize(capacity);   
+    resize(capacity); 
+    
+    // Initialize and bind shaders
+    velocityShader = new ComputeShader(
+        readFile(internalPath("shaders/velocity.wgsl").c_str()),
+        { 
+            posBuffer->handle(), 
+            initialBuffer->handle(), 
+            massBuffer->handle(), 
+            velBuffer->handle(), 
+            prevVelBuffer->handle() 
+        },
+        sizeof(VelocityUniforms)
+    );
 }
 
 BodyTable::~BodyTable() {
-    delete bvh;
-    bvh = nullptr;
+    delete velocityShader; velocityShader = nullptr;
+
+    delete posBuffer;      posBuffer = nullptr;
+    delete initialBuffer;  initialBuffer = nullptr;
+    delete inertialBuffer; inertialBuffer = nullptr;
+    delete velBuffer;      velBuffer = nullptr;
+    delete prevVelBuffer;  prevVelBuffer = nullptr;
+    delete frictionBuffer; frictionBuffer = nullptr;
+    delete massBuffer;     massBuffer = nullptr;
+    delete momentBuffer;   momentBuffer = nullptr;
+
+    delete bvh;            bvh = nullptr;
 }
 
 void BodyTable::computeTransforms() {
@@ -74,14 +97,28 @@ void BodyTable::warmstartBodies(const float dt, const std::optional<glm::vec3>& 
 
 // If we are are the final iteration before post stabilization, compute velocities (BDF1)
 void BodyTable::updateVelocities(float dt) {
-    for (std::size_t i = 0; i < size; i++) {
-        // update velocities
-        prevVel[i] = vel[i];
-        if (mass[i] > 0) {
-            vel[i] = (pos[i] - initial[i]) / dt;
-        }
+    if (dt == 0.0f) return;
 
-        // update node positions
+    // write all buffers to GPU (TODO remove this once main loop is ported to GPU)
+    posBuffer->write(pos);
+    initialBuffer->write(initial);
+    massBuffer->write(mass);
+    velBuffer->write(vel);
+    prevVelBuffer->write(prevVel);
+
+    // set shader uniforms (bodies as u32 to match WGSL layout)
+    VelocityUniforms uniforms;
+    uniforms.bodies = static_cast<std::uint32_t>(size);
+    uniforms.dt = dt;
+    velocityShader->setUniform(uniforms);
+
+    velocityShader->dispatch(size, 1, 1);
+
+    // read back from GPU (count = element count, like sand sim renderBuffer)
+    velBuffer->read(vel.data(), vel.size());
+    prevVelBuffer->read(prevVel.data(), prevVel.size());
+
+    for (std::size_t i = 0; i < size; i++) {
         bodies[i]->getNode()->setPosition(pos[i]);
     }
 }
@@ -94,12 +131,47 @@ void BodyTable::markAsDeleted(std::size_t index) {
 void BodyTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
+    const bool hadGpuResources = (capacity > 0);
+
     expandTensors(newCapacity,
     bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping
     );
 
-    // update capacity
     capacity = newCapacity;
+
+    // Recreate GPU buffers and velocity shader only when growing an already-initialized table.
+    // Skip on first call from constructor (capacity was 0, velocityShader not yet created).
+    if (hadGpuResources) {
+        delete velocityShader;
+        velocityShader = nullptr;
+        delete posBuffer;
+        delete initialBuffer;
+        delete inertialBuffer;
+        delete velBuffer;
+        delete prevVelBuffer;
+        delete frictionBuffer;
+        delete massBuffer;
+        delete momentBuffer;
+        posBuffer = new GpuBuffer<bsk::vec3>(capacity);
+        initialBuffer = new GpuBuffer<bsk::vec3>(capacity);
+        inertialBuffer = new GpuBuffer<bsk::vec3>(capacity);
+        velBuffer = new GpuBuffer<bsk::vec3>(capacity);
+        prevVelBuffer = new GpuBuffer<bsk::vec3>(capacity);
+        frictionBuffer = new GpuBuffer<float>(capacity);
+        massBuffer = new GpuBuffer<float>(capacity);
+        momentBuffer = new GpuBuffer<float>(capacity);
+        velocityShader = new ComputeShader(
+            readFile(internalPath("shaders/velocity.wgsl").c_str()),
+            {
+                posBuffer->handle(),
+                initialBuffer->handle(),
+                massBuffer->handle(),
+                velBuffer->handle(),
+                prevVelBuffer->handle()
+            },
+            sizeof(VelocityUniforms)
+        );
+    }
 }
 
 void BodyTable::compact() {

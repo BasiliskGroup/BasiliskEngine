@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_FORCES_MOTOR_H
+#define BSK_PHYSICS_FORCES_MOTOR_H
 
 #include <basilisk/physics/forces/force.h>
 
@@ -9,12 +10,16 @@ namespace bsk::internal {
 // ------------------------------------------------------------
 struct MotorStruct {
     float speed = 0.0f;
+
+    // padding to 16 bytes
+    char _padding[12] = { 0 };
 };
 
 // Motor force which applies a torque to two rigid bodies to achieve a desired angular speed
 class Motor : public Force {
 public:
     Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque);
+    ~Motor();
 
     static int rows(ForceTable* forceTable, std::size_t index) { return 1; }
     int rows() override { return 1; }
@@ -34,3 +39,4 @@ public:
 
 }
 
+#endif

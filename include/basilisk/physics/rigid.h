@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_RIGID_H
+#define BSK_PHYSICS_RIGID_H
 
 #include <basilisk/util/includes.h>
 
@@ -98,3 +99,5 @@ public:
 };
 
 }
+
+#endif

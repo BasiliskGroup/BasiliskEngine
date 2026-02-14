@@ -323,6 +323,31 @@ else()
     message(WARNING "main.cpp not found — skipping engine build.")
 endif()
 
+# Forces test executable (joints, springs, motors, manifolds)
+set(BASILISK_FORCES_TEST_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main_forces_test.cpp)
+if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
+    add_executable(engine_forces_test ${BASILISK_FORCES_TEST_MAIN})
+    target_include_directories(engine_forces_test PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+    target_link_libraries(engine_forces_test
+        PRIVATE
+            basilisk_lib
+            clipper2
+    )
+    if(RUST_GPU_LIB)
+        target_link_libraries(engine_forces_test PRIVATE ${RUST_GPU_LIB})
+    endif()
+    set_target_properties(engine_forces_test PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders  DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models   DESTINATION ${CMAKE_BINARY_DIR})
+    add_dependencies(engine_forces_test rust_gpu_lib)
+    message(STATUS "Added forces test executable: engine_forces_test")
+endif()
+
 # ======================================================
 # Rust Dependency
 # ======================================================

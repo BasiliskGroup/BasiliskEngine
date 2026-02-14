@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_FORCES_SPRING_H
+#define BSK_PHYSICS_FORCES_SPRING_H
 
 #include <basilisk/physics/forces/force.h>
 
@@ -11,6 +12,9 @@ struct SpringStruct {
     glm::vec2 rA;
     glm::vec2 rB;
     float rest;
+
+    // padding to 16 bytes
+    char _padding[12] = { 0 };
 };
 
 // Standard spring force
@@ -18,6 +22,7 @@ class Spring : public Force
 {
 public:
     Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, float stiffness, float rest = -1);
+    ~Spring();
 
     static int rows(ForceTable* forceTable, std::size_t index) { return 1; }
     int rows() override { return 1; }
@@ -46,3 +51,4 @@ public:
 
 }
 
+#endif
