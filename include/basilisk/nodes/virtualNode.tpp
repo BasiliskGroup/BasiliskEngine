@@ -28,6 +28,7 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     rotation(rotation), 
     scale(scale)
 {
+    parent->childrenSet.insert(asNode());
     parent->children.push_back(asNode());
     createBuffers();
 }
@@ -56,10 +57,17 @@ VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Mesh* mesh, Material
     material(material), 
     position(position), 
     rotation(rotation), 
-    scale(scale) 
+    scale(scale),
+    vbo(nullptr),
+    ebo(nullptr),
+    vao(nullptr)
 {
+    parent->childrenSet.insert(asNode());
     parent->children.push_back(asNode());
-    createBuffers();
+    // Only create buffers if parent is in a scene (has valid shader). Orphan subtrees get buffers on adoption via setSceneRecursive.
+    if (shader != nullptr && mesh != nullptr) {
+        createBuffers();
+    }
 }
 
 /**
@@ -141,13 +149,18 @@ VirtualNode<Derived,P,R,S>::VirtualNode(const VirtualNode& other) noexcept
             cloneParent->remove(clone);
         }
         clone->parent = asNode();
+        childrenSet.insert(clone);
         children.push_back(clone);
     }
 
-    createBuffers();
-    
+    // Only create buffers if we have a valid shader (e.g. not copying an orphan)
+    if (shader != nullptr && mesh != nullptr) {
+        createBuffers();
+    }
+
     // Add ourselves to parent
     if (parent) {
+        parent->childrenSet.insert(asNode());
         parent->children.push_back(asNode());
     }
 }
@@ -175,7 +188,8 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
       rotation(std::move(other.rotation)),
       scale(std::move(other.scale)),
       model(std::move(other.model)),
-      children(std::move(other.children))
+      children(std::move(other.children)),
+      childrenSet(std::move(other.childrenSet))
 {
     // rebind children to new parent
     for (auto* child : children)
@@ -183,6 +197,7 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
 
     if (parent) {
         parent->remove(other.asNode());
+        parent->childrenSet.insert(asNode());
         parent->children.push_back(asNode());
     }
 
@@ -192,6 +207,7 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
     other.vao = nullptr;
     other.parent = nullptr;
     other.children.clear();
+    other.childrenSet.clear();
 }
 
 /**
@@ -246,15 +262,19 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const Vi
             cloneParent->remove(clone);
         }
         clone->parent = asNode();
+        childrenSet.insert(clone);
         children.push_back(clone);
     }
 
-    // initialize
-    createBuffers();
-    
+    // Only create buffers if we have a valid shader (e.g. not copying from an orphan)
+    if (shader != nullptr && mesh != nullptr) {
+        createBuffers();
+    }
+
     // Set parent and add to parent's children
     parent = other.parent;
-    if (parent) {  
+    if (parent) {
+        parent->childrenSet.insert(asNode());
         parent->children.push_back(asNode());
     }
 
@@ -289,12 +309,14 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
 
     // move children
     children = std::move(other.children);
+    childrenSet = std::move(other.childrenSet);
     for (auto* child : children)
         child->parent = asNode();
 
     // initialize
     if (parent) {
         parent->remove(other.asNode());
+        parent->childrenSet.insert(asNode());
         parent->children.push_back(asNode());
     }
 
@@ -303,6 +325,7 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
     other.ebo = nullptr;
     other.vao = nullptr;
     other.children.clear();
+    other.childrenSet.clear();
     return *this;
 }
 
@@ -506,7 +529,7 @@ void VirtualNode<Derived, P, R, S>::clear() {
 
     // remove from parent
     if (parent != nullptr) {
-        parent->remove(asNode());
+        parent->asNode()->remove(asNode());
         parent = nullptr;
     }
 }

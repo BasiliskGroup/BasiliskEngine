@@ -58,24 +58,20 @@ void Scene2D::render() {
 
 void Scene2D::add(Node2D* node) {
     root->add(node);
-    node->onAdoption();
 }
 
 void Scene2D::add(std::shared_ptr<Node2D> node) {
     childrenPythonMap.emplace(node.get(), node);
-    root->add(node.get());
-    node->onAdoption();
+    root->add(node.get());  
 }
 
 void Scene2D::remove(Node2D* node) {
     root->remove(node);
-    node->onOrphan();
 }
 
 void Scene2D::remove(std::shared_ptr<Node2D> node) {
     childrenPythonMap.erase(node.get());
     root->remove(node.get());
-    node->onOrphan();
 }
 
 }

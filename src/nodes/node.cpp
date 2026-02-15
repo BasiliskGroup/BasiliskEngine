@@ -43,12 +43,4 @@ void Node::setScale(glm::vec3 scale) {
     updateModel();
 }
 
-void Node::onAdoption() {
-    
-}
-
-void Node::onOrphan() {
-    
-}
-
 }

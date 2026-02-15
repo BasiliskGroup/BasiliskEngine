@@ -54,8 +54,9 @@ public:
     // float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
     float getLayer() { return layer; }
 
-    void onAdoption() override;
-    void onOrphan() override;
+    void onSceneChange(VirtualScene2D* oldScene, VirtualScene2D* newScene);
+    void add(Node2D* child);
+    void remove(Node2D* child);
 
     // collision exposure
     ForceType constrainedTo(Node2D* other);

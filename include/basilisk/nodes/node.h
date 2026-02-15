@@ -27,9 +27,6 @@ class Node : public VirtualNode<Node, glm::vec3, glm::quat, glm::vec3> {
         void setPosition(glm::vec3 position) override;
         void setRotation(glm::quat rotation) override;
         void setScale(glm::vec3 scale) override;
-        
-        void onAdoption() override;
-        void onOrphan() override;
 
         Scene* getScene() { return (Scene*) scene; }
 
