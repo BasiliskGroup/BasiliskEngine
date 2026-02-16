@@ -5,6 +5,7 @@
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/util/fileHandling.h>
 #include <basilisk/util/print.h>
+#include <basilisk/physics/tables/colliderTable.h>
 
 
 namespace bsk::internal {
@@ -238,6 +239,16 @@ glm::vec3 BodyTable::getGravity(Rigid* body) const {
 
 glm::vec3 BodyTable::getGravity(std::size_t index) const {
     return { bvh->computeGravity(bodies[index]), 0.0f };
+}
+
+float BodyTable::getDensity(std::size_t index) {
+    Collider* collider = Solver::colliderTable->getCollider(this->collider[index]);
+    return mass[index] / (scale[index].x * scale[index].y * collider->getArea());
+}
+
+void BodyTable::setDensity(std::size_t index, float value) {
+    Collider* collider = Solver::colliderTable->getCollider(this->collider[index]);
+    mass[index] = value * (scale[index].x * scale[index].y * collider->getArea());
 }
 
 }

@@ -6,6 +6,8 @@
 namespace py = pybind11;
 
 void bind_engine(py::module_&);
+void bind_camera(py::module_&);
+void bind_window(py::module_&);
 void bind_keyboard(py::module_&);
 void bind_mouse(py::module_&);
 void bind_scene(py::module_&);
@@ -51,11 +53,13 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     }
 
     // bind submodules
-    // Bind key enum before keyboard (so Keyboard methods can use KeyCode)
-    bind_engine(m);
+    // Bind Window, Keyboard, Mouse before Engine (Engine returns references to them)
+    bind_window(m);
     bind_key(m);
     bind_keyboard(m);
     bind_mouse(m);
+    bind_engine(m);
+    bind_camera(m);   // Before Scene2D (Scene2D.set_camera accepts StaticCamera2D*)
     bind_scene(m);
     bind_scene2d(m);
     bind_node(m);

@@ -11,6 +11,7 @@ namespace bsk::internal {
 class Rigid;
 class Collider;
 class BVH;
+class ColliderTable;
 
 class BodyTable : public VirtualTable {
 private:
@@ -87,6 +88,7 @@ public:
     bool getUpdated(std::size_t index) { return updated[index]; }
     int getColor(std::size_t index) { return color[index]; }
     BVH* getBVH() { return bvh; }
+    float getDensity(std::size_t index); //{ return mass[index] / (scale[index].x * scale[index].y * collider[index]->getArea()); }
 
     // setters
     void setBodies(std::size_t index, Rigid* value) { bodies[index] = value; }
@@ -107,6 +109,7 @@ public:
     void setRmat(std::size_t index, const glm::mat2x2& value) { rmat[index] = value; }
     void setUpdated(std::size_t index, bool value) { updated[index] = value; }
     void setColor(std::size_t index, int value) { color[index] = value; }
+    void setDensity(std::size_t index, float value); //{ density[index] = value; }
 
 private:
     struct VelocityUniforms {

@@ -45,14 +45,19 @@ public:
     void setScale(glm::vec2 scale) override;
     void setVelocity(glm::vec3 velocity);
     void setLayer(float layer) { this->layer = layer; updateModel(); }
+    void setCollider(Collider* collider);
+    void setDensity(float density);
+    void setFriction(float friction);
     // void setManifoldMask(float x, float y, float z) { rigid->setManifoldMask(x, y, z); }
 
     Scene2D* getScene() { return (Scene2D*) scene; }
-    // glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
     Rigid* getRigid() { return rigid; }
     glm::vec3 getVelocity();
-    // float getDensity() { return rigid != nullptr ? rigid->getDensity() : -1; }
     float getLayer() { return layer; }
+    float getDensity();
+    float getFriction();
+    Collider* getCollider();
+    // glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
 
     void onSceneChange(VirtualScene2D* oldScene, VirtualScene2D* newScene);
     void add(Node2D* child);

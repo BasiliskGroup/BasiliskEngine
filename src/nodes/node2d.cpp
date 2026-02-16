@@ -191,6 +191,36 @@ void Node2D::setRigid(Node2D&& other) {
     other.rigid = nullptr;
 }
 
+void Node2D::setCollider(Collider* collider) {
+    if (this->rigid) this->rigid->setCollider(collider);
+    physicsData.collider = collider;
+}
+
+void Node2D::setDensity(float density) {
+    if (this->rigid) this->rigid->setDensity(density);
+    physicsData.density = density;
+}
+
+void Node2D::setFriction(float friction) {
+    if (this->rigid) this->rigid->setFriction(friction);
+    physicsData.friction = friction;
+}
+
+float Node2D::getDensity() {
+    assert(this->rigid != nullptr);
+    return this->rigid->getDensity();
+}
+
+float Node2D::getFriction() {
+    assert(this->rigid != nullptr);
+    return this->rigid->getFriction();
+}
+
+Collider* Node2D::getCollider() {
+    assert(this->rigid != nullptr);
+    return this->rigid->getCollider();
+}
+
 ForceType Node2D::constrainedTo(Node2D* other){
     if (this->rigid == nullptr || other == nullptr || other->rigid == nullptr) {
         return NULL_FORCE;
@@ -205,6 +235,12 @@ bool Node2D::isTouching(Node2D* other){
     }
 
     return constrainedTo(other) == MANIFOLD;
+}
+
+bool Node2D::justCollided(Node2D* other) {
+    // True if we are currently in contact with other. Per-frame "contact just began"
+    // would require solver contact history; for now matches isTouching.
+    return isTouching(other);
 }
 
 glm::vec3 Node2D::getVelocity() {

@@ -53,6 +53,8 @@ public:
         
         delete node;
         std::cout << "  ✓ Node2D with collider created and cleaned up" << std::endl;
+
+        engine->getKeyboard()->getPressed(KeyCode::K_ESCAPE);
     }
 
     void test_create_node_without_collider() {

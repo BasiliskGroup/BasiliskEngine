@@ -33,6 +33,9 @@ struct WorkRange;
 
 // Core solver class which holds all the rigid bodies and forces, and has logic to step the simulation forward in time
 class Solver {
+public: 
+    static std::unique_ptr<ColliderTable> colliderTable;
+
 private:
     enum class Stage {
         STAGE_NONE,
@@ -59,7 +62,6 @@ private:
 
     BodyTable* bodyTable;
     ForceTable* forceTable;
-    static std::unique_ptr<ColliderTable> colliderTable;
 
     // Coloring
     ColorQueue colorQueue;
