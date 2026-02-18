@@ -1,27 +1,42 @@
 #include <basilisk/resource/resourceServer.h>
 #include <basilisk/render/skybox.h>
+#include <basilisk/util/resolvePath.h>
 
+// internalPath("models/cube.obj").c_str()
 
 namespace bsk::internal {
 
 // Define static members (must include full type)
+// Initialize simple ones at global scope, but defer Mesh/Skybox initialization
+// to avoid static initialization order issues with Assimp
 Image*    ResourceServer::defaultImage = new Image({1.0f, 1.0f, 1.0f, 1.0f}, 1, 1);
 Material* ResourceServer::defaultMaterial = new Material();
-Mesh*     ResourceServer::defaultCube = new Mesh("models/cube.obj");
-Mesh*     ResourceServer::defaultQuad = new Mesh("models/quad.obj");
-Skybox*   ResourceServer::defaultSkybox = new Skybox({
-    "textures/skybox/right.jpg",
-    "textures/skybox/left.jpg",
-    "textures/skybox/top.jpg",
-    "textures/skybox/bottom.jpg",
-    "textures/skybox/front.jpg",
-    "textures/skybox/back.jpg"
-});
+Mesh*     ResourceServer::defaultCube = nullptr;
+Mesh*     ResourceServer::defaultQuad = nullptr;
+Skybox*   ResourceServer::defaultSkybox = nullptr;
 
 
 ResourceServer::ResourceServer() {
     textureServer = new TextureServer();
     materialServer = new MaterialServer(textureServer);
+    
+    // Initialize static resources that require Assimp (deferred to avoid static init order issues)
+    if (defaultCube == nullptr) {
+        defaultCube = new Mesh(internalPath("models/cube.obj").c_str());
+    }
+    if (defaultQuad == nullptr) {
+        defaultQuad = new Mesh(internalPath("models/quad.obj").c_str());
+    }
+    if (defaultSkybox == nullptr) {
+        defaultSkybox = new Skybox({
+            internalPath("textures/skybox/right.jpg").c_str(),
+            internalPath("textures/skybox/left.jpg").c_str(),
+            internalPath("textures/skybox/top.jpg").c_str(),
+            internalPath("textures/skybox/bottom.jpg").c_str(),
+            internalPath("textures/skybox/front.jpg").c_str(),
+            internalPath("textures/skybox/back.jpg").c_str()
+        });
+    }
 }
 
 ResourceServer::~ResourceServer() {
