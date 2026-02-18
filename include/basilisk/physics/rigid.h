@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_RIGID_H
+#define BSK_PHYSICS_RIGID_H
 
 #include <basilisk/util/includes.h>
 
@@ -58,6 +59,7 @@ public:
     void setInertial(const glm::vec3& inertial);
     void setPrevVelocity(const glm::vec3& prevVelocity);
     void setMass(float mass);
+    void setDensity(float density);
     void setMoment(float moment);
     void setFriction(float friction);
     void setRadius(float radius);
@@ -98,3 +100,5 @@ public:
 };
 
 }
+
+#endif

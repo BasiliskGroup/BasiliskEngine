@@ -27,6 +27,7 @@ protected:
     VirtualScene<Derived, P, R, S>* scene;
     Derived* parent;
     std::vector<Derived*> children;
+    std::set<Derived*> childrenSet; // used for O(1) lookup of children, prevent adding duplicates
 
     P position;
     R rotation;
@@ -101,9 +102,6 @@ public:
     const std::vector<Derived*>& getChildren() { return children; }
     void add(Derived* child);
     void remove(Derived* child);
-
-    virtual void onAdoption() = 0;
-    virtual void onOrphan() = 0;
 
     iterator begin() { return iterator(asNode()); }
     iterator end() { return iterator(nullptr); }

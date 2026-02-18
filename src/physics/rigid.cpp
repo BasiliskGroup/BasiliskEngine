@@ -15,7 +15,6 @@ Rigid::Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 positio
     this->solver->getBodyTable()->insert(this, position, size, density, friction, velocity, collider);
 }
 
-
 Rigid::~Rigid() {
     // Remove from linked list
     solver->remove(this);
@@ -270,6 +269,10 @@ void Rigid::setNode(Node2D* node) {
 
 void Rigid::setIndex(std::size_t index) {
     this->index = index;
+}
+
+void Rigid::setDensity(float density) {
+    this->solver->getBodyTable()->setDensity(this->index, density);
 }
 
 glm::vec3 Rigid::getPosition() const {

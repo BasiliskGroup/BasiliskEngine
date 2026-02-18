@@ -2,24 +2,28 @@
 #define BODY_TABLE_H
 
 #include <basilisk/util/includes.h>
-#include <basilisk/physics/tables/virtualTable.h>
+#include <basilisk/physics/tables/virtualTable.h>       
+#include <basilisk/compute/gpuWrapper.hpp>
+#include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
 
 class Rigid;
 class Collider;
 class BVH;
+class ColliderTable;
 
 class BodyTable : public VirtualTable {
 private:
+    // CPU side data
     std::vector<Rigid*> bodies;
     std::vector<bool> toDelete;
-    std::vector<bool> sleeping;
-    std::vector<glm::vec3> pos;
-    std::vector<glm::vec3> initial;
-    std::vector<glm::vec3> inertial;
-    std::vector<glm::vec3> vel;
-    std::vector<glm::vec3> prevVel;
+    std::vector<bool> sleeping; // TODO, currently unused
+    std::vector<bsk::vec3> pos;
+    std::vector<bsk::vec3> initial;
+    std::vector<bsk::vec3> inertial;
+    std::vector<bsk::vec3> vel;
+    std::vector<bsk::vec3> prevVel;
     std::vector<glm::vec2> scale;
     std::vector<float> friction;
     std::vector<float> mass;
@@ -33,7 +37,19 @@ private:
     std::vector<int> color;
 
     BVH* bvh;
-    
+
+    // GPU side data
+    GpuBuffer<bsk::vec3>* posBuffer;
+    GpuBuffer<bsk::vec3>* initialBuffer;
+    GpuBuffer<bsk::vec3>* inertialBuffer;
+    GpuBuffer<bsk::vec3>* velBuffer;
+    GpuBuffer<bsk::vec3>* prevVelBuffer;
+    GpuBuffer<float>* frictionBuffer;
+    GpuBuffer<float>* massBuffer;
+    GpuBuffer<float>* momentBuffer;
+
+    ComputeShader* velocityShader;
+
 public:
     BodyTable(std::size_t capacity);
     ~BodyTable();
@@ -72,6 +88,7 @@ public:
     bool getUpdated(std::size_t index) { return updated[index]; }
     int getColor(std::size_t index) { return color[index]; }
     BVH* getBVH() { return bvh; }
+    float getDensity(std::size_t index); //{ return mass[index] / (scale[index].x * scale[index].y * collider[index]->getArea()); }
 
     // setters
     void setBodies(std::size_t index, Rigid* value) { bodies[index] = value; }
@@ -92,6 +109,13 @@ public:
     void setRmat(std::size_t index, const glm::mat2x2& value) { rmat[index] = value; }
     void setUpdated(std::size_t index, bool value) { updated[index] = value; }
     void setColor(std::size_t index, int value) { color[index] = value; }
+    void setDensity(std::size_t index, float value); //{ density[index] = value; }
+
+private:
+    struct VelocityUniforms {
+        std::uint32_t bodies;
+        float dt;
+    };
 };
 
 }

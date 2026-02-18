@@ -1,15 +1,28 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <basilisk/scene/scene2d.h>
 #include <basilisk/engine/engine.h>
+#include <basilisk/nodes/node2d.h>
+#include <basilisk/camera/staticCamera2d.h>
 
 namespace py = pybind11;
+using namespace bsk::internal;
 
 void bind_scene2d(py::module_& m) {
-    py::class_<bsk::internal::Scene2D>(m, "Scene2D")
-        .def(py::init<bsk::internal::Engine*>(), py::arg("engine"))
-        .def("update", &bsk::internal::Scene2D::update)
-        .def("render", &bsk::internal::Scene2D::render)
-        .def("set_camera", &bsk::internal::Scene2D::setCamera, py::arg("camera"))
-        .def("get_shader", &bsk::internal::Scene2D::getShader)
-        .def("get_camera", &bsk::internal::Scene2D::getCamera);
+    py::class_<Scene2D>(m, "Scene2D")
+        .def(py::init<Engine*>(), py::arg("engine"))
+        .def("update", &Scene2D::update)
+        .def("render", &Scene2D::render)
+        .def("add", static_cast<void (Scene2D::*)(std::shared_ptr<Node2D>)>(&Scene2D::add), py::arg("node"))
+        .def("remove", static_cast<void (Scene2D::*)(Node2D*)>(&Scene2D::remove), py::arg("node"))
+        .def("set_camera", &Scene2D::setCamera, py::arg("camera"))
+        .def("get_camera", &Scene2D::getCamera, py::return_value_policy::reference_internal)
+        .def_property("camera",
+            [](Scene2D& s) { return s.getCamera(); },
+            [](Scene2D& s, StaticCamera2D* c) { s.setCamera(c); },
+            py::return_value_policy::reference_internal)
+        .def("get_shader", &Scene2D::getShader)
+        .def("get_engine", &Scene2D::getEngine)
+        .def("get_root", &Scene2D::getRoot)
+        .def("get_solver", &Scene2D::getSolver);
 }

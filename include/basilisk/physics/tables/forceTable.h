@@ -11,8 +11,12 @@
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/tables/adjacency.h>
+#include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
+
+template<typename T>
+class ForceTypeTable;
 
 using ::bsk::internal::MAX_ROWS;
 
@@ -27,11 +31,14 @@ struct ParameterStruct {
     float fracture;
     float penalty;
     float lambda;
+
+    // TODO determine if we need padding (vec4 aligned)
+    // float _padding;
 };
 
 struct DerivativeStruct {
-    glm::vec3 J;
-    glm::mat3x3 H;
+    bsk::vec3 J;
+    bsk::mat3x3 H;
 };
 
 union SpecialParameters {
@@ -44,15 +51,16 @@ union SpecialParameters {
 };
 
 struct Positional {
-    std::array<glm::vec3, 2> pos;
-    std::array<glm::vec3, 2> initial;
+    std::array<bsk::vec3, 2> pos;
+    std::array<bsk::vec3, 2> initial;
 };
 
 // ------------------------------------------------------------
 // Force Table Types
 // ------------------------------------------------------------
-using Derivatives = std::array<DerivativeStruct, MAX_ROWS>;
 using Parameters = std::array<ParameterStruct, MAX_ROWS>;
+using Derivatives = std::array<DerivativeStruct, MAX_ROWS>;
+
 
 class Force;
 
@@ -67,11 +75,19 @@ private:
     std::vector<Force*> forces;
     std::vector<bool> toDelete;
     std::vector<Parameters> parameters;
-    std::vector<Derivatives> derivativesA;
-    std::vector<Derivatives> derivativesB;
+    std::vector<Derivatives> derivatives;
     std::vector<ForceType> forceTypes;
     std::vector<SpecialParameters> specialParameters;
     std::vector<Positional> positional;
+
+    // used to map row vectors to new indices
+    std::vector<std::size_t> indexMap;
+
+    // force specific tables
+    ForceTypeTable<ManifoldData>* manifoldTable;
+    ForceTypeTable<JointStruct>* jointTable;
+    ForceTypeTable<SpringStruct>* springTable;
+    ForceTypeTable<MotorStruct>* motorTable;
 
     // structure variables
     std::vector<int> rows;
@@ -91,17 +107,20 @@ public:
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
     Positional& getPositional(std::size_t index) { return positional[index]; }
-    glm::vec3& getPosA(std::size_t index) { return positional[index].pos[0]; }
-    glm::vec3& getPosB(std::size_t index) { return positional[index].pos[1]; }
-    glm::vec3& getInitialA(std::size_t index) { return positional[index].initial[0]; }
-    glm::vec3& getInitialB(std::size_t index) { return positional[index].initial[1]; }
+    bsk::vec3& getPosA(std::size_t index) { return positional[index].pos[0]; }
+    bsk::vec3& getPosB(std::size_t index) { return positional[index].pos[1]; }
+    bsk::vec3& getInitialA(std::size_t index) { return positional[index].initial[0]; }
+    bsk::vec3& getInitialB(std::size_t index) { return positional[index].initial[1]; }
+
     Solver* getSolver() { return solver; }
+    ForceTypeTable<ManifoldData>* getManifoldTable() { return manifoldTable; }
+    ForceTypeTable<JointStruct>* getJointTable() { return jointTable; }
+    ForceTypeTable<SpringStruct>* getSpringTable() { return springTable; }
+    ForceTypeTable<MotorStruct>* getMotorTable() { return motorTable; }
 
     // index specific
-    glm::vec3& getJA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].J; }
-    glm::vec3& getJB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].J; }
-    glm::mat3& getHA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row].H; }
-    glm::mat3& getHB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row].H; }
+    bsk::vec3& getJ(std::size_t forceIndex, int row) { return derivatives[forceIndex][row].J; }
+    bsk::mat3x3& getH(std::size_t forceIndex, int row) { return derivatives[forceIndex][row].H; }
     float getC(std::size_t forceIndex, int row) { return parameters[forceIndex][row].C; }
     float getFmin(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fmin; }
     float getFmax(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fmax; }
@@ -111,13 +130,13 @@ public:
     float getLambda(std::size_t forceIndex, int row) { return parameters[forceIndex][row].lambda; }
 
     ParameterStruct& getParameter(std::size_t forceIndex, int row) { return parameters[forceIndex][row]; }
-    DerivativeStruct& getDerivativeA(std::size_t forceIndex, int row) { return derivativesA[forceIndex][row]; }
-    DerivativeStruct& getDerivativeB(std::size_t forceIndex, int row) { return derivativesB[forceIndex][row]; }
+    DerivativeStruct& getDerivative(std::size_t forceIndex, int row) { return derivatives[forceIndex][row]; }
+
+    std::size_t& getMappedIndex(std::size_t forceIndex) { return indexMap[forceIndex]; }
 
     // full row
     Parameters& getParameters(std::size_t forceIndex) { return parameters[forceIndex]; }
-    Derivatives& getDerivativesA(std::size_t forceIndex) { return derivativesA[forceIndex]; }
-    Derivatives& getDerivativesB(std::size_t forceIndex) { return derivativesB[forceIndex]; }
+    Derivatives& getDerivatives(std::size_t forceIndex) { return derivatives[forceIndex]; }
 
     SpecialParameters& getSpecialParameters(std::size_t forceIndex) { return specialParameters[forceIndex]; }
     ManifoldData& getManifolds(std::size_t forceIndex) { return specialParameters[forceIndex].manifold; }
@@ -138,10 +157,8 @@ public:
     void setSolver(Solver* value) { solver = value; }
     
     // index specific
-    void setJA(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesA[forceIndex][row].J = value; }
-    void setJB(std::size_t forceIndex, int row, const glm::vec3& value) { derivativesB[forceIndex][row].J = value; }
-    void setHA(std::size_t forceIndex, int row, const glm::mat3& value) { derivativesA[forceIndex][row].H = value; }
-    void setHB(std::size_t forceIndex, int row, const glm::mat3& value) { derivativesB[forceIndex][row].H = value; }
+    void setJ(std::size_t forceIndex, int row, const glm::vec3& value) { derivatives[forceIndex][row].J = value; }
+    void setH(std::size_t forceIndex, int row, const glm::mat3& value) { derivatives[forceIndex][row].H = value; }
     void setC(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].C = value; }
     void setFmin(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].fmin = value; }
     void setFmax(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].fmax = value; }
@@ -151,13 +168,11 @@ public:
     void setLambda(std::size_t forceIndex, int row, float value) { parameters[forceIndex][row].lambda = value; }
 
     void setParameter(std::size_t forceIndex, int row, const ParameterStruct& value) { parameters[forceIndex][row] = value; }
-    void setDerivativeA(std::size_t forceIndex, int row, const DerivativeStruct& value) { derivativesA[forceIndex][row] = value; }
-    void setDerivativeB(std::size_t forceIndex, int row, const DerivativeStruct& value) { derivativesB[forceIndex][row] = value; }
+    void setDerivative(std::size_t forceIndex, int row, const DerivativeStruct& value) { derivatives[forceIndex][row] = value; }
 
     // full row
     void setParameters(std::size_t forceIndex, const Parameters& value) { parameters[forceIndex] = value; }
-    void setDerivativesA(std::size_t forceIndex, const Derivatives& value) { derivativesA[forceIndex] = value; }
-    void setDerivativesB(std::size_t forceIndex, const Derivatives& value) { derivativesB[forceIndex] = value; }
+    void setDerivatives(std::size_t forceIndex, const Derivatives& value) { derivatives[forceIndex] = value; }
 
     void setSpecialParameters(std::size_t forceIndex, const SpecialParameters& value) { specialParameters[forceIndex] = value; }
     void setManifolds(std::size_t forceIndex, const ManifoldData& value) { specialParameters[forceIndex].manifold = value; }

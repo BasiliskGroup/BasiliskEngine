@@ -6,9 +6,12 @@
 namespace py = pybind11;
 
 void bind_engine(py::module_&);
+void bind_camera(py::module_&);
+void bind_window(py::module_&);
 void bind_keyboard(py::module_&);
 void bind_mouse(py::module_&);
 void bind_scene(py::module_&);
+void bind_scene2d(py::module_&);
 void bind_node(py::module_&);
 void bind_node2d(py::module_&);
 void bind_image(py::module_&);
@@ -32,6 +35,7 @@ void bind_solver(py::module_&);
 void bind_collider(py::module_&);
 void bind_force(py::module_&);
 void bind_key(py::module_&);
+void bind_compute(py::module_&);
 
 PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     m.doc() = "pybind11 example plugin"; // optional module docstring
@@ -49,12 +53,15 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     }
 
     // bind submodules
-    // Bind key enum before keyboard (so Keyboard methods can use KeyCode)
-    bind_engine(m);
+    // Bind Window, Keyboard, Mouse before Engine (Engine returns references to them)
+    bind_window(m);
     bind_key(m);
     bind_keyboard(m);
     bind_mouse(m);
+    bind_engine(m);
+    bind_camera(m);   // Before Scene2D (Scene2D.set_camera accepts StaticCamera2D*)
     bind_scene(m);
+    bind_scene2d(m);
     bind_node(m);
     bind_image(m);
     bind_mesh(m);
@@ -85,4 +92,6 @@ PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
     auto forces = m.def_submodule("forces", "Physics forces submodule");
     bind_force(forces);  // Base class must be bound before derived classes
 
+    // Compute (GPU) bindings
+    bind_compute(m);
 }

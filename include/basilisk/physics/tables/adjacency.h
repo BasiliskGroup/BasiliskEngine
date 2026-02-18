@@ -2,6 +2,7 @@
 #define BSK_PHYSICS_GRAPH_ADJACENCY_H
 
 #include <basilisk/util/includes.h>
+#include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
 
@@ -16,7 +17,7 @@ struct ColoredData {
 
     float mass;
     float moment;
-    glm::vec3 inertial;
+    bsk::vec3 inertial;
 
     std::size_t getCount() const { return joint + manifold + spring + motor; }
 };

@@ -1,20 +1,10 @@
-/*
-* Copyright (c) 2025 Chris Giles
-*
-* Permission to use, copy, modify, distribute and sell this software
-* and its documentation for any purpose is hereby granted without fee,
-* provided that the above copyright notice appear in all copies.
-* Chris Giles makes no representations about the suitability
-* of this software for any purpose.
-* It is provided "as is" without express or implied warranty.
-*/
-
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -28,6 +18,14 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
     if (getRest() < 0)
         setRest(length(transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB())));
     solver->getForceTable()->setForceType(this->index, ForceType::SPRING);
+
+    // register to spring table
+    solver->getForceTable()->getSpringTable()->insert(this);
+}
+
+Spring::~Spring() {
+    // unregister from spring table
+    solver->getForceTable()->getSpringTable()->markAsDeleted(this->specialIndex);
 }
 
 void Spring::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
@@ -61,12 +59,12 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, Force
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
 
-        forceTable->setJA(index, 0, glm::vec3(n.x, n.y, dot(n, Sr)));
+        forceTable->setJ(index, 0, glm::vec3(n.x, n.y, dot(n, Sr)));
         // GLM 3x3 constructor: mat3(x1,y1,z1, x2,y2,z2, x3,y3,z3) = columns
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        forceTable->setHA(index, 0, glm::mat3(
+        forceTable->setH(index, 0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2
@@ -79,10 +77,10 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, Force
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 
-        forceTable->setJB(index, 0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
+        forceTable->setJ(index, 0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
-        forceTable->setHB(index, 0, glm::mat3(
+        forceTable->setH(index, 0, glm::mat3(
             row0.x, row1.x, dxr.x,   // column 0
             row0.y, row1.y, dxr.y,   // column 1
             dxr.x,  dxr.y,  drr      // column 2

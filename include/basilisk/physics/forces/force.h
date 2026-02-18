@@ -1,7 +1,9 @@
-#pragma once
+#ifndef BSK_PHYSICS_FORCES_FORCE_H
+#define BSK_PHYSICS_FORCES_FORCE_H
 
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/tables/adjacency.h>
+#include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
 
@@ -24,6 +26,7 @@ protected:
     Force* prevB;
 
     std::size_t index;
+    std::size_t specialIndex = -1; // default to invalid index
 
 public:
     Force(Solver* solver, Rigid* bodyA, Rigid* bodyB);
@@ -45,18 +48,15 @@ public:
     Force* getPrevA() const { return prevA; }
     Force* getPrevB() const { return prevB; }
     std::size_t getIndex() const { return index; }
-    glm::vec3& getPosA() const;
-    glm::vec3& getPosB() const;
-    glm::vec3& getInitialA() const;
-    glm::vec3& getInitialB() const;
+    std::size_t getSpecialIndex() const { return specialIndex; }
+    bsk::vec3& getPosA() const;
+    bsk::vec3& getPosB() const;
+    bsk::vec3& getInitialA() const;
+    bsk::vec3& getInitialB() const;
     ForceType getForceType() const;
 
-    glm::vec3& getJ(int index, Rigid* body) const;
-    glm::mat3x3& getH(int index, Rigid* body) const;
-    glm::vec3& getJA(int index) const;
-    glm::vec3& getJB(int index) const;
-    glm::mat3x3& getHA(int index) const;
-    glm::mat3x3& getHB(int index) const;
+    bsk::vec3& getJ(int index) const;
+    bsk::mat3x3& getH(int index) const;
     float getC(int index) const;
     float getFmin(int index) const;
     float getFmax(int index) const;
@@ -73,18 +73,15 @@ public:
     void setPrevA(Force* value) { prevA = value; }
     void setPrevB(Force* value) { prevB = value; }
     void setIndex(std::size_t index) { this->index = index; }
+    void setSpecialIndex(std::size_t index) { this->specialIndex = index; }
     void setPosA(const glm::vec3& value);
     void setPosB(const glm::vec3& value);
     void setInitialA(const glm::vec3& value);
     void setInitialB(const glm::vec3& value);
     void setForceType(ForceType value);
 
-    void setJ(int index, Rigid* body, const glm::vec3& value);
-    void setH(int index, Rigid* body, const glm::mat3& value);
-    void setJA(int index, const glm::vec3& value);
-    void setJB(int index, const glm::vec3& value);
-    void setHA(int index, const glm::mat3& value);
-    void setHB(int index, const glm::mat3& value);
+    void setJ(int index, const glm::vec3& value);
+    void setH(int index, const glm::mat3& value);
     void setC(int index, float value);
     void setFmin(int index, float value);
     void setFmax(int index, float value);
@@ -96,3 +93,4 @@ public:
 
 }
 
+#endif

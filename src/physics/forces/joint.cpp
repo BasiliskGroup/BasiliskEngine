@@ -4,6 +4,7 @@
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -12,7 +13,6 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
 {
     setRA(rA);
     setRB(rB);
-
     setStiffness(0, stiffness.x);
     setStiffness(1, stiffness.y);
     setStiffness(2, stiffness.z);
@@ -22,6 +22,14 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
     setRestAngle((bodyA ? bodyA->getPosition().z : 0.0f) - bodyB->getPosition().z);
     setTorqueArm(lengthSq((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize()));
     solver->getForceTable()->setForceType(this->index, ForceType::JOINT);
+
+    // register to joint table
+    solver->getForceTable()->getJointTable()->insert(this);
+}
+
+Joint::~Joint() {
+    // unregister from joint table
+    solver->getForceTable()->getJointTable()->markAsDeleted(this->specialIndex);
 }
 
 bool Joint::initialize() {
@@ -58,20 +66,20 @@ void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceB
     if (body == ForceBodyOffset::A)
     {
         glm::vec2 r = rotate(forceTable->getPosA(index).z, joints.rA);
-        forceTable->setJA(index, 0, glm::vec3(1.0f, 0.0f, -r.y));
-        forceTable->setJA(index, 1, glm::vec3(0.0f, 1.0f, r.x));
-        forceTable->setJA(index, 2, glm::vec3(0.0f, 0.0f, joints.torqueArm));
-        forceTable->setHA(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
-        forceTable->setHA(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
-        forceTable->setHA(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(1.0f, 0.0f, -r.y));
+        forceTable->setJ(index, 1, glm::vec3(0.0f, 1.0f, r.x));
+        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, joints.torqueArm));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
+        forceTable->setH(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
+        forceTable->setH(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     } else {
         glm::vec2 r = rotate(forceTable->getPosB(index).z, joints.rB);
-        forceTable->setJB(index, 0, glm::vec3(-1.0f, 0.0f, r.y));
-        forceTable->setJB(index, 1, glm::vec3(0.0f, -1.0f, -r.x));
-        forceTable->setJB(index, 2, glm::vec3(0.0f, 0.0f, -joints.torqueArm));
-        forceTable->setHB(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
-        forceTable->setHB(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
-        forceTable->setHB(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        forceTable->setJ(index, 0, glm::vec3(-1.0f, 0.0f, r.y));
+        forceTable->setJ(index, 1, glm::vec3(0.0f, -1.0f, -r.x));
+        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, -joints.torqueArm));
+        forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
+        forceTable->setH(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
+        forceTable->setH(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }
 

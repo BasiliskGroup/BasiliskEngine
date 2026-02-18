@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BSK_PHYSICS_FORCES_JOINT_H
+#define BSK_PHYSICS_FORCES_JOINT_H
 
 #include <basilisk/physics/forces/force.h>
 
@@ -10,9 +11,12 @@ namespace bsk::internal {
 struct JointStruct {
     glm::vec2 rA = glm::vec2(0.0f);
     glm::vec2 rB = glm::vec2(0.0f);
-    glm::vec3 C0 = glm::vec3(0.0f);
+    bsk::vec3 C0 = bsk::vec3(0.0f);
     float torqueArm = 0.0f;
     float restAngle = 0.0f;
+
+    // padding to 16 bytes
+    char _padding[8] = { 0 };
 };
 
 // Revolute joint + angle constraint between two rigid bodies, with optional fracture
@@ -20,6 +24,7 @@ class Joint : public Force {
 public:
     Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, glm::vec3 stiffness = glm::vec3{ INFINITY, INFINITY, INFINITY },
         float fracture = INFINITY);
+    ~Joint();
 
     static int rows(ForceTable* forceTable, std::size_t index) { return 3; }
     int rows() override { return 3; }
@@ -52,3 +57,4 @@ public:
 
 }
 
+#endif

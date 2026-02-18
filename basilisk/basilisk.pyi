@@ -6,7 +6,51 @@ import collections.abc
 import glm
 import typing
 import typing_extensions
-__all__: list[str] = ['Collider', 'Contact', 'EBO', 'Edges', 'Engine', 'FBO', 'FeaturePair', 'Force', 'Frame', 'Image', 'Joint', 'Manifold', 'Material', 'Mesh', 'Motor', 'Node', 'Node2D', 'Rigid', 'Scene', 'Shader', 'Solver', 'Spring', 'VAO', 'VBO']
+__all__: list[str] = ['Collider', 'ComputeShader', 'Contact', 'EBO', 'Edges', 'Engine', 'FBO', 'FeaturePair', 'Force', 'Frame', 'GpuBuffer', 'GpuBufferDtype', 'Image', 'Joint', 'Manifold', 'Material', 'Mesh', 'Motor', 'Node', 'Node2D', 'Rigid', 'Scene', 'Shader', 'Solver', 'Spring', 'VAO', 'VBO']
+
+
+def init_gpu() -> None:
+    """Initialize the GPU compute backend (call once at startup)."""
+    ...
+
+
+class GpuBufferDtype:
+    U32: int
+    F32: int
+    I32: int
+
+
+class GpuBuffer:
+    """Single GPU buffer; dtype controls element type ('u32'|'f32'|'i32'), len is element count."""
+    def __init__(self, dtype: typing.Union[str, typing.Any], len: int) -> None:
+        ...
+    def write(self, data: collections.abc.Sequence[typing.Union[int, float]]) -> None:
+        ...
+    def read(self) -> list[typing.Union[int, float]]:
+        ...
+    def len(self) -> int:
+        ...
+    def size_bytes(self) -> int:
+        ...
+    def element_size(self) -> int:
+        ...
+    def dtype(self) -> str:
+        """Return dtype string: 'u32', 'f32', or 'i32'."""
+        ...
+    def handle(self) -> int:
+        """Return opaque handle for use with ComputeShader buffer_handles."""
+        ...
+
+
+class ComputeShader:
+    def __init__(self, wgsl: str, buffer_handles: list[int], uniform_size: int = 0) -> None:
+        ...
+    def set_uniform_bytes(self, data: typing.Union[bytes, typing_extensions.Buffer]) -> None:
+        """Set uniform data from a bytes-like or buffer object."""
+        ...
+    def dispatch(self, x: int, y: int = 1, z: int = 1) -> None:
+        """Dispatch the compute shader with workgroup counts (x, y, z)."""
+        ...
 class Collider:
     def __init__(self, solver: Solver, vertices: collections.abc.Sequence[glm.vec2]) -> None:
         ...

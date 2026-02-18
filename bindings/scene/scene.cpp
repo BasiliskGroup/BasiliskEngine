@@ -1,3 +1,4 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 #include <basilisk/scene/scene.h>
 #include <basilisk/light/light.h>
@@ -31,7 +32,7 @@ void bind_scene(py::module_& m) {
         )
         .def(
             "add",
-            static_cast<void (bsk::internal::Scene::*)(bsk::internal::Node*)>(
+            static_cast<void (bsk::internal::Scene::*)(std::shared_ptr<bsk::internal::Node>)>(
                 &bsk::internal::Scene::add),
             py::arg("node")
         )

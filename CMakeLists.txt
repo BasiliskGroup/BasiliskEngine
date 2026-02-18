@@ -158,6 +158,16 @@ target_include_directories(clipper2 PUBLIC
 target_compile_features(clipper2 PUBLIC cxx_std_20)
 
 # ======================================================
+# Rust GPU library
+# ======================================================
+add_custom_target(rust_gpu_lib ALL
+    COMMAND cargo build --release
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu
+    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.dylib
+    COMMENT "Building Rust GPU compute library..."
+)
+
+# ======================================================
 # Basilisk Engine Sources
 # ======================================================
 file(GLOB_RECURSE BASILISK_SOURCES
@@ -209,11 +219,27 @@ pybind11_add_module(basilisk ${BINDING_SOURCES})
 target_include_directories(basilisk PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/bindings
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(basilisk PRIVATE
     basilisk_lib
 )
+
+# Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
+if(APPLE)
+    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.dylib")
+elseif(UNIX)
+    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so")
+elseif(WIN32)
+    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll")
+else()
+    set(RUST_GPU_LIB "")
+endif()
+if(RUST_GPU_LIB)
+    target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
+    add_dependencies(basilisk rust_gpu_lib)
+endif()
 
 # ======================================================
 # Generate Python type stubs with pybind11-stubgen
@@ -278,6 +304,11 @@ if(EXISTS ${BASILISK_MAIN})
             clipper2
     )
 
+    # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
+    if(RUST_GPU_LIB)
+        target_link_libraries(engine PRIVATE ${RUST_GPU_LIB})
+    endif()
+
     set_target_properties(engine PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
@@ -291,6 +322,37 @@ if(EXISTS ${BASILISK_MAIN})
 else()
     message(WARNING "main.cpp not found — skipping engine build.")
 endif()
+
+# Forces test executable (joints, springs, motors, manifolds)
+set(BASILISK_FORCES_TEST_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main_forces_test.cpp)
+if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
+    add_executable(engine_forces_test ${BASILISK_FORCES_TEST_MAIN})
+    target_include_directories(engine_forces_test PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+    )
+    target_link_libraries(engine_forces_test
+        PRIVATE
+            basilisk_lib
+            clipper2
+    )
+    if(RUST_GPU_LIB)
+        target_link_libraries(engine_forces_test PRIVATE ${RUST_GPU_LIB})
+    endif()
+    set_target_properties(engine_forces_test PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders  DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models   DESTINATION ${CMAKE_BINARY_DIR})
+    add_dependencies(engine_forces_test rust_gpu_lib)
+    message(STATUS "Added forces test executable: engine_forces_test")
+endif()
+
+# ======================================================
+# Rust Dependency
+# ======================================================
+add_dependencies(engine rust_gpu_lib)
+add_dependencies(basilisk_lib rust_gpu_lib)
 
 # ======================================================
 # AddressSanitizer
