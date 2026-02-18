@@ -63,4 +63,24 @@ void StaticCamera::use(Shader* shader) {
     shader->setUniform("uViewDirection", forward);
 }
 
+/**
+ * @brief Look at a target and update the pitch and yaw
+ *  
+ * @param target 
+ */
+void StaticCamera::lookAt(glm::vec3 target) {
+    // Update forward vector
+    forward = glm::normalize(target - position);
+    right = glm::normalize(glm::cross(worldUp, forward));
+    up = glm::cross(forward, right);
+    view = glm::lookAt(position, position + forward, up);
+
+    // Update pitch and yaw (convert from radians to degrees)
+    // Based on updateView() formula: forward.x = cos(yaw)*cos(pitch), forward.z = sin(yaw)*cos(pitch)
+    pitch = glm::degrees(asin(forward.y));
+    yaw = glm::degrees(atan2(forward.z, forward.x));
+
+    updateView();
+}
+
 }

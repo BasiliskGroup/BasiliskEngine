@@ -51,12 +51,14 @@ class StaticCamera : public VirtualCamera {
         void setX(float x) { position.x = x; updateView(); }
         void setY(float y) { position.y = y; updateView(); }
         void setZ(float z) { position.z = z; updateView(); }
+        void setPosition(glm::vec3 position) { this->position = position; updateView(); }
         void setYaw(float yaw) { this->yaw = yaw; updateView(); }
         void setPitch(float pitch) { this->pitch = pitch; updateView(); }
         void setFOV(float fov) { this->fov = fov; updateProjection();}
         void setAspect(float aspect) { this->aspect = aspect; updateProjection();}
         void setNear(float near) { this->near = near; updateProjection();}
         void setFar(float far) { this->far = far; updateProjection();}
+        void lookAt(glm::vec3 target);
 };
 
 }
