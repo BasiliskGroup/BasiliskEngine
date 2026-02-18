@@ -202,6 +202,7 @@ public:
         
         Solver* solver1 = scene1->getSolver();
         Rigid* rigid1 = node->getRigid();
+        assert(rigid1 != nullptr);
         assert(rigid1->getSolver() == solver1);
         
         // Move to scene2
@@ -210,8 +211,13 @@ public:
         assert(node->getScene() == scene2);
         Rigid* rigid2 = node->getRigid();
         assert(rigid2 != nullptr);
-        assert(rigid2 != rigid1);  // Different rigid instance
-        assert(rigid2->getSolver() == scene2->getSolver());  // New solver
+        
+        // Verify this is a genuinely new rigid bound to the new solver.
+        // Note: we do NOT compare rigid2 != rigid1 because the allocator may reuse
+        // the same address after the old rigid is freed — this is valid behavior and
+        // is more likely on Linux (glibc) than macOS. Solver identity is the correct
+        // way to verify that a new rigid was created for the new scene.
+        assert(rigid2->getSolver() == scene2->getSolver());
         assert(rigid2->getSolver() != solver1);
         
         // Verify physics properties transferred
