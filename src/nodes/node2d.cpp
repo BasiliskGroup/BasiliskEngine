@@ -250,6 +250,21 @@ glm::vec3 Node2D::getVelocity() {
     return rigid->getVelocity();
 }
 
+glm::vec2& Node2D::getPositionRef() {
+    return this->position;
+}
+
+glm::vec2& Node2D::getScaleRef() {
+    return this->scale;
+}
+
+glm::vec3& Node2D::getVelocityRef() {
+    if (rigid != nullptr) {
+        return rigid->getVelocityRef();
+    }
+    return physicsData.velocity;
+}
+
 void Node2D::onSceneChange(VirtualScene2D* oldScene, VirtualScene2D* newScene) {
     // Save rigid state before destroying
     if (rigid != nullptr) {

@@ -53,6 +53,9 @@ public:
     Scene2D* getScene() { return (Scene2D*) scene; }
     Rigid* getRigid() { return rigid; }
     glm::vec3 getVelocity();
+    glm::vec2& getPositionRef();
+    glm::vec2& getScaleRef();
+    glm::vec3& getVelocityRef();
     float getLayer() { return layer; }
     float getDensity();
     float getFriction();

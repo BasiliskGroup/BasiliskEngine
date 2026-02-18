@@ -355,7 +355,9 @@ endif()
 # ======================================================
 # Rust Dependency
 # ======================================================
-add_dependencies(engine rust_gpu_lib)
+if(TARGET engine)
+    add_dependencies(engine rust_gpu_lib)
+endif()
 add_dependencies(basilisk_lib rust_gpu_lib)
 
 # ======================================================

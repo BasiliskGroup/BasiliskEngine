@@ -1,0 +1,25 @@
+We will look at using node in python for the example test cases. All uses of basilisk objects with vec2, vec3, and quat properties should behave the same. Below we will just show cases for vec3, the other types should behave the same
+
+# minimum requirements
+# vec3 below represents glm.vec3 from PyGLM
+
+# using full vector
+vec3 = vec3 + node.pos # returns vec3
+vec3 = node.pos + 2.0 * vec3(node.vel)
+vec3 = vec3(node.pos) + node.pos
+node.pos = vec3
+node.pos *= 2 # piecewise multiplication
+node.pos /= 2 # piecewise division
+node.pos *= vec3 # piecewise multiplication
+node.pos /= vec3 # piecewise division
+
+# using vector props
+node.pos.x += 2.0 * node.vel.x
+node.pos.x += 2.0
+node.pos.x = node.vel.x
+
+# would be nice to have (If jonah can get PyGLM in the bindings and compile Python correctly with PyInstaller/CXFreeze)
+
+# using full vector
+vec3 = node.pos + 2.0 * node.vel # returns vec3
+vec3 = node.pos + node2.pos

@@ -193,6 +193,10 @@ glm::vec3 Rigid::getVelocity() const {
     return this->solver->getBodyTable()->getVel(this->index);
 }
 
+glm::vec3& Rigid::getVelocityRef() {
+    return this->solver->getBodyTable()->getVel(this->index);
+}
+
 float Rigid::getDensity() const {
     float mass = this->solver->getBodyTable()->getMass(this->index);
     glm::vec2 size = this->solver->getBodyTable()->getScale(this->index);

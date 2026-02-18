@@ -1,10 +1,10 @@
 #include <memory>
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include "glm/glmCasters.hpp"  // DO NOT REMOVE - must be before vector_proxy.h (uses py::cast<glm::vec2/vec3>)
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/scene/scene2d.h>
-
-// IMPORTANT: include GLM casters
-#include "glm/glmCasters.hpp"  // DO NOT REMOVE THIS LINE
+#include "vector_proxy.h"
 
 namespace py = pybind11;
 using namespace bsk::internal;
@@ -16,64 +16,11 @@ const glm::vec3 default_velocity(0.0f, 0.0f, 0.0f);
 const float default_rotation = 0.0f;
 const float default_density = 1.0f;
 const float default_friction = 0.5f;
-
-// Proxy classes for mutable properties so node.velocity.y += 1 works
-class Vec2PropertyProxy {
-public:
-    Node2D* node;
-    enum Type { Position, Scale } type;
-    float get_x() const {
-        auto v = type == Position ? glm::vec2(node->getPosition()) : node->getScale();
-        return v.x;
-    }
-    void set_x(float v) {
-        if (type == Position) {
-            auto p = node->getPosition();
-            node->setPosition(glm::vec2(v, p.y));
-        } else {
-            auto s = node->getScale();
-            node->setScale(glm::vec2(v, s.y));
-        }
-    }
-    float get_y() const {
-        auto v = type == Position ? glm::vec2(node->getPosition()) : node->getScale();
-        return v.y;
-    }
-    void set_y(float v) {
-        if (type == Position) {
-            auto p = node->getPosition();
-            node->setPosition(glm::vec2(p.x, v));
-        } else {
-            auto s = node->getScale();
-            node->setScale(glm::vec2(s.x, v));
-        }
-    }
-};
-
-class Vec3VelocityProxy {
-public:
-    Node2D* node;
-    float get_x() const { return node->getVelocity().x; }
-    void set_x(float v) { auto vel = node->getVelocity(); vel.x = v; node->setVelocity(vel); }
-    float get_y() const { return node->getVelocity().y; }
-    void set_y(float v) { auto vel = node->getVelocity(); vel.y = v; node->setVelocity(vel); }
-    float get_z() const { return node->getVelocity().z; }
-    void set_z(float v) { auto vel = node->getVelocity(); vel.z = v; node->setVelocity(vel); }
-};
-
 }  // namespace
 
 void bind_node2d(py::module_& m) {
-    // Bind Vec2PropertyProxy for position and scale
-    py::class_<Vec2PropertyProxy>(m, "_Vec2PropertyProxy", py::module_local())
-        .def_property("x", &Vec2PropertyProxy::get_x, &Vec2PropertyProxy::set_x)
-        .def_property("y", &Vec2PropertyProxy::get_y, &Vec2PropertyProxy::set_y);
-
-    // Bind Vec3VelocityProxy for velocity
-    py::class_<Vec3VelocityProxy>(m, "_Vec3VelocityProxy", py::module_local())
-        .def_property("x", &Vec3VelocityProxy::get_x, &Vec3VelocityProxy::set_x)
-        .def_property("y", &Vec3VelocityProxy::get_y, &Vec3VelocityProxy::set_y)
-        .def_property("z", &Vec3VelocityProxy::get_z, &Vec3VelocityProxy::set_z);
+    // Bind Vec2 proxy (Vec3 is bound by Node which runs first)
+    bind_vector_proxy<glm::vec2>(m, "_Vec2PropertyProxy");
 
     py::class_<Node2D, std::shared_ptr<Node2D>>(m, "Node2D")
 
@@ -170,30 +117,39 @@ void bind_node2d(py::module_& m) {
         .def("get_engine", &Node2D::getEngine, py::return_value_policy::reference_internal)
         .def("get_children", &Node2D::getChildren, py::return_value_policy::reference_internal)
 
-        // Properties (mutable: node.velocity.y += 1, node.position.x = 5, etc.)
-        .def_property_readonly("position",
+        // Proxies: in-place (node.velocity.y += 1) + tuple/PyGLM (glm.vec2(*node.position), glm.mix(...))
+        .def_property("position",
             [](Node2D& n) {
-                auto p = std::make_unique<Vec2PropertyProxy>();
-                p->node = &n;
-                p->type = Vec2PropertyProxy::Position;
-                return p.release();
+                return new Vec2Proxy(
+                    [&n]() { return n.getPosition(); },
+                    [&n](const glm::vec2& v) { n.setPosition(v); }
+                );
             },
+            [](Node2D& n, py::object value) { n.setPosition(vec2_from_pyobject(value)); },
             py::return_value_policy::take_ownership)
-        .def_property_readonly("scale",
+        .def_property("scale",
             [](Node2D& n) {
-                auto p = std::make_unique<Vec2PropertyProxy>();
-                p->node = &n;
-                p->type = Vec2PropertyProxy::Scale;
-                return p.release();
+                return new Vec2Proxy(
+                    [&n]() { return n.getScale(); },
+                    [&n](const glm::vec2& v) { n.setScale(v); }
+                );
             },
+            [](Node2D& n, py::object value) { n.setScale(vec2_from_pyobject(value)); },
             py::return_value_policy::take_ownership)
-        .def_property_readonly("velocity",
+        .def_property("velocity",
             [](Node2D& n) {
-                auto p = std::make_unique<Vec3VelocityProxy>();
-                p->node = &n;
-                return p.release();
+                return new Vec3Proxy(
+                    [&n]() { return n.getVelocity(); },
+                    [&n](const glm::vec3& v) { n.setVelocity(v); }
+                );
             },
+            [](Node2D& n, py::object value) { n.setVelocity(vec3_from_pyobject(value)); },
             py::return_value_policy::take_ownership)
+
+        // PyGLM vec2/vec3 for glm.mix etc. (pos, vel, scl return native PyGLM types)
+        .def_property_readonly("pos", [](const Node2D& n) { return n.getPosition(); })
+        .def_property_readonly("vel", [](Node2D& n) { return n.getVelocity(); })
+        .def_property_readonly("scl", [](const Node2D& n) { return n.getScale(); })
 
         // Simple properties (get/set full value)
         .def_property("rotation",

@@ -44,10 +44,19 @@ public:
 }  // namespace
 
 void bind_camera(py::module_& m) {
-    // Bind proxy classes for mutable properties
+    // Bind proxy: in-place modification + tuple/PyGLM compat (glm.vec2(*pos), glm.mix(...))
     py::class_<CameraPositionProxy>(m, "_CameraPositionProxy", py::module_local())
         .def_property("x", &CameraPositionProxy::get_x, &CameraPositionProxy::set_x)
-        .def_property("y", &CameraPositionProxy::get_y, &CameraPositionProxy::set_y);
+        .def_property("y", &CameraPositionProxy::get_y, &CameraPositionProxy::set_y)
+        .def("__iter__", [](const CameraPositionProxy& p) {
+            return py::iter(py::make_tuple(p.get_x(), p.get_y()));
+        })
+        .def("__len__", [](const CameraPositionProxy&) { return 2; })
+        .def("__getitem__", [](const CameraPositionProxy& p, py::ssize_t i) {
+            if (i == 0) return p.get_x();
+            if (i == 1) return p.get_y();
+            throw py::index_error("index out of range");
+        });
 
     py::class_<CameraViewScaleProxy>(m, "_CameraViewScaleProxy", py::module_local())
         .def_property("x", &CameraViewScaleProxy::get_x, &CameraViewScaleProxy::set_x)
@@ -83,6 +92,7 @@ void bind_camera(py::module_& m) {
             },
             [](StaticCamera2D& c, const glm::vec2& v) { c.setPosition(v); },
             py::return_value_policy::take_ownership)
+        .def_property_readonly("pos", [](StaticCamera2D& c) { return c.getPosition(); })
         .def_property_readonly("view_scale",
             [](StaticCamera2D& c) {
                 auto p = std::make_unique<CameraViewScaleProxy>();

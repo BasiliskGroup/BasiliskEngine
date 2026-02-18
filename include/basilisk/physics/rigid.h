@@ -78,6 +78,7 @@ public:
     glm::vec3 getInitial() const;
     glm::vec3 getInertial() const;
     glm::vec3 getVelocity() const;
+    glm::vec3& getVelocityRef();
     glm::vec3 getPrevVelocity() const;
     glm::vec2 getSize() const;
     float getMass() const;

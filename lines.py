@@ -48,7 +48,8 @@ if __name__ == "__main__":
         "./src",
         "./bindings",
         "./include/basilisk",
-        "./rust_gpu/src"
+        "./rust_gpu/src",
+        "./shaders"
     ]
 
     totals, total, ext_counts = count_non_empty_lines(DIRECTORIES)
@@ -59,5 +60,8 @@ if __name__ == "__main__":
     print(f"\nTotal non-empty lines: {total}\n")
 
     print("File counts by extension:")
+    tot = 0
     for ext, count in sorted(ext_counts.items()):
         print(f"{ext}: {count}")
+        tot += count
+    print(f"Total: {tot}")
