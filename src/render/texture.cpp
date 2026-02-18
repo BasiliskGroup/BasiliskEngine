@@ -2,23 +2,25 @@
 
 namespace bsk::internal {
 
+
 /**
- * @brief Construct a new Texture object from an existing Image object
+ * @brief Construct a new Texture object from data
  * 
- * @param image 
+ * @param data 
+ * @param width 
+ * @param height 
+ * @param format 
+ * @param type 
  */
-Texture::Texture(Image* image) : image(image) {
+Texture::Texture(const void* data, unsigned int width, unsigned int height, unsigned int format, unsigned int type): width(width), height(height) {
     // Create one texture, and update texture with the ID
     glGenTextures(1, &ID); 
     // Bind the texture to start working on it
     glBindTexture(GL_TEXTURE_2D, ID);
     // Add image data to the texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->getWidth(), image->getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image->getData());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, type, data);
     // Generate Mipmaps
     glGenerateMipmap(GL_TEXTURE_2D);
-    // Set internal width and height
-    width = image->getWidth();
-    height = image->getHeight();
 }
 
 /**
@@ -75,4 +77,6 @@ void Texture::write(const void* data, unsigned int width, unsigned int height, u
     glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
     // Unbind for safety
     glBindBuffer(GL_TEXTURE_2D, 0);
+}
+
 }

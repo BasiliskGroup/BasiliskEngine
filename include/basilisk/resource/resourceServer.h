@@ -5,8 +5,14 @@
 #include <basilisk/render/shader.h>
 #include <basilisk/resource/textureServer.h>
 #include <basilisk/resource/materialServer.h>
+#include <basilisk/render/material.h>
+#include <basilisk/render/image.h>
+#include <basilisk/render/mesh.h>
+
 
 namespace bsk::internal {
+
+class Skybox;
 
 class ResourceServer {
     private:
@@ -21,6 +27,12 @@ class ResourceServer {
 
         inline TextureServer* getTextureServer() const { return textureServer; }
         inline MaterialServer* getMaterialServer() const { return materialServer; }
+
+        static Image*    defaultImage;
+        static Material* defaultMaterial;
+        static Mesh*     defaultCube;
+        static Mesh*     defaultQuad;
+        static Skybox*   defaultSkybox;
 };
 
 }

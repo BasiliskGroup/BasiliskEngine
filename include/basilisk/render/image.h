@@ -14,6 +14,8 @@ class Image {
     
     public:
         Image(std::string file, bool flip_vertically=true);
+        Image(void* data, int width, int height, int nChannels=4) : data((unsigned char*)data), width(width), height(height), nChannels(nChannels) {}
+        Image(const std::vector<float>& data, int width, int height, int nChannels=4);
         ~Image();
         
         unsigned char* getData() { return data; }
