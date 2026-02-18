@@ -150,9 +150,21 @@ private:
     void* handle_;
 };
 
-// Initialize GPU once at startup
+// Initialize GPU once at startup.
+// On Linux with AddressSanitizer enabled, Vulkan drivers/loaders can trip ASan
+// in system libraries (e.g., inside vkEnumerateInstanceVersion). To keep C++
+// ASan debugging usable, we optionally skip GPU init in that configuration
+// unless BASILISK_ENABLE_GPU_ASAN is defined.
 inline void initGpu() {
+#if defined(__linux__) && defined(__SANITIZE_ADDRESS__) && !defined(BASILISK_ENABLE_GPU_ASAN)
+    // Skip GPU init when ASan is enabled on Linux, unless explicitly enabled.
+    // This avoids heap-use-after-free reports from within libvulkan/driver code.
+    std::cerr << "WARNING: Skipping GPU init due to ASan on Linux. "
+                 "Define BASILISK_ENABLE_GPU_ASAN to force GPU initialization."
+              << std::endl;
+#else
     gpu_init();
+#endif
 }
 
 }

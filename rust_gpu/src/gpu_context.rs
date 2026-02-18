@@ -8,8 +8,23 @@ pub struct GpuContext {
 impl GpuContext {
     // constructor
     pub fn new () -> Self {
+        // Select backends based on platform. On Linux, we primarily use Vulkan.
+        // Note: The C++ wrapper (gpuWrapper.hpp) will skip GPU init entirely
+        // when ASan is enabled on Linux to avoid heap-use-after-free in libvulkan.
+        #[cfg(target_os = "macos")]
+        let backends = Backends::METAL | Backends::VULKAN;
+        
+        #[cfg(target_os = "linux")]
+        let backends = Backends::VULKAN;
+        
+        #[cfg(target_os = "windows")]
+        let backends = Backends::DX12 | Backends::VULKAN;
+        
+        #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
+        let backends = Backends::METAL | Backends::VULKAN | Backends::DX12;
+        
         let instance = Instance::new(InstanceDescriptor {
-            backends: Backends::METAL | Backends::VULKAN | Backends:: DX12,
+            backends,
             dx12_shader_compiler: Default::default()
         });
 

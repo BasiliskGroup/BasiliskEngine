@@ -315,6 +315,8 @@ if(EXISTS ${BASILISK_MAIN})
 
     # Copy resources
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    # Copy WGSL compute shaders used by the physics GPU path into the same runtime shaders folder
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders)
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models   DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -342,6 +344,8 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders  DESTINATION ${CMAKE_BINARY_DIR})
+    # Copy WGSL compute shaders used by the physics GPU path into the same runtime shaders folder
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/ DESTINATION ${CMAKE_BINARY_DIR}/shaders)
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_BINARY_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models   DESTINATION ${CMAKE_BINARY_DIR})
     add_dependencies(engine_forces_test rust_gpu_lib)
@@ -357,11 +361,14 @@ add_dependencies(basilisk_lib rust_gpu_lib)
 # ======================================================
 # AddressSanitizer
 # ======================================================
+# Enable/disable ASan explicitly. Vulkan stacks on Linux can trip ASan inside libvulkan/driver code.
+option(BASILISK_ENABLE_ASAN "Enable AddressSanitizer for Debug builds" ON)
+
 # Only enable AddressSanitizer for Debug builds (not for Release/wheel builds)
 # Note: AddressSanitizer requires the sanitizer runtime library, which may not be
 # available in all build environments (e.g., cibuildwheel). For wheel builds,
 # AddressSanitizer is disabled.
-if(TARGET engine AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
+if(BASILISK_ENABLE_ASAN AND TARGET engine AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(engine PRIVATE
             -fsanitize=address
