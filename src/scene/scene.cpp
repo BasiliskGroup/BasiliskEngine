@@ -27,6 +27,34 @@ Scene::Scene(Engine* engine, Shader* shader) : VirtualScene(engine) {
 }
 
 /**
+ * @brief Add default resources to the scene
+ * 
+ */
+void Scene::addDefaults(bool addSkybox, bool addLight, bool addCube) {
+
+    // Set camera back
+    internalCamera->setPosition(glm::vec3(0, 0, -5));
+    internalCamera->lookAt(glm::vec3(0, 0, 0));
+
+    // Default Skybox
+    if (addSkybox) {
+        skybox = engine->getResourceServer()->defaultSkybox;
+    }
+
+    // Default Light
+    if (addLight) {
+        DirectionalLight* directionalLight = new DirectionalLight(glm::vec3(1, 1, 1), 0.8f, glm::vec3(2, -3, 1));
+        add(directionalLight);
+        AmbientLight* ambientLight = new AmbientLight(glm::vec3(1, 1, 1), 0.2f);
+        add(ambientLight);
+    }
+
+    if (addCube) {
+        new Node(this, engine->getResourceServer()->defaultCube, engine->getResourceServer()->defaultMaterial, glm::vec3(0, 0, 0), glm::quat(0, 0, 0, 1), glm::vec3(1, 1, 1));
+    }
+}
+
+/**
  * @brief Destroy the Scene object. Deletes scene camera and shader.
  * 
  */

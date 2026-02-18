@@ -417,3 +417,13 @@ install(
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders
     DESTINATION basilisk
 )
+
+install(
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/models
+    DESTINATION basilisk
+)
+
+install(
+    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/textures
+    DESTINATION basilisk
+)
