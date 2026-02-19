@@ -60,6 +60,47 @@ def run_pyinstaller(spec_file_or_script, work_dir=None):
     return result
 
 
+def copy_basilisk_resources(internal_dir):
+    """
+    Copy basilisk package resources (shaders, models, textures) to _internal/basilisk/.
+    These are needed at runtime for the engine to find default resources.
+    """
+    try:
+        import basilisk
+        basilisk_package_dir = Path(basilisk.__file__).parent
+    except ImportError:
+        print("Warning: Could not import basilisk package. Skipping resource copy.")
+        print("  Make sure basilisk is installed: pip install -e .")
+        return
+    
+    # The resources should be in the same directory as the .so/.pyd file
+    # (shaders/, models/, textures/ directories)
+    basilisk_resources = ['shaders', 'models', 'textures']
+    basilisk_dest = internal_dir / 'basilisk'
+    basilisk_dest.mkdir(parents=True, exist_ok=True)
+    
+    print(f"Copying basilisk resources from {basilisk_package_dir} to {basilisk_dest}")
+    
+    copied_count = 0
+    for resource_dir in basilisk_resources:
+        source_path = basilisk_package_dir / resource_dir
+        dest_path = basilisk_dest / resource_dir
+        
+        if source_path.exists() and source_path.is_dir():
+            if dest_path.exists():
+                shutil.rmtree(dest_path)
+            shutil.copytree(source_path, dest_path, dirs_exist_ok=True)
+            print(f"  Copied: {resource_dir}/")
+            copied_count += 1
+        else:
+            print(f"  Warning: {resource_dir}/ not found in {basilisk_package_dir}")
+    
+    if copied_count == 0:
+        print("  Warning: No basilisk resources found. The application may not work correctly.")
+    else:
+        print(f"  Successfully copied {copied_count} resource directories")
+
+
 def copy_top_level_files(source_dir, dest_dir, exclude_patterns=None):
     """
     Copy all top-level files and folders from source_dir to dest_dir,
@@ -172,16 +213,22 @@ def main(argv=None):
         print("Please check the dist/ directory manually.")
         return
 
-    # Step 3: Copy files to _internal (if not skipped)
+    # Step 3: Copy basilisk package resources to _internal/basilisk/
+    print("\n" + "=" * 60)
+    print("Step 2: Copying basilisk package resources")
+    print("=" * 60)
+    copy_basilisk_resources(internal_dir)
+
+    # Step 4: Copy files to _internal (if not skipped)
     if not args.no_copy:
         print("\n" + "=" * 60)
-        print("Step 2: Copying top-level files to _internal/")
+        print("Step 3: Copying top-level files to _internal/")
         print("=" * 60)
         copy_top_level_files(source_dir, internal_dir, args.exclude)
 
-    # Step 4: Move dist/<name> to top level, rename to 'build', and clean up
+    # Step 5: Move dist/<name> to top level, rename to 'build', and clean up
     print("\n" + "=" * 60)
-    print("Step 3: Reorganizing output structure")
+    print("Step 4: Reorganizing output structure")
     print("=" * 60)
 
     final_build_dir = work_dir / 'build'
