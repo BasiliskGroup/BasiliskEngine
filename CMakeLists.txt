@@ -310,12 +310,23 @@ if(RUST_GPU_LIB_NAME)
         target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
     endif()
     add_dependencies(basilisk rust_gpu_lib)
-    # Copy DLL to output directory on Windows
+    # Copy shared library to output directory so it is findable at runtime (and for stubgen)
     if(WIN32)
         add_custom_command(TARGET basilisk POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
                 $<TARGET_FILE_DIR:basilisk>
+        )
+    elseif(UNIX AND NOT APPLE)
+        # Linux: copy .so and set RPATH so loader finds librust_gpu.so next to basilisk.so
+        add_custom_command(TARGET basilisk POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so"
+                $<TARGET_FILE_DIR:basilisk>
+        )
+        set_target_properties(basilisk PROPERTIES
+            BUILD_RPATH "$ORIGIN"
+            INSTALL_RPATH "$ORIGIN"
         )
     endif()
 endif()
@@ -555,6 +566,21 @@ install(TARGETS basilisk
     LIBRARY DESTINATION basilisk
     RUNTIME DESTINATION basilisk
 )
+
+# Install Rust GPU shared library alongside basilisk so it is findable at runtime (RPATH $ORIGIN)
+if(RUST_GPU_LIB_NAME)
+    if(WIN32)
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll
+            DESTINATION basilisk
+            OPTIONAL
+        )
+    elseif(UNIX AND NOT APPLE)
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so
+            DESTINATION basilisk
+            OPTIONAL
+        )
+    endif()
+endif()
 
 # Add internal files 
 install(

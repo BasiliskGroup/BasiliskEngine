@@ -69,7 +69,8 @@ level = "INFO"
 
 [tool.cibuildwheel]
 build = ["cp310-*", "cp311-*", "cp312-*", "cp313-*"]
-skip = ["pp*", "*musllinux*"]
+# Skip 32-bit Windows (Rust defaults to 64-bit, avoid toolchain mismatch)
+skip = ["pp*", "*musllinux*", "*win32*"]
 
 [tool.cibuildwheel.linux]
 before-build = """
@@ -80,4 +81,9 @@ yum install -y \
   libXi-devel \
   libX11-devel \
   mesa-libGL-devel
+# Install Rust (required for rust_gpu compute library; manylinux has no pre-installed Rust)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+export PATH="$HOME/.cargo/bin:$PATH"
+ln -sf "$HOME/.cargo/bin/cargo" /usr/local/bin/cargo
+ln -sf "$HOME/.cargo/bin/rustc" /usr/local/bin/rustc
 """
