@@ -177,11 +177,13 @@ endif()
 # Check if cargo is available and rust_gpu directory exists
 find_program(CARGO cargo)
 if(RUST_GPU_LIB_NAME AND CARGO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/Cargo.toml)
-    # On Windows, Rust produces both .dll and .dll.lib (import library)
+    # On Windows, Rust produces both .dll and .dll.lib (import library for MSVC)
+    # or .dll and .lib (for GNU toolchain)
     if(WIN32)
         set(RUST_GPU_BYPRODUCTS
             ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}.lib
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.lib
         )
     else()
         set(RUST_GPU_BYPRODUCTS
@@ -195,6 +197,17 @@ if(RUST_GPU_LIB_NAME AND CARGO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/C
         BYPRODUCTS ${RUST_GPU_BYPRODUCTS}
         COMMENT "Building Rust GPU compute library..."
     )
+    
+    # On Windows, create an IMPORTED library target for easier linking
+    if(WIN32)
+        add_library(rust_gpu_imported SHARED IMPORTED)
+        set_target_properties(rust_gpu_imported PROPERTIES
+            IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}"
+            IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib"
+        )
+        add_dependencies(rust_gpu_imported rust_gpu_lib)
+    endif()
+    
     message(STATUS "Rust GPU library will be built: ${RUST_GPU_LIB_NAME}")
 else()
     # Create a dummy target if Rust is not available
@@ -208,6 +221,23 @@ else()
         message(WARNING "rust_gpu/Cargo.toml not found - Rust GPU library will not be built")
     endif()
     set(RUST_GPU_LIB_NAME "")
+endif()
+
+# Set RUST_GPU_LIB path immediately after RUST_GPU_LIB_NAME is set
+# so it's available for all targets (engine, engine_forces_test, basilisk)
+if(RUST_GPU_LIB_NAME)
+    if(WIN32)
+        # On Windows with MSVC, Rust produces rust_gpu.dll.lib as the import library
+        # Try both possible names in case the toolchain differs
+        set(RUST_GPU_LIB_IMPORT "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib")
+        set(RUST_GPU_LIB_ALT "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.lib")
+        # Use the .dll.lib version (MSVC standard), but we'll verify it exists at link time
+        set(RUST_GPU_LIB "${RUST_GPU_LIB_IMPORT}")
+    else()
+        set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}")
+    endif()
+else()
+    set(RUST_GPU_LIB "")
 endif()
 
 # ======================================================
@@ -270,20 +300,15 @@ target_link_libraries(basilisk PRIVATE
 )
 
 # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
-# RUST_GPU_LIB_NAME is set earlier in the Rust GPU library section
+# RUST_GPU_LIB is set earlier, right after RUST_GPU_LIB_NAME
 if(RUST_GPU_LIB_NAME)
-    if(WIN32)
-        # On Windows, link against the import library (.dll.lib)
-        set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib")
-    else()
-        set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}")
-    endif()
-else()
-    set(RUST_GPU_LIB "")
-endif()
-if(RUST_GPU_LIB AND RUST_GPU_LIB_NAME)
     # Only link if the library will actually be built
-    target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
+    if(WIN32 AND TARGET rust_gpu_imported)
+        # Use the IMPORTED target on Windows for better CMake integration
+        target_link_libraries(basilisk PRIVATE rust_gpu_imported)
+    else()
+        target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
+    endif()
     add_dependencies(basilisk rust_gpu_lib)
     # Copy DLL to output directory on Windows
     if(WIN32)
@@ -359,8 +384,12 @@ if(EXISTS ${BASILISK_MAIN})
     )
 
     # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
-    if(RUST_GPU_LIB AND RUST_GPU_LIB_NAME)
-        target_link_libraries(engine PRIVATE ${RUST_GPU_LIB})
+    if(RUST_GPU_LIB_NAME)
+        if(WIN32 AND TARGET rust_gpu_imported)
+            target_link_libraries(engine PRIVATE rust_gpu_imported)
+        else()
+            target_link_libraries(engine PRIVATE ${RUST_GPU_LIB})
+        endif()
         add_dependencies(engine rust_gpu_lib)
         # Copy DLL to output directory on Windows
         if(WIN32)
@@ -413,8 +442,13 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
             basilisk_lib
             clipper2
     )
-    if(RUST_GPU_LIB AND RUST_GPU_LIB_NAME)
-        target_link_libraries(engine_forces_test PRIVATE ${RUST_GPU_LIB})
+    # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
+    if(RUST_GPU_LIB_NAME)
+        if(WIN32 AND TARGET rust_gpu_imported)
+            target_link_libraries(engine_forces_test PRIVATE rust_gpu_imported)
+        else()
+            target_link_libraries(engine_forces_test PRIVATE ${RUST_GPU_LIB})
+        endif()
         add_dependencies(engine_forces_test rust_gpu_lib)
         # Copy DLL to output directory on Windows
         if(WIN32)
@@ -447,9 +481,6 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
             ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/dual.wgsl
             $<TARGET_FILE_DIR:engine_forces_test>/shaders/dual.wgsl
     )
-    if(RUST_GPU_LIB_NAME)
-        add_dependencies(engine_forces_test rust_gpu_lib)
-    endif()
     message(STATUS "Added forces test executable: engine_forces_test")
 endif()
 
@@ -474,7 +505,14 @@ option(BASILISK_ENABLE_ASAN "Enable AddressSanitizer for Debug builds" ON)
 # Note: AddressSanitizer requires the sanitizer runtime library, which may not be
 # available in all build environments (e.g., cibuildwheel). For wheel builds,
 # AddressSanitizer is disabled.
+# Disable ASan in cibuildwheel environments (wheels don't need ASan)
+if(DEFINED ENV{CIBUILDWHEEL})
+    set(BASILISK_ENABLE_ASAN OFF)
+    message(STATUS "AddressSanitizer disabled in cibuildwheel environment")
+endif()
+
 if(BASILISK_ENABLE_ASAN AND TARGET engine AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
+    # Only enable ASan for Debug builds
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(engine PRIVATE
             -fsanitize=address
