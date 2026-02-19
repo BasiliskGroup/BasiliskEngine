@@ -8,8 +8,9 @@ namespace py = pybind11;
 
 void bind_scene(py::module_& m) {
     py::class_<bsk::internal::Scene>(m, "Scene")
-        .def(py::init<bsk::internal::Engine*>(), py::arg("engine"))
-
+        .def(py::init<bsk::internal::Engine*, bool, bool, bool>(), py::arg("engine"), py::arg("addSkybox") = true, py::arg("addLight") = true, py::arg("addCube") = false)
+        .def(py::init<bsk::internal::Engine*, bsk::internal::Shader*, bool, bool, bool>(), py::arg("engine"), py::arg("shader"), py::arg("addSkybox") = true, py::arg("addLight") = true, py::arg("addCube") = false)
+        
         .def("update", &bsk::internal::Scene::update)
         .def("render", &bsk::internal::Scene::render)
 

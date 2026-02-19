@@ -8,22 +8,24 @@ namespace bsk::internal {
  * 
  * @param engine Pointer to the parent object
  */
-Scene::Scene(Engine* engine) : VirtualScene(engine) {
+Scene::Scene(Engine* engine, bool addSkybox, bool addLight, bool addCube) : VirtualScene(engine) {
     camera = new Camera(engine);
     internalCamera = camera;
     shader = new Shader(internalPath("shaders/instance.vert").c_str(), internalPath("shaders/instance.frag").c_str());
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
     lightServer = new LightServer();
     lightServer->setTiles(shader, camera, (unsigned int)engine->getWindow()->getWidth(), (unsigned int)engine->getWindow()->getHeight());
+    addDefaults(addSkybox, addLight, addCube);
 }
 
-Scene::Scene(Engine* engine, Shader* shader) : VirtualScene(engine) {
+Scene::Scene(Engine* engine, Shader* shader, bool addSkybox, bool addLight, bool addCube) : VirtualScene(engine) {
     camera = new Camera(engine);
     internalCamera = camera;
     this->shader = shader;
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
     lightServer = new LightServer();
     lightServer->setTiles(shader, camera, (unsigned int)engine->getWindow()->getWidth(), (unsigned int)engine->getWindow()->getHeight());
+    addDefaults(addSkybox, addLight, addCube);
 }
 
 /**

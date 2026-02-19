@@ -24,8 +24,8 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         Skybox* skybox = nullptr;
 
     public:
-        Scene(Engine* engine);
-        Scene(Engine* engine, Shader* shader);
+        Scene(Engine* engine, bool addSkybox = true, bool addLight = true, bool addCube = false);
+        Scene(Engine* engine, Shader* shader, bool addSkybox = true, bool addLight = true, bool addCube = false);
         ~Scene();
 
         void update();

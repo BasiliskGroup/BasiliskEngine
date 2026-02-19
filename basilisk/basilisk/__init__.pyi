@@ -642,7 +642,11 @@ class Rigid:
     def verifyColoring(self) -> bool:
         ...
 class Scene:
-    def __init__(self, engine: Engine) -> None:
+    @typing.overload
+    def __init__(self, engine: Engine, addSkybox: bool = True, addLight: bool = True, addCube: bool = False) -> None:
+        ...
+    @typing.overload
+    def __init__(self, engine: Engine, shader: ..., addSkybox: bool = True, addLight: bool = True, addCube: bool = False) -> None:
         ...
     @typing.overload
     def add(self, light: ...) -> None:
