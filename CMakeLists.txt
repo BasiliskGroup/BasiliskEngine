@@ -161,15 +161,15 @@ target_compile_features(clipper2 PUBLIC cxx_std_20)
 # Rust GPU library
 # ======================================================
 # Rust produces different library names on different platforms:
-# - macOS: librust_gpu.dylib
-# - Linux: librust_gpu.so
-# - Windows: rust_gpu.dll (no "lib" prefix)
+# - macOS: librust_gpu.a (static)
+# - Linux: librust_gpu.a (static)
+# - Windows: rust_gpu.lib (static)
 if(APPLE)
-    set(RUST_GPU_LIB_NAME "librust_gpu.dylib")
+    set(RUST_GPU_LIB_NAME "librust_gpu.a")
 elseif(UNIX)
-    set(RUST_GPU_LIB_NAME "librust_gpu.so")
+    set(RUST_GPU_LIB_NAME "librust_gpu.a")
 elseif(WIN32)
-    set(RUST_GPU_LIB_NAME "rust_gpu.dll")
+    set(RUST_GPU_LIB_NAME "rust_gpu.lib")
 else()
     set(RUST_GPU_LIB_NAME "")
 endif()
@@ -177,35 +177,29 @@ endif()
 # Check if cargo is available and rust_gpu directory exists
 find_program(CARGO cargo)
 if(RUST_GPU_LIB_NAME AND CARGO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/Cargo.toml)
-    # On Windows, Rust produces both .dll and .dll.lib (import library for MSVC)
-    # or .dll and .lib (for GNU toolchain)
-    if(WIN32)
-        set(RUST_GPU_BYPRODUCTS
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.lib
-        )
-    else()
-        set(RUST_GPU_BYPRODUCTS
-            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}
-        )
-    endif()
+    set(RUST_GPU_BYPRODUCTS
+        ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}
+    )
     
     add_custom_target(rust_gpu_lib ALL
         COMMAND cargo build --release
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu
         BYPRODUCTS ${RUST_GPU_BYPRODUCTS}
-        COMMENT "Building Rust GPU compute library..."
+        COMMENT "Building Rust GPU compute library (static)..."
     )
     
-    # On Windows, create an IMPORTED library target for easier linking
+    # Create an IMPORTED static library target
+    add_library(rust_gpu_imported STATIC IMPORTED GLOBAL)
+    set_target_properties(rust_gpu_imported PROPERTIES
+        IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}"
+    )
+    add_dependencies(rust_gpu_imported rust_gpu_lib)
+    
+    # On Windows, we need to link additional system libraries that wgpu depends on
     if(WIN32)
-        add_library(rust_gpu_imported SHARED IMPORTED)
-        set_target_properties(rust_gpu_imported PROPERTIES
-            IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}"
-            IMPORTED_IMPLIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib"
+        target_link_libraries(rust_gpu_imported INTERFACE 
+            ws2_32 userenv advapi32 ntdll bcrypt d3dcompiler
         )
-        add_dependencies(rust_gpu_imported rust_gpu_lib)
     endif()
     
     message(STATUS "Rust GPU library will be built: ${RUST_GPU_LIB_NAME}")
@@ -223,19 +217,9 @@ else()
     set(RUST_GPU_LIB_NAME "")
 endif()
 
-# Set RUST_GPU_LIB path immediately after RUST_GPU_LIB_NAME is set
-# so it's available for all targets (engine, engine_forces_test, basilisk)
+# Set RUST_GPU_LIB for linking
 if(RUST_GPU_LIB_NAME)
-    if(WIN32)
-        # On Windows with MSVC, Rust produces rust_gpu.dll.lib as the import library
-        # Try both possible names in case the toolchain differs
-        set(RUST_GPU_LIB_IMPORT "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib")
-        set(RUST_GPU_LIB_ALT "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.lib")
-        # Use the .dll.lib version (MSVC standard), but we'll verify it exists at link time
-        set(RUST_GPU_LIB "${RUST_GPU_LIB_IMPORT}")
-    else()
-        set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}")
-    endif()
+    set(RUST_GPU_LIB rust_gpu_imported)
 else()
     set(RUST_GPU_LIB "")
 endif()
@@ -303,22 +287,11 @@ target_link_libraries(basilisk PRIVATE
 # RUST_GPU_LIB is set earlier, right after RUST_GPU_LIB_NAME
 # On Windows, we use manual DLL loading (gpuLoader.cpp) so we don't link against the DLL
 # On other platforms, we link directly
+# Link Rust GPU static library for compute bindings
+# The static library is now embedded into the .pyd, no separate DLL needed
 if(RUST_GPU_LIB_NAME)
-    if(WIN32)
-        # On Windows, don't link - we'll manually load the DLL at runtime
-        # This allows the DLL to be found relative to the .pyd location
-        add_dependencies(basilisk rust_gpu_lib)
-        # Copy DLL to output directory so it can be found next to the .pyd
-        add_custom_command(TARGET basilisk POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
-                $<TARGET_FILE_DIR:basilisk>
-        )
-    else()
-        # On non-Windows, link directly
-        target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
-        add_dependencies(basilisk rust_gpu_lib)
-    endif()
+    target_link_libraries(basilisk PRIVATE rust_gpu_imported)
+    add_dependencies(basilisk rust_gpu_lib)
 endif()
 
 # ======================================================
@@ -384,22 +357,10 @@ if(EXISTS ${BASILISK_MAIN})
             clipper2
     )
 
-    # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
+    # Link Rust GPU static library for compute bindings
     if(RUST_GPU_LIB_NAME)
-        if(WIN32 AND TARGET rust_gpu_imported)
-            target_link_libraries(engine PRIVATE rust_gpu_imported)
-        else()
-            target_link_libraries(engine PRIVATE ${RUST_GPU_LIB})
-        endif()
+        target_link_libraries(engine PRIVATE rust_gpu_imported)
         add_dependencies(engine rust_gpu_lib)
-        # Copy DLL to output directory on Windows
-        if(WIN32)
-            add_custom_command(TARGET engine POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
-                    $<TARGET_FILE_DIR:engine>
-            )
-        endif()
     endif()
 
     set_target_properties(engine PROPERTIES
@@ -433,22 +394,10 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
             basilisk_lib
             clipper2
     )
-    # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
+    # Link Rust GPU static library for compute bindings
     if(RUST_GPU_LIB_NAME)
-        if(WIN32 AND TARGET rust_gpu_imported)
-            target_link_libraries(engine_forces_test PRIVATE rust_gpu_imported)
-        else()
-            target_link_libraries(engine_forces_test PRIVATE ${RUST_GPU_LIB})
-        endif()
+        target_link_libraries(engine_forces_test PRIVATE rust_gpu_imported)
         add_dependencies(engine_forces_test rust_gpu_lib)
-        # Copy DLL to output directory on Windows
-        if(WIN32)
-            add_custom_command(TARGET engine_forces_test POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
-                    $<TARGET_FILE_DIR:engine_forces_test>
-            )
-        endif()
     endif()
     set_target_properties(engine_forces_test PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -537,20 +486,7 @@ install(TARGETS basilisk
     RUNTIME DESTINATION basilisk
 )
 
-# Install Rust GPU shared library alongside basilisk so it is findable at runtime (RPATH $ORIGIN)
-if(RUST_GPU_LIB_NAME)
-    if(WIN32)
-        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll
-            DESTINATION basilisk
-            OPTIONAL
-        )
-    elseif(UNIX AND NOT APPLE)
-        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so
-            DESTINATION basilisk
-            OPTIONAL
-        )
-    endif()
-endif()
+# Rust GPU is now statically linked into the basilisk module, no separate library to install
 
 # Add internal files 
 install(

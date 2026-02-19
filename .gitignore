@@ -37,3 +37,4 @@ boilerplate/build/
 boilerplate/dist/
 boilerplate/*.so
 boilerplate/*.spec
+*.pyd

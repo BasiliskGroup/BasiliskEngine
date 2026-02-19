@@ -8,46 +8,20 @@
 
 namespace bsk::internal {
 
-// On Windows, we use manual DLL loading to find rust_gpu.dll relative to the .pyd
-// On other platforms, we link directly
-#ifdef _WIN32
-    // Forward declarations for wrapper functions (defined in gpuLoader.cpp)
-    void  gpu_init_wrapper();
-    void* gpu_buffer_create_wrapper(size_t len);
-    void  gpu_buffer_destroy_wrapper(void* buffer);
-    void  gpu_buffer_write_wrapper(void* buffer, const uint32_t* ptr, size_t len);
-    void  gpu_buffer_read_wrapper(void* buffer, uint32_t* out_ptr, size_t len);
-    void* gpu_shader_create_wrapper(const char* wgsl, void** buffers, size_t buffer_count, uint64_t uniform_size);
-    void  gpu_shader_destroy_wrapper(void* shader);
-    void  gpu_shader_set_uniform_wrapper(void* shader, const uint8_t* ptr, size_t len);
-    void  gpu_shader_dispatch_wrapper(void* shader, uint32_t x, uint32_t y, uint32_t z);
+// Link directly to the Rust library on all platforms
+extern "C" {
+    void  gpu_init();
     
-    // Use wrapper functions on Windows
-    #define gpu_init gpu_init_wrapper
-    #define gpu_buffer_create gpu_buffer_create_wrapper
-    #define gpu_buffer_destroy gpu_buffer_destroy_wrapper
-    #define gpu_buffer_write gpu_buffer_write_wrapper
-    #define gpu_buffer_read gpu_buffer_read_wrapper
-    #define gpu_shader_create gpu_shader_create_wrapper
-    #define gpu_shader_destroy gpu_shader_destroy_wrapper
-    #define gpu_shader_set_uniform gpu_shader_set_uniform_wrapper
-    #define gpu_shader_dispatch gpu_shader_dispatch_wrapper
-#else
-    // On non-Windows, link directly to the Rust library
-    extern "C" {
-        void  gpu_init();
-        
-        void* gpu_buffer_create(size_t len);
-        void  gpu_buffer_destroy(void* buffer);
-        void  gpu_buffer_write(void* buffer, const uint32_t* ptr, size_t len);
-        void  gpu_buffer_read(void* buffer, uint32_t* out_ptr, size_t len);
-        
-        void* gpu_shader_create(const char* wgsl, void** buffers, size_t buffer_count, uint64_t uniform_size);
-        void  gpu_shader_destroy(void* shader);
-        void  gpu_shader_set_uniform(void* shader, const uint8_t* ptr, size_t len);
-        void  gpu_shader_dispatch(void* shader, uint32_t x, uint32_t y, uint32_t z);
-    }
-#endif
+    void* gpu_buffer_create(size_t len);
+    void  gpu_buffer_destroy(void* buffer);
+    void  gpu_buffer_write(void* buffer, const uint32_t* ptr, size_t len);
+    void  gpu_buffer_read(void* buffer, uint32_t* out_ptr, size_t len);
+    
+    void* gpu_shader_create(const char* wgsl, void** buffers, size_t buffer_count, uint64_t uniform_size);
+    void  gpu_shader_destroy(void* shader);
+    void  gpu_shader_set_uniform(void* shader, const uint8_t* ptr, size_t len);
+    void  gpu_shader_dispatch(void* shader, uint32_t x, uint32_t y, uint32_t z);
+}
 
 template<typename T>
 class GpuBuffer {
