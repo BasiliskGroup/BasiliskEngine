@@ -512,3 +512,9 @@ install(
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/textures
     DESTINATION basilisk
 )
+
+# CLI build script (basilisk file.py / basilisk-engine file.py)
+install(
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/basilisk/build.py
+    DESTINATION basilisk
+)

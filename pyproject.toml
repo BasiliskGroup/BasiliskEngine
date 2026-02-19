@@ -50,6 +50,12 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+build = ["pyinstaller>=6.0"]
+
+[project.scripts]
+basilisk = "basilisk.build:main"
+basilisk-engine = "basilisk.build:main"
 
 [project.urls]
 Homepage = "https://github.com/BasiliskGroup/BasiliskEngine"
