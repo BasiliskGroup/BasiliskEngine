@@ -112,7 +112,11 @@ void Scene::add(Node* node) {
 
 void Scene::add(std::shared_ptr<Node> node) {
     childrenPythonMap.emplace(node.get(), node);
-    root->add(node.get());
+    // Only add to root if the node doesn't already have a parent
+    // (nodes created with a parent are already in the tree)
+    if (node->getParent() == nullptr) {
+        root->add(node.get());
+    }
 }
 
 void Scene::remove(Node* node) {

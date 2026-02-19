@@ -43,6 +43,8 @@ void bind_node(py::module_& m) {
         .def(py::init([](Node* parent, Mesh* mesh, Material* material,
                          glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
             auto node = std::make_shared<Node>(parent, mesh, material, position, rotation, scale);
+            // Node is already added to parent's children by the constructor
+            // Register it in the Python map (Scene::add will check if it needs to be added to root)
             if (parent && parent->getScene()) {
                 parent->getScene()->add(node);
             }

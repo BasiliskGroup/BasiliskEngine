@@ -8,9 +8,20 @@ import typing
 import typing_extensions
 from . import forces
 from . import key
-__all__: list[str] = ['AmbientLight', 'Camera2D', 'Collider', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera2D', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
+__all__: list[str] = ['AmbientLight', 'Camera', 'Camera2D', 'Collider', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'RayCastResult', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera', 'StaticCamera2D', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
 class AmbientLight(Light):
     def __init__(self, color: glm.vec3 = (1.0, 1.0, 1.0), intensity: typing.SupportsFloat = 1.0) -> None:
+        ...
+class Camera(StaticCamera):
+    def __init__(self, engine: Engine, position: glm.vec3 = (0.0, 0.0, 0.0), pitch: typing.SupportsFloat = 0.0, yaw: typing.SupportsFloat = 0.0) -> None:
+        ...
+    def update(self) -> None:
+        ...
+    @property
+    def speed(self) -> float:
+        ...
+    @speed.setter
+    def speed(self, arg1: typing.SupportsFloat) -> None:
         ...
 class Camera2D(StaticCamera2D):
     def __init__(self, engine: Engine, position: glm.vec2 = (0.0, 0.0), scale: typing.SupportsFloat = 10.0) -> None:
@@ -118,6 +129,14 @@ class Engine:
         """
         Get the mouse. Access position, clicks, and button states.
         """
+    def get_mouse_x(self) -> float:
+        """
+        Mouse X position (screen coordinates, scaled).
+        """
+    def get_mouse_y(self) -> float:
+        """
+        Mouse Y position (screen coordinates, scaled).
+        """
     def get_window(self) -> Window:
         """
         Get the window. Access width, height, FPS, etc.
@@ -133,6 +152,42 @@ class Engine:
     def is_key_released(self, key_code: key.KeyCode) -> bool:
         """
         True if key was released this frame.
+        """
+    def is_left_clicked(self) -> bool:
+        """
+        True if left button was clicked this frame (down now, was up last frame).
+        """
+    def is_left_down(self) -> bool:
+        """
+        True if left mouse button is held down.
+        """
+    def is_left_released(self) -> bool:
+        """
+        True if left button was released this frame.
+        """
+    def is_middle_clicked(self) -> bool:
+        """
+        True if middle button was clicked this frame.
+        """
+    def is_middle_down(self) -> bool:
+        """
+        True if middle mouse button is held down.
+        """
+    def is_middle_released(self) -> bool:
+        """
+        True if middle button was released this frame.
+        """
+    def is_right_clicked(self) -> bool:
+        """
+        True if right button was clicked this frame.
+        """
+    def is_right_down(self) -> bool:
+        """
+        True if right mouse button is held down.
+        """
+    def is_right_released(self) -> bool:
+        """
+        True if right button was released this frame.
         """
     def is_running(self) -> bool:
         ...
@@ -353,16 +408,16 @@ class Mouse:
         ...
 class Node:
     @typing.overload
-    def __init__(self, scene: Scene, mesh: ... = None, material: ... = None, position: glm.vec3 = (0.0, 0.0, 0.0), rotation: glm.quat = (0.0, 0.0, 0.0, 1.0), scale: glm.vec3 = (1.0, 1.0, 1.0)) -> None:
+    def __init__(self, scene: ..., mesh: ... = None, material: ... = None, position: glm.vec3 = (0.0, 0.0, 0.0), rotation: glm.quat = (1.0, 0.0, 0.0, 0.0), scale: glm.vec3 = (1.0, 1.0, 1.0)) -> None:
         ...
     @typing.overload
-    def __init__(self, parent: Node, mesh: ... = None, material: ... = None, position: glm.vec3 = (0.0, 0.0, 0.0), rotation: glm.quat = (0.0, 0.0, 0.0, 1.0), scale: glm.vec3 = (1.0, 1.0, 1.0)) -> None:
+    def __init__(self, parent: Node, mesh: ... = None, material: ... = None, position: glm.vec3 = (0.0, 0.0, 0.0), rotation: glm.quat = (1.0, 0.0, 0.0, 0.0), scale: glm.vec3 = (1.0, 1.0, 1.0)) -> None:
         ...
     @typing.overload
-    def __init__(self, scene: Scene) -> None:
+    def __init__(self, scene: ...) -> None:
         ...
     @typing.overload
-    def __init__(self, mesh: ..., material: ..., position: glm.vec3 = (0.0, 0.0, 0.0), rotation: glm.quat = (0.0, 0.0, 0.0, 1.0), scale: glm.vec3 = (1.0, 1.0, 1.0)) -> None:
+    def __init__(self, mesh: ..., material: ..., position: glm.vec3 = (0.0, 0.0, 0.0), rotation: glm.quat = (1.0, 0.0, 0.0, 0.0), scale: glm.vec3 = (1.0, 1.0, 1.0)) -> None:
         ...
     def add(self, child: Node) -> None:
         ...
@@ -382,7 +437,7 @@ class Node:
         ...
     def get_scale(self) -> glm.vec3:
         ...
-    def get_scene(self) -> Scene:
+    def get_scene(self) -> ...:
         ...
     def get_shader(self) -> ...:
         ...
@@ -546,6 +601,21 @@ class PointLight(Light):
         ...
     def set_range(self, range: typing.SupportsFloat) -> None:
         ...
+class RayCastResult:
+    @property
+    def distance(self) -> float:
+        ...
+    @property
+    def intersection(self) -> glm.vec3:
+        ...
+    @property
+    def node(self) -> Node:
+        """
+        Hit node (shared_ptr) or None if no hit
+        """
+    @property
+    def normal(self) -> glm.vec3:
+        ...
 class Rigid:
     def __init__(self, solver: Solver, node: Node2D, collider: Collider, position: glm.vec3, size: glm.vec2, density: typing.SupportsFloat, friction: typing.SupportsFloat, velocity: glm.vec3) -> None:
         ...
@@ -652,17 +722,29 @@ class Scene:
     def add(self, light: ...) -> None:
         ...
     @typing.overload
-    def add(self, node: ...) -> None:
+    def add(self, node: Node) -> None:
         ...
-    def get_camera(self) -> ...:
+    def get_camera(self) -> StaticCamera:
         ...
     def get_shader(self) -> ...:
         ...
-    def remove(self, node: ...) -> None:
+    def pick(self, mouse_position: glm.vec2) -> RayCastResultPy:
+        """
+        Cast a ray from the mouse position; returns RayCastResult with shared_ptr node. Raises if hit node lacks shared_ptr.
+        """
+    def raycast(self, origin: glm.vec3, direction: glm.vec3) -> RayCastResultPy:
+        """
+        Cast a ray in world space; returns RayCastResult with shared_ptr node. Raises if hit node lacks shared_ptr.
+        """
+    def remove(self, node: Node) -> None:
         ...
     def render(self) -> None:
         ...
-    def set_camera(self, camera: ...) -> None:
+    @typing.overload
+    def set_camera(self, camera: StaticCamera) -> None:
+        ...
+    @typing.overload
+    def set_camera(self, camera: StaticCamera) -> None:
         ...
     def set_skybox(self, skybox: ...) -> None:
         ...
@@ -688,6 +770,10 @@ class Scene2D:
         ...
     def render(self) -> None:
         ...
+    @typing.overload
+    def set_camera(self, camera: StaticCamera2D) -> None:
+        ...
+    @typing.overload
     def set_camera(self, camera: StaticCamera2D) -> None:
         ...
     def update(self) -> None:
@@ -752,7 +838,7 @@ class Skybox:
         ...
     def get_vbo(self) -> VBO:
         ...
-    def render(self, camera: ...) -> None:
+    def render(self, camera: StaticCamera) -> None:
         ...
 class Solver:
     @staticmethod
@@ -802,6 +888,55 @@ class Solver:
         ...
     def setPostStabilize(self, arg0: bool) -> None:
         ...
+class StaticCamera:
+    def __init__(self, engine: Engine, position: glm.vec3 = (0.0, 0.0, 0.0), pitch: typing.SupportsFloat = 0.0, yaw: typing.SupportsFloat = 0.0) -> None:
+        ...
+    def get_aspect(self) -> float:
+        ...
+    def get_far(self) -> float:
+        ...
+    def get_fov(self) -> float:
+        ...
+    def get_near(self) -> float:
+        ...
+    def get_pitch(self) -> float:
+        ...
+    def get_position(self) -> glm.vec3:
+        ...
+    def get_x(self) -> float:
+        ...
+    def get_y(self) -> float:
+        ...
+    def get_yaw(self) -> float:
+        ...
+    def get_z(self) -> float:
+        ...
+    def look_at(self, target: glm.vec3) -> None:
+        ...
+    def set_aspect(self, aspect: typing.SupportsFloat) -> None:
+        ...
+    def set_far(self, far: typing.SupportsFloat) -> None:
+        ...
+    def set_fov(self, fov: typing.SupportsFloat) -> None:
+        ...
+    def set_near(self, near: typing.SupportsFloat) -> None:
+        ...
+    def set_pitch(self, pitch: typing.SupportsFloat) -> None:
+        ...
+    def set_position(self, position: glm.vec3) -> None:
+        ...
+    def set_x(self, x: typing.SupportsFloat) -> None:
+        ...
+    def set_y(self, y: typing.SupportsFloat) -> None:
+        ...
+    def set_yaw(self, yaw: typing.SupportsFloat) -> None:
+        ...
+    def set_z(self, z: typing.SupportsFloat) -> None:
+        ...
+    def update(self) -> None:
+        ...
+    def use(self, shader: ...) -> None:
+        ...
 class StaticCamera2D:
     def __init__(self, engine: Engine, position: glm.vec2 = (0.0, 0.0), scale: typing.SupportsFloat = 10.0) -> None:
         ...
@@ -840,10 +975,10 @@ class StaticCamera2D:
     def pos(self) -> glm.vec2:
         ...
     @property
-    def position(self) -> _CameraPositionProxy:
+    def position(self) -> ...:
         ...
     @position.setter
-    def position(self, arg1: glm.vec2) -> None:
+    def position(self, arg1: typing.Any) -> None:
         ...
     @property
     def scale(self) -> float:
@@ -852,7 +987,10 @@ class StaticCamera2D:
     def scale(self, arg1: typing.SupportsFloat) -> None:
         ...
     @property
-    def view_scale(self) -> _CameraViewScaleProxy:
+    def view_scale(self) -> ...:
+        ...
+    @view_scale.setter
+    def view_scale(self, arg1: typing.Any) -> None:
         ...
 class UBO:
     @typing.overload
@@ -941,38 +1079,6 @@ class Window:
     def render(self) -> None:
         ...
     def use(self) -> None:
-        ...
-class _CameraPositionProxy:
-    def __getitem__(self, arg0: typing.SupportsInt) -> float:
-        ...
-    def __iter__(self) -> collections.abc.Iterator:
-        ...
-    def __len__(self) -> int:
-        ...
-    @property
-    def x(self) -> float:
-        ...
-    @x.setter
-    def x(self, arg1: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def y(self) -> float:
-        ...
-    @y.setter
-    def y(self, arg1: typing.SupportsFloat) -> None:
-        ...
-class _CameraViewScaleProxy:
-    @property
-    def x(self) -> float:
-        ...
-    @x.setter
-    def x(self, arg1: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def y(self) -> float:
-        ...
-    @y.setter
-    def y(self, arg1: typing.SupportsFloat) -> None:
         ...
 class _QuatPropertyProxy:
     def __getitem__(self, arg0: typing.SupportsInt) -> float:

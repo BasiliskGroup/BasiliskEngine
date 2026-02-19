@@ -38,10 +38,9 @@ void Node::updateModel() {
 
     // Apply the parent model to this node's model
     if (parent) {
-        std::cout << "Parent pointer: " << parent << std::endl;
         model = parent->getModel() * model;
     }
-          
+    
     for (auto child : children) {
         child->updateModel();
     }
