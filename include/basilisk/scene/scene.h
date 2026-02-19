@@ -2,6 +2,7 @@
 #define BSK_SCENE_H
 
 #include <basilisk/util/includes.h>
+#include <memory>
 #include <basilisk/engine/engine.h>
 #include <basilisk/camera/virtualCamera.h>
 #include <basilisk/scene/virtualScene.h>
@@ -10,6 +11,7 @@
 #include <basilisk/resource/lightServer.h>
 #include <basilisk/light/light.h>
 #include <basilisk/render/skybox.h>
+#include <basilisk/scene/raycast.h>
 
 namespace bsk::internal {
 
@@ -19,6 +21,7 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
     private:
         StaticCamera* camera;
         StaticCamera* internalCamera;
+        std::shared_ptr<StaticCamera> cameraPython;
         Shader* shader;
         LightServer* lightServer;
         Skybox* skybox = nullptr;
@@ -41,10 +44,15 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         void remove(std::shared_ptr<Node> node) override;
 
         inline void setCamera(StaticCamera* camera) { this->camera = camera; }
+        inline void setCamera(std::shared_ptr<StaticCamera> cameraSp) { cameraPython = std::move(cameraSp); camera = cameraPython.get(); }
         inline void setSkybox(Skybox* skybox) { this->skybox = skybox; }
         
         inline Shader* getShader() override { return shader; }
         inline StaticCamera* getCamera() { return camera; }
+
+        // mouse interaction
+        RayCastResult pick(glm::vec2 mousePosition);
+        RayCastResult raycast(glm::vec3 origin, glm::vec3 direction);
 };
 
 }

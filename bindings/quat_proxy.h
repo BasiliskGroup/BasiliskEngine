@@ -63,10 +63,10 @@ class QuatProxy {
             if (py::len(obj) != 4)
                 throw py::value_error("Iterable length must be 4 for quat (x, y, z, w)");
             return glm::quat(
-                py::cast<float>(obj[py::int_(3)]),  // w
-                py::cast<float>(obj[py::int_(0)]),  // x
-                py::cast<float>(obj[py::int_(1)]),  // y
-                py::cast<float>(obj[py::int_(2)])   // z
+                py::cast<float>(obj[py::int_(0)]),  // w
+                py::cast<float>(obj[py::int_(1)]),  // x
+                py::cast<float>(obj[py::int_(2)]),  // y
+                py::cast<float>(obj[py::int_(3)])   // z
             );
         }
     
@@ -89,10 +89,10 @@ class QuatProxy {
         if (py::isinstance<glm::quat>(obj)) return py::cast<glm::quat>(obj);
         if (py::len(obj) != 4) throw py::value_error("Iterable length must be 4 for quat (x, y, z, w)");
         return glm::quat(
-            py::cast<float>(obj[py::int_(3)]),  // w
-            py::cast<float>(obj[py::int_(0)]),  // x
-            py::cast<float>(obj[py::int_(1)]),  // y
-            py::cast<float>(obj[py::int_(2)])   // z
+            py::cast<float>(obj[py::int_(0)]),  // w
+            py::cast<float>(obj[py::int_(1)]),  // x
+            py::cast<float>(obj[py::int_(2)]),  // y
+            py::cast<float>(obj[py::int_(3)])   // z
         );
     }
     
@@ -105,24 +105,24 @@ class QuatProxy {
             .def_property("w", &QuatProxy::get_w, &QuatProxy::set_w)
             .def("__len__",     [](const QuatProxy&) { return 4; })
             // __iter__ and __getitem__ expose components as (x, y, z, w)
-            .def("__iter__", [](const QuatProxy& p) {
+            .def("__iter__", [](const QuatProxy& p) {   
                 auto q = p.get();
-                return py::iter(py::make_tuple(q.x, q.y, q.z, q.w));
+                return py::iter(py::make_tuple(q.w, q.x, q.y, q.z));
             })
             .def("__getitem__", [](const QuatProxy& p, py::ssize_t i) -> float {
                 auto q = p.get();
-                if (i == 0) return q.x;
-                if (i == 1) return q.y;
-                if (i == 2) return q.z;
-                if (i == 3) return q.w;
+                if (i == 0) return q.w;
+                if (i == 1) return q.x;
+                if (i == 2) return q.y;
+                if (i == 3) return q.z;
                 throw py::index_error("index out of range");
             })
             .def("__setitem__", [](QuatProxy& p, py::ssize_t i, float v) {
                 auto q = p.get();
-                if      (i == 0) q.x = v;
-                else if (i == 1) q.y = v;
-                else if (i == 2) q.z = v;
-                else if (i == 3) q.w = v;
+                if      (i == 0) q.w = v;
+                else if (i == 1) q.x = v;
+                else if (i == 2) q.y = v;
+                else if (i == 3) q.z = v;
                 else throw py::index_error("index out of range");
                 p.set(q);
             })

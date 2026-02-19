@@ -124,4 +124,49 @@ void Scene::remove(std::shared_ptr<Node> node) {
     root->remove(node.get());
 }
 
+// raycasting - origin and direction in world space
+RayCastResult Scene::raycast(glm::vec3 origin, glm::vec3 direction) {
+    RayCastResult result;
+
+    for (auto it = ++root->begin(); it != root->end(); ++it) {
+        Node* node = *it;
+        RayCastResult hit = node->raycast(origin, direction);
+
+        if (hit.node && hit.distance < result.distance && hit.distance > 0.0f) {
+            result = hit;
+        }
+    }
+
+    return result;
 }
+
+RayCastResult Scene::pick(glm::vec2 mousePosition) {
+    // Convert mouse position (screen pixels) to normalized direction vector in world space
+    int width = static_cast<int>(engine->getWindow()->getWidth() * engine->getWindow()->getWindowScaleX());
+    int height = static_cast<int>(engine->getWindow()->getHeight() * engine->getWindow()->getWindowScaleY());
+
+    // Screen to NDC: [0,width] x [0,height] -> [-1,1] x [-1,1], Y flipped (screen Y down, NDC Y up)
+    float ndcX = (2.0f * mousePosition.x) / width - 1.0f;
+    float ndcY = 1.0f - (2.0f * mousePosition.y) / height;
+
+    // Point on near plane in clip space
+    glm::vec4 clipNear(ndcX, ndcY, -1.0f, 1.0f);
+    // Point on far plane in clip space (for direction)
+    glm::vec4 clipFar(ndcX, ndcY, 1.0f, 1.0f);
+
+    glm::mat4 view = camera->getView();
+    glm::mat4 projection = camera->getProjection();
+    glm::mat4 invViewProj = glm::inverse(projection * view);
+
+    glm::vec4 worldNear = invViewProj * clipNear;
+    glm::vec4 worldFar = invViewProj * clipFar;
+    worldNear /= worldNear.w;
+    worldFar /= worldFar.w;
+
+    glm::vec3 origin = camera->getPosition();
+    glm::vec3 direction = glm::normalize(glm::vec3(worldFar) - glm::vec3(worldNear));
+
+    return raycast(origin, direction);
+}
+
+}  // namespace bsk::internal

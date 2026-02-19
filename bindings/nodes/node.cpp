@@ -13,9 +13,9 @@ namespace py = pybind11;
 using namespace bsk::internal;
 
 namespace {
-const glm::vec3 default_position(0.0f, 0.0f, 0.0f);
-const glm::vec3 default_scale(1.0f, 1.0f, 1.0f);
-const glm::quat default_rotation(0.0f, 0.0f, 0.0f, 1.0f);
+    const glm::vec3 default_position(0.0f, 0.0f, 0.0f);
+    const glm::vec3 default_scale(1.0f, 1.0f, 1.0f);
+    const glm::quat default_rotation(1.0f, 0.0f, 0.0f, 0.0f);
 }  // namespace
 
 void bind_node(py::module_& m) {

@@ -6,6 +6,7 @@
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/collision/collider.h>
 #include <basilisk/physics/rigid.h>
+#include <basilisk/scene/raycast.h>
 
 namespace bsk::internal {
 
@@ -70,6 +71,9 @@ public:
     ForceType constrainedTo(Node2D* other);
     bool justCollided(Node2D* other);
     bool isTouching(Node2D* other);
+
+    // raycasting
+    // RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
 
 private:
     void updateModel();
