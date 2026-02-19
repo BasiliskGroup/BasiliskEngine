@@ -32,9 +32,15 @@ tests/
 rust_gpu/target/
 rust_gpu/Cargo.lock
 
-# examples
+# boilerplate
 boilerplate/build/
 boilerplate/dist/
 boilerplate/*.so
 boilerplate/*.spec
 *.pyd
+
+# examples
+examples/models/
+examples/shaders/
+examples/textures/
+examples/*.so
