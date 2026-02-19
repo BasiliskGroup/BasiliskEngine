@@ -557,6 +557,21 @@ install(TARGETS basilisk
     RUNTIME DESTINATION basilisk
 )
 
+# Install Rust GPU shared library alongside basilisk so it is findable at runtime (RPATH $ORIGIN)
+if(RUST_GPU_LIB_NAME)
+    if(WIN32)
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll
+            DESTINATION basilisk
+            OPTIONAL
+        )
+    elseif(UNIX AND NOT APPLE)
+        install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so
+            DESTINATION basilisk
+            OPTIONAL
+        )
+    endif()
+endif()
+
 # Add internal files 
 install(
     DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders

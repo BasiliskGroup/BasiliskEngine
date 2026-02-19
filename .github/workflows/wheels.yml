@@ -21,6 +21,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      # Rust required for rust_gpu compute library (used by cibuildwheel on Windows/macOS; Linux uses before-build in container)
+      - uses: dtolnay/rust-toolchain@stable
+
       - name: Install cibuildwheel
         run: pip install cibuildwheel
 
