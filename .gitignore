@@ -33,7 +33,7 @@ rust_gpu/target/
 rust_gpu/Cargo.lock
 
 # examples
-example/build/
-example/dist/
-example/*.so
-example/*.spec
+boilerplate/build/
+boilerplate/dist/
+boilerplate/*.so
+boilerplate/*.spec

@@ -301,22 +301,23 @@ target_link_libraries(basilisk PRIVATE
 
 # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
 # RUST_GPU_LIB is set earlier, right after RUST_GPU_LIB_NAME
+# On Windows, we use manual DLL loading (gpuLoader.cpp) so we don't link against the DLL
+# On other platforms, we link directly
 if(RUST_GPU_LIB_NAME)
-    # Only link if the library will actually be built
-    if(WIN32 AND TARGET rust_gpu_imported)
-        # Use the IMPORTED target on Windows for better CMake integration
-        target_link_libraries(basilisk PRIVATE rust_gpu_imported)
-    else()
-        target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
-    endif()
-    add_dependencies(basilisk rust_gpu_lib)
-    # Copy DLL to output directory on Windows
     if(WIN32)
+        # On Windows, don't link - we'll manually load the DLL at runtime
+        # This allows the DLL to be found relative to the .pyd location
+        add_dependencies(basilisk rust_gpu_lib)
+        # Copy DLL to output directory so it can be found next to the .pyd
         add_custom_command(TARGET basilisk POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
                 $<TARGET_FILE_DIR:basilisk>
         )
+    else()
+        # On non-Windows, link directly
+        target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
+        add_dependencies(basilisk rust_gpu_lib)
     endif()
 endif()
 
