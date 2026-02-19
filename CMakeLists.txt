@@ -416,7 +416,7 @@ if(EXISTS ${BASILISK_MAIN})
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
-    # Copy resources
+    # Copy resources (shaders includes velocity.wgsl, primal.wgsl, dual.wgsl at top level)
     add_custom_command(TARGET engine POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:engine>/shaders
@@ -424,16 +424,6 @@ if(EXISTS ${BASILISK_MAIN})
             ${CMAKE_CURRENT_SOURCE_DIR}/textures $<TARGET_FILE_DIR:engine>/textures
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/models $<TARGET_FILE_DIR:engine>/models
-        # Copy WGSL compute shaders from physics directory
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/velocity.wgsl
-            $<TARGET_FILE_DIR:engine>/shaders/velocity.wgsl
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/primal.wgsl
-            $<TARGET_FILE_DIR:engine>/shaders/primal.wgsl
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/dual.wgsl
-            $<TARGET_FILE_DIR:engine>/shaders/dual.wgsl
     )
 
     message(STATUS "Added test executable: engine")
@@ -473,7 +463,7 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
     set_target_properties(engine_forces_test PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
-    # Copy resources
+    # Copy resources (shaders includes velocity.wgsl, primal.wgsl, dual.wgsl at top level)
     add_custom_command(TARGET engine_forces_test POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:engine_forces_test>/shaders
@@ -481,16 +471,6 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
             ${CMAKE_CURRENT_SOURCE_DIR}/textures $<TARGET_FILE_DIR:engine_forces_test>/textures
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/models $<TARGET_FILE_DIR:engine_forces_test>/models
-        # Copy WGSL compute shaders from physics directory
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/velocity.wgsl
-            $<TARGET_FILE_DIR:engine_forces_test>/shaders/velocity.wgsl
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/primal.wgsl
-            $<TARGET_FILE_DIR:engine_forces_test>/shaders/primal.wgsl
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/dual.wgsl
-            $<TARGET_FILE_DIR:engine_forces_test>/shaders/dual.wgsl
     )
     message(STATUS "Added forces test executable: engine_forces_test")
 endif()
