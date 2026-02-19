@@ -50,8 +50,8 @@ public:
     static pybind11::handle cast(const glm::vec2& v,
                            pybind11::return_value_policy,
                            pybind11::handle) {
-        pybind11::object glm = pybind11::module_::import("glm");
-        return glm.attr("vec2")(v.x, v.y).release();
+        // Always return a tuple - works with load method and avoids glm module import issues
+        return pybind11::make_tuple(v.x, v.y).release();
     }
 };
 
@@ -70,8 +70,8 @@ public:
     static pybind11::handle cast(const glm::vec3& v,
                            pybind11::return_value_policy,
                            pybind11::handle) {
-        pybind11::object glm = pybind11::module_::import("glm");
-        return glm.attr("vec3")(v.x, v.y, v.z).release();
+        // Always return a tuple - works with load method and avoids glm module import issues
+        return pybind11::make_tuple(v.x, v.y, v.z).release();
     }
 };
 
@@ -96,8 +96,8 @@ public:
     static pybind11::handle cast(const glm::quat& q,
                            pybind11::return_value_policy,
                            pybind11::handle) {
-        pybind11::object glm = pybind11::module_::import("glm");
-        return glm.attr("quat")(q.w, q.x, q.y, q.z).release();
+        // Always return a tuple - works with load method and avoids glm module import issues
+        return pybind11::make_tuple(q.w, q.x, q.y, q.z).release();
     }
 };
 
