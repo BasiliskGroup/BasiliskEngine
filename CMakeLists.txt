@@ -232,13 +232,21 @@ if(APPLE)
 elseif(UNIX)
     set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so")
 elseif(WIN32)
-    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll")
+    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib")
 else()
     set(RUST_GPU_LIB "")
 endif()
 if(RUST_GPU_LIB)
     target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
     add_dependencies(basilisk rust_gpu_lib)
+    # Copy DLL to output directory on Windows
+    if(WIN32)
+        add_custom_command(TARGET basilisk POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
+                $<TARGET_FILE_DIR:basilisk>
+        )
+    endif()
 endif()
 
 # ======================================================
@@ -307,6 +315,14 @@ if(EXISTS ${BASILISK_MAIN})
     # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
     if(RUST_GPU_LIB)
         target_link_libraries(engine PRIVATE ${RUST_GPU_LIB})
+        # Copy DLL to output directory on Windows
+        if(WIN32)
+            add_custom_command(TARGET engine POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
+                    $<TARGET_FILE_DIR:engine>
+            )
+        endif()
     endif()
 
     set_target_properties(engine PROPERTIES
@@ -314,11 +330,24 @@ if(EXISTS ${BASILISK_MAIN})
     )
 
     # Copy resources
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    # Copy WGSL compute shaders used by the physics GPU path into the same runtime shaders folder
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/shaders)
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models   DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    add_custom_command(TARGET engine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:engine>/shaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/textures $<TARGET_FILE_DIR:engine>/textures
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/models $<TARGET_FILE_DIR:engine>/models
+        # Copy WGSL compute shaders from physics directory
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/velocity.wgsl
+            $<TARGET_FILE_DIR:engine>/shaders/velocity.wgsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/primal.wgsl
+            $<TARGET_FILE_DIR:engine>/shaders/primal.wgsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/dual.wgsl
+            $<TARGET_FILE_DIR:engine>/shaders/dual.wgsl
+    )
 
     message(STATUS "Added test executable: engine")
 else()
@@ -339,15 +368,37 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
     )
     if(RUST_GPU_LIB)
         target_link_libraries(engine_forces_test PRIVATE ${RUST_GPU_LIB})
+        # Copy DLL to output directory on Windows
+        if(WIN32)
+            add_custom_command(TARGET engine_forces_test POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
+                    $<TARGET_FILE_DIR:engine_forces_test>
+            )
+        endif()
     endif()
     set_target_properties(engine_forces_test PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders  DESTINATION ${CMAKE_BINARY_DIR})
-    # Copy WGSL compute shaders used by the physics GPU path into the same runtime shaders folder
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/ DESTINATION ${CMAKE_BINARY_DIR}/shaders)
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures DESTINATION ${CMAKE_BINARY_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models   DESTINATION ${CMAKE_BINARY_DIR})
+    # Copy resources
+    add_custom_command(TARGET engine_forces_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:engine_forces_test>/shaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/textures $<TARGET_FILE_DIR:engine_forces_test>/textures
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/models $<TARGET_FILE_DIR:engine_forces_test>/models
+        # Copy WGSL compute shaders from physics directory
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/velocity.wgsl
+            $<TARGET_FILE_DIR:engine_forces_test>/shaders/velocity.wgsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/primal.wgsl
+            $<TARGET_FILE_DIR:engine_forces_test>/shaders/primal.wgsl
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/dual.wgsl
+            $<TARGET_FILE_DIR:engine_forces_test>/shaders/dual.wgsl
+    )
     add_dependencies(engine_forces_test rust_gpu_lib)
     message(STATUS "Added forces test executable: engine_forces_test")
 endif()
