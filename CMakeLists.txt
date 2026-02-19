@@ -160,12 +160,55 @@ target_compile_features(clipper2 PUBLIC cxx_std_20)
 # ======================================================
 # Rust GPU library
 # ======================================================
-add_custom_target(rust_gpu_lib ALL
-    COMMAND cargo build --release
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu
-    BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.dylib
-    COMMENT "Building Rust GPU compute library..."
-)
+# Rust produces different library names on different platforms:
+# - macOS: librust_gpu.dylib
+# - Linux: librust_gpu.so
+# - Windows: rust_gpu.dll (no "lib" prefix)
+if(APPLE)
+    set(RUST_GPU_LIB_NAME "librust_gpu.dylib")
+elseif(UNIX)
+    set(RUST_GPU_LIB_NAME "librust_gpu.so")
+elseif(WIN32)
+    set(RUST_GPU_LIB_NAME "rust_gpu.dll")
+else()
+    set(RUST_GPU_LIB_NAME "")
+endif()
+
+# Check if cargo is available and rust_gpu directory exists
+find_program(CARGO cargo)
+if(RUST_GPU_LIB_NAME AND CARGO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/Cargo.toml)
+    # On Windows, Rust produces both .dll and .dll.lib (import library)
+    if(WIN32)
+        set(RUST_GPU_BYPRODUCTS
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}.lib
+        )
+    else()
+        set(RUST_GPU_BYPRODUCTS
+            ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}
+        )
+    endif()
+    
+    add_custom_target(rust_gpu_lib ALL
+        COMMAND cargo build --release
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu
+        BYPRODUCTS ${RUST_GPU_BYPRODUCTS}
+        COMMENT "Building Rust GPU compute library..."
+    )
+    message(STATUS "Rust GPU library will be built: ${RUST_GPU_LIB_NAME}")
+else()
+    # Create a dummy target if Rust is not available
+    add_custom_target(rust_gpu_lib
+        COMMENT "Rust GPU library not available (cargo not found or rust_gpu/Cargo.toml missing)"
+    )
+    if(NOT CARGO)
+        message(WARNING "cargo not found - Rust GPU library will not be built")
+    endif()
+    if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/Cargo.toml)
+        message(WARNING "rust_gpu/Cargo.toml not found - Rust GPU library will not be built")
+    endif()
+    set(RUST_GPU_LIB_NAME "")
+endif()
 
 # ======================================================
 # Basilisk Engine Sources
@@ -227,16 +270,19 @@ target_link_libraries(basilisk PRIVATE
 )
 
 # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
-if(APPLE)
-    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.dylib")
-elseif(UNIX)
-    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/librust_gpu.so")
-elseif(WIN32)
-    set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib")
+# RUST_GPU_LIB_NAME is set earlier in the Rust GPU library section
+if(RUST_GPU_LIB_NAME)
+    if(WIN32)
+        # On Windows, link against the import library (.dll.lib)
+        set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll.lib")
+    else()
+        set(RUST_GPU_LIB "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/${RUST_GPU_LIB_NAME}")
+    endif()
 else()
     set(RUST_GPU_LIB "")
 endif()
-if(RUST_GPU_LIB)
+if(RUST_GPU_LIB AND RUST_GPU_LIB_NAME)
+    # Only link if the library will actually be built
     target_link_libraries(basilisk PRIVATE ${RUST_GPU_LIB})
     add_dependencies(basilisk rust_gpu_lib)
     # Copy DLL to output directory on Windows
@@ -313,8 +359,9 @@ if(EXISTS ${BASILISK_MAIN})
     )
 
     # Link Rust GPU library for compute bindings (gpu_init, gpu_buffer_*, gpu_shader_*)
-    if(RUST_GPU_LIB)
+    if(RUST_GPU_LIB AND RUST_GPU_LIB_NAME)
         target_link_libraries(engine PRIVATE ${RUST_GPU_LIB})
+        add_dependencies(engine rust_gpu_lib)
         # Copy DLL to output directory on Windows
         if(WIN32)
             add_custom_command(TARGET engine POST_BUILD
@@ -366,8 +413,9 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
             basilisk_lib
             clipper2
     )
-    if(RUST_GPU_LIB)
+    if(RUST_GPU_LIB AND RUST_GPU_LIB_NAME)
         target_link_libraries(engine_forces_test PRIVATE ${RUST_GPU_LIB})
+        add_dependencies(engine_forces_test rust_gpu_lib)
         # Copy DLL to output directory on Windows
         if(WIN32)
             add_custom_command(TARGET engine_forces_test POST_BUILD
@@ -399,17 +447,22 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
             ${CMAKE_CURRENT_SOURCE_DIR}/src/physics/shaders/dual.wgsl
             $<TARGET_FILE_DIR:engine_forces_test>/shaders/dual.wgsl
     )
-    add_dependencies(engine_forces_test rust_gpu_lib)
+    if(RUST_GPU_LIB_NAME)
+        add_dependencies(engine_forces_test rust_gpu_lib)
+    endif()
     message(STATUS "Added forces test executable: engine_forces_test")
 endif()
 
 # ======================================================
 # Rust Dependency
 # ======================================================
-if(TARGET engine)
-    add_dependencies(engine rust_gpu_lib)
+# Only add dependencies if Rust GPU library is available
+if(RUST_GPU_LIB_NAME)
+    if(TARGET engine)
+        add_dependencies(engine rust_gpu_lib)
+    endif()
+    add_dependencies(basilisk_lib rust_gpu_lib)
 endif()
-add_dependencies(basilisk_lib rust_gpu_lib)
 
 # ======================================================
 # AddressSanitizer
