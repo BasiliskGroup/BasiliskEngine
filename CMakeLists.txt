@@ -202,6 +202,17 @@ if(RUST_GPU_LIB_NAME AND CARGO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/C
         )
     endif()
     
+    # On macOS, wgpu's Metal backend needs these frameworks (MTLCopyAllDevices, kCAGravityTopLeft, etc.)
+    if(APPLE)
+        target_link_libraries(rust_gpu_imported INTERFACE
+            "-framework Metal"
+            "-framework MetalKit"
+            "-framework QuartzCore"
+            "-framework CoreGraphics"
+            "-framework IOKit"
+        )
+    endif()
+    
     message(STATUS "Rust GPU library will be built: ${RUST_GPU_LIB_NAME}")
 else()
     # Create a dummy target if Rust is not available
@@ -340,6 +351,20 @@ if(Python3_FOUND AND TARGET basilisk)
 endif()
 
 # ======================================================
+# Copy resources (shaders, textures, models) to build dir
+# Single target avoids race when engine and engine_forces_test build in parallel (-j)
+# ======================================================
+add_custom_target(copy_resources ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/textures ${CMAKE_BINARY_DIR}/textures
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/models
+    COMMENT "Copying resources to build directory"
+)
+
+# ======================================================
 # Engine executable
 # ======================================================
 set(BASILISK_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
@@ -367,15 +392,7 @@ if(EXISTS ${BASILISK_MAIN})
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
-    # Copy resources (shaders includes velocity.wgsl, primal.wgsl, dual.wgsl at top level)
-    add_custom_command(TARGET engine POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:engine>/shaders
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/textures $<TARGET_FILE_DIR:engine>/textures
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/models $<TARGET_FILE_DIR:engine>/models
-    )
+    add_dependencies(engine copy_resources)
 
     message(STATUS "Added test executable: engine")
 else()
@@ -402,15 +419,7 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
     set_target_properties(engine_forces_test PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
-    # Copy resources (shaders includes velocity.wgsl, primal.wgsl, dual.wgsl at top level)
-    add_custom_command(TARGET engine_forces_test POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:engine_forces_test>/shaders
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/textures $<TARGET_FILE_DIR:engine_forces_test>/textures
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/models $<TARGET_FILE_DIR:engine_forces_test>/models
-    )
+    add_dependencies(engine_forces_test copy_resources)
     message(STATUS "Added forces test executable: engine_forces_test")
 endif()
 
