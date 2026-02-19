@@ -4,6 +4,7 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/nodes/virtualNode.h>
 #include <basilisk/scene/scene.h>
+#include <basilisk/scene/raycast.h>
 
 namespace bsk::internal {
 
@@ -29,6 +30,9 @@ class Node : public VirtualNode<Node, glm::vec3, glm::quat, glm::vec3> {
         void setScale(glm::vec3 scale) override;
 
         Scene* getScene() { return (Scene*) scene; }
+
+        // raycasting
+        RayCastResult raycast(glm::vec3 origin, glm::vec3 direction);
 
     private:
         void updateModel();

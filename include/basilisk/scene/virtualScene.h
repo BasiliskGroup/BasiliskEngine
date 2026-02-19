@@ -36,6 +36,12 @@ public:
     
     virtual Shader* getShader() = 0;
 
+    /** Returns shared_ptr if the node was added via add(shared_ptr); otherwise nullptr. */
+    std::shared_ptr<NodeType> findSharedNode(NodeType* node) const {
+        auto it = childrenPythonMap.find(node);
+        return it != childrenPythonMap.end() ? it->second : nullptr;
+    }
+
 protected:
     void clear() {
         if (root != nullptr) {

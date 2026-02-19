@@ -11,6 +11,7 @@
 #include <basilisk/resource/lightServer.h>
 #include <basilisk/light/light.h>
 #include <basilisk/render/skybox.h>
+#include <basilisk/scene/raycast.h>
 
 namespace bsk::internal {
 
@@ -48,6 +49,10 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         
         inline Shader* getShader() override { return shader; }
         inline StaticCamera* getCamera() { return camera; }
+
+        // mouse interaction
+        RayCastResult pick(glm::vec2 mousePosition);
+        RayCastResult raycast(glm::vec3 origin, glm::vec3 direction);
 };
 
 }

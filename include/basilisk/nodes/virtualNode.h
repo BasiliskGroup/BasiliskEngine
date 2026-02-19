@@ -91,6 +91,7 @@ public:
     P getPosition() const { return position; }
     R getRotation() const { return rotation; }
     S getScale() const { return scale; }
+    const glm::mat4& getModel() const { return model; }
     VirtualScene<Derived, P, R, S>* getScene() const { return scene; }
     Derived* getParent() const { return parent; }
     Shader* getShader() { return shader; }

@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <basilisk/engine/engine.h>
 #include <basilisk/IO/keyboard.h>
+#include <basilisk/IO/mouse.h>
 
 namespace py = pybind11;
 
@@ -36,5 +37,28 @@ void bind_engine(py::module_& m) {
              "True if key is currently held down.")
         .def("is_key_released", [](Engine& e, KeyCode key) { return e.getKeyboard()->getReleased(key); },
              py::arg("key_code"),
-             "True if key was released this frame.");
+             "True if key was released this frame.")
+        // Mouse convenience methods
+        .def("get_mouse_x", [](Engine& e) { return e.getMouse()->getX(); },
+             "Mouse X position (screen coordinates, scaled).")
+        .def("get_mouse_y", [](Engine& e) { return e.getMouse()->getY(); },
+             "Mouse Y position (screen coordinates, scaled).")
+        .def("is_left_down", [](Engine& e) { return e.getMouse()->getLeftDown(); },
+             "True if left mouse button is held down.")
+        .def("is_middle_down", [](Engine& e) { return e.getMouse()->getMiddleDown(); },
+             "True if middle mouse button is held down.")
+        .def("is_right_down", [](Engine& e) { return e.getMouse()->getRightDown(); },
+             "True if right mouse button is held down.")
+        .def("is_left_clicked", [](Engine& e) { return e.getMouse()->getLeftClicked(); },
+             "True if left button was clicked this frame (down now, was up last frame).")
+        .def("is_middle_clicked", [](Engine& e) { return e.getMouse()->getMiddleClicked(); },
+             "True if middle button was clicked this frame.")
+        .def("is_right_clicked", [](Engine& e) { return e.getMouse()->getRightClicked(); },
+             "True if right button was clicked this frame.")
+        .def("is_left_released", [](Engine& e) { return e.getMouse()->getLeftReleased(); },
+             "True if left button was released this frame.")
+        .def("is_middle_released", [](Engine& e) { return e.getMouse()->getMiddleReleased(); },
+             "True if middle button was released this frame.")
+        .def("is_right_released", [](Engine& e) { return e.getMouse()->getRightReleased(); },
+             "True if right button was released this frame.");
 }

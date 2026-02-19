@@ -4,7 +4,6 @@
 #include <pybind11/pybind11.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <iostream>
 
 namespace pybind11::detail {
 

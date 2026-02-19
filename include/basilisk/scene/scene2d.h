@@ -9,6 +9,7 @@
 #include <basilisk/camera/camera2d.h>
 #include <basilisk/render/shader.h>
 #include <basilisk/physics/solver.h>
+#include <basilisk/scene/raycast.h>
 
 namespace bsk::internal {
 
@@ -40,6 +41,10 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         inline Shader* getShader() override { return shader; }
         inline StaticCamera2D* getCamera() { return camera; }
         inline Solver* getSolver() { return solver; }
+
+        // raycasting
+        // RayCastResult2D pick(glm::vec2 mousePosition);
+        // RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
 };
 
 }
