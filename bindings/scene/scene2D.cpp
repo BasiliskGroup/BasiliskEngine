@@ -15,11 +15,17 @@ void bind_scene2d(py::module_& m) {
         .def("render", &Scene2D::render)
         .def("add", static_cast<void (Scene2D::*)(std::shared_ptr<Node2D>)>(&Scene2D::add), py::arg("node"))
         .def("remove", static_cast<void (Scene2D::*)(Node2D*)>(&Scene2D::remove), py::arg("node"))
-        .def("set_camera", &Scene2D::setCamera, py::arg("camera"))
+        // Camera setters: raw pointer or shared_ptr
+        .def("set_camera",
+             static_cast<void (Scene2D::*)(StaticCamera2D*)>(&Scene2D::setCamera),
+             py::arg("camera"))
+        .def("set_camera",
+             static_cast<void (Scene2D::*)(std::shared_ptr<StaticCamera2D>)>(&Scene2D::setCamera),
+             py::arg("camera"))
         .def("get_camera", &Scene2D::getCamera, py::return_value_policy::reference_internal)
         .def_property("camera",
             [](Scene2D& s) { return s.getCamera(); },
-            [](Scene2D& s, StaticCamera2D* c) { s.setCamera(c); },
+            [](Scene2D& s, std::shared_ptr<StaticCamera2D> c) { s.setCamera(std::move(c)); },
             py::return_value_policy::reference_internal)
         .def("get_shader", &Scene2D::getShader)
         .def("get_engine", &Scene2D::getEngine)

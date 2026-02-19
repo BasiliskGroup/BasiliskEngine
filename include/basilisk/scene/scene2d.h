@@ -2,6 +2,7 @@
 #define BSK_SCENE2D_H
 
 #include <basilisk/util/includes.h>
+#include <memory>
 #include <basilisk/engine/engine.h>
 #include <basilisk/camera/virtualCamera.h>
 #include <basilisk/scene/virtualScene.h>
@@ -17,6 +18,7 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
     private:
         StaticCamera2D* camera;
         StaticCamera2D* internalCamera;
+        std::shared_ptr<StaticCamera2D> cameraPython;
         Shader* shader;
         Solver* solver;
 
@@ -33,6 +35,7 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         void remove(std::shared_ptr<Node2D> node) override;
 
         void setCamera(StaticCamera2D* camera) { this->camera = camera; }
+        void setCamera(std::shared_ptr<StaticCamera2D> cameraSp) { cameraPython = std::move(cameraSp); camera = cameraPython.get(); }
 
         inline Shader* getShader() override { return shader; }
         inline StaticCamera2D* getCamera() { return camera; }

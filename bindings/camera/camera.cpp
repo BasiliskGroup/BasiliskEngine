@@ -2,71 +2,35 @@
 #include <pybind11/pybind11.h>
 #include <basilisk/camera/staticCamera2d.h>
 #include <basilisk/camera/camera2d.h>
+#include <basilisk/camera/staticCamera.h>
+#include <basilisk/camera/camera.h>
 #include <basilisk/engine/engine.h>
 
-// IMPORTANT: include GLM casters
+// IMPORTANT: include GLM casters (for glm::vec2/vec3, matrices, etc.)
 #include "glm/glmCasters.hpp"
+#include "vector_proxy.h"
 
 namespace py = pybind11;
 using namespace bsk::internal;
 
 namespace {
 
-const glm::vec2 default_position(0.0f, 0.0f);
-const float default_scale = 10.0f;
+const glm::vec2 default_position_2d(0.0f, 0.0f);
+const float default_scale_2d = 10.0f;
 
-// Proxy for mutable position property (camera.position.x += 1, etc.)
-class CameraPositionProxy {
-public:
-    StaticCamera2D* camera;
-    float get_x() const { return static_cast<float>(camera->getX()); }
-    void set_x(float v) { camera->setX(static_cast<double>(v)); }
-    float get_y() const { return static_cast<float>(camera->getY()); }
-    void set_y(float v) { camera->setY(static_cast<double>(v)); }
-};
-
-// Proxy for mutable view_scale property (camera.view_scale.x, etc.)
-class CameraViewScaleProxy {
-public:
-    StaticCamera2D* camera;
-    float get_x() const { return static_cast<float>(camera->getViewWidth()); }
-    void set_x(float v) {
-        float y = static_cast<float>(camera->getViewHeight());
-        camera->setScale(v, y);
-    }
-    float get_y() const { return static_cast<float>(camera->getViewHeight()); }
-    void set_y(float v) {
-        float x = static_cast<float>(camera->getViewWidth());
-        camera->setScale(x, v);
-    }
-};
+const glm::vec3 default_position_3d(0.0f, 0.0f, 0.0f);
+const float default_pitch_3d = 0.0f;
+const float default_yaw_3d = 0.0f;
 
 }  // namespace
 
 void bind_camera(py::module_& m) {
-    // Bind proxy: in-place modification + tuple/PyGLM compat (glm.vec2(*pos), glm.mix(...))
-    py::class_<CameraPositionProxy>(m, "_CameraPositionProxy", py::module_local())
-        .def_property("x", &CameraPositionProxy::get_x, &CameraPositionProxy::set_x)
-        .def_property("y", &CameraPositionProxy::get_y, &CameraPositionProxy::set_y)
-        .def("__iter__", [](const CameraPositionProxy& p) {
-            return py::iter(py::make_tuple(p.get_x(), p.get_y()));
-        })
-        .def("__len__", [](const CameraPositionProxy&) { return 2; })
-        .def("__getitem__", [](const CameraPositionProxy& p, py::ssize_t i) {
-            if (i == 0) return p.get_x();
-            if (i == 1) return p.get_y();
-            throw py::index_error("index out of range");
-        });
-
-    py::class_<CameraViewScaleProxy>(m, "_CameraViewScaleProxy", py::module_local())
-        .def_property("x", &CameraViewScaleProxy::get_x, &CameraViewScaleProxy::set_x)
-        .def_property("y", &CameraViewScaleProxy::get_y, &CameraViewScaleProxy::set_y);
-
-    py::class_<StaticCamera2D>(m, "StaticCamera2D")
+    // 2D cameras ---------------------------------------------------------
+    py::class_<StaticCamera2D, std::shared_ptr<StaticCamera2D>>(m, "StaticCamera2D")
         .def(py::init<Engine*, glm::vec2, float>(),
              py::arg("engine"),
-             py::arg("position") = default_position,
-             py::arg("scale") = default_scale)
+             py::arg("position") = default_position_2d,
+             py::arg("scale") = default_scale_2d)
         .def("update", &StaticCamera2D::update)
         .def("use", &StaticCamera2D::use, py::arg("shader"))
         // Setters
@@ -86,31 +50,78 @@ void bind_camera(py::module_& m) {
         // Properties (mutable: camera.position.x += 1, camera.position = (x,y), etc.)
         .def_property("position",
             [](StaticCamera2D& c) {
-                auto p = std::make_unique<CameraPositionProxy>();
-                p->camera = &c;
-                return p.release();
+                return new Vec2Proxy(
+                    [&c]() { return c.getPosition(); },
+                    [&c](const glm::vec2& v) { c.setPosition(v); }
+                );
             },
-            [](StaticCamera2D& c, const glm::vec2& v) { c.setPosition(v); },
+            [](StaticCamera2D& c, py::object value) { c.setPosition(vec2_from_pyobject(value)); },
             py::return_value_policy::take_ownership)
         .def_property_readonly("pos", [](StaticCamera2D& c) { return c.getPosition(); })
-        .def_property_readonly("view_scale",
+        .def_property("view_scale",
             [](StaticCamera2D& c) {
-                auto p = std::make_unique<CameraViewScaleProxy>();
-                p->camera = &c;
-                return p.release();
+                return new Vec2Proxy(
+                    [&c]() { return c.getViewScale(); },
+                    [&c](const glm::vec2& v) { c.setScale(v); }
+                );
             },
+            [](StaticCamera2D& c, py::object value) { c.setScale(vec2_from_pyobject(value)); },
             py::return_value_policy::take_ownership)
         .def_property("scale",
             [](StaticCamera2D& c) { return static_cast<float>(c.getViewWidth()); },
             [](StaticCamera2D& c, float v) { c.setScale(v); });
 
-    py::class_<Camera2D, StaticCamera2D>(m, "Camera2D")
+    py::class_<Camera2D, StaticCamera2D, std::shared_ptr<Camera2D>>(m, "Camera2D")
         .def(py::init<Engine*, glm::vec2, float>(),
              py::arg("engine"),
-             py::arg("position") = default_position,
-             py::arg("scale") = default_scale)
+             py::arg("position") = default_position_2d,
+             py::arg("scale") = default_scale_2d)
         .def("update", &Camera2D::update)
         .def_property("speed",
             [](const Camera2D& c) { return c.getSpeed(); },
             [](Camera2D& c, float v) { c.setSpeed(v); });
+
+    // 3D cameras ---------------------------------------------------------
+    py::class_<StaticCamera, std::shared_ptr<StaticCamera>>(m, "StaticCamera")
+        .def(py::init<Engine*, glm::vec3, float, float>(),
+             py::arg("engine"),
+             py::arg("position") = default_position_3d,
+             py::arg("pitch") = default_pitch_3d,
+             py::arg("yaw") = default_yaw_3d)
+        .def("update", &StaticCamera::update)
+        .def("use", &StaticCamera::use, py::arg("shader"))
+        // Setters
+        .def("set_position", &StaticCamera::setPosition, py::arg("position"))
+        .def("set_x", &StaticCamera::setX, py::arg("x"))
+        .def("set_y", &StaticCamera::setY, py::arg("y"))
+        .def("set_z", &StaticCamera::setZ, py::arg("z"))
+        .def("set_yaw", &StaticCamera::setYaw, py::arg("yaw"))
+        .def("set_pitch", &StaticCamera::setPitch, py::arg("pitch"))
+        .def("set_fov", &StaticCamera::setFOV, py::arg("fov"))
+        .def("set_aspect", &StaticCamera::setAspect, py::arg("aspect"))
+        .def("set_near", &StaticCamera::setNear, py::arg("near"))
+        .def("set_far", &StaticCamera::setFar, py::arg("far"))
+        .def("look_at", &StaticCamera::lookAt, py::arg("target"))
+        // Getters
+        .def("get_position", &StaticCamera::getPosition)
+        .def("get_x", &StaticCamera::getX)
+        .def("get_y", &StaticCamera::getY)
+        .def("get_z", &StaticCamera::getZ)
+        .def("get_yaw", &StaticCamera::getYaw)
+        .def("get_pitch", &StaticCamera::getPitch)
+        .def("get_fov", &StaticCamera::getFOV)
+        .def("get_aspect", &StaticCamera::getAspect)
+        .def("get_near", &StaticCamera::getNear)
+        .def("get_far", &StaticCamera::getFar);
+
+    py::class_<Camera, StaticCamera, std::shared_ptr<Camera>>(m, "Camera")
+        .def(py::init<Engine*, glm::vec3, float, float>(),
+             py::arg("engine"),
+             py::arg("position") = default_position_3d,
+             py::arg("pitch") = default_pitch_3d,
+             py::arg("yaw") = default_yaw_3d)
+        .def("update", &Camera::update)
+        .def_property("speed",
+            [](const Camera& c) { return c.getSpeed(); },
+            [](Camera& c, float v) { c.setSpeed(v); });
 }

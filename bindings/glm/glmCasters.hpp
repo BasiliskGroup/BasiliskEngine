@@ -4,6 +4,7 @@
 #include <pybind11/pybind11.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <iostream>
 
 namespace pybind11::detail {
 
@@ -89,7 +90,8 @@ public:
         if (!load_vec(src, tmp, 4))
             return false;
 
-        value = glm::quat(tmp[3], tmp[0], tmp[1], tmp[2]); // (w, x, y, z)
+        // comes in as (x, y, z, w)
+        value = glm::quat(tmp[0], tmp[1], tmp[2], tmp[3]);
         return true;
     }
 
@@ -100,7 +102,6 @@ public:
         return pybind11::make_tuple(q.w, q.x, q.y, q.z).release();
     }
 };
-
 
 } // namespace pybind11::detail
 
