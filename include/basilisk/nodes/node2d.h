@@ -27,10 +27,10 @@ private:
     } physicsData;
 
 public:
-    Node2D(VirtualScene2D* scene, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
-    Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
     Node2D(VirtualScene2D* scene);
-    Node2D(Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction);
+    Node2D(Scene2D* scene, Mesh* mesh = nullptr, Material* material = nullptr, glm::vec2 position = {0.0, 0.0}, float rotation = 0.0, glm::vec2 scale = {1.0, 1.0}, glm::vec3 velocity = {0.0, 0.0, 0.0}, Collider* collider = nullptr, float density = 1.0, float friction = 0.5);
+    Node2D(Node2D* parent, Mesh* mesh = nullptr, Material* material = nullptr, glm::vec2 position = {0.0, 0.0}, float rotation = 0.0, glm::vec2 scale = {1.0, 1.0}, glm::vec3 velocity = {0.0, 0.0, 0.0}, Collider* collider = nullptr, float density = 1.0, float friction = 0.5);
+    Node2D(Mesh* mesh = nullptr, Material* material = nullptr, glm::vec2 position = {0.0, 0.0}, float rotation = 0.0, glm::vec2 scale = {1.0, 1.0}, glm::vec3 velocity = {0.0, 0.0, 0.0}, Collider* collider = nullptr, float density = 1.0, float friction = 0.5);
     Node2D(const Node2D& other) noexcept;
     Node2D(Node2D&& other) noexcept;
     

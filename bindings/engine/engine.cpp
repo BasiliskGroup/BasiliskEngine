@@ -9,9 +9,9 @@ void bind_engine(py::module_& m) {
 
     py::class_<Engine>(m, "Engine")
         .def(py::init<int, int, const char*, bool>(),
-             py::arg("width"),
-             py::arg("height"),
-             py::arg("title"),
+             py::arg("width") = 800,
+             py::arg("height") = 800,
+             py::arg("title") = "Basilisk",
              py::arg("auto_mouse_grab") = true)
         .def("is_running", &Engine::isRunning)
         .def("update", &Engine::update)

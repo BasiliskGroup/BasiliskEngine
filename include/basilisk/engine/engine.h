@@ -21,7 +21,7 @@ class Engine {
         bool autoMouseGrab;
 
     public:
-        Engine(int width, int height, const char* title, bool autoMouseGrab=true);
+        Engine(int width=800, int height=800, const char* title="Basilisk", bool autoMouseGrab=true);
         ~Engine();
 
         bool isRunning() { return window->isRunning(); }

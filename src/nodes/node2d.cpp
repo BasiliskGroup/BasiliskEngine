@@ -3,26 +3,26 @@
 
 namespace bsk::internal {
 
-Node2D::Node2D(VirtualScene2D* scene, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
-    : VirtualNode(scene, mesh, material, position, rotation, scale), rigid(nullptr) {
+Node2D::Node2D(Scene2D* scene, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
+    : VirtualNode(scene, mesh ? mesh : Engine::getResourceServer()->defaultQuad, material ? material : Engine::getResourceServer()->defaultMaterial, position, rotation, scale), rigid(nullptr) {
     updateModel();
     bindRigid(mesh, material, position, rotation, scale, velocity, collider, density, friction);
-    Engine::getResourceServer()->getMaterialServer()->add(material);
+    Engine::getResourceServer()->getMaterialServer()->add(getMaterial());
 }
 
 Node2D::Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
-    : VirtualNode(parent, mesh, material, position, rotation, scale), rigid(nullptr) {
+    : VirtualNode(parent, mesh ? mesh : Engine::getResourceServer()->defaultQuad, material ? material : Engine::getResourceServer()->defaultMaterial, position, rotation, scale), rigid(nullptr) {
     updateModel();
     bindRigid(mesh, material, position, rotation, scale, velocity, collider, density, friction);
-    Engine::getResourceServer()->getMaterialServer()->add(material);
+    Engine::getResourceServer()->getMaterialServer()->add(getMaterial());
 }
 
 Node2D::Node2D(VirtualScene2D* scene) : VirtualNode(scene), rigid(nullptr) {}
 
 Node2D::Node2D(Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
-    : VirtualNode(mesh, material, position, rotation, scale), rigid(nullptr) {
+    : VirtualNode(mesh ? mesh : Engine::getResourceServer()->defaultQuad, material ? material : Engine::getResourceServer()->defaultMaterial, position, rotation, scale), rigid(nullptr) {
     updateModel();
-    Engine::getResourceServer()->getMaterialServer()->add(material);
+    Engine::getResourceServer()->getMaterialServer()->add(getMaterial());
 
     // save data here so that we can adopt it when the node is adopted
     physicsData.collider = collider;
