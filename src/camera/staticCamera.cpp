@@ -13,6 +13,7 @@ namespace bsk::internal {
 StaticCamera::StaticCamera(Engine* engine, glm::vec3 position, float pitch, float yaw): 
     engine(engine), position(position), pitch(pitch), yaw(yaw) 
 {
+    aspect = (float)engine->getWindow()->getWidth() / (float)engine->getWindow()->getHeight();
     updateView();
     updateProjection();
 }
