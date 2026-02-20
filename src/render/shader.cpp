@@ -1,4 +1,5 @@
 #include <basilisk/render/shader.h>
+#include <basilisk/util/resolvePath.h>
 #include <regex>
 #include <filesystem>
 
@@ -214,9 +215,13 @@ unsigned int loadProgram(unsigned int vertex, unsigned int fragment) {
  * @param fragmentPath 
  */
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
+    // Keep file resolution behavior consistent with Mesh/Image (cwd-based external assets).
+    std::string resolvedVertexPath = externalPath(vertexPath);
+    std::string resolvedFragmentPath = externalPath(fragmentPath);
+
     //  Load the source code
-    std::string vertexShaderSource   = loadShaderSource(vertexPath);
-    std::string fragmentShaderSource = loadShaderSource(fragmentPath);
+    std::string vertexShaderSource   = loadShaderSource(resolvedVertexPath);
+    std::string fragmentShaderSource = loadShaderSource(resolvedFragmentPath);
 
     if (vertexShaderSource.empty()) {
         std::cout << "Failed to load shader from path: " << vertexPath << std::endl;
