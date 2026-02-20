@@ -57,6 +57,7 @@ class Shader {
         void setUniform(const char* name, float value);
         void setUniform(const char* name, double value);
         void setUniform(const char* name, int value);
+        void setUniform(const char* name, glm::vec2 value);
         void setUniform(const char* name, glm::vec3 value);
         void setUniform(const char* name, glm::mat4 value);
 

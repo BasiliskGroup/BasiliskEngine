@@ -21,5 +21,6 @@ void bind_shader(py::module_& m) {
         .def("set_uniform", py::overload_cast<const char*, double>(&Shader::setUniform), py::arg("name"), py::arg("value"))
         .def("set_uniform", py::overload_cast<const char*, int>(&Shader::setUniform), py::arg("name"), py::arg("value"))
         .def("set_uniform", py::overload_cast<const char*, glm::vec3>(&Shader::setUniform), py::arg("name"), py::arg("value"))
-        .def("set_uniform", py::overload_cast<const char*, glm::mat4>(&Shader::setUniform), py::arg("name"), py::arg("value"));
+        .def("set_uniform", py::overload_cast<const char*, glm::mat4>(&Shader::setUniform), py::arg("name"), py::arg("value"))
+        .def("set_uniform", py::overload_cast<const char*, glm::vec2>(&Shader::setUniform), py::arg("name"), py::arg("value"));
 }
