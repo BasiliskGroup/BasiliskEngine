@@ -60,4 +60,22 @@ void MaterialServer::write(Shader* shader, std::string name, unsigned int slot) 
     shader->bind(name.c_str(), tbo, slot);
 }
 
+void MaterialServer::update(Material* material) {
+    // Get the material data
+    
+    MaterialData data = material->getData();
+    // Get the location of the albedo and noraml maps in theif texture server
+    std::pair<unsigned int, unsigned int> albedo = textureServer->add(material->getAlbedo());
+    std::pair<unsigned int, unsigned int> normal = textureServer->add(material->getNormal());
+    
+    // Update material data to have correct texture array locations
+    data.albedoArray = albedo.first;
+    data.albedoIndex = albedo.second;
+    data.normalArray = normal.first;
+    data.normalIndex = normal.second;
+
+    // Write the material data to the tbo
+    tbo->write(&data, sizeof(data), get(material) * sizeof(MaterialData));
+}
+
 }

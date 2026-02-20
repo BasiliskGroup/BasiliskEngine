@@ -9,8 +9,9 @@ namespace bsk::internal {
 // Define static members (must include full type)
 // Initialize simple ones at global scope, but defer Mesh/Skybox initialization
 // to avoid static initialization order issues with Assimp
-Image*    ResourceServer::defaultImage = new Image({0.5f, 0.5f, 0.5f, 1.0f}, 1, 1);
-Material* ResourceServer::defaultMaterial = new Material({1.0f, 1.0f, 1.0f}, ResourceServer::defaultImage);
+Image*    ResourceServer::defaultImage = new Image({1.0f, 1.0f, 1.0f, 1.0f}, 1, 1);
+Material* ResourceServer::defaultMaterial = new Material({0.5f, 0.5f, 0.5f}, ResourceServer::defaultImage);
+Image*    ResourceServer::logoImage = nullptr;
 Mesh*     ResourceServer::defaultCube = nullptr;
 Mesh*     ResourceServer::defaultQuad = nullptr;
 Skybox*   ResourceServer::defaultSkybox = nullptr;
@@ -26,6 +27,9 @@ ResourceServer::ResourceServer() {
     }
     if (defaultQuad == nullptr) {
         defaultQuad = new Mesh(internalPath("models/quad.obj").c_str());
+    }
+    if (logoImage == nullptr) {
+        logoImage = new Image(internalPath("textures/logo.png").c_str());
     }
     if (defaultSkybox == nullptr) {
         defaultSkybox = new Skybox({

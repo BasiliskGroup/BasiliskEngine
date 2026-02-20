@@ -29,6 +29,7 @@ class ResourceServer {
         inline MaterialServer* getMaterialServer() const { return materialServer; }
 
         static Image*    defaultImage;
+        static Image*    logoImage;
         static Material* defaultMaterial;
         static Mesh*     defaultCube;
         static Mesh*     defaultQuad;

@@ -8,7 +8,7 @@ import typing
 import typing_extensions
 from . import forces
 from . import key
-__all__: list[str] = ['AmbientLight', 'Camera', 'Camera2D', 'Collider', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'RayCastResult', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera', 'StaticCamera2D', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
+__all__: list[str] = ['AmbientLight', 'Camera', 'Camera2D', 'Collider', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'RayCastResult', 'RayCastResult2D', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera', 'StaticCamera2D', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
 class AmbientLight(Light):
     def __init__(self, color: glm.vec3 = (1.0, 1.0, 1.0), intensity: typing.SupportsFloat = 1.0) -> None:
         ...
@@ -128,6 +128,14 @@ class Engine:
     def get_mouse(self) -> Mouse:
         """
         Get the mouse. Access position, clicks, and button states.
+        """
+    def get_mouse_world_x(self, camera: ...) -> float:
+        """
+        Mouse X in world coordinates. Pass the scene's camera, e.g. scene.get_camera().
+        """
+    def get_mouse_world_y(self, camera: ...) -> float:
+        """
+        Mouse Y in world coordinates. Pass the scene's camera, e.g. scene.get_camera().
         """
     def get_mouse_x(self) -> float:
         """
@@ -398,10 +406,14 @@ class Mouse:
         ...
     def get_right_released(self) -> bool:
         ...
-    def get_world_x(self, arg0: ...) -> float:
-        ...
-    def get_world_y(self, arg0: ...) -> float:
-        ...
+    def get_world_x(self, camera: ...) -> float:
+        """
+        Mouse X in world coordinates using the given 2D camera.
+        """
+    def get_world_y(self, camera: ...) -> float:
+        """
+        Mouse Y in world coordinates using the given 2D camera.
+        """
     def get_x(self) -> float:
         ...
     def get_y(self) -> float:
@@ -624,6 +636,21 @@ class RayCastResult:
     @property
     def normal(self) -> glm.vec3:
         ...
+class RayCastResult2D:
+    @property
+    def distance(self) -> float:
+        ...
+    @property
+    def intersection(self) -> glm.vec2:
+        ...
+    @property
+    def node(self) -> ...:
+        """
+        Hit node (shared_ptr) or None if no hit
+        """
+    @property
+    def normal(self) -> glm.vec2:
+        ...
 class Rigid:
     def __init__(self, solver: Solver, node: Node2D, collider: Collider, position: glm.vec3, size: glm.vec2, density: typing.SupportsFloat, friction: typing.SupportsFloat, velocity: glm.vec3) -> None:
         ...
@@ -774,6 +801,14 @@ class Scene2D:
         ...
     def get_solver(self) -> ...:
         ...
+    def pick(self, position: glm.vec2) -> ...:
+        """
+        Return the topmost node at the given world position (by layer). Returns None if no hit. Raises if hit node lacks shared_ptr.
+        """
+    def raycast(self, origin: glm.vec2, direction: glm.vec2) -> RayCastResult2D:
+        """
+        Cast a ray in world space; returns RayCastResult2D with shared_ptr node. Raises if hit node lacks shared_ptr.
+        """
     def remove(self, node: ...) -> None:
         ...
     def render(self) -> None:

@@ -42,13 +42,13 @@ class Material {
         float clearcoat;
         float clearcoatGloss;
 
+        void update();
+
     public:
         Material(
             const glm::vec3& color = {1.0f, 1.0f, 1.0f},
-
             Image* albedo = nullptr,
             Image* normal = nullptr,
-
             float subsurface = 0.0f,
             float sheen = 0.0f,
             float sheenTint = 0.0f,
@@ -57,22 +57,7 @@ class Material {
             float metallicness = 0.0f,
             float clearcoat = 0.0f,
             float clearcoatGloss = 0.0f
-        )
-            : color(color),
-
-            albedo(albedo),
-            normal(normal),
-
-            roughness(0.0f),
-            subsurface(subsurface),
-            sheen(sheen),
-            sheenTint(sheenTint),
-            anisotropic(anisotropic),
-            specular(specular),
-            metallicness(metallicness),
-            clearcoat(clearcoat),
-            clearcoatGloss(clearcoatGloss)
-        {}
+        );
 
         inline const glm::vec3& getColor() const { return color; }
         
@@ -89,20 +74,20 @@ class Material {
         inline float getClearcoat() const { return clearcoat; }
         inline float getClearcoatGloss() const { return clearcoatGloss; }
 
-        void setColor(const glm::vec3& value) { color = value; }
+        void setColor(const glm::vec3& value) { color = value; update(); }
 
-        void setAlbedo(Image* value) { albedo = value; }
-        void setNormal(Image* value) { normal = value; }
+        void setAlbedo(Image* value) { albedo = value; update(); }
+        void setNormal(Image* value) { normal = value; update(); }
 
-        void setRoughness(float value) { roughness = value; }
-        void setSubsurface(float value) { subsurface = value; }
-        void setSheen(float value) { sheen = value; }
-        void setSheenTint(float value) { sheenTint = value; }
-        void setAnisotropic(float value) { anisotropic = value; }
-        void setSpecular(float value) { specular = value; }
-        void setMetallicness(float value) { metallicness = value; }
-        void setClearcoat(float value) { clearcoat = value; }
-        void setClearcoatGloss(float value) { clearcoatGloss = value; }
+        void setRoughness(float value) { roughness = value; update(); }
+        void setSubsurface(float value) { subsurface = value; update(); }
+        void setSheen(float value) { sheen = value; update(); }
+        void setSheenTint(float value) { sheenTint = value; update(); }
+        void setAnisotropic(float value) { anisotropic = value; update(); }
+        void setSpecular(float value) { specular = value; update(); }
+        void setMetallicness(float value) { metallicness = value; update(); }
+        void setClearcoat(float value) { clearcoat = value; update(); }
+        void setClearcoatGloss(float value) { clearcoatGloss = value; update(); }
 
         MaterialData getData();
 };

@@ -22,8 +22,9 @@ class MaterialServer {
 
         unsigned int add(Material* material);
         unsigned int get(Material* material);
-
+        
         void write(Shader* shader, std::string name, unsigned int startSlot = 0);
+        void update(Material* material);
 };
 
 }
