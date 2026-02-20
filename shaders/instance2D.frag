@@ -10,6 +10,7 @@ out vec4 fragColor;
 void main() {
     vec4 textureColor = getTextureValue(material, uv);
     textureColor.rgb *= material.color;
+    textureColor.a *= material.alpha;
     if (textureColor.a <= 0.01) { discard; }
     fragColor = textureColor;
 }

@@ -19,18 +19,20 @@ struct Material {
     float metallicness;
     float clearcoat;
     float clearcoatGloss;
+    float alpha;
 };
 
 Material getMaterial(int index) {
     Material m;
 
-    int N = 4;  // N = (number of floats per material / 4)
+    int N = 5;  // N = (number of vec4s per material; 17 floats -> 5 vec4s)
     int base = index * N;
 
     vec4 v0 = texelFetch(materials, base + 0);
     vec4 v1 = texelFetch(materials, base + 1);
     vec4 v2 = texelFetch(materials, base + 2);
     vec4 v3 = texelFetch(materials, base + 3);
+    vec4 v4 = texelFetch(materials, base + 4);
 
     // Unpack to struct fields:
     m.color         = v0.rgb;
@@ -47,6 +49,7 @@ Material getMaterial(int index) {
     m.metallicness  = v3.y;
     m.clearcoat     = v3.z;
     m.clearcoatGloss= v3.w;
+    m.alpha         = v4.x;
 
     return m;
 }

@@ -6,6 +6,7 @@
 
 namespace bsk::internal {
 
+#pragma pack(push, 4)
 struct MaterialData {
     glm::vec3 color;
 
@@ -23,7 +24,10 @@ struct MaterialData {
     float metallicness;
     float clearcoat;
     float clearcoatGloss;
+    float alpha;
+    float _padding[3];  // pad to 80 bytes (5 vec4s) for TBO layout
 };
+#pragma pack(pop)
 
 class Material {
     private:
@@ -41,6 +45,7 @@ class Material {
         float metallicness;
         float clearcoat;
         float clearcoatGloss;
+        float alpha;
 
         void update();
 
@@ -49,6 +54,7 @@ class Material {
             const glm::vec3& color = {1.0f, 1.0f, 1.0f},
             Image* albedo = nullptr,
             Image* normal = nullptr,
+            float alpha = 1.0f,
             float subsurface = 0.0f,
             float sheen = 0.0f,
             float sheenTint = 0.0f,
@@ -73,12 +79,14 @@ class Material {
         inline float getMetallicness() const { return metallicness; }
         inline float getClearcoat() const { return clearcoat; }
         inline float getClearcoatGloss() const { return clearcoatGloss; }
+        inline float getAlpha() const { return alpha; }
 
         void setColor(const glm::vec3& value) { color = value; update(); }
 
         void setAlbedo(Image* value) { albedo = value; update(); }
         void setNormal(Image* value) { normal = value; update(); }
 
+        void setAlpha(float value) { alpha = value; update(); }
         void setRoughness(float value) { roughness = value; update(); }
         void setSubsurface(float value) { subsurface = value; update(); }
         void setSheen(float value) { sheen = value; update(); }

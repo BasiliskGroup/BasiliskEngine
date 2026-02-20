@@ -5,12 +5,13 @@
 
 namespace bsk::internal {
 
-Material::Material(const glm::vec3& color, Image* albedo, Image* normal,
+Material::Material(const glm::vec3& color, Image* albedo, Image* normal, float alpha,
     float subsurface, float sheen, float sheenTint, float anisotropic,
     float specular, float metallicness, float clearcoat, float clearcoatGloss)
     : color(color),
       albedo(albedo),
       normal(normal),
+      alpha(alpha),
       roughness(0.0f),
       subsurface(subsurface),
       sheen(sheen),
@@ -35,7 +36,7 @@ void Material::update() {
  * @return MaterialData
  */
 MaterialData Material::getData() {
-    MaterialData data {color, 0, 0, 0, 0, roughness, subsurface, sheen, sheenTint, anisotropic, specular, metallicness, clearcoat, clearcoatGloss};
+    MaterialData data {color, 0, 0, 0, 0, roughness, subsurface, sheen, sheenTint, anisotropic, specular, metallicness, clearcoat, clearcoatGloss, alpha, {0.0f, 0.0f, 0.0f}};
 
     return data;
 }

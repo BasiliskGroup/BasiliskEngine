@@ -61,8 +61,13 @@ void MaterialServer::write(Shader* shader, std::string name, unsigned int slot) 
 }
 
 void MaterialServer::update(Material* material) {
+    // If material was never added add it
+    if (materialMapping.count(material) == 0) {
+        add(material);
+        return;
+    }
+
     // Get the material data
-    
     MaterialData data = material->getData();
     // Get the location of the albedo and noraml maps in theif texture server
     std::pair<unsigned int, unsigned int> albedo = textureServer->add(material->getAlbedo());

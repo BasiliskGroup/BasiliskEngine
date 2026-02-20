@@ -94,8 +94,14 @@ void Frame::render() {
     shader->use();
     shader->bind("uTexture", fbo, 4);
     shader->setUniform("textureSize", glm::vec2(this->width, this->height));
+    // Draw frame as fully opaque so we don't blend with window clear color
+    // (otherwise semi-transparent black in the frame would become gray)
+    GLint blendSrc, blendDst;
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrc);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDst);
+    glBlendFunc(GL_ONE, GL_ZERO);
     vao->render();
-
+    glBlendFunc(blendSrc, blendDst);
     // Reset viewport to previous dimensions
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
@@ -117,8 +123,12 @@ void Frame::render(int x, int y, int width, int height) {
     glViewport(x, y, width, height);
     shader->use();
     shader->bind("uTexture", fbo, 4);
+    GLint blendSrc, blendDst;
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrc);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDst);
+    glBlendFunc(GL_ONE, GL_ZERO);
     vao->render();
-
+    glBlendFunc(blendSrc, blendDst);
     // Reset viewport to previous dimensions
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }

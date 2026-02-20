@@ -37,5 +37,5 @@ void main() {
 
     vec3 ambientColor = uAmbientLight;
 
-    fragColor = vec4((directionalLightColor + pointLightColor + ambientColor) * textureColor.rgb * material.color, textureColor.a);
+    fragColor = vec4((directionalLightColor + pointLightColor + ambientColor) * textureColor.rgb * material.color, textureColor.a * material.alpha);
 } 
