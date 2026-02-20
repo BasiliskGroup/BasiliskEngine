@@ -120,12 +120,18 @@ void Scene::add(std::shared_ptr<Node> node) {
 }
 
 void Scene::remove(Node* node) {
-    root->remove(node);
+    if (node == nullptr) return;
+    Node* parent = node->getParent();
+    if (parent != nullptr) {
+        parent->remove(node);
+    } else {
+        root->remove(node);
+    }
 }
 
 void Scene::remove(std::shared_ptr<Node> node) {
     childrenPythonMap.erase(node.get());
-    root->remove(node.get());
+    remove(node.get());
 }
 
 // raycasting - origin and direction in world space

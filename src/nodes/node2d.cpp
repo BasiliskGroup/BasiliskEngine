@@ -55,7 +55,10 @@ Node2D::Node2D(Node2D* parent, Mesh* mesh, Material* material, glm::vec2 positio
     Engine::getResourceServer()->getMaterialServer()->add(getMaterial());
 }
 
-Node2D::Node2D(VirtualScene2D* scene) : VirtualNode(scene), rigid(nullptr) {}
+Node2D::Node2D(VirtualScene2D* scene) : VirtualNode(scene), rigid(nullptr) {
+    // Root node needs identity model so child hierarchy composition is valid.
+    model = glm::mat4(1.0f);
+}
 
 Node2D::Node2D(Mesh* mesh, Material* material, glm::vec2 position, float rotation, glm::vec2 scale, glm::vec3 velocity, Collider* collider, float density, float friction)
     : VirtualNode(mesh ? mesh : Engine::getResourceServer()->defaultQuad, material ? material : Engine::getResourceServer()->defaultMaterial, position, rotation, scale), rigid(nullptr) {
@@ -138,6 +141,15 @@ void Node2D::updateModel() {
     model = glm::translate(model, glm::vec3(position.x, -position.y, layer));
     model = glm::rotate(model, -rotation, glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::scale(model, glm::vec3(scale, 1.0f));
+
+    // Compose with parent transform so child nodes inherit hierarchy transforms.
+    if (parent) {
+        model = parent->getModel() * model;
+    }
+
+    for (auto child : children) {
+        child->updateModel();
+    }
 }
 
 void Node2D::setPosition(glm::vec2 position) {
@@ -381,8 +393,6 @@ bool Node2D::pointIsInside(glm::vec2 position) {
     glm::vec4 modelPos = glm::inverse(getModel()) * glm::vec4(position.x, -position.y, 0.0f, 1.0f);
     glm::vec2 modelPoint(modelPos.x, -modelPos.y);
 
-    std::cout << "modelPoint: " << modelPoint.x << ", " << modelPoint.y << std::endl;
-
     for (size_t i = 0; i + 2 < indices.size(); i += 3) {
         glm::vec3 v0 = meshVertexPosition(vertices, indices, indices[i]);
         glm::vec3 v1 = meshVertexPosition(vertices, indices, indices[i + 1]);
@@ -417,10 +427,6 @@ RayCastResult2D Node2D::raycast(glm::vec2 origin, glm::vec2 direction) {
     glm::vec2 dirModel = glm::vec2(invModel * glm::vec4(dirNorm.x, -dirNorm.y, 0.0f, 0.0f));
     dirModel.y = -dirModel.y;
     dirModel = glm::normalize(dirModel);
-
-    std::cout << "originModel: " << originModel.x << ", " << originModel.y << std::endl;
-    std::cout << "dirModel: " << dirModel.x << ", " << dirModel.y << std::endl;
-    std::cout << std::endl;
 
     float closestT = result.distance;
 
