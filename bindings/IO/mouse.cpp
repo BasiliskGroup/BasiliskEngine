@@ -11,8 +11,10 @@ void bind_mouse(py::module_& m) {
         .def("get_y", &Mouse::getY)
         .def("get_relative_x", &Mouse::getRelativeX)
         .def("get_relative_y", &Mouse::getRelativeY)
-        .def("get_world_x", &Mouse::getWorldX)
-        .def("get_world_y", &Mouse::getWorldY)
+        .def("get_world_x", &Mouse::getWorldX, py::arg("camera"),
+             "Mouse X in world coordinates using the given 2D camera.")
+        .def("get_world_y", &Mouse::getWorldY, py::arg("camera"),
+             "Mouse Y in world coordinates using the given 2D camera.")
         .def("get_clicked", &Mouse::getClicked)
         .def("get_left_clicked", &Mouse::getLeftClicked)
         .def("get_middle_clicked", &Mouse::getMiddleClicked)

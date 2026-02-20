@@ -63,6 +63,19 @@ inline glm::vec2 xy(const glm::vec3& v) noexcept {
 }
 
 float triangleArea2(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
+
+// True if point p is inside or on the boundary of triangle (a, b, c).
+inline bool pointInTriangle2(const glm::vec2& p, const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    float area = triangleArea2(a, b, c);
+    if (std::abs(area) < 1e-9f) return false;  // degenerate triangle
+    float a1 = triangleArea2(a, b, p);
+    float a2 = triangleArea2(b, c, p);
+    float a3 = triangleArea2(c, a, p);
+    // Point is inside if all sub-areas have the same sign as the triangle area
+    bool pos = area > 0;
+    return (pos && a1 >= 0 && a2 >= 0 && a3 >= 0) || (!pos && a1 <= 0 && a2 <= 0 && a3 <= 0);
+}
+
 std::pair<glm::vec3, glm::vec2> connectSquare(const glm::vec2& a, const glm::vec2& b, float width=0.1f);
 
 }

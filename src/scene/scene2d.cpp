@@ -73,5 +73,31 @@ void Scene2D::remove(std::shared_ptr<Node2D> node) {
     childrenPythonMap.erase(node.get());
     root->remove(node.get());
 }
+    
+// raycasting
+RayCastResult2D Scene2D::raycast(glm::vec2 origin, glm::vec2 direction) {
+    for (auto it = ++root->begin(); it != root->end(); ++it) {
+        Node2D* node = *it;
+        RayCastResult2D result = node->raycast(origin, direction);
+        if (result.node)
+            return result;
+    }
+    return RayCastResult2D();
+}
+
+// return the node at the position
+Node2D* Scene2D::pick(glm::vec2 position) {
+    float bestLayer = -FLT_MAX;
+    Node2D* bestNode = nullptr;
+
+    for (auto it = ++root->begin(); it != root->end(); ++it) {
+        Node2D* node = *it;
+        if (node->pointIsInside(position) && node->getLayer() > bestLayer) {
+            bestLayer = node->getLayer();
+            bestNode = node;
+        }
+    }
+    return bestNode;
+}
 
 }

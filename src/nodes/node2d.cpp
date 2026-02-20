@@ -1,5 +1,43 @@
 #include <basilisk/scene/sceneRoute.h>
 #include <basilisk/physics/rigid.h>
+#include <basilisk/util/maths.h>
+
+namespace {
+
+// Extract vertex position from flat vertex buffer (position is first 3 floats per vertex).
+glm::vec3 meshVertexPosition(const std::vector<float>& vertices,
+                             const std::vector<unsigned int>& indices,
+                             unsigned int vertexIndex) {
+    if (vertices.empty() || indices.empty())
+        return glm::vec3(0.0f);
+    unsigned int maxIndex = 0;
+    for (unsigned int idx : indices)
+        if (idx > maxIndex) maxIndex = idx;
+    unsigned int numVertices = maxIndex + 1;
+    unsigned int stride = static_cast<unsigned int>(vertices.size()) / numVertices;
+    if (stride < 3) stride = 3;
+    unsigned int offset = vertexIndex * stride;
+    return glm::vec3(vertices[offset], vertices[offset + 1], vertices[offset + 2]);
+}
+
+// Ray (origin + t*direction, t>=0) vs segment (a,b). Returns true if hit; t and hitPoint are set.
+bool raySegmentIntersect2(const glm::vec2& origin, const glm::vec2& direction,
+                          const glm::vec2& a, const glm::vec2& b,
+                          float& t, glm::vec2& hitPoint) {
+    glm::vec2 edge = b - a;
+    glm::vec2 va = a - origin;
+    float denom = direction.x * edge.y - direction.y * edge.x;
+    const float eps = 1e-9f;
+    if (std::abs(denom) < eps) return false;
+    float inv = 1.0f / denom;
+    t = (edge.x * va.y - edge.y * va.x) * inv;
+    float s = (direction.x * va.y - direction.y * va.x) * inv;
+    if (t < 0.0f || s < 0.0f || s > 1.0f) return false;
+    hitPoint = origin + direction * t;
+    return true;
+}
+
+}  // namespace
 
 namespace bsk::internal {
 
@@ -329,6 +367,84 @@ void Node2D::remove(Node2D* child) {
     if (oldScene != nullptr && !g_inMoveOperation) {
         child->onSceneChange(oldScene, nullptr);
     }
+}
+
+bool Node2D::pointIsInside(glm::vec2 position) {
+    Mesh* m = getMesh();
+    if (!m) return false;
+
+    const auto& vertices = m->getVertices();
+    const auto& indices = m->getIndices();
+    if (indices.size() < 3) return false;
+
+    // Convert world position to model space
+    glm::vec4 modelPos = glm::inverse(getModel()) * glm::vec4(position.x, -position.y, 0.0f, 1.0f);
+    glm::vec2 modelPoint(modelPos.x, -modelPos.y);
+
+    std::cout << "modelPoint: " << modelPoint.x << ", " << modelPoint.y << std::endl;
+
+    for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+        glm::vec3 v0 = meshVertexPosition(vertices, indices, indices[i]);
+        glm::vec3 v1 = meshVertexPosition(vertices, indices, indices[i + 1]);
+        glm::vec3 v2 = meshVertexPosition(vertices, indices, indices[i + 2]);
+
+        glm::vec2 a(v0.x, v0.y);
+        glm::vec2 b(v1.x, v1.y);
+        glm::vec2 c(v2.x, v2.y);
+
+        if (pointInTriangle2(modelPoint, a, b, c))
+            return true;
+    }
+    return false;
+}
+
+RayCastResult2D Node2D::raycast(glm::vec2 origin, glm::vec2 direction) {
+    RayCastResult2D result;
+
+    Mesh* m = getMesh();
+    if (!m) return result;
+
+    const auto& vertices = m->getVertices();
+    const auto& indices = m->getIndices();
+    if (indices.size() < 3) return result;
+
+    glm::vec2 dirNorm = glm::normalize(direction);
+
+    // Convert to model space
+    glm::mat4 invModel = glm::inverse(getModel());
+    glm::vec2 originModel = glm::vec2(invModel * glm::vec4(origin.x, -origin.y, 0.0f, 1.0f));
+    originModel.y = -originModel.y;
+    glm::vec2 dirModel = glm::normalize(glm::vec2(invModel * glm::vec4(dirNorm.x, dirNorm.y, 0.0f, 0.0f)));
+
+    std::cout << "originModel: " << originModel.x << ", " << originModel.y << std::endl;
+    std::cout << "dirModel: " << dirModel.x << ", " << dirModel.y << std::endl;
+    std::cout << std::endl;
+
+    float closestT = result.distance;
+
+    for (size_t i = 0; i + 2 < indices.size(); i += 3) {
+        glm::vec2 a = xy(meshVertexPosition(vertices, indices, indices[i]));
+        glm::vec2 b = xy(meshVertexPosition(vertices, indices, indices[i + 1]));
+        glm::vec2 c = xy(meshVertexPosition(vertices, indices, indices[i + 2]));
+
+        glm::vec2 edges[3][2] = {{a, b}, {b, c}, {c, a}};
+        for (int e = 0; e < 3; ++e) {
+            float t;
+            glm::vec2 hitModel;
+            if (!raySegmentIntersect2(originModel, dirModel, edges[e][0], edges[e][1], t, hitModel))
+                continue;
+            if (t < closestT && t > 1e-9f) {
+                closestT = t;
+                glm::vec2 hitWorld = glm::vec2(getModel() * glm::vec4(hitModel.x, hitModel.y, 0.0f, 1.0f));
+                result.node = this;
+                result.intersection = hitWorld;
+                result.normal = -dirNorm;  // opposite to ray (side the ray hit)
+                result.distance = glm::length(hitWorld - origin);
+            }
+        }
+    }
+
+    return result;
 }
 
 }
