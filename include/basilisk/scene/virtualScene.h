@@ -46,9 +46,19 @@ protected:
     void clear() {
         if (root != nullptr) {
             // Remove Python-owned nodes from the tree so root's destructor won't delete them.
-            // They are owned by shared_ptrs in childrenPythonMap and will be destroyed when the map is destroyed.
+            // Important: nodes may be nested/reparented, so remove from their actual parent.
             for (auto& [node_ptr, node_sp] : childrenPythonMap) {
-                root->remove(node_ptr);
+                if (node_ptr == nullptr) {
+                    continue;
+                }
+
+                NodeType* parent = node_ptr->getParent();
+                if (parent != nullptr) {
+                    parent->remove(node_ptr);
+                } else {
+                    // Fallback for direct-root nodes or stale bookkeeping.
+                    root->remove(node_ptr);
+                }
             }
             delete root;
             root = nullptr;
