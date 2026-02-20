@@ -7,9 +7,10 @@ using namespace bsk::internal;
 
 void bind_frame(py::module_& m) {
     py::class_<Frame>(m, "Frame")
-        .def(py::init<Engine*, unsigned int, unsigned int>(), py::arg("engine"), py::arg("width"), py::arg("height"))
+        .def(py::init<Engine*, unsigned int, unsigned int>(), py::arg("engine"), py::arg("width")=800, py::arg("height")=800)
+        .def(py::init<Engine*, Shader*, unsigned int, unsigned int>(), py::arg("engine"), py::arg("shader"), py::arg("width")=800, py::arg("height")=800)
         .def("use", &Frame::use)
-        .def("clear", &Frame::clear, py::arg("r"), py::arg("g"), py::arg("b"), py::arg("a"))
+        .def("clear", &Frame::clear, py::arg("r") = 0.0f, py::arg("g") = 0.0f, py::arg("b") = 0.0f, py::arg("a") = 1.0f)
         .def("render", py::overload_cast<>(&Frame::render))
         .def("render", py::overload_cast<int, int, int, int>(&Frame::render), py::arg("x"), py::arg("y"), py::arg("width"), py::arg("height"))
         .def("get_shader", &Frame::getShader)
@@ -21,5 +22,7 @@ void bind_frame(py::module_& m) {
         .def("get_height", &Frame::getHeight)
         .def("get_aspect_ratio", &Frame::getAspectRatio)
         .def("get_render_width", &Frame::getRenderWidth)
-        .def("get_render_height", &Frame::getRenderHeight);
+        .def("get_render_height", &Frame::getRenderHeight)
+        .def("set_filter_linear", &Frame::setFilterLinear)
+        .def("set_filter_nearest", &Frame::setFilterNearest);
 }

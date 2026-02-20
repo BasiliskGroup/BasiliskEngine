@@ -26,9 +26,11 @@ class Frame {
         unsigned int width;
         unsigned int height;
         float aspectRatio;
+        bool customShader = true;
 
     public:
-        Frame(Engine* engine, unsigned int width, unsigned int height);
+        Frame(Engine* engine, unsigned int width = 800, unsigned int height = 800);
+        Frame(Engine* engine, Shader* shader, unsigned int width = 800, unsigned int height = 800);
         ~Frame();
 
         void use();
@@ -46,6 +48,9 @@ class Frame {
         inline float getAspectRatio() { return aspectRatio; }
         unsigned int getRenderWidth();
         unsigned int getRenderHeight();
+
+        void setFilterLinear();
+        void setFilterNearest();
 };
 
 }

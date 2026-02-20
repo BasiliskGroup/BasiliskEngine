@@ -14,6 +14,7 @@ void bind_engine(py::module_& m) {
              py::arg("height") = 800,
              py::arg("title") = "Basilisk",
              py::arg("auto_mouse_grab") = true)
+             
         .def("is_running", &Engine::isRunning)
         .def("update", &Engine::update)
         .def("render", &Engine::render)

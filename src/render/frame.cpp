@@ -5,22 +5,12 @@
 
 namespace bsk::internal {
 
-/**
- * @brief Construct a new Frame object. Used as a render target and can render contents to screen. 
- * 
- * @param width Width of the FBO in pixels
- * @param height Height of the FBO in pixels
- */
-Frame::Frame(Engine* engine, unsigned int width, unsigned int height): engine(engine), width(width), height(height), aspectRatio((float)width / (float)height) {
-
-    // Load simple shader for rendering a quad wuth texture
-    shader = new Shader(internalPath("shaders/frame.vert").c_str(), internalPath("shaders/frame.frag").c_str());
-
+Frame::Frame(Engine* engine, Shader* shader, unsigned int width, unsigned int height): shader(shader), engine(engine), width(width), height(height), aspectRatio((float)width / (float)height), customShader(true) {
     // Create data needed to render a full-screen quad
     std::vector<float> vertexData = {
         -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f,
+            1.0f, -1.0f,  1.0f, 0.0f,
+            1.0f,  1.0f,  1.0f, 1.0f,
         -1.0f,  1.0f,  0.0f, 1.0f
     };
     std::vector<unsigned int> indexData = {
@@ -38,15 +28,27 @@ Frame::Frame(Engine* engine, unsigned int width, unsigned int height): engine(en
 }
 
 /**
+ * @brief Construct a new Frame object. Used as a render target and can render contents to screen. 
+ * 
+ * @param width Width of the FBO in pixels
+ * @param height Height of the FBO in pixels
+ */
+Frame::Frame(Engine* engine, unsigned int width, unsigned int height): Frame(engine, new Shader(internalPath("shaders/frame.vert").c_str(), internalPath("shaders/frame.frag").c_str()), width, height) {
+    customShader = false;
+}
+
+/**
  * @brief Destroy the Frame object
  * 
  */
 Frame::~Frame() {
+    if (!customShader) {
+        delete shader;
+    }
     delete fbo;
     delete ebo;
     delete vbo;
     delete vao;
-    delete shader;
 }
 
 /**
@@ -91,6 +93,7 @@ void Frame::render() {
     glViewport(x, y, width, height);
     shader->use();
     shader->bind("uTexture", fbo, 4);
+    shader->setUniform("textureSize", glm::vec2(this->width, this->height));
     vao->render();
 
     // Reset viewport to previous dimensions
@@ -155,6 +158,22 @@ unsigned int Frame::getRenderHeight() {
         return screenHeight;
     }
 
+}
+
+void Frame::setFilterLinear() {
+    unsigned int texture = fbo->getTextureID();
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Frame::setFilterNearest() {
+    unsigned int texture = fbo->getTextureID();
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 }
