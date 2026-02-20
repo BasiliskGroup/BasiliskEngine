@@ -30,8 +30,8 @@ bool raySegmentIntersect2(const glm::vec2& origin, const glm::vec2& direction,
     const float eps = 1e-9f;
     if (std::abs(denom) < eps) return false;
     float inv = 1.0f / denom;
-    t = (edge.x * va.y - edge.y * va.x) * inv;
-    float s = (direction.x * va.y - direction.y * va.x) * inv;
+    t = (va.x * edge.y - va.y * edge.x) * inv;
+    float s = (va.x * direction.y - va.y * direction.x) * inv;
     if (t < 0.0f || s < 0.0f || s > 1.0f) return false;
     hitPoint = origin + direction * t;
     return true;
@@ -414,7 +414,9 @@ RayCastResult2D Node2D::raycast(glm::vec2 origin, glm::vec2 direction) {
     glm::mat4 invModel = glm::inverse(getModel());
     glm::vec2 originModel = glm::vec2(invModel * glm::vec4(origin.x, -origin.y, 0.0f, 1.0f));
     originModel.y = -originModel.y;
-    glm::vec2 dirModel = glm::normalize(glm::vec2(invModel * glm::vec4(dirNorm.x, dirNorm.y, 0.0f, 0.0f)));
+    glm::vec2 dirModel = glm::vec2(invModel * glm::vec4(dirNorm.x, -dirNorm.y, 0.0f, 0.0f));
+    dirModel.y = -dirModel.y;
+    dirModel = glm::normalize(dirModel);
 
     std::cout << "originModel: " << originModel.x << ", " << originModel.y << std::endl;
     std::cout << "dirModel: " << dirModel.x << ", " << dirModel.y << std::endl;
@@ -435,10 +437,22 @@ RayCastResult2D Node2D::raycast(glm::vec2 origin, glm::vec2 direction) {
                 continue;
             if (t < closestT && t > 1e-9f) {
                 closestT = t;
-                glm::vec2 hitWorld = glm::vec2(getModel() * glm::vec4(hitModel.x, hitModel.y, 0.0f, 1.0f));
+                glm::vec2 edgeDirModel = edges[e][1] - edges[e][0];
+                glm::vec2 normalModel = glm::normalize(glm::vec2(-edgeDirModel.y, edgeDirModel.x));
+
+                glm::vec4 hitWorld4 = getModel() * glm::vec4(hitModel.x, -hitModel.y, 0.0f, 1.0f);
+                glm::vec2 hitWorld(hitWorld4.x, -hitWorld4.y);
+                glm::vec4 normalWorld4 = getModel() * glm::vec4(normalModel.x, -normalModel.y, 0.0f, 0.0f);
+                glm::vec2 normalWorld = glm::normalize(glm::vec2(normalWorld4.x, -normalWorld4.y));
+
+                // Ensure normal points toward the ray origin.
+                if (glm::dot(normalWorld, origin - hitWorld) < 0.0f) {
+                    normalWorld = -normalWorld;
+                }
+
                 result.node = this;
                 result.intersection = hitWorld;
-                result.normal = -dirNorm;  // opposite to ray (side the ray hit)
+                result.normal = normalWorld;
                 result.distance = glm::length(hitWorld - origin);
             }
         }
