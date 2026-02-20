@@ -25,7 +25,7 @@ int main() {
         scene->render();
 
         engine->getFrame()->use();
-        frame->render(0, 0, engine->getWindow()->getHeight(), engine->getWindow()->getHeight());
+        frame->render();
 
         engine->render();
     }

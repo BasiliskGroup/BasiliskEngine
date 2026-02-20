@@ -70,8 +70,8 @@ void Frame::render() {
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     // Get the screen dimensions from the engine
-    int screenWidth  = engine->getWindow()->getWidth() * engine->getWindow()->getWindowScaleX();
-    int screenHeight = engine->getWindow()->getHeight() * engine->getWindow()->getWindowScaleY();
+    int screenWidth  = viewport[2] * engine->getWindow()->getWindowScaleX();
+    int screenHeight = viewport[3] * engine->getWindow()->getWindowScaleY();
     float screenAspectRatio = (float)screenWidth / (float)screenHeight;
 
     // Set the render rect based on screen size and this frame's aspect ratio

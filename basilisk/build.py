@@ -1,68 +1,205 @@
+#!/usr/bin/env python3
 """
-Build a Basilisk project into a standalone executable using PyInstaller.
-
-Run with: basilisk file.py or basilisk-engine file.py
-
-Also supports: basilisk path/to/script.py, basilisk script.spec, and options
-like --work-dir, --source-dir, --no-copy, etc.
+Build script for cx_Freeze that:
+1. Runs cx_Freeze on a given Python script
+2. Copies all top-level files and folders (excluding build-generated ones) 
+   into the output folder
+3. Reorganizes output to a clean 'build/' directory structure
 """
 
-import re
+import argparse
+import os
+import platform
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 
-def get_pyinstaller_output_dir(spec_file_or_script):
+def get_cxfreeze_build_dir():
     """
-    Determine the output directory name from a spec file or Python script.
-    Returns the name that PyInstaller will use for the dist/ subdirectory.
+    Determine the cx_Freeze build directory name based on platform.
+    cx_Freeze creates directories like: exe.linux-x86_64-3.10
     """
-    path = Path(spec_file_or_script)
-
-    if path.suffix == '.spec':
-        with open(path, 'r') as f:
-            content = f.read()
-            match = re.search(r"name=['\"]([^'\"]+)['\"]", content)
-            if match:
-                return match.group(1)
-            return path.stem
-    else:
-        return path.stem
+    system = platform.system().lower()
+    machine = platform.machine()
+    py_version = f"{sys.version_info.major}.{sys.version_info.minor}"
+    
+    return f"exe.{system}-{machine}-{py_version}"
 
 
-def run_pyinstaller(spec_file_or_script, work_dir=None):
-    """Run PyInstaller on the given file."""
-    if work_dir is None:
-        work_dir = Path(spec_file_or_script).parent
+def create_setup_script(script_path, work_dir, output_name):
+    """
+    Create a temporary setup.py for cx_Freeze.
+    Returns the path to the created setup.py.
+    """
+    setup_content = f'''"""
+Auto-generated cx_Freeze setup script
+"""
 
-    work_dir = Path(work_dir)
-    spec_file_or_script = Path(spec_file_or_script)
+import sys
+from cx_Freeze import setup, Executable
 
-    if not spec_file_or_script.is_absolute():
-        spec_file_or_script = work_dir / spec_file_or_script
-    else:
-        try:
-            spec_file_or_script = spec_file_or_script.relative_to(work_dir)
-        except ValueError:
-            pass
+build_exe_options = {{
+    "packages": ["glm", "glcontext"],
+    "includes": [],
+    "excludes": ["tkinter", "unittest", "email", "html", "http", "xml", "pydoc"],
+}}
 
-    print(f"Running PyInstaller on: {spec_file_or_script}")
-    print(f"Working directory: {work_dir}")
+base = None
 
-    result = subprocess.run(
-        [sys.executable, '-m', 'PyInstaller', str(spec_file_or_script)],
-        cwd=work_dir,
-        check=True
+executables = [
+    Executable(
+        "{script_path.name}",
+        base=base,
+        target_name="{output_name}",
     )
+]
 
+setup(
+    name="{output_name}",
+    version="1.0",
+    description="Built with cx_Freeze",
+    options={{"build_exe": build_exe_options}},
+    executables=executables,
+)
+'''
+    
+    setup_path = work_dir / "_temp_setup.py"
+    with open(setup_path, 'w') as f:
+        f.write(setup_content)
+    
+    return setup_path
+
+
+def run_cxfreeze(script_path, work_dir=None):
+    """Run cx_Freeze on the given Python script."""
+    if work_dir is None:
+        work_dir = Path(script_path).parent
+    
+    work_dir = Path(work_dir)
+    script_path = Path(script_path)
+    
+    # Make path absolute
+    if not script_path.is_absolute():
+        script_path = work_dir / script_path
+    
+    output_name = script_path.stem
+    
+    print(f"Running cx_Freeze on: {script_path}")
+    print(f"Working directory: {work_dir}")
+    
+    # Create temporary setup.py
+    setup_path = create_setup_script(script_path, work_dir, output_name)
+    
+    try:
+        # Run cx_Freeze build
+        result = subprocess.run(
+            [sys.executable, str(setup_path), "build"],
+            cwd=work_dir,
+            check=True
+        )
+    finally:
+        # Clean up temporary setup.py
+        if setup_path.exists():
+            setup_path.unlink()
+    
     return result
 
 
-def copy_basilisk_resources(internal_dir):
+def copy_top_level_files(source_dir, dest_dir, exclude_patterns=None):
     """
-    Copy basilisk package resources (shaders, models, textures) to _internal/basilisk/.
+    Copy all top-level files and folders from source_dir to dest_dir,
+    excluding build-generated files and patterns in exclude_patterns.
+    """
+    if exclude_patterns is None:
+        exclude_patterns = []
+    
+    # Default exclusions for build-generated files
+    default_excludes = {
+        'build',
+        'dist',
+        '__pycache__',
+        '*.pyc',
+        '*.pyo',
+        '*.spec',
+        '*.py',
+        '*.txt',
+        '*.md',
+        '*.github',
+        '*.git',
+        '*.gitkeep',
+        '.gitignore',
+        '.pytest_cache',
+        '.mypy_cache',
+        '*.egg-info',
+        '_temp_setup.py',
+        'build_cxfreeze.py',
+        'build_pyinstaller.py',
+    }
+    
+    # Combine with user-provided exclusions
+    all_excludes = set(default_excludes) | set(exclude_patterns)
+    
+    source_dir = Path(source_dir)
+    dest_dir = Path(dest_dir)
+    
+    if not source_dir.exists():
+        print(f"Warning: Source directory {source_dir} does not exist")
+        return
+    
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    
+    print(f"Copying files from {source_dir} to {dest_dir}")
+    
+    copied_count = 0
+    skipped_count = 0
+    
+    for item in source_dir.iterdir():
+        # Skip if matches exclusion pattern
+        should_exclude = False
+        for pattern in all_excludes:
+            if pattern.startswith('*.'):
+                # File extension pattern
+                if item.suffix == pattern[1:] or item.name.endswith(pattern[1:]):
+                    should_exclude = True
+                    break
+            elif pattern.endswith('*'):
+                # Wildcard pattern
+                if item.name.startswith(pattern[:-1]):
+                    should_exclude = True
+                    break
+            elif item.name == pattern:
+                should_exclude = True
+                break
+        
+        if should_exclude:
+            print(f"  Skipping: {item.name}")
+            skipped_count += 1
+            continue
+        
+        dest_item = dest_dir / item.name
+        
+        try:
+            if item.is_file():
+                shutil.copy2(item, dest_item)
+                print(f"  Copied file: {item.name}")
+                copied_count += 1
+            elif item.is_dir():
+                if dest_item.exists():
+                    shutil.rmtree(dest_item)
+                shutil.copytree(item, dest_item, dirs_exist_ok=True)
+                print(f"  Copied directory: {item.name}/")
+                copied_count += 1
+        except Exception as e:
+            print(f"  Error copying {item.name}: {e}")
+    
+    print(f"\nCopy complete: {copied_count} items copied, {skipped_count} items skipped")
+
+
+def copy_basilisk_resources(dest_dir):
+    """
+    Copy basilisk package resources (shaders, models, textures) to dest_dir/lib/.
     These are needed at runtime for the engine to find default resources.
     """
     try:
@@ -76,7 +213,7 @@ def copy_basilisk_resources(internal_dir):
     # The resources should be in the same directory as the .so/.pyd file
     # (shaders/, models/, textures/ directories)
     basilisk_resources = ['shaders', 'models', 'textures']
-    basilisk_dest = internal_dir / 'basilisk'
+    basilisk_dest = dest_dir / 'lib'
     basilisk_dest.mkdir(parents=True, exist_ok=True)
     
     print(f"Copying basilisk resources from {basilisk_package_dir} to {basilisk_dest}")
@@ -101,196 +238,15 @@ def copy_basilisk_resources(internal_dir):
         print(f"  Successfully copied {copied_count} resource directories")
 
 
-def copy_top_level_files(source_dir, dest_dir, exclude_patterns=None):
-    """
-    Copy all top-level files and folders from source_dir to dest_dir,
-    excluding PyInstaller-generated files and patterns in exclude_patterns.
-    """
-    if exclude_patterns is None:
-        exclude_patterns = []
-
-    default_excludes = {
-        'build',
-        'dist',
-        '__pycache__',
-        '*.pyc',
-        '*.pyo',
-        '*.spec',
-        '.pytest_cache',
-        '.mypy_cache',
-        '*.egg-info',
-    }
-
-    all_excludes = set(default_excludes) | set(exclude_patterns)
-
-    source_dir = Path(source_dir)
-    dest_dir = Path(dest_dir)
-
-    if not source_dir.exists():
-        print(f"Warning: Source directory {source_dir} does not exist")
-        return
-
-    dest_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"Copying files from {source_dir} to {dest_dir}")
-
-    copied_count = 0
-    skipped_count = 0
-
-    for item in source_dir.iterdir():
-        should_exclude = False
-        for pattern in all_excludes:
-            if pattern.endswith('*'):
-                if item.name.startswith(pattern[:-1]) or item.suffix in ['.pyc', '.pyo']:
-                    should_exclude = True
-                    break
-            elif item.name == pattern or item.name.startswith(pattern):
-                should_exclude = True
-                break
-
-        if should_exclude:
-            print(f"  Skipping: {item.name}")
-            skipped_count += 1
-            continue
-
-        dest_item = dest_dir / item.name
-
-        try:
-            if item.is_file():
-                shutil.copy2(item, dest_item)
-                print(f"  Copied file: {item.name}")
-                copied_count += 1
-            elif item.is_dir():
-                if dest_item.exists():
-                    shutil.rmtree(dest_item)
-                shutil.copytree(item, dest_item, dirs_exist_ok=True)
-                print(f"  Copied directory: {item.name}/")
-                copied_count += 1
-        except Exception as e:
-            print(f"  Error copying {item.name}: {e}")
-
-    print(f"\nCopy complete: {copied_count} items copied, {skipped_count} items skipped")
-
-
-def main(argv=None):
-    """Entry point for the basilisk / basilisk-engine CLI."""
-    parser = _create_parser()
-    args = parser.parse_args(argv)
-
-    # Determine working directory
-    file_path = Path(args.file)
-    if not file_path.is_absolute():
-        file_path = Path.cwd() / file_path
-
-    if args.work_dir:
-        work_dir = Path(args.work_dir)
-    else:
-        work_dir = file_path.parent
-
-    if args.source_dir:
-        source_dir = Path(args.source_dir)
-    else:
-        source_dir = work_dir
-
-    # Step 1: Run PyInstaller
-    print("=" * 60)
-    print("Step 1: Running PyInstaller")
-    print("=" * 60)
-    try:
-        run_pyinstaller(file_path, work_dir)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: PyInstaller failed with exit code {e.returncode}")
-        sys.exit(1)
-
-    # Step 2: Find the _internal directory
-    output_name = get_pyinstaller_output_dir(file_path)
-    dist_dir = work_dir / 'dist' / output_name
-    internal_dir = dist_dir / '_internal'
-
-    if not internal_dir.exists():
-        print(f"\nWarning: _internal directory not found at {internal_dir}")
-        print("PyInstaller may have used a different output structure.")
-        print("Please check the dist/ directory manually.")
-        return
-
-    # Step 3: Copy basilisk package resources to _internal/basilisk/
-    print("\n" + "=" * 60)
-    print("Step 2: Copying basilisk package resources")
-    print("=" * 60)
-    copy_basilisk_resources(internal_dir)
-
-    # Step 4: Copy files to _internal (if not skipped)
-    if not args.no_copy:
-        print("\n" + "=" * 60)
-        print("Step 3: Copying top-level files to _internal/")
-        print("=" * 60)
-        copy_top_level_files(source_dir, internal_dir, args.exclude)
-
-    # Step 5: Move dist/<name> to top level, rename to 'build', and clean up
-    print("\n" + "=" * 60)
-    print("Step 4: Reorganizing output structure")
-    print("=" * 60)
-
-    final_build_dir = work_dir / 'build'
-
-    pyinstaller_build_dir = work_dir / 'build' / output_name
-    if pyinstaller_build_dir.exists():
-        print(f"Removing PyInstaller build directory: {pyinstaller_build_dir}")
-        shutil.rmtree(pyinstaller_build_dir)
-
-    pyinstaller_build_parent = work_dir / 'build'
-    if pyinstaller_build_parent.exists():
-        try:
-            if not any(pyinstaller_build_parent.iterdir()):
-                pyinstaller_build_parent.rmdir()
-                print(f"Removed empty PyInstaller build parent: {pyinstaller_build_parent}")
-        except Exception:
-            pass
-
-    if final_build_dir.exists():
-        print(f"Removing existing build directory: {final_build_dir}")
-        shutil.rmtree(final_build_dir)
-
-    print(f"Moving {dist_dir} to {final_build_dir}")
-    shutil.move(str(dist_dir), str(final_build_dir))
-
-    # Clean up
-    print("Cleaning up PyInstaller-generated files...")
-
-    dist_parent = work_dir / 'dist'
-    if dist_parent.exists():
-        try:
-            remaining_items = list(dist_parent.iterdir())
-            if remaining_items:
-                print(f"  Note: dist/ directory contains other builds, keeping it")
-            else:
-                dist_parent.rmdir()
-                print(f"  Removed: {dist_parent}")
-        except Exception as e:
-            print(f"  Warning: Could not remove {dist_parent}: {e}")
-
-    spec_file_path = file_path if file_path.suffix == '.spec' else work_dir / f"{output_name}.spec"
-    if spec_file_path.exists() and spec_file_path.suffix == '.spec':
-        spec_file_path.unlink()
-        print(f"  Removed: {spec_file_path}")
-
-    print("\n" + "=" * 60)
-    print("Build complete!")
-    print(f"Final output directory: {final_build_dir}")
-    print(f"Executable: {final_build_dir / output_name}")
-    print("=" * 60)
-
-
-def _create_parser():
-    import argparse
+def main():
     parser = argparse.ArgumentParser(
-        description='Build a Basilisk project into a standalone executable (PyInstaller)'
+        description='Build cx_Freeze bundle and copy top-level files'
     )
     parser.add_argument(
         'file',
         nargs='?',
         default='main.py',
-        help='Python script or .spec file to build (default: main.py)'
+        help='Python script to build (default: main.py)'
     )
     parser.add_argument(
         '--work-dir',
@@ -313,6 +269,131 @@ def _create_parser():
     parser.add_argument(
         '--no-copy',
         action='store_true',
-        help='Skip copying files, only run PyInstaller'
+        help='Skip copying files, only run cx_Freeze'
     )
-    return parser
+    
+    args = parser.parse_args()
+    
+    # Determine working directory
+    file_path = Path(args.file)
+    if not file_path.is_absolute():
+        file_path = Path.cwd() / file_path
+    
+    if args.work_dir:
+        work_dir = Path(args.work_dir)
+    else:
+        work_dir = file_path.parent
+    
+    if args.source_dir:
+        source_dir = Path(args.source_dir)
+    else:
+        source_dir = work_dir
+    
+    output_name = file_path.stem
+    
+    # Step 1: Run cx_Freeze
+    print("=" * 60)
+    print("Step 1: Running cx_Freeze")
+    print("=" * 60)
+    try:
+        run_cxfreeze(file_path, work_dir)
+    except subprocess.CalledProcessError as e:
+        print(f"Error: cx_Freeze failed with exit code {e.returncode}")
+        sys.exit(1)
+    
+    # Step 2: Find the cx_Freeze output directory
+    # cx_Freeze creates: build/exe.<platform>-<version>/
+    cxfreeze_build_subdir = get_cxfreeze_build_dir()
+    cxfreeze_output_dir = work_dir / 'build' / cxfreeze_build_subdir
+    
+    if not cxfreeze_output_dir.exists():
+        # Try to find it by pattern matching
+        build_dir = work_dir / 'build'
+        if build_dir.exists():
+            for item in build_dir.iterdir():
+                if item.is_dir() and item.name.startswith('exe.'):
+                    cxfreeze_output_dir = item
+                    break
+    
+    if not cxfreeze_output_dir.exists():
+        print(f"\nError: cx_Freeze output directory not found")
+        print(f"Expected: {cxfreeze_output_dir}")
+        print("Please check the build/ directory manually.")
+        sys.exit(1)
+    
+    print(f"\nFound cx_Freeze output: {cxfreeze_output_dir}")
+    
+    # Step 2: Copy basilisk package resources
+    print("\n" + "=" * 60)
+    print("Step 2: Copying basilisk package resources")
+    print("=" * 60)
+    copy_basilisk_resources(cxfreeze_output_dir)
+    
+    # Step 3: Copy files to output directory (if not skipped)
+    if not args.no_copy:
+        print("\n" + "=" * 60)
+        print("Step 3: Copying top-level files to build output")
+        print("=" * 60)
+        copy_top_level_files(source_dir, cxfreeze_output_dir, args.exclude)
+    
+    # Step 4: Reorganize to final structure
+    print("\n" + "=" * 60)
+    print("Step 4: Reorganizing output structure")
+    print("=" * 60)
+    
+    # Target location: top-level 'build' folder with just the contents
+    final_build_dir = work_dir / 'build'
+    temp_output_dir = work_dir / f'_temp_build_{output_name}'
+    
+    # Move cx_Freeze output to temp location
+    print(f"Moving {cxfreeze_output_dir} to temporary location")
+    shutil.move(str(cxfreeze_output_dir), str(temp_output_dir))
+    
+    # Remove the build directory (which now only has the exe.* folder gone)
+    if final_build_dir.exists():
+        # Check if there are other items in build/
+        remaining = list(final_build_dir.iterdir())
+        if not remaining:
+            final_build_dir.rmdir()
+            print(f"Removed empty build directory")
+        else:
+            # Remove remaining cx_Freeze artifacts
+            for item in remaining:
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
+            final_build_dir.rmdir()
+            print(f"Cleaned up build directory")
+    
+    # Move temp to final build location
+    print(f"Moving to final location: {final_build_dir}")
+    shutil.move(str(temp_output_dir), str(final_build_dir))
+    
+    # Rename executable if needed (cx_Freeze should already use the right name)
+    executable_path = final_build_dir / output_name
+    if not executable_path.exists():
+        # Try to find the executable
+        for item in final_build_dir.iterdir():
+            if item.is_file() and os.access(item, os.X_OK) and not item.suffix:
+                print(f"Renaming {item.name} to {output_name}")
+                item.rename(executable_path)
+                break
+    
+    # Clean up .egg-info directories created by cx_Freeze
+    print("Cleaning up build artifacts...")
+    for item in work_dir.iterdir():
+        if item.is_dir() and item.name.endswith('.egg-info'):
+            shutil.rmtree(item)
+            print(f"  Removed: {item.name}")
+    
+    print("\n" + "=" * 60)
+    print("Build complete!")
+    print(f"Final output directory: {final_build_dir}")
+    print(f"Executable: {executable_path}")
+    print("=" * 60)
+
+
+if __name__ == '__main__':
+    main()
+
