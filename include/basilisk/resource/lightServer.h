@@ -41,6 +41,8 @@ class LightServer {
         TBO* lightIndicesTBO;
         TBO* pointLightsTBO;
 
+        std::unordered_map<Light*, std::shared_ptr<Light>> pythonLightMap;
+
         std::vector<DirectionalLight*> directionalLights;
         std::vector<PointLight*> pointLights;
         std::vector<AmbientLight*> ambientLights;
@@ -72,6 +74,9 @@ class LightServer {
         void add(DirectionalLight* light);
         void add(PointLight* light);
         void add(AmbientLight* light);
+        void add(std::shared_ptr<DirectionalLight> light);
+        void add(std::shared_ptr<PointLight> light);
+        void add(std::shared_ptr<AmbientLight> light);
 
         void update(Shader* shader, StaticCamera* camera);
         void setTiles(Shader* shader, StaticCamera* camera, unsigned int screenWidth, unsigned int screenHeight);

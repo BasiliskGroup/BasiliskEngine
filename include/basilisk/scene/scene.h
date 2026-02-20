@@ -35,6 +35,7 @@ class Scene : public VirtualScene<Node, glm::vec3, glm::quat, glm::vec3> {
         void render();
         
         void add(Light* light);
+        void add(std::shared_ptr<Light> light);
         void addDefaults(bool addSkybox = true, bool addLight = true, bool addCube = true);
         // TODO add remove light
 

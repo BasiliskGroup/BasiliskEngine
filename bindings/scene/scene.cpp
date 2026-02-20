@@ -53,7 +53,7 @@ void bind_scene(py::module_& m) {
         // ---- add overloads ----
         .def(
             "add",
-            static_cast<void (Scene::*)(Light*)>(
+            static_cast<void (Scene::*)(std::shared_ptr<Light>)>(
                 &Scene::add),
             py::arg("light")
         )

@@ -106,6 +106,19 @@ void Scene::add(Light* light) {
     }
 }
 
+void Scene::add(std::shared_ptr<Light> light) {
+    if (!light) {
+        return;
+    }
+    if (auto directional = std::dynamic_pointer_cast<DirectionalLight>(light)) {
+        lightServer->add(std::move(directional));
+    } else if (auto point = std::dynamic_pointer_cast<PointLight>(light)) {
+        lightServer->add(std::move(point));
+    } else if (auto ambient = std::dynamic_pointer_cast<AmbientLight>(light)) {
+        lightServer->add(std::move(ambient));
+    }
+}
+
 void Scene::add(Node* node) {
     root->add(node);
 }
@@ -120,12 +133,18 @@ void Scene::add(std::shared_ptr<Node> node) {
 }
 
 void Scene::remove(Node* node) {
-    root->remove(node);
+    if (node == nullptr) return;
+    Node* parent = node->getParent();
+    if (parent != nullptr) {
+        parent->remove(node);
+    } else {
+        root->remove(node);
+    }
 }
 
 void Scene::remove(std::shared_ptr<Node> node) {
     childrenPythonMap.erase(node.get());
-    root->remove(node.get());
+    remove(node.get());
 }
 
 // raycasting - origin and direction in world space
