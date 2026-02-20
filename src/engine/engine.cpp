@@ -5,7 +5,7 @@ namespace bsk::internal {
 
 std::unique_ptr<ResourceServer> Engine::resourceServer(nullptr);
 
-Engine::Engine(int width, int height, const char* title, bool autoMouseGrab) {
+Engine::Engine(int width, int height, const char* title, bool autoMouseGrab, bool showSplash) {
     window = new Window(width, height, title);
     mouse = new Mouse(this);
     keyboard = new Keyboard(window);
@@ -22,6 +22,10 @@ Engine::Engine(int width, int height, const char* title, bool autoMouseGrab) {
 
     if (autoMouseGrab) {
         mouse->setGrab();
+    }
+
+    if (showSplash) {
+        ::bsk::internal::showSplash(this);
     }
 }
 
@@ -67,6 +71,10 @@ void Engine::useContext() {
 void Engine::setResolution(unsigned int width, unsigned int height) {
     delete frame;
     frame = new Frame(this, width, height);
+}
+
+void Engine::showSplash() {
+    ::bsk::internal::showSplash(this);
 }
 
 }

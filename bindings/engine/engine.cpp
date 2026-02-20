@@ -10,11 +10,12 @@ void bind_engine(py::module_& m) {
     using namespace bsk::internal;
 
     py::class_<Engine>(m, "Engine")
-        .def(py::init<int, int, const char*, bool>(),
+        .def(py::init<int, int, const char*, bool, bool>(),
              py::arg("width") = 800,
              py::arg("height") = 800,
              py::arg("title") = "Basilisk",
-             py::arg("auto_mouse_grab") = true)
+             py::arg("auto_mouse_grab") = true,
+             py::arg("show_splash") = false)
              
         .def("is_running", &Engine::isRunning)
         .def("update", &Engine::update)
@@ -68,5 +69,6 @@ void bind_engine(py::module_& m) {
         .def("is_middle_released", [](Engine& e) { return e.getMouse()->getMiddleReleased(); },
              "True if middle button was released this frame.")
         .def("is_right_released", [](Engine& e) { return e.getMouse()->getRightReleased(); },
-             "True if right button was released this frame.");
+             "True if right button was released this frame.")
+        .def("show_splash", &Engine::showSplash);
 }

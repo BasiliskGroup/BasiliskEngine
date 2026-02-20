@@ -7,6 +7,7 @@
 #include <basilisk/IO/mouse.h>
 #include <basilisk/resource/resourceServer.h>
 #include <basilisk/render/frame.h>
+#include <basilisk/util/splashScreen.h>
 
 namespace bsk::internal {
 
@@ -21,7 +22,7 @@ class Engine {
         bool autoMouseGrab;
 
     public:
-        Engine(int width=800, int height=800, const char* title="Basilisk", bool autoMouseGrab=true);
+        Engine(int width=800, int height=800, const char* title="Basilisk", bool autoMouseGrab=true, bool showSplash=false);
         ~Engine();
 
         bool isRunning() { return window->isRunning(); }
@@ -47,6 +48,7 @@ class Engine {
         inline void disableMultisample() { window->disableMultisample(); }
         inline void disableBlend() { window->disableBlend(); }
         inline void disableVSync() { window->disableVSync(); }
+        void showSplash();
 };
 
 }
