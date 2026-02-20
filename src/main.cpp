@@ -23,6 +23,9 @@ int main() {
             scene->add(node);
         }
     }
+
+    engine->showSplash();
+
     while (engine->isRunning()) {
         engine->update();
         scene->update();

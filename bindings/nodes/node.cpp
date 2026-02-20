@@ -78,6 +78,10 @@ void bind_node(py::module_& m) {
         .def("set_rotation", [](Node& n, py::object value) { n.setRotation(quat_from_pyobject(value)); },
              py::arg("rotation"))
         .def("set_scale", &Node::setScale, py::arg("scale"))
+        .def("set_mesh", py::overload_cast<Mesh*>(&Node::setMesh), py::arg("mesh"))
+        .def("set_mesh", py::overload_cast<std::shared_ptr<Mesh>>(&Node::setMesh), py::arg("mesh"))
+        .def("set_material", py::overload_cast<Material*>(&Node::setMaterial), py::arg("material"))
+        .def("set_material", py::overload_cast<std::shared_ptr<Material>>(&Node::setMaterial), py::arg("material"))
 
         // Getters (Node)
         .def("get_scene", &Node::getScene)

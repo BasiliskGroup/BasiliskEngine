@@ -96,6 +96,10 @@ void bind_node2d(py::module_& m) {
         .def("set_collider", &Node2D::setCollider, py::arg("collider"))
         .def("set_density", &Node2D::setDensity, py::arg("density"))
         .def("set_friction", &Node2D::setFriction, py::arg("friction"))
+        .def("set_mesh", py::overload_cast<Mesh*>(&Node2D::setMesh), py::arg("mesh"))
+        .def("set_mesh", py::overload_cast<std::shared_ptr<Mesh>>(&Node2D::setMesh), py::arg("mesh"))
+        .def("set_material", py::overload_cast<Material*>(&Node2D::setMaterial), py::arg("material"))
+        .def("set_material", py::overload_cast<std::shared_ptr<Material>>(&Node2D::setMaterial), py::arg("material"))
 
         // Getters (Node2D)
         .def("get_scene", &Node2D::getScene)

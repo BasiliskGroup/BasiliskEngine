@@ -35,6 +35,8 @@ class Material {
 
         Image* albedo;
         Image* normal;
+        std::shared_ptr<Image> albedoPython;
+        std::shared_ptr<Image> normalPython;
 
         float roughness;
         float subsurface;
@@ -83,8 +85,10 @@ class Material {
 
         void setColor(const glm::vec3& value) { color = value; update(); }
 
-        void setAlbedo(Image* value) { albedo = value; update(); }
-        void setNormal(Image* value) { normal = value; update(); }
+        void setAlbedo(Image* value) { albedoPython.reset(); albedo = value; update(); }
+        void setNormal(Image* value) { normalPython.reset(); normal = value; update(); }
+        void setAlbedo(std::shared_ptr<Image> value) { albedoPython = std::move(value); albedo = albedoPython.get(); update(); }
+        void setNormal(std::shared_ptr<Image> value) { normalPython = std::move(value); normal = normalPython.get(); update(); }
 
         void setAlpha(float value) { alpha = value; update(); }
         void setRoughness(float value) { roughness = value; update(); }

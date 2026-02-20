@@ -1,3 +1,4 @@
+#include <memory>
 #include <pybind11/pybind11.h>
 
 #include <basilisk/render/material.h>
@@ -9,7 +10,7 @@ namespace py = pybind11;
 using namespace bsk::internal;
 
 void bind_material(py::module_& m) {
-    py::class_<Material>(m, "Material")
+    py::class_<Material, std::shared_ptr<Material>>(m, "Material")
         .def(py::init([](const glm::vec3& color, Image* albedo, Image* normal, float alpha, float subsurface, float sheen, float sheenTint, float anisotropic, float specular, float metallicness, float clearcoat, float clearcoatGloss) {
             return new Material(color, albedo, normal, alpha, subsurface, sheen, sheenTint, anisotropic, specular, metallicness, clearcoat, clearcoatGloss);
         }),
@@ -43,8 +44,10 @@ void bind_material(py::module_& m) {
 
         // Setters
         .def("set_color", &Material::setColor, py::arg("color"))
-        .def("set_albedo", &Material::setAlbedo, py::arg("albedo"))
-        .def("set_normal", &Material::setNormal, py::arg("normal"))
+        .def("set_albedo", py::overload_cast<Image*>(&Material::setAlbedo), py::arg("albedo"))
+        .def("set_albedo", py::overload_cast<std::shared_ptr<Image>>(&Material::setAlbedo), py::arg("albedo"))
+        .def("set_normal", py::overload_cast<Image*>(&Material::setNormal), py::arg("normal"))
+        .def("set_normal", py::overload_cast<std::shared_ptr<Image>>(&Material::setNormal), py::arg("normal"))
         .def("set_alpha", &Material::setAlpha, py::arg("alpha"))
         .def("set_roughness", &Material::setRoughness, py::arg("roughness"))
         .def("set_subsurface", &Material::setSubsurface, py::arg("subsurface"))

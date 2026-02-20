@@ -22,6 +22,8 @@ private:
     Shader* shader;
     Mesh* mesh;
     Material* material;
+    std::shared_ptr<Mesh> meshPython;
+    std::shared_ptr<Material> materialPython;
 
 protected:
     VirtualScene<Derived, P, R, S>* scene;
@@ -85,8 +87,10 @@ public:
     virtual void setRotation(R rotation) {};
     virtual void setScale(S scale) {};
     void setMesh(Mesh* mesh);
+    void setMesh(std::shared_ptr<Mesh> mesh);
     void setScene(VirtualScene<Derived, P, R, S>* scene);
     void setMaterial(Material* material);
+    void setMaterial(std::shared_ptr<Material> material);
 
     P getPosition() const { return position; }
     R getRotation() const { return rotation; }

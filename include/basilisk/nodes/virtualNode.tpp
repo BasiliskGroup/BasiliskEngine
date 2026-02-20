@@ -23,7 +23,9 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     parent(scene->getRoot()), 
     shader(scene->getShader()), 
     mesh(mesh), 
-    material(material), 
+    material(material),
+    meshPython(nullptr),
+    materialPython(nullptr),
     position(position), 
     rotation(rotation), 
     scale(scale)
@@ -54,8 +56,9 @@ VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Mesh* mesh, Material
     parent(parent), 
     shader(parent->getShader()), 
     mesh(mesh), 
-    material(material), 
-    position(position), 
+    material(material),
+    meshPython(nullptr),
+    materialPython(nullptr),
     rotation(rotation), 
     scale(scale),
     vbo(nullptr),
@@ -86,7 +89,9 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualScene<Derived, P, R, S>* scene
     parent(nullptr), 
     shader(nullptr), 
     mesh(nullptr), 
-    material(nullptr), 
+    material(nullptr),
+    meshPython(nullptr),
+    materialPython(nullptr),
     position(), // default
     rotation(), // default
     scale(), // default
@@ -101,7 +106,9 @@ VirtualNode<Derived, P, R, S>::VirtualNode(Mesh* mesh, Material* material, P pos
     parent(nullptr), 
     shader(nullptr), 
     mesh(mesh), 
-    material(material), 
+    material(material),
+    meshPython(nullptr),
+    materialPython(nullptr),
     position(position), 
     rotation(rotation), 
     scale(scale), 
@@ -128,6 +135,8 @@ VirtualNode<Derived,P,R,S>::VirtualNode(const VirtualNode& other) noexcept
       shader(other.shader),
       mesh(other.mesh),
       material(other.material),
+      meshPython(other.meshPython),
+      materialPython(other.materialPython),
       position(other.position),
       rotation(other.rotation),
       scale(other.scale),
@@ -181,6 +190,8 @@ VirtualNode<Derived, P, R, S>::VirtualNode(VirtualNode&& other) noexcept
       shader(other.shader),
       mesh(other.mesh),
       material(other.material),
+      meshPython(std::move(other.meshPython)),
+      materialPython(std::move(other.materialPython)),
       vbo(other.vbo),
       ebo(other.ebo),
       vao(other.vao),
@@ -243,6 +254,8 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(const Vi
     shader = other.shader;
     mesh = other.mesh;
     material = other.material;
+    meshPython = other.meshPython;
+    materialPython = other.materialPython;
     position = other.position;
     rotation = other.rotation;
     scale = other.scale;
@@ -302,6 +315,8 @@ VirtualNode<Derived, P, R, S>& VirtualNode<Derived, P, R, S>::operator=(VirtualN
     shader = other.shader;
     mesh = other.mesh;
     material = other.material;
+    meshPython = std::move(other.meshPython);
+    materialPython = std::move(other.materialPython);
     position = std::move(other.position);
     rotation = std::move(other.rotation);
     scale = std::move(other.scale);
@@ -459,8 +474,18 @@ void VirtualNode<Derived, P, R, S>::add(Derived* child) {
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::setMaterial(Material* material) { 
+    materialPython.reset();
     this->material = material; 
     getEngine()->getResourceServer()->getMaterialServer()->add(material); 
+}
+
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::setMaterial(std::shared_ptr<Material> material) { 
+    materialPython = std::move(material); 
+    this->material = materialPython.get(); 
+    if (this->material && scene) {
+        getEngine()->getResourceServer()->getMaterialServer()->add(this->material); 
+    }
 }
 
 /**
@@ -564,9 +589,18 @@ void VirtualNode<Derived, P, R, S>::deleteBuffers() {
 
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::setMesh(Mesh* mesh) {
+    meshPython.reset();
     this->mesh = mesh;
     deleteBuffers();
-    createBuffers();
+    if (mesh) createBuffers();
+}
+
+template<typename Derived, typename P, typename R, typename S>
+void VirtualNode<Derived, P, R, S>::setMesh(std::shared_ptr<Mesh> mesh) {
+    meshPython = std::move(mesh);
+    this->mesh = meshPython.get();
+    deleteBuffers();
+    if (this->mesh) createBuffers();
 }
 
 template<typename Derived, typename P, typename R, typename S>
