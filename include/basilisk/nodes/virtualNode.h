@@ -97,7 +97,7 @@ public:
     Shader* getShader() { return shader; }
     Material* getMaterial() { return material; }
     Mesh* getMesh() { return mesh; }
-    glm::mat4 getModel() { return glm::mat4(1.0f); }
+    glm::mat4 getModel() { return model; }
     Engine* getEngine();
 
     // node hierarchy

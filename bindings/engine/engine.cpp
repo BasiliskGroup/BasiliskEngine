@@ -2,6 +2,7 @@
 #include <basilisk/engine/engine.h>
 #include <basilisk/IO/keyboard.h>
 #include <basilisk/IO/mouse.h>
+#include <basilisk/camera/staticCamera2d.h>
 
 namespace py = pybind11;
 
@@ -44,6 +45,12 @@ void bind_engine(py::module_& m) {
              "Mouse X position (screen coordinates, scaled).")
         .def("get_mouse_y", [](Engine& e) { return e.getMouse()->getY(); },
              "Mouse Y position (screen coordinates, scaled).")
+        .def("get_mouse_world_x", [](Engine& e, StaticCamera2D* camera) { return e.getMouse()->getWorldX(camera); },
+             py::arg("camera"),
+             "Mouse X in world coordinates. Pass the scene's camera, e.g. scene.get_camera().")
+        .def("get_mouse_world_y", [](Engine& e, StaticCamera2D* camera) { return e.getMouse()->getWorldY(camera); },
+             py::arg("camera"),
+             "Mouse Y in world coordinates. Pass the scene's camera, e.g. scene.get_camera().")
         .def("is_left_down", [](Engine& e) { return e.getMouse()->getLeftDown(); },
              "True if left mouse button is held down.")
         .def("is_middle_down", [](Engine& e) { return e.getMouse()->getMiddleDown(); },

@@ -73,7 +73,8 @@ public:
     bool isTouching(Node2D* other);
 
     // raycasting
-    // RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
+    RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
+    bool pointIsInside(glm::vec2 position);
 
 private:
     void updateModel();

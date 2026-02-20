@@ -43,8 +43,8 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         inline Solver* getSolver() { return solver; }
 
         // raycasting
-        // RayCastResult2D pick(glm::vec2 mousePosition);
-        // RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
+        Node2D* pick(glm::vec2 mousePosition);
+        RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
 };
 
 }

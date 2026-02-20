@@ -37,7 +37,7 @@ void bind_force(py::module_&);
 void bind_key(py::module_&);
 void bind_compute(py::module_&);
 
-PYBIND11_MODULE(basilisk, m, py::mod_gil_not_used()) {
+PYBIND11_MODULE(basilisk, m) { // , py::mod_gil_not_used()
     m.doc() = "pybind11 example plugin"; // optional module docstring
 
     // Initialize the working directory from Python's perspective
