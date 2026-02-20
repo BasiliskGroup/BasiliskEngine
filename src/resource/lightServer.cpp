@@ -22,6 +22,11 @@ LightServer::LightServer() {
  * 
  */
 LightServer::~LightServer() {
+    directionalLights.clear();
+    pointLights.clear();
+    ambientLights.clear();
+    pythonLightMap.clear();
+
     delete directionalLightsUBO;
     delete tileTBO;
     delete lightIndicesTBO;
@@ -57,6 +62,37 @@ void LightServer::add(PointLight* light) {
  */
 void LightServer::add(AmbientLight* light) {
     ambientLights.push_back(light);
+}
+
+void LightServer::add(std::shared_ptr<DirectionalLight> light) {
+    if (!light) {
+        return;
+    }
+    if (directionalLights.size() >= MAX_DIRECTIONAL_LIGHTS) {
+        std::cout << "Maximum number of directional lights reached" << std::endl;
+        return;
+    }
+    DirectionalLight* rawLight = light.get();
+    pythonLightMap[rawLight] = std::move(light);
+    directionalLights.push_back(rawLight);
+}
+
+void LightServer::add(std::shared_ptr<PointLight> light) {
+    if (!light) {
+        return;
+    }
+    PointLight* rawLight = light.get();
+    pythonLightMap[rawLight] = std::move(light);
+    pointLights.push_back(rawLight);
+}
+
+void LightServer::add(std::shared_ptr<AmbientLight> light) {
+    if (!light) {
+        return;
+    }
+    AmbientLight* rawLight = light.get();
+    pythonLightMap[rawLight] = std::move(light);
+    ambientLights.push_back(rawLight);
 }
 
 /**
