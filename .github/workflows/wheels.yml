@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       # Rust required for rust_gpu compute library (used by cibuildwheel on Windows/macOS; Linux uses before-build in container)
       - uses: dtolnay/rust-toolchain@stable
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - run: pip install build
       - run: python -m build --sdist
       - uses: actions/upload-artifact@v4
