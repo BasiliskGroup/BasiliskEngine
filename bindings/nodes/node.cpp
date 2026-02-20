@@ -73,9 +73,10 @@ void bind_node(py::module_& m) {
              py::arg("rotation") = default_rotation,
              py::arg("scale") = default_scale)
 
-        // Setters
+        // Setters (use _from_pyobject for set_rotation so PyGLM quat, tuple (w,x,y,z), etc. all work like the property)
         .def("set_position", &Node::setPosition, py::arg("position"))
-        .def("set_rotation", &Node::setRotation, py::arg("rotation"))
+        .def("set_rotation", [](Node& n, py::object value) { n.setRotation(quat_from_pyobject(value)); },
+             py::arg("rotation"))
         .def("set_scale", &Node::setScale, py::arg("scale"))
 
         // Getters (Node)
