@@ -33,10 +33,7 @@ void bind_scene2d(py::module_& m) {
         .def("render", &Scene2D::render)
         .def("add", static_cast<void (Scene2D::*)(std::shared_ptr<Node2D>)>(&Scene2D::add), py::arg("node"))
         .def("remove", static_cast<void (Scene2D::*)(Node2D*)>(&Scene2D::remove), py::arg("node"))
-        // Camera setters: raw pointer or shared_ptr
-        .def("set_camera",
-             static_cast<void (Scene2D::*)(StaticCamera2D*)>(&Scene2D::setCamera),
-             py::arg("camera"))
+        // Camera: only bind shared_ptr setter so the scene keeps the camera alive (avoids segfault when camera is GC'd)
         .def("set_camera",
              static_cast<void (Scene2D::*)(std::shared_ptr<StaticCamera2D>)>(&Scene2D::setCamera),
              py::arg("camera"))
