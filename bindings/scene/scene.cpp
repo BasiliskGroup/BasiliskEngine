@@ -35,10 +35,7 @@ void bind_scene(py::module_& m) {
         .def("update", &Scene::update)
         .def("render", &Scene::render)
 
-        // Camera setters: raw pointer or shared_ptr
-        .def("set_camera",
-             static_cast<void (Scene::*)(StaticCamera*)>(&Scene::setCamera),
-             py::arg("camera"))
+        // Camera: only bind shared_ptr setter so the scene keeps the camera alive (avoids segfault when camera is GC'd)
         .def("set_camera",
              static_cast<void (Scene::*)(std::shared_ptr<StaticCamera>)>(&Scene::setCamera),
              py::arg("camera"))
@@ -46,9 +43,9 @@ void bind_scene(py::module_& m) {
              py::arg("skybox"))
 
         .def("get_shader", &Scene::getShader,
-             py::return_value_policy::reference)
+             py::return_value_policy::reference_internal)
         .def("get_camera", &Scene::getCamera,
-             py::return_value_policy::reference)
+             py::return_value_policy::reference_internal)
 
         // ---- add overloads ----
         .def(

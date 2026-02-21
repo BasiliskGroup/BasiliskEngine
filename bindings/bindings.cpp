@@ -60,6 +60,7 @@ PYBIND11_MODULE(basilisk, m) { // , py::mod_gil_not_used()
     bind_mouse(m);
     bind_engine(m);
     bind_camera(m);   // Before Scene2D (Scene2D.set_camera accepts StaticCamera2D*)
+    bind_shader(m);   // Before Scene2D so Scene2D(engine, shader) constructor can resolve
     bind_node(m);     // Before Scene (Scene.pick/raycast return shared_ptr<Node>)
     bind_scene(m);
     bind_scene2d(m);
@@ -67,7 +68,6 @@ PYBIND11_MODULE(basilisk, m) { // , py::mod_gil_not_used()
     bind_mesh(m);
     bind_material(m);
     bind_node2d(m);
-    bind_shader(m);
     bind_vbo(m);
     bind_ebo(m);
     bind_vao(m);
