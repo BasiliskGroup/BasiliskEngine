@@ -35,13 +35,13 @@ void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float a
     forceTable->setC(index, 0, deltaAngle - motors.speed * forceTable->getSolver()->getDt());
 }
 
-void Motor::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
+void Motor::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A) {
-        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, 1.0f));
+        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, 1.0f) * jacobianMask);
         forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     } else {
-        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, -1.0f));
+        forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, -1.0f) * jacobianMask);
         forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     }
 }

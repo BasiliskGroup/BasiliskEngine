@@ -473,4 +473,13 @@ std::vector<CollisionData> Node2D::getCollisions() {
     return rigid->getCollisions();
 }
 
+void Node2D::setJacobianMask(const glm::vec3& jacobianMask) {
+    if (rigid) rigid->setJacobianMask(jacobianMask);
+}
+
+glm::vec3 Node2D::getJacobianMask() {
+    if (rigid) return rigid->getJacobianMask();
+    return glm::vec3(1.0f, 1.0f, 1.0f);
+}
+
 }

@@ -35,6 +35,7 @@ private:
     std::vector<glm::mat2x2> rmat;
     std::vector<bool> updated;
     std::vector<int> color;
+    std::vector<glm::vec3> jacobianMask;
 
     BVH* bvh;
 
@@ -89,6 +90,7 @@ public:
     int getColor(std::size_t index) { return color[index]; }
     BVH* getBVH() { return bvh; }
     float getDensity(std::size_t index); //{ return mass[index] / (scale[index].x * scale[index].y * collider[index]->getArea()); }
+    glm::vec3& getJacobianMask(std::size_t index) { return jacobianMask[index]; }
 
     // setters
     void setBodies(std::size_t index, Rigid* value) { bodies[index] = value; }
@@ -110,6 +112,7 @@ public:
     void setUpdated(std::size_t index, bool value) { updated[index] = value; }
     void setColor(std::size_t index, int value) { color[index] = value; }
     void setDensity(std::size_t index, float value); //{ density[index] = value; }
+    void setJacobianMask(std::size_t index, const glm::vec3& value) { jacobianMask[index] = value; }
 
 private:
     struct VelocityUniforms {

@@ -59,24 +59,24 @@ void Joint::computeConstraint(ForceTable* forceTable, std::size_t index, float a
     }
 }
 
-void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
+void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
     JointStruct& joints = forceTable->getJoints(index);
 
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A)
     {
         glm::vec2 r = rotate(forceTable->getPosA(index).z, joints.rA);
-        forceTable->setJ(index, 0, glm::vec3(1.0f, 0.0f, -r.y));
-        forceTable->setJ(index, 1, glm::vec3(0.0f, 1.0f, r.x));
-        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, joints.torqueArm));
+        forceTable->setJ(index, 0, glm::vec3(1.0f, 0.0f, -r.y) * jacobianMask);
+        forceTable->setJ(index, 1, glm::vec3(0.0f, 1.0f, r.x) * jacobianMask);
+        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, joints.torqueArm) * jacobianMask);
         forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, -r.x, 0, 0));
         forceTable->setH(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, -r.y, 0, 0));
         forceTable->setH(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     } else {
         glm::vec2 r = rotate(forceTable->getPosB(index).z, joints.rB);
-        forceTable->setJ(index, 0, glm::vec3(-1.0f, 0.0f, r.y));
-        forceTable->setJ(index, 1, glm::vec3(0.0f, -1.0f, -r.x));
-        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, -joints.torqueArm));
+        forceTable->setJ(index, 0, glm::vec3(-1.0f, 0.0f, r.y) * jacobianMask);
+        forceTable->setJ(index, 1, glm::vec3(0.0f, -1.0f, -r.x) * jacobianMask);
+        forceTable->setJ(index, 2, glm::vec3(0.0f, 0.0f, -joints.torqueArm) * jacobianMask);
         forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, r.x, 0, 0));
         forceTable->setH(index, 1, glm::mat3(0, 0, 0, 0, 0, 0, r.y, 0, 0));
         forceTable->setH(index, 2, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));

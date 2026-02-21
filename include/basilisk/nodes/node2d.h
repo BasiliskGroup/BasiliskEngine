@@ -56,7 +56,7 @@ public:
     void setCollider(Collider* collider);
     void setDensity(float density);
     void setFriction(float friction);
-    // void setManifoldMask(float x, float y, float z) { rigid->setManifoldMask(x, y, z); }
+    void setJacobianMask(const glm::vec3& jacobianMask);
 
     Scene2D* getScene() { return (Scene2D*) scene; }
     Rigid* getRigid() { return rigid; }
@@ -68,7 +68,7 @@ public:
     float getDensity();
     float getFriction();
     Collider* getCollider();
-    // glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
+    glm::vec3 getJacobianMask();
 
     std::vector<CollisionData> getCollisions();
 

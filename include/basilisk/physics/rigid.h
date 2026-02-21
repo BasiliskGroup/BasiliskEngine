@@ -73,6 +73,7 @@ public:
     void setPrev(Rigid* prev);
     void setNode(Node2D* node);
     void setIndex(std::size_t index);
+    void setJacobianMask(const glm::vec3& jacobianMask);
     
     // Getters
     glm::vec3 getPosition() const;
@@ -101,6 +102,7 @@ public:
     void getAABB(glm::vec2& bl, glm::vec2& tr) const;
 
     std::vector<CollisionData> getCollisions();
+    glm::vec3 getJacobianMask() const;
 };
 
 }

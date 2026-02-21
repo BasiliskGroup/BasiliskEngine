@@ -10,6 +10,10 @@ int main() {
     // Optional: continue with your main scene after splash
     Scene2D* scene = new Scene2D(engine);
     
+
+    Node2D* node = new Node2D(scene, nullptr, nullptr);
+    node->setJacobianMask(glm::vec3(1.0f, 1.0f, 0.0f));
+    
     Frame* frame = new Frame(engine, 1200, 800);
 
     while (engine->isRunning()) {

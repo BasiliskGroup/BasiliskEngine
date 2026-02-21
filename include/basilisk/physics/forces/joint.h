@@ -30,7 +30,7 @@ public:
     int rows() override { return 3; }
     bool initialize() override;
     static void computeConstraint(ForceTable* forceTable, std::size_t index, float alpha);
-    static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body);
+    static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask);
     
     // Getters
     glm::vec2 getRA() const;

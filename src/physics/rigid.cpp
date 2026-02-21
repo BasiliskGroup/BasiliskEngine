@@ -388,4 +388,12 @@ std::vector<CollisionData> Rigid::getCollisions() {
     return collisions;
 }
 
+void Rigid::setJacobianMask(const glm::vec3& jacobianMask) {
+    this->solver->getBodyTable()->setJacobianMask(this->index, jacobianMask);
+}
+
+glm::vec3 Rigid::getJacobianMask() const {
+    return this->solver->getBodyTable()->getJacobianMask(this->index);
+}
+
 }

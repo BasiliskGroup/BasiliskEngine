@@ -215,5 +215,7 @@ void bind_node2d(py::module_& m) {
                 list.append(collision);
             }
             return list;
-        });
+        })
+
+        .def("set_jacobian_mask", &Node2D::setJacobianMask, py::arg("jacobian_mask"));
 }

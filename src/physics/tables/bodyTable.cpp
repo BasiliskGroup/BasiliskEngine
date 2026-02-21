@@ -135,7 +135,7 @@ void BodyTable::resize(std::size_t newCapacity) {
     const bool hadGpuResources = (capacity > 0);
 
     expandTensors(newCapacity,
-    bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping
+    bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping, jacobianMask
     );
 
     capacity = newCapacity;
@@ -184,7 +184,7 @@ void BodyTable::compact() {
 
     // TODO check to see who needs to be compacted and who will just get cleared anyway
     compactTensors(toDelete, size,
-bodies, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping
+bodies, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping, jacobianMask
     );
 
     size = active;
@@ -217,6 +217,7 @@ void BodyTable::insert(Rigid* body, glm::vec3 position, glm::vec2 size, float de
     this->imat[this->size] = glm::mat2x2(1.0f);
     this->rmat[this->size] = glm::mat2x2(1.0f);
     this->updated[this->size] = false;
+    this->jacobianMask[this->size] = glm::vec3(1.0f, 1.0f, 1.0f);
 
     body->setIndex(this->size);
     this->size++;

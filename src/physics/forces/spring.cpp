@@ -34,7 +34,7 @@ void Spring::computeConstraint(ForceTable* forceTable, std::size_t index, float 
     forceTable->setC(index, 0, length(transform(forceTable->getPosA(index), springs.rA) - transform(forceTable->getPosB(index), springs.rB)) - springs.rest);
 }
 
-void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
+void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
     SpringStruct& springs = forceTable->getSprings(index);
 
     // Compute the first and second derivatives for the desired body
@@ -59,7 +59,7 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, Force
         glm::vec2 dxr = dxx * Sr;
         float drr = -dot(n, r) - dot(n, r);
 
-        forceTable->setJ(index, 0, glm::vec3(n.x, n.y, dot(n, Sr)));
+        forceTable->setJ(index, 0, glm::vec3(n.x, n.y, dot(n, Sr)) * jacobianMask);
         // GLM 3x3 constructor: mat3(x1,y1,z1, x2,y2,z2, x3,y3,z3) = columns
         // GLM matrices are column-major: mat[col][row]
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
@@ -77,7 +77,7 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, Force
         glm::vec2 dxr = dxx * Sr;
         float drr = dot(n, r) + dot(n, r);
 
-        forceTable->setJ(index, 0, glm::vec3(-n.x, -n.y, dot(n, -Sr)));
+        forceTable->setJ(index, 0, glm::vec3(-n.x, -n.y, dot(n, -Sr)) * jacobianMask);
         glm::vec2 row0 = glm::vec2(dxx[0][0], dxx[1][0]);  // row 0
         glm::vec2 row1 = glm::vec2(dxx[0][1], dxx[1][1]);  // row 1
         forceTable->setH(index, 0, glm::mat3(

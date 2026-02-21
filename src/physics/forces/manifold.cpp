@@ -120,14 +120,14 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, floa
     }
 }
 
-void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body) {
+void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
     for (int i = 0; i < forceTable->getManifolds(index).numContacts; i++) {
         if (body == ForceBodyOffset::A) {
-            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JAn);
-            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JAt);
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JAn * jacobianMask);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JAt * jacobianMask);
         } else {
-            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JBn);
-            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JBt);
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JBn * jacobianMask);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JBt * jacobianMask);
         }
     }
 }

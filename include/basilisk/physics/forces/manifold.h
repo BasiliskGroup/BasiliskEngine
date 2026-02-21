@@ -66,7 +66,7 @@ public:
     int rows() override;
     bool initialize() override;
     static void computeConstraint(ForceTable* forceTable, std::size_t index, float alpha);
-    static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body);
+    static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask);
 
     static int collide(Rigid* bodyA, Rigid* bodyB, Contact* contacts);
     
