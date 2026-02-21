@@ -1,324 +1,140 @@
 #include <basilisk/basilisk.h>
+#include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/forces/manifold.h>
+#include <basilisk/physics/forces/joint.h>
+#include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/rigid.h>
-#include <cassert>
-#include <iostream>
-#include <stdexcept>
-
-namespace bsk::internal {
-
-class NodeTrackingTest {
-private:
-    Engine* engine;
-    Scene* scene1;
-    Scene* scene2;
-    Scene2D* scene2d1;
-    Scene2D* scene2d2;
-    Mesh* quad;
-    Material* material;
-    Collider* boxCollider;
-
-public:
-    NodeTrackingTest() {
-        engine = new Engine(800, 800, "NodeTrackingTest");
-        scene1 = new Scene(engine);
-        scene2 = new Scene(engine);
-        scene2d1 = new Scene2D(engine);
-        scene2d2 = new Scene2D(engine);
-        quad = new Mesh("models/quad.obj");
-        material = new Material({1, 1, 1}, nullptr);
-        boxCollider = new Collider({{0.5f, 0.5f}, {-0.5f, 0.5f}, {-0.5f, -0.5f}, {0.5f, -0.5f}});
-    }
-
-    ~NodeTrackingTest() {
-        // Engine destructor handles all scene cleanup
-        delete engine;
-        delete quad;
-        delete material;
-        delete boxCollider;
-    }
-
-    void test_add_node_to_scene() {
-        std::cout << "TEST: Add node to scene..." << std::endl;
-        
-        Node* node = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        assert(node->getScene() == scene1);
-        assert(node->getParent() == scene1->getRoot());
-        assert(scene1->getRoot()->getChildren().size() == 1);
-        
-        std::cout << "  ✓ Node successfully added to scene root" << std::endl;
-    }
-
-    void test_add_node_to_node() {
-        std::cout << "TEST: Add node to another node..." << std::endl;
-        
-        Node* parent = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* child = new Node(quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        
-        assert(child->getScene() == nullptr);  // Orphaned
-        assert(child->getParent() == nullptr);
-        
-        parent->add(child);
-        
-        assert(child->getScene() == scene1);  // Adopted child's scene
-        assert(child->getParent() == parent);
-        assert(parent->getChildren().size() == 1);
-        
-        std::cout << "  ✓ Child node successfully added to parent node" << std::endl;
-    }
-
-    void test_reparent_within_scene() {
-        std::cout << "TEST: Reparent node within same scene..." << std::endl;
-        
-        Node* parent1 = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* parent2 = new Node(scene1, quad, material, {5, 5, 5}, {}, {1, 1, 1});
-        Node* child = new Node(parent1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        
-        assert(parent1->getChildren().size() == 1);
-        assert(child->getParent() == parent1);
-        
-        parent2->add(child);
-        
-        assert(parent1->getChildren().size() == 0);  // Child removed from parent1
-        assert(parent2->getChildren().size() == 1);  // Child added to parent2
-        assert(child->getParent() == parent2);
-        assert(child->getScene() == scene1);  // Scene unchanged
-        
-        std::cout << "  ✓ Child successfully reparented within scene" << std::endl;
-    }
-
-    void test_move_node_between_scenes() {
-        std::cout << "TEST: Move node between scenes..." << std::endl;
-        
-        Node* node = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        assert(node->getScene() == scene1);
-        
-        Node* newParent = new Node(scene2, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        newParent->add(node);
-        
-        assert(node->getScene() == scene2);  // Scene changed
-        assert(node->getParent() == newParent);
-        
-        std::cout << "  ✓ Node successfully moved to different scene" << std::endl;
-    }
-
-    void test_move_subtree_between_scenes() {
-        std::cout << "TEST: Move subtree (parent + children) between scenes..." << std::endl;
-        
-        Node* parent = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* child1 = new Node(parent, quad, material, {1, 1, 1}, {}, {1, 1, 1});
-        Node* child2 = new Node(parent, quad, material, {2, 2, 2}, {}, {1, 1, 1});
-        Node* grandchild = new Node(child1, quad, material, {3, 3, 3}, {}, {1, 1, 1});
-        
-        assert(parent->getScene() == scene1);
-        assert(child1->getScene() == scene1);
-        assert(child2->getScene() == scene1);
-        assert(grandchild->getScene() == scene1);
-        
-        Node* newParent = new Node(scene2, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        newParent->add(parent);
-        
-        // All nodes should now be in scene2
-        assert(parent->getScene() == scene2);
-        assert(child1->getScene() == scene2);
-        assert(child2->getScene() == scene2);
-        assert(grandchild->getScene() == scene2);
-        
-        std::cout << "  ✓ Entire subtree successfully moved between scenes" << std::endl;
-    }
-
-    void test_remove_node_orphans_it() {
-        std::cout << "TEST: Remove node orphans it..." << std::endl;
-        
-        Node* parent = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* child = new Node(parent, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        
-        assert(child->getScene() == scene1);
-        assert(child->getParent() == parent);
-        
-        parent->remove(child);
-        
-        assert(child->getScene() == nullptr);  // Orphaned
-        assert(child->getParent() == nullptr);
-        assert(parent->getChildren().size() == 0);
-        
-        std::cout << "  ✓ Node successfully orphaned (scene and parent set to nullptr)" << std::endl;
-    }
-
-    void test_remove_subtree_orphans_all() {
-        std::cout << "TEST: Remove subtree orphans all descendants..." << std::endl;
-        
-        Node* parent = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* child1 = new Node(parent, quad, material, {1, 1, 1}, {}, {1, 1, 1});
-        Node* child2 = new Node(parent, quad, material, {2, 2, 2}, {}, {1, 1, 1});
-        Node* grandchild = new Node(child1, quad, material, {3, 3, 3}, {}, {1, 1, 1});
-        
-        parent->remove(child1);
-        
-        // child1 and grandchild should be orphaned
-        assert(child1->getScene() == nullptr);
-        assert(child1->getParent() == nullptr);
-        assert(grandchild->getScene() == nullptr);
-        assert(grandchild->getParent() == child1);  // Parent relationship preserved
-        
-        std::cout << "  ✓ Entire subtree successfully orphaned recursively" << std::endl;
-    }
-
-    void test_cycle_detection() {
-        std::cout << "TEST: Cycle detection..." << std::endl;
-        
-        Node* parent = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* child = new Node(parent, quad, material, {1, 1, 1}, {}, {1, 1, 1});
-        Node* grandchild = new Node(child, quad, material, {2, 2, 2}, {}, {1, 1, 1});
-        
-        // Try to add parent to grandchild (would create cycle)
-        bool caught_exception = false;
-        try {
-            grandchild->add(parent);
-        } catch (const std::runtime_error& e) {
-            caught_exception = true;
-            std::cout << "  Caught expected exception: " << e.what() << std::endl;
-        }
-        
-        assert(caught_exception);
-        assert(parent->getParent() == scene1->getRoot());  // Unchanged
-        
-        std::cout << "  ✓ Cycle correctly detected and prevented" << std::endl;
-    }
-
-    void test_adopt_orphaned_node() {
-        std::cout << "TEST: Adopt orphaned node..." << std::endl;
-        
-        Node* orphan = new Node(quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        assert(orphan->getScene() == nullptr);
-        assert(orphan->getParent() == nullptr);
-        
-        Node* parent = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        parent->add(orphan);
-        
-        assert(orphan->getScene() == scene1);
-        assert(orphan->getParent() == parent);
-        
-        std::cout << "  ✓ Orphaned node successfully adopted" << std::endl;
-    }
-
-    void test_scene2d_with_collider() {
-        std::cout << "TEST: 2D Node with collider..." << std::endl;
-        
-        Node2D* node = new Node2D(scene2d1, quad, material, {0, 0}, 0, {1, 1}, {0, 0, 0}, boxCollider, 1.0f, 0.5f);
-        assert(node->getScene() == scene2d1);
-        assert(node->getRigid() != nullptr);
-        assert(node->getRigid()->getCollider() == boxCollider);
-        
-        std::cout << "  ✓ 2D Node with collider correctly initialized" << std::endl;
-    }
-
-    void test_scene2d_with_nullptr_collider() {
-        std::cout << "TEST: 2D Node with nullptr collider..." << std::endl;
-        
-        Node2D* node = new Node2D(quad, material, {0, 0}, 0, {1, 1}, {0, 0, 0}, nullptr, 1.0f, 0.5f);
-        assert(node->getScene() == nullptr);
-        assert(node->getRigid() == nullptr);
-        
-        Node2D* parent = new Node2D(scene2d1, quad, material, {0, 0}, 0, {1, 1}, {0, 0, 0}, boxCollider, 1.0f, 0.5f);
-        parent->add(node);
-        
-        assert(node->getScene() == scene2d1);
-        assert(node->getParent() == parent);
-        // Note: rigid may or may not be created for nodes without colliders, that's OK
-        
-        std::cout << "  ✓ 2D Node without collider correctly handled" << std::endl;
-    }
-
-    void test_scene2d_reparent_physics_nodes() {
-        std::cout << "TEST: 2D Reparent nodes with physics..." << std::endl;
-        
-        Node2D* parent1 = new Node2D(scene2d1, quad, material, {0, 0}, 0, {1, 1}, {0, 0, 0}, boxCollider, 1.0f, 0.5f);
-        Node2D* parent2 = new Node2D(scene2d1, quad, material, {10, 10}, 0, {1, 1}, {0, 0, 0}, boxCollider, 1.0f, 0.5f);
-        Node2D* child = new Node2D(parent1, quad, material, {0, 0}, 0, {1, 1}, {0, 0, 0}, boxCollider, 1.0f, 0.5f);
-        
-        assert(child->getParent() == parent1);
-        
-        parent2->add(child);
-        
-        assert(child->getParent() == parent2);
-        assert(child->getScene() == scene2d1);
-        
-        std::cout << "  ✓ Physics nodes successfully reparented" << std::endl;
-    }
-
-    void test_scene2d_move_physics_node_between_scenes() {
-        std::cout << "TEST: 2D Move physics node between scenes..." << std::endl;
-        
-        Node2D* node = new Node2D(scene2d1, quad, material, {0, 0}, 0, {1, 1}, {0, 0, 0}, boxCollider, 1.0f, 0.5f);
-        assert(node->getScene() == scene2d1);
-        
-        Node2D* newParent = new Node2D(scene2d2, quad, material, {0, 0}, 0, {1, 1}, {0, 0, 0}, boxCollider, 1.0f, 0.5f);
-        newParent->add(node);
-        
-        assert(node->getScene() == scene2d2);
-        assert(node->getParent() == newParent);
-        
-        std::cout << "  ✓ Physics node successfully moved between scenes" << std::endl;
-    }
-
-    void test_mixed_hierarchy() {
-        std::cout << "TEST: Mixed hierarchy (multiple levels)..." << std::endl;
-        
-        Node* level1_a = new Node(scene1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* level1_b = new Node(scene1, quad, material, {5, 5, 5}, {}, {1, 1, 1});
-        
-        Node* level2_a1 = new Node(level1_a, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        Node* level2_a2 = new Node(level1_a, quad, material, {1, 1, 1}, {}, {1, 1, 1});
-        Node* level2_b1 = new Node(level1_b, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        
-        Node* level3_a1_1 = new Node(level2_a1, quad, material, {0, 0, 0}, {}, {1, 1, 1});
-        
-        // Move level2_a1 with its child to level1_b
-        level1_b->add(level2_a1);
-        
-        assert(level2_a1->getParent() == level1_b);
-        assert(level3_a1_1->getParent() == level2_a1);
-        assert(level3_a1_1->getScene() == scene1);
-        
-        std::cout << "  ✓ Complex mixed hierarchy handled correctly" << std::endl;
-    }
-
-    void runAllTests() {
-        std::cout << "\n=== Node Tracking Smoke Tests ===" << std::endl;
-        
-        try {
-            test_add_node_to_scene();
-            test_add_node_to_node();
-            test_reparent_within_scene();
-            test_move_node_between_scenes();
-            test_move_subtree_between_scenes();
-            test_remove_node_orphans_it();
-            test_remove_subtree_orphans_all();
-            test_cycle_detection();
-            test_adopt_orphaned_node();
-            test_scene2d_with_collider();
-            test_scene2d_with_nullptr_collider();
-            test_scene2d_reparent_physics_nodes();
-            test_scene2d_move_physics_node_between_scenes();
-            test_mixed_hierarchy();
-            
-            std::cout << "\n=== ✓ All tests passed! ===" << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "\n✗ Test failed with exception: " << e.what() << std::endl;
-            throw;
-        }
-    }
-};
-
-}  // namespace bsk::internal
+#include <basilisk/physics/maths.h>
+#include <basilisk/physics/tables/bodyTable.h>
+#include <basilisk/util/random.h>
+#include <basilisk/util/maths.h>
 
 int main() {
-    try {
-        bsk::internal::NodeTrackingTest test;
-        test.runAllTests();
-        return 0;
-    } catch (const std::exception& e) {
-        std::cerr << "Test execution failed: " << e.what() << std::endl;
-        return 1;
+    // Make a Basilisk Engine instance 
+    bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk");
+
+    // Create a blank 2D scene
+    bsk::Scene2D* scene = new bsk::Scene2D(engine);
+    bsk::Scene2D* voidScene = new bsk::Scene2D(engine);
+
+    // Load assets
+    bsk::Mesh* quad = new bsk::Mesh("models/quad.obj");
+    bsk::Image* images[] = {
+        new bsk::Image("textures/metal.png"),
+        new bsk::Image("textures/rope.png"),
+        new bsk::Image("textures/bricks.jpg"),
+        new bsk::Image("textures/container.jpg"),
+        new bsk::Image("textures/mouse.png")
+    };
+    bsk::Material* metalMaterial = new bsk::Material({1, 1, 1}, images[0]);
+    bsk::Material* ropeMaterial = new bsk::Material({1, 1, 1}, images[1]);
+    bsk::Material* bricksMaterial = new bsk::Material({1, 1, 1}, images[2]);
+    bsk::Material* containerMaterial = new bsk::Material({1, 1, 1}, images[3]);
+    bsk::Material* mouseMaterial = new bsk::Material({1, 1, 1}, images[4]);
+
+    // Create a box collider (unit box vertices) - can be shared by all box-shaped objects
+    bsk::Collider* boxCollider = new bsk::Collider({{0.5, 0.5}, {-0.5, 0.5}, {-0.5, -0.5}, {0.5, -0.5}});
+
+    // Create a 50x50 grid of quads with some missing
+    const int gridSize = 20;
+    const float spacing = 2.0f;  // Space between quads
+    const float quadSize = 0.8f;  // Size of each quad
+    const float missingProbability = 0.0f;
+
+    scene->getCamera()->setScale(gridSize * 3.0f);  // Zoom out to see the full grid
+    
+    // Increase camera speed by 5x (default is 3.0, so set to 15.0)
+    if (auto* camera2D = dynamic_cast<bsk::Camera2D*>(scene->getCamera())) {
+        camera2D->setSpeed(15.0f);
     }
+    
+    // Calculate grid offset to center it
+    float gridOffset = -(gridSize - 1) * spacing * 0.5f;
+    
+    std::vector<bsk::Node2D*> gridNodes;
+    gridNodes.reserve(gridSize * gridSize);
+    
+    for (int row = 0; row < gridSize; row++) {
+        for (int col = 0; col < gridSize; col++) {
+            // Randomly skip some quads
+            if (bsk::internal::uniform() < missingProbability) {
+                continue;
+            }
+            
+            float x = gridOffset + col * spacing;
+            float y = gridOffset + row * spacing;
+            
+            bsk::Node2D* node = new bsk::Node2D(scene, quad, bricksMaterial, {x, y}, 0.0f, {quadSize * bsk::internal::uniform(1.0f, 2.0f), quadSize * bsk::internal::uniform(1.0f, 2.0f)}, {0, 0, 0}, boxCollider, 1.0e1f, 0.5f);
+            gridNodes.push_back(node);
+        }
+    }
+
+    float mouseScale = 1.5f;
+    
+    // Create a Node2D that follows the mouse (no physics)
+    bsk::Node2D* mouseCursor = new bsk::Node2D(scene, quad, mouseMaterial, {0.0f, 0.0f}, 0.0f, {mouseScale, mouseScale}, {0, 0, 0}, nullptr, 0.5f, 0.5f);
+    mouseCursor->setLayer(1.0f);
+    
+    // Drag joint for mouse interaction
+    bsk::Joint* drag = nullptr;
+    
+    // Main loop continues as long as the window is open
+    while (engine->isRunning()) {
+        engine->update();
+        
+        // Handle mouse input for dragging rigid bodies
+        bsk::Mouse* mouse = engine->getMouse();
+        bsk::StaticCamera2D* camera = scene->getCamera();
+        
+        // Get mouse world position
+        glm::vec2 mousePos = glm::vec2(
+            static_cast<float>(mouse->getWorldX(camera)),
+            static_cast<float>(mouse->getWorldY(camera))
+        );
+        
+        // Update mouse cursor position to follow the mouse
+        mouseCursor->setPosition(mousePos + glm::vec2{mouseScale * 0.5f, -mouseScale * 0.5f});
+        
+        // Handle drag joint
+        if (mouse->getLeftDown()) {
+            if (!drag) {
+                // Try to pick a body at the mouse position
+                glm::vec2 local;
+                bsk::Rigid* pickedBody = scene->getSolver()->pick(mousePos, local);
+                if (pickedBody) {
+                    // Create a joint between the mouse (world position) and the picked body
+                    drag = new bsk::Joint(
+                        scene->getSolver(),
+                        nullptr,           // bodyA = nullptr means world anchor
+                        pickedBody,        // bodyB = the picked rigid body
+                        mousePos,          // rA = world position (attachment point in world)
+                        local,             // rB = local position on the body
+                        glm::vec3(1000.0f, 1000.0f, 0.0f)  // stiffness
+                    );
+                }
+            } else {
+                // Update the world anchor position to follow the mouse
+                drag->setRA(mousePos);
+            }
+        } else if (mouse->getLeftReleased() && drag) {
+            // Delete the drag joint when mouse is released
+            delete drag;
+            drag = nullptr;
+        }
+        
+        scene->update();
+        scene->render();
+        engine->render();
+    }
+
+    // Cleanup
+    for (auto* img : images) delete img;
+    delete metalMaterial;
+    delete ropeMaterial;
+    delete bricksMaterial;
+    delete containerMaterial;
+    delete quad;
+    delete scene;
+    delete voidScene;
+    delete engine;
 }

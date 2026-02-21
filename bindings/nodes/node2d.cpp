@@ -191,6 +191,9 @@ void bind_node2d(py::module_& m) {
         .def_property("layer",
             [](Node2D& n) { return n.getLayer(); },
             [](Node2D& n, float v) { n.setLayer(v); })
+        .def_property("collision_group",
+            [](const Node2D& n) { return n.getCollisionGroup(); },
+            [](Node2D& n, int v) { n.setCollisionGroup(v); })
 
         // Hierarchy
         .def("add", &Node2D::add, py::arg("child"))

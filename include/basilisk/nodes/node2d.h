@@ -33,6 +33,7 @@ private:
         float friction = 0.5f;
         glm::vec3 velocity = glm::vec3(0.0f);
         bool resolvesCollisions = true;
+        int collisionGroup = 0;
     } physicsData;
 
 public:
@@ -59,6 +60,7 @@ public:
     void setFriction(float friction);
     void setJacobianMask(const glm::vec3& jacobianMask);
     void setResolvesCollisions(bool resolvesCollisions);
+    void setCollisionGroup(int group);
 
     Scene2D* getScene() { return (Scene2D*) scene; }
     Rigid* getRigid() { return rigid; }
@@ -72,6 +74,7 @@ public:
     Collider* getCollider();
     glm::vec3 getJacobianMask();
     bool getResolvesCollisions() const { return physicsData.resolvesCollisions; }
+    int getCollisionGroup() const { return physicsData.collisionGroup; }
 
     std::vector<CollisionData> getCollisions();
 

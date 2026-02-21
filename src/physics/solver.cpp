@@ -198,7 +198,12 @@ void Solver::step(float dtIncoming) {
         std::vector<Rigid*> results = bodyTable->getBVH()->query(bodyA);
         for (Rigid* bodyB : results) {
             // Skip self-collision and already constrained pairs
-            if (bodyB == bodyA || bodyA->constrainedTo( bodyB))
+            if (bodyB == bodyA || bodyA->constrainedTo(bodyB))
+                continue;
+            // Skip pairs in the same non-zero collision group (they ignore each other)
+            int gA = bodyA->getCollisionGroup();
+            int gB = bodyB->getCollisionGroup();
+            if (gA != 0 && gA == gB)
                 continue;
             
             new Manifold(this, bodyA, bodyB);
