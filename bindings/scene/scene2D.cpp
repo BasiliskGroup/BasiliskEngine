@@ -26,7 +26,7 @@ void bind_scene2d(py::module_& m) {
         .def_readonly("normal", &RayCastResult2DPy::normal)
         .def_readonly("distance", &RayCastResult2DPy::distance);
 
-    py::class_<Scene2D>(m, "Scene2D")
+    py::class_<Scene2D, std::shared_ptr<Scene2D>>(m, "Scene2D")
         .def(py::init<Engine*>(), py::arg("engine"))
         .def(py::init<Engine*, Shader*>(), py::arg("engine"), py::arg("shader"))
         .def("update", &Scene2D::update)

@@ -19,7 +19,7 @@ struct RayCastResultPy {
 };
 
 void bind_scene(py::module_& m) {
-    py::class_<Scene>(m, "Scene")
+    py::class_<Scene, std::shared_ptr<Scene>>(m, "Scene")
         .def(py::init<Engine*, bool, bool, bool>(),
              py::arg("engine"),
              py::arg("addSkybox") = true,
