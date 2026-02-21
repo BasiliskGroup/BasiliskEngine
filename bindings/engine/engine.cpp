@@ -82,5 +82,6 @@ void bind_engine(py::module_& m) {
         .def("disable_cull_face", &Engine::disableCullFace)
         .def("disable_multisample", &Engine::disableMultisample)
         .def("disable_blend", &Engine::disableBlend)
-        .def("disable_vsync", &Engine::disableVSync);
+        .def("disable_vsync", &Engine::disableVSync)
+        .def("set_viewport", &Engine::setViewport, py::arg("x"), py::arg("y"), py::arg("width"), py::arg("height"));
 }
