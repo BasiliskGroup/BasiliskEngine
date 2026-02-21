@@ -410,6 +410,9 @@ void Solver::dsatur() {
                     tempIndices[ForceType::JOINT].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 case ForceType::MANIFOLD:
+                    if (body->getResolvesCollisions() == false || other->getResolvesCollisions() == false) {
+                        continue;
+                    }
                     colorGroups[color].back().manifold++;
                     tempIndices[ForceType::MANIFOLD].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;

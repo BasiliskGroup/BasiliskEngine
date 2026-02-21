@@ -592,7 +592,8 @@ void VirtualNode<Derived, P, R, S>::setMesh(Mesh* mesh) {
     meshPython.reset();
     this->mesh = mesh;
     deleteBuffers();
-    if (mesh) createBuffers();
+    // Only create buffers if we have a scene (shader). Orphans get buffers on adoption via setSceneRecursive.
+    if (mesh && shader) createBuffers();
 }
 
 template<typename Derived, typename P, typename R, typename S>
@@ -600,7 +601,8 @@ void VirtualNode<Derived, P, R, S>::setMesh(std::shared_ptr<Mesh> mesh) {
     meshPython = std::move(mesh);
     this->mesh = meshPython.get();
     deleteBuffers();
-    if (this->mesh) createBuffers();
+    // Only create buffers if we have a scene (shader). Orphans get buffers on adoption via setSceneRecursive.
+    if (this->mesh && shader) createBuffers();
 }
 
 template<typename Derived, typename P, typename R, typename S>

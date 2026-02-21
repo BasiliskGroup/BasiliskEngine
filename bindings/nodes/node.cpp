@@ -147,5 +147,7 @@ void bind_node(py::module_& m) {
 
         // Hierarchy
         .def("add", &Node::add, py::arg("child"))
-        .def("remove", &Node::remove, py::arg("child"));
+        .def("remove", &Node::remove, py::arg("child"))
+
+        .def("orphan_copy", &Node::orphanCopy, "Returns an orphaned copy of this node");
 }

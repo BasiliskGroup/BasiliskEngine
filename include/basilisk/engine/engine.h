@@ -43,6 +43,8 @@ class Engine {
         inline void enableMultisample() { window->enableMultisample(); }
         inline void enableBlend() { window->enableBlend(); }
         inline void enableVSync() { window->enableVSync(); }
+        inline int getWindowWidth() { return window->getWidth(); }
+        inline int getWindowHeight() { return window->getHeight(); }
         inline void disableDepthTest() { window->disableDepthTest(); }
         inline void disableCullFace() { window->disableCullFace(); }
         inline void disableMultisample() { window->disableMultisample(); }

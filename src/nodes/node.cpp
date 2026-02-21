@@ -103,4 +103,13 @@ RayCastResult Node::raycast(glm::vec3 worldOrigin, glm::vec3 worldDirection) {
     return result;
 }
 
+std::shared_ptr<Node> Node::orphanCopy() const {
+    auto copy = std::make_shared<Node>(getMesh(), getMaterial(), getPosition(), getRotation(), getScale());
+    auto meshShared = getMeshShared();
+    if (meshShared) copy->setMesh(meshShared);
+    auto materialShared = getMaterialShared();
+    if (materialShared) copy->setMaterial(materialShared);
+    return copy;
+}
+
 }

@@ -26,6 +26,9 @@ private:
     std::shared_ptr<Material> materialPython;
 
 protected:
+    std::shared_ptr<Mesh> getMeshShared() const { return meshPython; }
+    std::shared_ptr<Material> getMaterialShared() const { return materialPython; }
+
     VirtualScene<Derived, P, R, S>* scene;
     Derived* parent;
     std::vector<Derived*> children;
@@ -99,8 +102,8 @@ public:
     VirtualScene<Derived, P, R, S>* getScene() const { return scene; }
     Derived* getParent() const { return parent; }
     Shader* getShader() { return shader; }
-    Material* getMaterial() { return material; }
-    Mesh* getMesh() { return mesh; }
+    Material* getMaterial() const { return material; }
+    Mesh* getMesh() const { return mesh; }
     glm::mat4 getModel() { return model; }
     Engine* getEngine();
 

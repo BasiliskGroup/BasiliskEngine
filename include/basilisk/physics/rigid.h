@@ -31,6 +31,7 @@ private:
     int degree;
     int satur;
     std::vector<bool> usedColors;
+    bool resolvesCollisions = true;
 
 public:
     Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity);
@@ -74,7 +75,8 @@ public:
     void setNode(Node2D* node);
     void setIndex(std::size_t index);
     void setJacobianMask(const glm::vec3& jacobianMask);
-    
+    void setResolvesCollisions(bool resolvesCollisions) { this->resolvesCollisions = resolvesCollisions; }
+
     // Getters
     glm::vec3 getPosition() const;
     glm::vec3 getInitial() const;
@@ -100,6 +102,7 @@ public:
     glm::vec3 getVel() const;
     std::size_t getIndex() const { return index; }
     void getAABB(glm::vec2& bl, glm::vec2& tr) const;
+    bool getResolvesCollisions() const { return resolvesCollisions; }
 
     std::vector<CollisionData> getCollisions();
     glm::vec3 getJacobianMask() const;

@@ -172,9 +172,14 @@ void Node2D::setRotation(float rotation) {
 }
 
 void Node2D::setScale(glm::vec2 scale) {
-    if (this->rigid) this->rigid->setScale(scale);
+    if (this->rigid) this->rigid->setScale(glm::abs(scale));
     this->scale = scale;
     updateModel();
+}
+
+void Node2D::setResolvesCollisions(bool resolvesCollisions) {
+    physicsData.resolvesCollisions = resolvesCollisions;
+    if (this->rigid) this->rigid->setResolvesCollisions(resolvesCollisions);
 }
 
 void Node2D::setVelocity(glm::vec3 velocity) {
@@ -196,6 +201,7 @@ void Node2D::bindRigid(Mesh* mesh, Material* material, glm::vec2 position, float
     if (collider != nullptr) {
         Scene2D* scene2d = static_cast<Scene2D*>(scene);
         rigid = new Rigid(scene2d->getSolver(), this, collider, { this->position, this->rotation }, this->scale, density, friction, velocity);
+        rigid->setResolvesCollisions(physicsData.resolvesCollisions);
     }
 }
 
@@ -480,6 +486,22 @@ void Node2D::setJacobianMask(const glm::vec3& jacobianMask) {
 glm::vec3 Node2D::getJacobianMask() {
     if (rigid) return rigid->getJacobianMask();
     return glm::vec3(1.0f, 1.0f, 1.0f);
+}
+
+std::shared_ptr<Node2D> Node2D::orphanCopy() const {
+    glm::vec3 vel = (rigid != nullptr) ? rigid->getVelocity() : physicsData.velocity;
+    auto copy = std::make_shared<Node2D>(
+        getMesh(), getMaterial(),
+        getPosition(), getRotation(), getScale(),
+        vel, physicsData.collider, physicsData.density, physicsData.friction
+    );
+    auto meshShared = getMeshShared();
+    if (meshShared) copy->setMesh(meshShared);
+    auto materialShared = getMaterialShared();
+    if (materialShared) copy->setMaterial(materialShared);
+    copy->setLayer(layer);
+    copy->setResolvesCollisions(physicsData.resolvesCollisions);
+    return copy;
 }
 
 }

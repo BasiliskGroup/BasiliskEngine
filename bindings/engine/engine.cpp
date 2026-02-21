@@ -24,6 +24,8 @@ void bind_engine(py::module_& m) {
         .def("set_resolution", &Engine::setResolution, py::arg("width"), py::arg("height"))
         .def("get_window", &Engine::getWindow, py::return_value_policy::reference_internal,
              "Get the window. Access width, height, FPS, etc.")
+          .def("get_window_width", &Engine::getWindowWidth)
+          .def("get_window_height", &Engine::getWindowHeight)
         .def("get_mouse", &Engine::getMouse, py::return_value_policy::reference_internal,
              "Get the mouse. Access position, clicks, and button states.")
         .def("get_keyboard", &Engine::getKeyboard, py::return_value_policy::reference_internal,

@@ -217,5 +217,9 @@ void bind_node2d(py::module_& m) {
             return list;
         })
 
-        .def("set_jacobian_mask", &Node2D::setJacobianMask, py::arg("jacobian_mask"));
+        .def("set_jacobian_mask", &Node2D::setJacobianMask, py::arg("jacobian_mask"))
+        .def("set_resolves_collisions", &Node2D::setResolvesCollisions, py::arg("resolves_collisions"))
+        .def("get_resolves_collisions", &Node2D::getResolvesCollisions)
+
+        .def("orphan_copy", &Node2D::orphanCopy, "Returns an orphaned copy of this node (no rigid, only physics properties)");
 }

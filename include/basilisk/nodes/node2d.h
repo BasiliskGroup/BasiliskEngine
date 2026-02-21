@@ -24,7 +24,7 @@ private:
     using VirtualScene2D = VirtualScene<Node2D, glm::vec2, float, glm::vec2>;
 
     Rigid* rigid;
-    float layer=0.0;
+    float layer = 0.0;
 
     // save data here so that we can adopt it when the node is adopted
     struct PhysicsData {
@@ -32,6 +32,7 @@ private:
         float density = 1.0f;
         float friction = 0.5f;
         glm::vec3 velocity = glm::vec3(0.0f);
+        bool resolvesCollisions = true;
     } physicsData;
 
 public:
@@ -57,6 +58,7 @@ public:
     void setDensity(float density);
     void setFriction(float friction);
     void setJacobianMask(const glm::vec3& jacobianMask);
+    void setResolvesCollisions(bool resolvesCollisions);
 
     Scene2D* getScene() { return (Scene2D*) scene; }
     Rigid* getRigid() { return rigid; }
@@ -69,6 +71,7 @@ public:
     float getFriction();
     Collider* getCollider();
     glm::vec3 getJacobianMask();
+    bool getResolvesCollisions() const { return physicsData.resolvesCollisions; }
 
     std::vector<CollisionData> getCollisions();
 
@@ -85,7 +88,8 @@ public:
     RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
     bool pointIsInside(glm::vec2 position);
 
-
+    /** Returns an orphaned copy of this node. No rigid body; only physics properties (collider, density, friction, velocity) are copied. */
+    std::shared_ptr<Node2D> orphanCopy() const;
 
 private:
     void updateModel();

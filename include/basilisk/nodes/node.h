@@ -35,6 +35,9 @@ class Node : public VirtualNode<Node, glm::vec3, glm::quat, glm::vec3> {
         // raycasting
         RayCastResult raycast(glm::vec3 origin, glm::vec3 direction);
 
+        /** Returns an orphaned copy of this node. */
+        std::shared_ptr<Node> orphanCopy() const;
+
     private:
         void updateModel();
 };
