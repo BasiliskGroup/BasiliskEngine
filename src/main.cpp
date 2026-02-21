@@ -24,7 +24,7 @@ int main() {
         }
     }
 
-    engine->showSplash();
+    // engine->showSplash();
 
     while (engine->isRunning()) {
         engine->update();

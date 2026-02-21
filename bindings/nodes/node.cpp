@@ -25,10 +25,14 @@ void bind_node(py::module_& m) {
 
     py::class_<Node, std::shared_ptr<Node>>(m, "Node")
 
-        // Node with scene - use lambda to add to childrenPythonMap
-        .def(py::init([](Scene* scene, Mesh* mesh, Material* material,
+        // Node with scene - use shared_ptr for mesh/material so node keeps them alive when Python ref drops
+        .def(py::init([](Scene* scene, py::object mesh_obj, py::object material_obj,
                          glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
+            Mesh* mesh = mesh_obj.is_none() ? nullptr : mesh_obj.cast<Mesh*>();
+            Material* material = material_obj.is_none() ? nullptr : material_obj.cast<Material*>();
             auto node = std::make_shared<Node>(scene, mesh, material, position, rotation, scale);
+            if (!mesh_obj.is_none()) node->setMesh(py::cast<std::shared_ptr<Mesh>>(mesh_obj));
+            if (!material_obj.is_none()) node->setMaterial(py::cast<std::shared_ptr<Material>>(material_obj));
             scene->add(node);
             return node;
         }),
@@ -39,12 +43,14 @@ void bind_node(py::module_& m) {
         py::arg("rotation") = default_rotation,
         py::arg("scale") = default_scale)
 
-        // Node with parent - use lambda to add to childrenPythonMap
-        .def(py::init([](Node* parent, Mesh* mesh, Material* material,
+        // Node with parent - use shared_ptr for mesh/material so node keeps them alive
+        .def(py::init([](Node* parent, py::object mesh_obj, py::object material_obj,
                          glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
+            Mesh* mesh = mesh_obj.is_none() ? nullptr : mesh_obj.cast<Mesh*>();
+            Material* material = material_obj.is_none() ? nullptr : material_obj.cast<Material*>();
             auto node = std::make_shared<Node>(parent, mesh, material, position, rotation, scale);
-            // Node is already added to parent's children by the constructor
-            // Register it in the Python map (Scene::add will check if it needs to be added to root)
+            if (!mesh_obj.is_none()) node->setMesh(py::cast<std::shared_ptr<Mesh>>(mesh_obj));
+            if (!material_obj.is_none()) node->setMaterial(py::cast<std::shared_ptr<Material>>(material_obj));
             if (parent && parent->getScene()) {
                 parent->getScene()->add(node);
             }
@@ -65,13 +71,21 @@ void bind_node(py::module_& m) {
         }),
         py::arg("scene"))
 
-        // Orphan Node (mesh, material, ...) - no scene, so no need to add
-        .def(py::init<Mesh*, Material*, glm::vec3, glm::quat, glm::vec3>(),
-             py::arg("mesh"),
-             py::arg("material"),
-             py::arg("position") = default_position,
-             py::arg("rotation") = default_rotation,
-             py::arg("scale") = default_scale)
+        // Orphan Node (mesh, material, ...) - use shared_ptr so node keeps them alive
+        .def(py::init([](py::object mesh_obj, py::object material_obj,
+                         glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
+            Mesh* mesh = mesh_obj.is_none() ? nullptr : mesh_obj.cast<Mesh*>();
+            Material* material = material_obj.is_none() ? nullptr : material_obj.cast<Material*>();
+            auto node = std::make_shared<Node>(mesh, material, position, rotation, scale);
+            if (!mesh_obj.is_none()) node->setMesh(py::cast<std::shared_ptr<Mesh>>(mesh_obj));
+            if (!material_obj.is_none()) node->setMaterial(py::cast<std::shared_ptr<Material>>(material_obj));
+            return node;
+        }),
+        py::arg("mesh") = py::none(),
+        py::arg("material") = py::none(),
+        py::arg("position") = default_position,
+        py::arg("rotation") = default_rotation,
+        py::arg("scale") = default_scale)
 
         // Setters (use _from_pyobject for set_rotation so PyGLM quat, tuple (w,x,y,z), etc. all work like the property)
         .def("set_position", &Node::setPosition, py::arg("position"))

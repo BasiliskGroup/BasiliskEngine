@@ -2,19 +2,19 @@
 #include <pybind11/pybind11.h>
 
 #include <basilisk/render/material.h>
-
-// IMPORTANT: include GLM casters
-#include "glm/glmCasters.hpp" // DO NOT REMOVE THIS LINE
+#include "glm/glmCasters.hpp"
+#include "vector_proxy.h"
 
 namespace py = pybind11;
 using namespace bsk::internal;
 
 void bind_material(py::module_& m) {
     py::class_<Material, std::shared_ptr<Material>>(m, "Material")
-        .def(py::init([](const glm::vec3& color, Image* albedo, Image* normal, float alpha, float subsurface, float sheen, float sheenTint, float anisotropic, float specular, float metallicness, float clearcoat, float clearcoatGloss) {
+        .def(py::init([](py::object color_obj, Image* albedo, Image* normal, float alpha, float subsurface, float sheen, float sheenTint, float anisotropic, float specular, float metallicness, float clearcoat, float clearcoatGloss) {
+            glm::vec3 color = color_obj.is_none() ? glm::vec3{1.0f, 1.0f, 1.0f} : vec3_from_pyobject(color_obj);
             return new Material(color, albedo, normal, alpha, subsurface, sheen, sheenTint, anisotropic, specular, metallicness, clearcoat, clearcoatGloss);
         }),
-        py::arg("color") = glm::vec3{1.0f, 1.0f, 1.0f},
+        py::arg("color") = py::none(),
         py::arg("albedo") = nullptr,
         py::arg("normal") = nullptr,
         py::arg("alpha") = 1.0f,

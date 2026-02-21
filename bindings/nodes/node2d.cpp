@@ -24,12 +24,16 @@ void bind_node2d(py::module_& m) {
 
     py::class_<Node2D, std::shared_ptr<Node2D>>(m, "Node2D")
 
-        // Node2D with scene - use lambda to add to childrenPythonMap
-        .def(py::init([](Scene2D* scene, Mesh* mesh, Material* material,
+        // Node2D with scene - use shared_ptr for mesh/material so node keeps them alive when Python ref drops
+        .def(py::init([](Scene2D* scene, py::object mesh_obj, py::object material_obj,
                          glm::vec2 position, float rotation, glm::vec2 scale,
                          glm::vec3 velocity, Collider* collider, float density, float friction) {
+            Mesh* mesh = mesh_obj.is_none() ? nullptr : mesh_obj.cast<Mesh*>();
+            Material* material = material_obj.is_none() ? nullptr : material_obj.cast<Material*>();
             auto node = std::make_shared<Node2D>(scene, mesh, material, position, rotation,
                                                  scale, velocity, collider, density, friction);
+            if (!mesh_obj.is_none()) node->setMesh(py::cast<std::shared_ptr<Mesh>>(mesh_obj));
+            if (!material_obj.is_none()) node->setMaterial(py::cast<std::shared_ptr<Material>>(material_obj));
             scene->add(node);
             return node;
         }),
@@ -44,12 +48,16 @@ void bind_node2d(py::module_& m) {
         py::arg("density") = default_density,
         py::arg("friction") = default_friction)
 
-        // Node2D with parent - use lambda to add to childrenPythonMap
-        .def(py::init([](Node2D* parent, Mesh* mesh, Material* material,
+        // Node2D with parent - use shared_ptr for mesh/material so node keeps them alive
+        .def(py::init([](Node2D* parent, py::object mesh_obj, py::object material_obj,
                          glm::vec2 position, float rotation, glm::vec2 scale,
                          glm::vec3 velocity, Collider* collider, float density, float friction) {
+            Mesh* mesh = mesh_obj.is_none() ? nullptr : mesh_obj.cast<Mesh*>();
+            Material* material = material_obj.is_none() ? nullptr : material_obj.cast<Material*>();
             auto node = std::make_shared<Node2D>(parent, mesh, material, position, rotation,
                                                  scale, velocity, collider, density, friction);
+            if (!mesh_obj.is_none()) node->setMesh(py::cast<std::shared_ptr<Mesh>>(mesh_obj));
+            if (!material_obj.is_none()) node->setMaterial(py::cast<std::shared_ptr<Material>>(material_obj));
             if (parent && parent->getScene()) {
                 parent->getScene()->add(node);
             }
@@ -74,10 +82,20 @@ void bind_node2d(py::module_& m) {
         }),
         py::arg("scene"))
 
-        // Orphan Node2D (mesh, material, ...) - no scene, so no need to add
-        .def(py::init<Mesh*, Material*, glm::vec2, float, glm::vec2, glm::vec3, Collider*, float, float>(),
-             py::arg("mesh"),
-             py::arg("material"),
+        // Orphan Node2D (mesh, material, ...) - use shared_ptr so node keeps them alive
+        .def(py::init([](py::object mesh_obj, py::object material_obj,
+                         glm::vec2 position, float rotation, glm::vec2 scale,
+                         glm::vec3 velocity, Collider* collider, float density, float friction) {
+            Mesh* mesh = mesh_obj.is_none() ? nullptr : mesh_obj.cast<Mesh*>();
+            Material* material = material_obj.is_none() ? nullptr : material_obj.cast<Material*>();
+            auto node = std::make_shared<Node2D>(mesh, material, position, rotation,
+                                                 scale, velocity, collider, density, friction);
+            if (!mesh_obj.is_none()) node->setMesh(py::cast<std::shared_ptr<Mesh>>(mesh_obj));
+            if (!material_obj.is_none()) node->setMaterial(py::cast<std::shared_ptr<Material>>(material_obj));
+            return node;
+        }),
+        py::arg("mesh") = py::none(),
+        py::arg("material") = py::none(),
              py::arg("position") = default_position,
              py::arg("rotation") = default_rotation,
              py::arg("scale") = default_scale,
