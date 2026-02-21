@@ -209,4 +209,22 @@ std::shared_ptr<Image> Frame::getImage() {
     return std::shared_ptr<Image>(img);
 }
 
+Texture* Frame::getTexture() {
+    const size_t rowBytes = width * 4;
+    const size_t dataSize = rowBytes * height;
+    std::vector<unsigned char> buffer(dataSize);
+
+    GLint prevFbo = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    fbo->bind();
+
+    for (int y = 0; y < (int)height; ++y) {
+        glReadPixels(0, y, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data() + (height - 1 - y) * rowBytes);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)prevFbo);
+
+    return new Texture(buffer.data(), width, height, GL_RGBA, GL_UNSIGNED_BYTE);
+}
+
 }
