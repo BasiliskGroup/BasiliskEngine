@@ -1,6 +1,7 @@
 #include <basilisk/render/frame.h>
 #include <basilisk/engine/engine.h>
 #include <basilisk/util/resolvePath.h>
+#include <cstdlib>
 
 
 namespace bsk::internal {
@@ -184,6 +185,46 @@ void Frame::setFilterNearest() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+std::shared_ptr<Image> Frame::getImage() {
+    const size_t rowBytes = width * 4;
+    const size_t dataSize = rowBytes * height;
+    unsigned char* buffer = (unsigned char*)std::malloc(dataSize);
+    if (!buffer)
+        return nullptr;
+
+    GLint prevFbo = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    fbo->bind();
+
+    // glReadPixels has origin at bottom-left; read row-by-row so buffer ends up top-left origin
+    for (int y = 0; y < (int)height; ++y) {
+        glReadPixels(0, y, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer + (height - 1 - y) * rowBytes);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)prevFbo);
+
+    Image* img = new Image(buffer, (int)width, (int)height, 4);
+    return std::shared_ptr<Image>(img);
+}
+
+Texture* Frame::getTexture() {
+    const size_t rowBytes = width * 4;
+    const size_t dataSize = rowBytes * height;
+    std::vector<unsigned char> buffer(dataSize);
+
+    GLint prevFbo = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    fbo->bind();
+
+    for (int y = 0; y < (int)height; ++y) {
+        glReadPixels(0, y, width, 1, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data() + (height - 1 - y) * rowBytes);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)prevFbo);
+
+    return new Texture(buffer.data(), width, height, GL_RGBA, GL_UNSIGNED_BYTE);
 }
 
 }

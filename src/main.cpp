@@ -1,3 +1,7 @@
+/**
+ * C++ port of test.py: slot machine effect with three reels.
+ * Press SPACE to advance the slot animation.
+ */
 #include <basilisk/basilisk.h>
 #include <basilisk/physics/forces/force.h>
 #include <basilisk/physics/forces/manifold.h>

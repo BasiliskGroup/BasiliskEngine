@@ -50,6 +50,7 @@ class Engine {
         inline void disableMultisample() { window->disableMultisample(); }
         inline void disableBlend() { window->disableBlend(); }
         inline void disableVSync() { window->disableVSync(); }
+        inline void setViewport(int x, int y, int width, int height) { window->setViewport(x, y, width, height); }
         void showSplash();
 };
 

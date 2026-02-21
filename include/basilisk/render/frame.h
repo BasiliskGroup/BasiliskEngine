@@ -1,12 +1,15 @@
 #ifndef BSK_FRAME_H
 #define BSK_FRAME_H
 
+#include <memory>
 #include <basilisk/util/includes.h>
 #include <basilisk/render/shader.h>
 #include <basilisk/render/vbo.h>
 #include <basilisk/render/ebo.h>
 #include <basilisk/render/vao.h>
 #include <basilisk/render/fbo.h>
+#include <basilisk/render/image.h>
+#include <basilisk/render/texture.h>
 
 
 namespace bsk::internal {
@@ -51,6 +54,12 @@ class Frame {
 
         void setFilterLinear();
         void setFilterNearest();
+
+        /** Read the current FBO color attachment to CPU and return it as an Image (RGBA, top-left origin). */
+        std::shared_ptr<Image> getImage();
+
+        /** Read the current FBO color attachment and return a new Texture with the data copied to the GPU. Caller owns the returned Texture. */
+        Texture* getTexture();
 };
 
 }

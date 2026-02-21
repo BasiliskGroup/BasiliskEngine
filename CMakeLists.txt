@@ -114,12 +114,12 @@ FetchContent_MakeAvailable(assimp)
 # ======================================================
 # Clipper2 (static library the same way CrumpleQuest does)
 # ======================================================
-FetchContent_Declare(
-    clipper2
-    GIT_REPOSITORY https://github.com/AngusJohnson/Clipper2.git
-    GIT_TAG main
-)
-FetchContent_MakeAvailable(clipper2)
+# FetchContent_Declare(
+#     clipper2
+#     GIT_REPOSITORY https://github.com/AngusJohnson/Clipper2.git
+#     GIT_TAG main
+# )
+# FetchContent_MakeAvailable(clipper2)
 
 # ======================================================
 # PyBind11
@@ -145,17 +145,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(pybind11)
 
-file(GLOB CLIPPER2_SOURCES
-    ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/src/*.cpp
-)
+# file(GLOB CLIPPER2_SOURCES
+#     ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/src/*.cpp
+# )
 
-add_library(clipper2 STATIC ${CLIPPER2_SOURCES})
+# add_library(clipper2 STATIC ${CLIPPER2_SOURCES})
 
-target_include_directories(clipper2 PUBLIC
-    ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/include
-)
+# target_include_directories(clipper2 PUBLIC
+#     ${clipper2_SOURCE_DIR}/CPP/Clipper2Lib/include
+# )
 
-target_compile_features(clipper2 PUBLIC cxx_std_20)
+# target_compile_features(clipper2 PUBLIC cxx_std_20)
 
 # ======================================================
 # Rust GPU library
@@ -268,7 +268,7 @@ target_link_libraries(basilisk_lib
         assimp
         glm_h
         stb
-        clipper2
+        # clipper2
 )
 
 if(MSVC)
@@ -379,7 +379,7 @@ if(EXISTS ${BASILISK_MAIN})
     target_link_libraries(engine
         PRIVATE
             basilisk_lib
-            clipper2
+            # clipper2
     )
 
     # Link Rust GPU static library for compute bindings
@@ -409,7 +409,7 @@ if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
     target_link_libraries(engine_forces_test
         PRIVATE
             basilisk_lib
-            clipper2
+            # clipper2
     )
     # Link Rust GPU static library for compute bindings
     if(RUST_GPU_LIB_NAME)

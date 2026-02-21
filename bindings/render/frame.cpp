@@ -24,5 +24,7 @@ void bind_frame(py::module_& m) {
         .def("get_render_width", &Frame::getRenderWidth)
         .def("get_render_height", &Frame::getRenderHeight)
         .def("set_filter_linear", &Frame::setFilterLinear)
-        .def("set_filter_nearest", &Frame::setFilterNearest);
+        .def("set_filter_nearest", &Frame::setFilterNearest)
+        .def("get_image", &Frame::getImage)
+        .def("get_texture", &Frame::getTexture, py::return_value_policy::take_ownership);
 }
