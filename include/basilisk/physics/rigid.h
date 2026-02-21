@@ -14,6 +14,7 @@ class Spring;
 class Motor;
 class Manifold;
 struct CollisionPair;
+struct CollisionData;
 
 // Holds all the state for a single rigid body that is needed by AVBD
 class Rigid {
@@ -98,6 +99,8 @@ public:
     glm::vec3 getVel() const;
     std::size_t getIndex() const { return index; }
     void getAABB(glm::vec2& bl, glm::vec2& tr) const;
+
+    std::vector<CollisionData> getCollisions();
 };
 
 }

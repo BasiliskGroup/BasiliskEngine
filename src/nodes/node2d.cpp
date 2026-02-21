@@ -467,4 +467,10 @@ RayCastResult2D Node2D::raycast(glm::vec2 origin, glm::vec2 direction) {
     return result;
 }
 
+std::vector<CollisionData> Node2D::getCollisions() {
+    std::vector<CollisionData> collisions;
+    if (rigid == nullptr) return collisions;
+    return rigid->getCollisions();
+}
+
 }

@@ -10,17 +10,28 @@ namespace py = pybind11;
 using namespace bsk::internal;
 
 namespace {
-const glm::vec2 default_position(0.0f, 0.0f);
-const glm::vec2 default_scale(1.0f, 1.0f);
-const glm::vec3 default_velocity(0.0f, 0.0f, 0.0f);
-const float default_rotation = 0.0f;
-const float default_density = 1.0f;
-const float default_friction = 0.5f;
+    const glm::vec2 default_position(0.0f, 0.0f);
+    const glm::vec2 default_scale(1.0f, 1.0f);
+    const glm::vec3 default_velocity(0.0f, 0.0f, 0.0f);
+    const float default_rotation = 0.0f;
+    const float default_density = 1.0f;
+    const float default_friction = 0.5f;
 }  // namespace
+
+struct CollisionDataPy {
+    std::shared_ptr<Node2D> other;
+    glm::vec2 normal;
+    float depth;
+};
 
 void bind_node2d(py::module_& m) {
     // Bind Vec2 proxy (Vec3 is bound by Node which runs first)
     bind_vector_proxy<glm::vec2>(m, "_Vec2PropertyProxy");
+
+    py::class_<CollisionDataPy>(m, "CollisionData")
+        .def_readonly("other", &CollisionDataPy::other)
+        .def_readonly("normal", &CollisionDataPy::normal)
+        .def_readonly("depth", &CollisionDataPy::depth);
 
     py::class_<Node2D, std::shared_ptr<Node2D>>(m, "Node2D")
 
@@ -188,5 +199,21 @@ void bind_node2d(py::module_& m) {
         // Collision
         .def("constrained_to", &Node2D::constrainedTo, py::arg("other"))
         .def("just_collided", &Node2D::justCollided, py::arg("other"))
-        .def("is_touching", &Node2D::isTouching, py::arg("other"));
+        .def("is_touching", &Node2D::isTouching, py::arg("other"))
+
+        // Collision
+        // returns a list of CollisionDataPy
+        .def("get_collisions", [](Node2D& n) {
+            std::vector<CollisionData> collisions = n.getCollisions();
+            std::vector<CollisionDataPy> collisionsPy;
+            for (const CollisionData& collision : collisions) {
+                collisionsPy.push_back({n.getScene()->findSharedNode(collision.other), collision.normal, collision.depth});
+            }
+            // return as a python readable list
+            py::list list;
+            for (const CollisionDataPy& collision : collisionsPy) {
+                list.append(collision);
+            }
+            return list;
+        });
 }

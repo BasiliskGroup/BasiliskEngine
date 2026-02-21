@@ -5,6 +5,7 @@
 #include <basilisk/physics/tables/bodyTable.h>
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/physics/maths.h>
+#include <basilisk/nodes/node2d.h>
 
 namespace bsk::internal {
 
@@ -353,6 +354,38 @@ void Rigid::getAABB(glm::vec2& bl, glm::vec2& tr) const {
         bl = glm::min(bl, transformed);
         tr = glm::max(tr, transformed);
     }
+}
+
+std::vector<CollisionData> Rigid::getCollisions() {
+    std::vector<CollisionData> collisions;
+
+    // iterate through all forces
+    for (Force* force = forces; force != nullptr; force = (force->getBodyA() == this) ? force->getNextA() : force->getNextB()) {
+        if (force->getForceType() != ForceType::MANIFOLD) {
+            continue;
+        }
+
+        Rigid* other = (force->getBodyA() == this) ? force->getBodyB() : force->getBodyA();
+        if (other == nullptr) {
+            continue; // should never happen
+        }
+
+        Manifold* manifold = dynamic_cast<Manifold*>(force);
+        const Contact& contactA = manifold->getContact(0);
+        const Contact& contactB = manifold->getContact(1);
+
+        glm::vec2 normal = (contactA.normal + contactB.normal) / 2.0f;
+
+        // point the normal towards ourselves
+        if (glm::dot(normal, glm::vec2(other->getPosition() - getPosition())) > 0.0f) {
+            normal = -normal;
+        }
+
+        float depth = glm::max(glm::abs(contactA.C0.y), glm::abs(contactB.C0.y));
+
+        collisions.push_back({other->getNode(), normal, depth});
+    }
+    return collisions;
 }
 
 }

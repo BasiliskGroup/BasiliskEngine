@@ -28,7 +28,6 @@ bool collide(Rigid* bodyA, Rigid* bodyB,
              const std::vector<glm::vec2>& verticesB,
              glm::vec2 contacts[4], 
              glm::vec2& normal);
-
 }
 
 #endif

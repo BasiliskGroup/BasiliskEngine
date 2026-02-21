@@ -11,6 +11,13 @@
 namespace bsk::internal {
 
 class Scene2D;  // Forward declaration
+class Node2D;
+
+struct CollisionData {
+    Node2D* other = nullptr;
+    glm::vec2 normal = glm::vec2(0.0f, 0.0f);
+    float depth = 0.0f;
+};
 
 class Node2D : public VirtualNode<Node2D, glm::vec2, float, glm::vec2> {
 private:
@@ -63,6 +70,8 @@ public:
     Collider* getCollider();
     // glm::vec3 getManifoldMask() { return rigid->getManifoldMask(); }
 
+    std::vector<CollisionData> getCollisions();
+
     void onSceneChange(VirtualScene2D* oldScene, VirtualScene2D* newScene);
     void add(Node2D* child);
     void remove(Node2D* child);
@@ -75,6 +84,8 @@ public:
     // raycasting
     RayCastResult2D raycast(glm::vec2 origin, glm::vec2 direction);
     bool pointIsInside(glm::vec2 position);
+
+
 
 private:
     void updateModel();
