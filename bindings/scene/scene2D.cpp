@@ -28,6 +28,7 @@ void bind_scene2d(py::module_& m) {
 
     py::class_<Scene2D>(m, "Scene2D")
         .def(py::init<Engine*>(), py::arg("engine"))
+        .def(py::init<Engine*, Shader*>(), py::arg("engine"), py::arg("shader"))
         .def("update", &Scene2D::update)
         .def("render", &Scene2D::render)
         .def("add", static_cast<void (Scene2D::*)(std::shared_ptr<Node2D>)>(&Scene2D::add), py::arg("node"))

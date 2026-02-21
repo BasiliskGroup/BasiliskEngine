@@ -16,6 +16,14 @@ Scene2D::Scene2D(Engine* engine) : VirtualScene(engine) {
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
 }
 
+Scene2D::Scene2D(Engine* engine, Shader* shader) : VirtualScene(engine) {
+    camera = new Camera2D(engine);
+    internalCamera = camera;
+    this->shader = shader;
+    solver = new Solver();
+    engine->getResourceServer()->write(shader, "textureArrays", "materials");
+}
+
 /**
  * @brief Destroy the Scene2D object. Deletes scene camera and shader.
  * 

@@ -70,5 +70,15 @@ void bind_engine(py::module_& m) {
              "True if middle button was released this frame.")
         .def("is_right_released", [](Engine& e) { return e.getMouse()->getRightReleased(); },
              "True if right button was released this frame.")
-        .def("show_splash", &Engine::showSplash);
+        .def("show_splash", &Engine::showSplash)
+        .def("enable_depth_test", &Engine::enableDepthTest)
+        .def("enable_cull_face", &Engine::enableCullFace)
+        .def("enable_multisample", &Engine::enableMultisample)
+        .def("enable_blend", &Engine::enableBlend)
+        .def("enable_vsync", &Engine::enableVSync)
+        .def("disable_depth_test", &Engine::disableDepthTest)
+        .def("disable_cull_face", &Engine::disableCullFace)
+        .def("disable_multisample", &Engine::disableMultisample)
+        .def("disable_blend", &Engine::disableBlend)
+        .def("disable_vsync", &Engine::disableVSync);
 }
