@@ -14,6 +14,7 @@ Scene2D::Scene2D(Engine* engine) : VirtualScene(engine) {
     shader = new Shader(internalPath("shaders/instance2D.vert").c_str(), internalPath("shaders/instance2D.frag").c_str());
     solver = new Solver();
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
+    customShader = false;
 }
 
 Scene2D::Scene2D(Engine* engine, Shader* shader) : VirtualScene(engine) {
@@ -22,6 +23,7 @@ Scene2D::Scene2D(Engine* engine, Shader* shader) : VirtualScene(engine) {
     this->shader = shader;
     solver = new Solver();
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
+    customShader = true;
 }
 
 /**
@@ -32,7 +34,9 @@ Scene2D::~Scene2D() {
     VirtualScene::clear();
 
     delete internalCamera; internalCamera = nullptr;
-    delete shader; shader = nullptr;
+    if (!customShader) {
+        delete shader; shader = nullptr;
+    }
     delete solver; solver = nullptr;
 }
 

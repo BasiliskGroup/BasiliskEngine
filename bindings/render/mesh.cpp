@@ -6,8 +6,15 @@
 namespace py = pybind11;
 
 void bind_mesh(py::module_& m) {
-    py::class_<bsk::internal::Mesh, std::shared_ptr<bsk::internal::Mesh>>(m, "Mesh")
+    using Mesh = bsk::internal::Mesh;
+    py::class_<Mesh, std::shared_ptr<Mesh>>(m, "Mesh")
         .def(py::init<const std::string&, bool, bool>(), py::arg("modelPath"), py::arg("generateUV") = false, py::arg("generateNormals") = false)
-        .def("get_vertices", &bsk::internal::Mesh::getVertices)
-        .def("get_indices", &bsk::internal::Mesh::getIndices);
+        .def(py::init([](const std::vector<float>& vertices) {
+            return std::make_shared<Mesh>(vertices);
+        }), py::arg("vertices"))
+        .def(py::init([](const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
+            return std::make_shared<Mesh>(vertices, indices);
+        }), py::arg("vertices"), py::arg("indices"))
+        .def("get_vertices", &Mesh::getVertices)
+        .def("get_indices", &Mesh::getIndices);
 }

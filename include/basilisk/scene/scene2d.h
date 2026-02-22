@@ -23,6 +23,8 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         Shader* shader;
         Solver* solver;
 
+        bool customShader = false;
+
     public:
         Scene2D(Engine* engine);
         Scene2D(Engine* engine, Shader* shader);
