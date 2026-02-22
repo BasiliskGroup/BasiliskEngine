@@ -101,9 +101,9 @@ void TBO::resize() {
     ID = newBuffer;
     capacity = newCapacity;
 
-    // Rebind texture to use the new buffer
+    // Rebind texture to use the new buffer (must match constructor's GL_RGBA32F)
     glBindTexture(GL_TEXTURE_BUFFER, textureID);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, ID);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, ID);
     glBindTexture(GL_TEXTURE_BUFFER, 0);
 
     // Unbind for safety
