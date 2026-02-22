@@ -96,4 +96,10 @@ void Engine::showSplash() {
     ::bsk::internal::showSplash(this);
 }
 
+void Engine::processPendingMaterials() {
+    if (resourceServer) {
+        resourceServer->getMaterialServer()->processPendingUpdates();
+    }
+}
+
 }

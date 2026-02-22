@@ -475,9 +475,23 @@ void VirtualNode<Derived, P, R, S>::add(Derived* child) {
  */
 template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::setMaterial(Material* material) { 
-    materialPython.reset();
-    this->material = material; 
-    getEngine()->getResourceServer()->getMaterialServer()->add(material); 
+    // CRITICAL FIX FOR WINDOWS: Only reset materialPython if material is actually changing
+    // This prevents materials from being destroyed when set_material() is called
+    // multiple times with the same material (which happens during animation updates).
+    // If the material is the same, we don't need to do anything.
+    if (this->material != material) {
+        materialPython.reset();
+        this->material = material;
+        // CRITICAL FIX FOR WINDOWS: Only call add() if material is actually changing
+        // This prevents materials from being added to pendingAdds multiple times,
+        // which causes accumulation and wrong IDs over time on Windows.
+        // The add() method will check if material is already in mapping and return early,
+        // but calling it unnecessarily can still cause issues with pendingAdds.
+        if (material) {
+            getEngine()->getResourceServer()->getMaterialServer()->add(material);
+        }
+    }
+    // If material is the same, do nothing - material is already set and registered
 }
 
 template<typename Derived, typename P, typename R, typename S>

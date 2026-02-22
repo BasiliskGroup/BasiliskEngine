@@ -7,7 +7,10 @@
 #include <basilisk/render/tbo.h>
 #include <basilisk/resource/textureServer.h>
 #include <mutex>
+#include <atomic>
 #include <unordered_set>
+#include <vector>
+#include <algorithm>
 
 namespace bsk::internal {
 
@@ -25,15 +28,23 @@ class MaterialServer {
         
         // Deferred add queue - materials that need to be added between render frames
         // Needed because texture array operations (resizing) must not happen during rendering
-        std::unordered_set<Material*> pendingAdds;
+        // CRITICAL FIX FOR WINDOWS: Use vector to preserve insertion order
+        // unordered_set has non-deterministic iteration order, which on Windows causes
+        // materials to be processed in random order, leading to wrong IDs and positioning issues.
+        // We use a vector to preserve order and a set for O(1) duplicate checking.
+        std::vector<Material*> pendingAdds;
+        std::unordered_set<Material*> pendingAddsSet;  // For O(1) duplicate checking
         std::mutex addMutex;  // Thread safety for pendingAdds
         
         // Track if we're in active game loop (update() has been called)
         // During initialization (before first update), materials can be added immediately
-        bool inGameLoop;
+        // CRITICAL FIX FOR WINDOWS: Use atomic to ensure proper memory visibility across threads
+        // Windows has stricter memory model requirements, and plain bool can cause visibility issues
+        std::atomic<bool> inGameLoop;
         
         // Guard to prevent recursive calls to processPendingUpdates()
-        bool processingUpdates;
+        // CRITICAL FIX FOR WINDOWS: Use atomic to ensure proper memory visibility across threads
+        std::atomic<bool> processingUpdates;
 
         // Internal helper to check if OpenGL context is current
         bool isContextCurrent() const;

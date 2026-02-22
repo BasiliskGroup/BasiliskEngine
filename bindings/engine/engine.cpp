@@ -83,5 +83,7 @@ void bind_engine(py::module_& m) {
         .def("disable_multisample", &Engine::disableMultisample)
         .def("disable_blend", &Engine::disableBlend)
         .def("disable_vsync", &Engine::disableVSync)
-        .def("set_viewport", &Engine::setViewport, py::arg("x"), py::arg("y"), py::arg("width"), py::arg("height"));
+        .def("set_viewport", &Engine::setViewport, py::arg("x"), py::arg("y"), py::arg("width"), py::arg("height"))
+        .def("process_pending_materials", &Engine::processPendingMaterials,
+             "Process pending material updates/additions. Call this after creating entities during gameplay to ensure materials are ready before rendering.");
 }

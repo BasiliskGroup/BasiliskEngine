@@ -52,6 +52,10 @@ class Engine {
         inline void disableVSync() { window->disableVSync(); }
         inline void setViewport(int x, int y, int width, int height) { window->setViewport(x, y, width, height); }
         void showSplash();
+        
+        // Process pending material updates/additions (useful after creating entities during gameplay)
+        // This ensures materials are ready before rendering, preventing flickering
+        void processPendingMaterials();
 };
 
 }

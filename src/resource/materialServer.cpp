@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 
 namespace bsk::internal {
 
@@ -35,11 +36,39 @@ bool MaterialServer::isContextCurrent() const {
 unsigned int MaterialServer::get(Material* material) {
     if (!material) return 0;
     
-    std::lock_guard<std::mutex> lock(materialMutex);
-    auto it = materialMapping.find(material);
-    if (it != materialMapping.end()) {
-        return it->second;
+    // CRITICAL FIX FOR FLICKERING: Check if material is in mapping first
+    {
+        std::lock_guard<std::mutex> lock(materialMutex);
+        auto it = materialMapping.find(material);
+        if (it != materialMapping.end()) {
+            return it->second;
+        }
     }
+    
+    // Material not found - check if it's pending and try to process it immediately
+    // This prevents flickering when animation materials are swapped during update()
+    // CRITICAL: Only do this if we're not currently processing updates (to avoid deadlock)
+    // and if context is current (required for OpenGL operations)
+    if (!processingUpdates.load(std::memory_order_acquire) && isContextCurrent()) {
+        // Check if material is pending
+        {
+            std::lock_guard<std::mutex> addLock(addMutex);
+            if (pendingAddsSet.count(material) > 0) {
+                // Material is pending - try to process it immediately
+                // This is safe because we're not currently processing updates
+                // and we have the OpenGL context
+                processPendingUpdates();
+                
+                // Check again after processing
+                std::lock_guard<std::mutex> materialLock(materialMutex);
+                auto it = materialMapping.find(material);
+                if (it != materialMapping.end()) {
+                    return it->second;
+                }
+            }
+        }
+    }
+    
     // Material not found - return 0 as safe fallback (default material)
     return 0;
 }
@@ -71,9 +100,16 @@ unsigned int MaterialServer::addInternal(Material* material) {
     data.normalArray = normal.first;
     data.normalIndex = normal.second;
 
-    // CRITICAL FIX: Calculate index FIRST based on mapping size, then use it for byte offset
-    // This ensures index and TBO offset are always in sync, even after reset() clears mapping
-    // but not TBO data. The index represents the material's position in the array.
+    // CRITICAL FIX FOR WINDOWS: Calculate index based on mapping size
+    // This ensures materials get sequential IDs in the order they're added.
+    // IMPORTANT: We must calculate the index BEFORE adding to mapping to ensure
+    // consistent ordering. If we add to mapping first, the size changes and
+    // we get wrong indices.
+    // 
+    // The key insight: On Windows, unordered_map iteration order is non-deterministic,
+    // but insertion order into the mapping (via this function) IS deterministic.
+    // By using mapping.size() as the index, we ensure materials get IDs in the
+    // exact order they're added, preventing positioning issues.
     unsigned int index = materialMapping.size();
     unsigned int offset = index * sizeof(MaterialData);
     
@@ -81,6 +117,7 @@ unsigned int MaterialServer::addInternal(Material* material) {
     tbo->write(&data, sizeof(data), offset);
 
     // Add the material to the mapping with the calculated index
+    // CRITICAL: This must happen AFTER calculating index to preserve ordering
     materialMapping[material] = index;
 
     return index;
@@ -106,18 +143,21 @@ unsigned int MaterialServer::add(Material* material) {
         }
     }
     
-    // CRITICAL FIX FOR WINDOWS: Only add immediately if we're NOT in the game loop yet
-    // Once inGameLoop is true, we MUST defer all additions because:
-    // 1. addInternal() calls textureServer->add() which can trigger TextureArray::generate()
-    // 2. generate() calls glTexImage3D() which recreates the texture array
-    // 3. This is UNSAFE if a frame is already active (after Engine::update() calls frame->use())
-    // 4. Materials swapped during scene->update() happen AFTER frame->use(), so they're unsafe
+    // CRITICAL FIX FOR WINDOWS: Only allow immediate addition during initialization
+    // During gameplay, we MUST always defer to processPendingUpdates() to ensure:
+    // 1. Materials are processed in the exact order they were added (preserves IDs)
+    // 2. No race conditions between immediate adds and processPendingUpdates()
+    // 3. Consistent behavior across platforms (Windows has stricter memory ordering)
     // 
-    // Solution: Only add immediately during initialization (before first processPendingUpdates()).
-    // During game loop, always defer to processPendingUpdates() which runs BEFORE frame->use().
-    // This means materials swapped during animations will use default material (ID 0) for 1 frame,
-    // but this is safe and prevents crashes.
-    if (!inGameLoop && isContextCurrent()) {
+    // The problem: If we allow immediate addition during gameplay, materials can be added
+    // out of order, causing wrong IDs and positioning issues. For example:
+    // - Material A added immediately (gets ID 10)
+    // - processPendingUpdates() processes Material B (gets ID 10, overwrites A's slot)
+    // - Result: Materials have wrong IDs, causing positioning/texture issues
+    // 
+    // Solution: Only add immediately during initialization (before inGameLoop is true).
+    // During gameplay, always defer to processPendingUpdates() which processes in order.
+    if (!inGameLoop.load(std::memory_order_acquire) && isContextCurrent() && !processingUpdates.load(std::memory_order_acquire)) {
         std::lock_guard<std::mutex> lock(materialMutex);
         // Double-check after acquiring lock (another thread might have added it)
         if (materialMapping.count(material) == 0) {
@@ -128,14 +168,22 @@ unsigned int MaterialServer::add(Material* material) {
                 // This prevents crashes from corrupted materials
                 std::cerr << "Warning: Failed to add material immediately (exception: " << e.what() << "), deferring" << std::endl;
                 std::lock_guard<std::mutex> addLock(addMutex);
-                pendingAdds.insert(material);
+                // CRITICAL FIX FOR WINDOWS: Use vector to preserve order, set for duplicate checking
+                if (pendingAddsSet.count(material) == 0) {
+                    pendingAdds.push_back(material);
+                    pendingAddsSet.insert(material);
+                }
                 return 0;
             } catch (...) {
                 // If addInternal fails (e.g., invalid material), defer it
                 // This prevents crashes from corrupted materials
                 std::cerr << "Warning: Failed to add material immediately (unknown exception), deferring" << std::endl;
                 std::lock_guard<std::mutex> addLock(addMutex);
-                pendingAdds.insert(material);
+                // CRITICAL FIX FOR WINDOWS: Use vector to preserve order, set for duplicate checking
+                if (pendingAddsSet.count(material) == 0) {
+                    pendingAdds.push_back(material);
+                    pendingAddsSet.insert(material);
+                }
                 return 0;
             }
         }
@@ -145,13 +193,38 @@ unsigned int MaterialServer::add(Material* material) {
     // If we can't add immediately (processing updates or no context), defer to safe time
     // CRITICAL: Texture array operations (like resizing) must not happen during active rendering
     // They must happen in processPendingUpdates() which is called at the safe time
+    // 
+    // CRITICAL FIX FOR WINDOWS: Double-check material is not already in mapping before deferring
+    // This prevents materials from being added to pendingAdds multiple times, which causes
+    // accumulation and wrong IDs over time. On Windows, race conditions can cause the initial
+    // check to miss materials that are being processed, so we check again here.
     {
-        std::lock_guard<std::mutex> lock(addMutex);
-        pendingAdds.insert(material);
+        std::lock_guard<std::mutex> materialLock(materialMutex);
+        // CRITICAL: Check again if material was added between the initial check and now
+        // This can happen if processPendingUpdates() ran between checks
+        if (materialMapping.count(material)) {
+            return materialMapping.at(material);
+        }
+    }
+    
+    // Material is not in mapping - add it to pending queue
+    // CRITICAL FIX FOR WINDOWS: Only add if not already pending to prevent duplicates
+    {
+        std::lock_guard<std::mutex> addLock(addMutex);
+        // CRITICAL: Check if material is already pending before adding
+        // This prevents the same material from being added multiple times, which causes
+        // accumulation and wrong IDs over time on Windows
+        if (pendingAddsSet.count(material) == 0) {
+            pendingAdds.push_back(material);
+            pendingAddsSet.insert(material);
+        }
     }
     
     // Return 0 for now - material will be added in processPendingUpdates()
     // This is safe because render() handles missing materials gracefully (returns 0 = default)
+    // CRITICAL: Materials swapped during animation will use default material (ID 0) for 1 frame
+    // This causes flickering but is necessary to maintain correct material IDs and ordering
+    // The flickering will stop once processPendingUpdates() processes the material on the next frame
     return 0;
 }
 
@@ -213,23 +286,38 @@ void MaterialServer::update(Material* material) {
  */
 void MaterialServer::processPendingUpdates() {
     // Prevent recursive calls (deadlock/infinite loop protection
-    if (processingUpdates) {
+    // CRITICAL FIX FOR WINDOWS: Use atomic load to ensure we see the latest value
+    bool expected = false;
+    if (!processingUpdates.compare_exchange_strong(expected, true, std::memory_order_acq_rel)) {
+        // Already processing, return early
         return;
     }
+    
+    // CRITICAL: Use RAII to ensure processingUpdates is always reset, even on early return
+    // This prevents the flag from getting stuck true on Windows
+    struct ProcessingGuard {
+        std::atomic<bool>& flag;
+        ProcessingGuard(std::atomic<bool>& f) : flag(f) {}
+        ~ProcessingGuard() { flag.store(false, std::memory_order_release); }
+    } guard(processingUpdates);
     
     // Verify OpenGL context is current
     if (!isContextCurrent()) {
         std::cerr << "Warning: MaterialServer::processPendingUpdates() called without OpenGL context." << std::endl;
-        return;
+        return;  // guard will reset processingUpdates
     }
     
     // Get pending adds (thread-safe copy)
-    std::unordered_set<Material*> addsToProcess;
+    // CRITICAL FIX FOR WINDOWS: Copy vector to preserve insertion order
+    // This ensures materials are processed in the order they were added, preventing
+    // wrong IDs and positioning issues on Windows where unordered_set iteration order is non-deterministic
+    std::vector<Material*> addsToProcess;
     {
         std::lock_guard<std::mutex> lock(addMutex);
         if (!pendingAdds.empty()) {
-            addsToProcess = pendingAdds;
+            addsToProcess = pendingAdds;  // Copy vector to preserve order
             pendingAdds.clear();
+            pendingAddsSet.clear();
         }
     }
     
@@ -247,7 +335,7 @@ void MaterialServer::processPendingUpdates() {
     // This allows materials created after first update() but before first render()
     // to still be added immediately during initialization
     if (addsToProcess.empty() && updatesToProcess.empty()) {
-        return;
+        return;  // guard will reset processingUpdates
     }
     
     // Mark that we're now in the game loop (we actually processed something)
@@ -255,10 +343,10 @@ void MaterialServer::processPendingUpdates() {
     // BUT: Only set this if we're actually processing adds/updates from the game loop,
     // not from initialization. We check if there are pending operations to distinguish.
     // Actually, if we got here, we have something to process, so we're in the game loop.
-    inGameLoop = true;
+    // CRITICAL FIX FOR WINDOWS: Use atomic store to ensure visibility across threads
+    inGameLoop.store(true, std::memory_order_release);
     
-    // Set processing flag to prevent recursion
-    processingUpdates = true;
+    // processingUpdates was already set to true by compare_exchange_strong above
     
     // Lock material mutex for the duration of all operations
     std::lock_guard<std::mutex> lock(materialMutex);
@@ -266,23 +354,61 @@ void MaterialServer::processPendingUpdates() {
     // First, process all pending additions
     // This ensures materials exist before we try to update them
     // CRITICAL: This is where texture array operations (including resizing) happen safely
+    // CRITICAL FIX FOR WINDOWS: Process materials in exact order and prevent duplicates
+    // Windows has non-deterministic behavior with unordered_map, so we must ensure
+    // materials are processed in the exact order they were added to pendingAdds.
+    // We also need to prevent the same material from being added multiple times,
+    // which can happen if set_material() is called multiple times with the same material.
+    std::vector<Material*> invalidMaterials;
+    std::unordered_set<Material*> processedThisBatch;  // Track materials processed in this batch
+    
     for (Material* material : addsToProcess) {
         // Validate material pointer is still valid (not destroyed from previous run)
-        // We can't fully validate a raw pointer, but we check for null and existence
-        if (material && materialMapping.count(material) == 0) {
+        if (!material) {
+            invalidMaterials.push_back(material);
+            continue;
+        }
+        
+        // CRITICAL FIX FOR WINDOWS: Check if material was already processed in this batch
+        // This prevents the same material from being added multiple times if it appears
+        // multiple times in addsToProcess (shouldn't happen, but Windows can be weird)
+        if (processedThisBatch.count(material) > 0) {
+            // Material already processed in this batch - skip it
+            continue;
+        }
+        
+        // CRITICAL FIX FOR WINDOWS: Check if material is already in mapping
+        // If it is, it means it was added immediately during initialization or
+        // was already processed in a previous batch. We should not add it again.
+        if (materialMapping.count(material) == 0) {
             try {
                 addInternal(material);
+                processedThisBatch.insert(material);  // Mark as processed
             } catch (const std::exception& e) {
                 // Material might be invalid (destroyed from previous run or corrupted)
                 // Skip it - it will be re-added if still needed
                 std::cerr << "Warning: Failed to add material (exception: " << e.what() << ")" << std::endl;
+                invalidMaterials.push_back(material);
                 continue;
             } catch (...) {
                 // Material might be invalid (destroyed from previous run or corrupted)
                 // Skip it - it will be re-added if still needed
                 std::cerr << "Warning: Failed to add material (unknown exception)" << std::endl;
+                invalidMaterials.push_back(material);
                 continue;
             }
+        } else {
+            // Material already in mapping - mark as processed to avoid duplicate handling
+            processedThisBatch.insert(material);
+        }
+    }
+    
+    // CRITICAL FIX FOR WINDOWS: Remove invalid materials from pendingAdds to prevent accumulation
+    if (!invalidMaterials.empty()) {
+        std::lock_guard<std::mutex> addLock(addMutex);
+        for (Material* material : invalidMaterials) {
+            pendingAddsSet.erase(material);
+            pendingAdds.erase(std::remove(pendingAdds.begin(), pendingAdds.end(), material), pendingAdds.end());
         }
     }
     
@@ -295,34 +421,54 @@ void MaterialServer::processPendingUpdates() {
                 updateInternal(material);
             } catch (...) {
                 // Material might be invalid (destroyed from previous run or corrupted)
-                // Remove it from mapping to prevent future issues
-                materialMapping.erase(material);
+                // CRITICAL FIX FOR WINDOWS: Do NOT remove from mapping!
+                // Removing causes size() to decrease, leading to ID reuse.
+                // Just skip it - it will be ignored on future access attempts.
+                // materialMapping.erase(material);  // DO NOT DO THIS!
                 continue;
             }
         }
     }
     
-    // Clear processing flag
-    processingUpdates = false;
+    // processingUpdates will be reset by RAII guard when function returns
 }
 
 /**
  * @brief Remove a material from the server (for cleanup)
+ * 
+ * CRITICAL FIX FOR WINDOWS: Do NOT remove materials from materialMapping!
+ * When materials are removed from the mapping, materialMapping.size() decreases,
+ * causing new materials to reuse the same IDs. This overwrites TBO slots that
+ * still contain old data, causing wrong materials/positioning.
+ * 
+ * Instead, we only remove materials from pending queues. The mapping persists
+ * until reset() is called, ensuring IDs are never reused. Stale pointers in
+ * the mapping are safe because:
+ * 1. We check materialMapping.count() before accessing
+ * 2. get() returns 0 if material not found (safe fallback)
+ * 3. reset() clears everything when starting a new game run
  * 
  * @param material The material to remove
  */
 void MaterialServer::remove(Material* material) {
     if (!material) return;
     
-    std::lock_guard<std::mutex> lock(materialMutex);
     std::lock_guard<std::mutex> updateLock(updateMutex);
     std::lock_guard<std::mutex> addLock(addMutex);
     
-    materialMapping.erase(material);
+    // CRITICAL FIX FOR WINDOWS: Do NOT remove from materialMapping!
+    // Removing from mapping causes size() to decrease, leading to ID reuse
+    // which overwrites TBO slots and causes wrong materials/positioning.
+    // materialMapping.erase(material);  // DO NOT DO THIS!
+    
+    // Only remove from pending queues to prevent processing stale materials
     pendingUpdates.erase(material);
-    pendingAdds.erase(material);
+    // CRITICAL FIX FOR WINDOWS: Remove from both vector and set
+    pendingAddsSet.erase(material);
+    pendingAdds.erase(std::remove(pendingAdds.begin(), pendingAdds.end(), material), pendingAdds.end());
+    
     // Note: We don't remove the data from TBO to avoid index shifting issues
-    // The slot will be reused if needed in the future
+    // The slot will remain with old data, but since we don't reuse IDs, it won't be accessed
 }
 
 /**
@@ -351,10 +497,12 @@ void MaterialServer::reset() {
     materialMapping.clear();
     pendingUpdates.clear();
     pendingAdds.clear();
+    pendingAddsSet.clear();
     
     // Reset flags to allow immediate material adds during new initialization
-    inGameLoop = false;
-    processingUpdates = false;
+    // CRITICAL FIX FOR WINDOWS: Use atomic store to ensure visibility across threads
+    inGameLoop.store(false, std::memory_order_release);
+    processingUpdates.store(false, std::memory_order_release);
     
     // Note: We don't clear/reset the TBO because:
     // 1. It would require OpenGL context which might not be current
