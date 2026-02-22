@@ -59,6 +59,7 @@ VirtualNode<Derived, P, R, S>::VirtualNode(Derived* parent, Mesh* mesh, Material
     material(material),
     meshPython(nullptr),
     materialPython(nullptr),
+    position(position), 
     rotation(rotation), 
     scale(scale),
     vbo(nullptr),
