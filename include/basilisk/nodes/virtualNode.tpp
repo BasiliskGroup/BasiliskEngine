@@ -352,6 +352,7 @@ template<typename Derived, typename P, typename R, typename S>
 void VirtualNode<Derived, P, R, S>::render() {
     shader->setUniform("uModel", model);
     if (material) {
+        // get() is thread-safe and returns 0 if material not found (safe fallback)
         int materialID = getEngine()->getResourceServer()->getMaterialServer()->get(material);
         shader->setUniform("uMaterialID", materialID);
     }

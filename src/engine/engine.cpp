@@ -16,6 +16,13 @@ Engine::Engine(int width, int height, const char* title, bool autoMouseGrab, boo
 
         // only initialize the GPU once, we'll use the fact that resourceServer is a singleton to ensure this
         initGpu();
+    } else {
+        // CRITICAL: Reset MaterialServer state when creating a new Engine instance
+        // The C++ singleton persists between Python runs, so when Python objects are destroyed
+        // and recreated, the C++ side still has raw pointers to the old (destroyed) materials.
+        // This causes crashes when those pointers are accessed. Resetting clears stale pointers.
+        // This ensures consistent, reliable behavior between runs.
+        resourceServer->getMaterialServer()->reset();
     }
 
     this->autoMouseGrab = autoMouseGrab;
@@ -38,6 +45,18 @@ Engine::~Engine() {
 
 
 void Engine::update() {
+    // CRITICAL: Process deferred material updates/additions at START of update, BEFORE frame operations
+    // This ensures texture array operations (including resizing) happen before any frame is active.
+    // 
+    // IMPORTANT: Materials swapped during scene->update() will be processed in the NEXT frame.
+    // This is acceptable because:
+    // 1. Materials should be added immediately when node.set_material() is called (if context is current)
+    // 2. If they can't be added immediately, they'll use default material (ID 0) for 1 frame (safe)
+    // 3. Processing here ensures all deferred materials are ready before rendering begins
+    if (resourceServer) {
+        resourceServer->getMaterialServer()->processPendingUpdates();
+    }
+    
     frame->use();
     frame->clear();
 

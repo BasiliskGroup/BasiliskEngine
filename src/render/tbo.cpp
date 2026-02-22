@@ -94,22 +94,25 @@ void TBO::resize() {
     glBindBuffer(GL_COPY_WRITE_BUFFER, newBuffer);
     glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size);
 
-    // Delete the old buffer
-    glDeleteBuffers(1, &ID);
+    // Store old buffer ID for cleanup
+    GLuint oldBuffer = ID;
 
     // Replace IDs
     ID = newBuffer;
     capacity = newCapacity;
 
-    // Rebind texture to use the new buffer
+    // Rebind texture to use the new buffer BEFORE deleting old buffer
     glBindTexture(GL_TEXTURE_BUFFER, textureID);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, ID);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, ID);
     glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-    // Unbind for safety
+    // Unbind buffers before deleting
     glBindBuffer(GL_TEXTURE_BUFFER, 0);
     glBindBuffer(GL_COPY_READ_BUFFER, 0);
     glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+    
+    // Now safe to delete the old buffer (texture is bound to new one)
+    glDeleteBuffers(1, &oldBuffer);
 }
 
 }

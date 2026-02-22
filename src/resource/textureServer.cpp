@@ -36,6 +36,8 @@ unsigned int TextureServer::getClosestSize(unsigned int x) {
 
 /**
  * @brief Adds an image to the array and returns it mapping as a pair <index of the array, index in the array>
+ * WARNING: If texture array needs to resize, this will recreate the texture which breaks active rendering.
+ * Must only be called between render frames when textures are not in use.
  * 
  * @param image Pointer to the image to add to the server
  * @return std::pair<unsigned int, unsigned int> 
@@ -48,18 +50,26 @@ std::pair<unsigned int, unsigned int> TextureServer::add(Image* image) {
     }
 
     // Do not double add image, simply return existing mapping
+    // This is critical - prevents unnecessary texture operations
     if (imageMapping.count(image)) {
         return get(image);
     }
 
-    // Get the buckest size to add this image to. Will likely resize the image. 
+    // Get the bucket size to add this image to. Will likely resize the image. 
     unsigned int size = getClosestSize(image->getWidth());
 
     // Get the index of the closest bucket size
     auto it = std::find(sizeBuckets.begin(), sizeBuckets.end(), size);
     int arrayIndex = (it != sizeBuckets.end()) ? std::distance(sizeBuckets.begin(), it) : -1;
 
+    if (arrayIndex < 0 || arrayIndex >= (int)textureArrays.size()) {
+        // Fallback to first array if size doesn't match any bucket
+        arrayIndex = 0;
+    }
+
     // Add the image to the closest array
+    // WARNING: This may resize the texture array, breaking active rendering
+    // Only safe when called between render frames
     TextureArray* array = textureArrays.at(arrayIndex);
     unsigned int imageIndex = array->add(image);
 

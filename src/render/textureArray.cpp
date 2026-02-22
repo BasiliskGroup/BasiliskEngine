@@ -29,17 +29,22 @@ TextureArray::~TextureArray() {
 
 /**
  * @brief Generates the array and uploads all the image data from the image vector to this texture array
+ * WARNING: This recreates the texture array. Must only be called when texture is not in use by GPU.
  * 
  */
 void TextureArray::generate() {
-
-    // Set the filter to liear by default
+    // CRITICAL: glTexImage3D with new size invalidates the texture
+    // This will break any active rendering using this texture array
+    // Only safe to call between render frames when texture is not bound to shaders
+    
+    // Set the filter to linear by default
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
-    // Set up the array
+    // Set up the array with new capacity
+    // WARNING: This invalidates the texture - any active shader using it will crash
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, width, height, capacity, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
     // Upload the data for each image
@@ -67,21 +72,29 @@ void TextureArray::uploadImage(Image* image, unsigned int position) {
 
 /**
  * @brief Adds a new image to the texture array.
+ * WARNING: If array needs to resize, this will recreate the texture which breaks active rendering.
+ * Must only be called between render frames when texture is not in use.
  * 
  * @param image Pointer to the image to add.
  * 
  * @return unsigned int of the location of the image in the array. 
  */
 unsigned int TextureArray::add(Image* image) {
+    if (!image) return 0;
+    
     bind();
     
     images.push_back(image);
     
     if (images.size() > capacity) {
+        // CRITICAL: Resizing the texture array recreates it completely
+        // This will break any active rendering using this texture array
+        // This should only happen between render frames
         capacity *= 2;
-        generate();
+        generate();  // Recreates entire texture - breaks active rendering!
     }
     else {
+        // Safe: Just upload new image to existing slot
         uploadImage(image, images.size() - 1);
     }
 
