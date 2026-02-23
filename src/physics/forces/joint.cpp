@@ -42,7 +42,7 @@ bool Joint::initialize() {
 
 void Joint::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
     // Compute constraint function at current state C(x)
-    JointStruct& joints = forceTable->getJoints(index);
+    JointStruct& joints = forceTable->getJointTable()->getData(index);
     glm::vec3 Cn;
     glm::vec2 cnxy = transform(forceTable->getPosA(index), joints.rA) - transform(forceTable->getPosB(index), joints.rB);
     Cn.x = cnxy.x;
@@ -60,7 +60,7 @@ void Joint::computeConstraint(ForceTable* forceTable, std::size_t index, float a
 }
 
 void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    JointStruct& joints = forceTable->getJoints(index);
+    JointStruct& joints = forceTable->getJointTable()->getData(index);
 
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A)
@@ -84,8 +84,8 @@ void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceB
 }
 
 // Getters
-JointStruct& Joint::getData() { return solver->getForceTable()->getJoints(index); }
-const JointStruct& Joint::getData() const { return solver->getForceTable()->getJoints(index); }
+JointStruct& Joint::getData() { return solver->getForceTable()->getJointTable()->getData(index); }
+const JointStruct& Joint::getData() const { return solver->getForceTable()->getJointTable()->getData(index); }
 glm::vec2 Joint::getRA() const { return getData().rA; }
 glm::vec2 Joint::getRB() const { return getData().rB; }
 glm::vec3 Joint::getC0() const { return getData().C0; }

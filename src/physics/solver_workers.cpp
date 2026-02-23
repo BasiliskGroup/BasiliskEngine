@@ -151,9 +151,41 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     body->setPosition(pos);
 
     // update position in force table
-    for (std::size_t i = data.start; i < data.start + data.getCount(); ++i) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][i];
-        Positional& positional = forceTable->getPositional(forceData.force);
+    // MANIFOLD
+    start = data.start;
+    end = data.start + data.manifold;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        std::size_t forceIndex = forceTable->getManifoldTable()->getForceIndex(forceData.special);
+        Positional& positional = forceTable->getPositional(forceIndex);
+        positional.pos[(std::size_t) forceData.offset] = pos;
+    }
+
+    // JOINT
+    end = start + data.joint;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        std::size_t forceIndex = forceTable->getJointTable()->getForceIndex(forceData.special);
+        Positional& positional = forceTable->getPositional(forceIndex);
+        positional.pos[(std::size_t) forceData.offset] = pos;
+    }
+
+    // SPRING
+    end = start + data.spring;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        std::size_t forceIndex = forceTable->getSpringTable()->getForceIndex(forceData.special);
+        Positional& positional = forceTable->getPositional(forceIndex);
+        positional.pos[(std::size_t) forceData.offset] = pos;
+    }
+    
+    
+    // MOTOR
+    end = start + data.motor;
+    for (; start < end; ++start) {
+        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        std::size_t forceIndex = forceTable->getMotorTable()->getForceIndex(forceData.special);
+        Positional& positional = forceTable->getPositional(forceIndex);
         positional.pos[(std::size_t) forceData.offset] = pos;
     }
 }

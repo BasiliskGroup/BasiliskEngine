@@ -41,15 +41,6 @@ struct DerivativeStruct {
     bsk::mat3x3 H;
 };
 
-union SpecialParameters {
-    ManifoldData manifold;
-    JointStruct joint;
-    SpringStruct spring;
-    MotorStruct motor;
-
-    SpecialParameters() : manifold() {}
-};
-
 struct Positional {
     std::array<bsk::vec3, 2> pos;
     std::array<bsk::vec3, 2> initial;
@@ -77,7 +68,7 @@ private:
     std::vector<Parameters> parameters;
     std::vector<Derivatives> derivatives;
     std::vector<ForceType> forceTypes;
-    std::vector<SpecialParameters> specialParameters;
+    // std::vector<SpecialParameters> specialParameters;
     std::vector<Positional> positional;
 
     // used to map row vectors to new indices
@@ -138,12 +129,6 @@ public:
     Parameters& getParameters(std::size_t forceIndex) { return parameters[forceIndex]; }
     Derivatives& getDerivatives(std::size_t forceIndex) { return derivatives[forceIndex]; }
 
-    SpecialParameters& getSpecialParameters(std::size_t forceIndex) { return specialParameters[forceIndex]; }
-    ManifoldData& getManifolds(std::size_t forceIndex) { return specialParameters[forceIndex].manifold; }
-    JointStruct& getJoints(std::size_t forceIndex) { return specialParameters[forceIndex].joint; }
-    SpringStruct& getSprings(std::size_t forceIndex) { return specialParameters[forceIndex].spring; }
-    MotorStruct& getMotors(std::size_t forceIndex) { return specialParameters[forceIndex].motor; }
-
     // setters
     void setForces(std::size_t index, Force* value) { forces[index] = value; }
     void setToDelete(std::size_t index, bool value) { toDelete[index] = value; }
@@ -173,12 +158,6 @@ public:
     // full row
     void setParameters(std::size_t forceIndex, const Parameters& value) { parameters[forceIndex] = value; }
     void setDerivatives(std::size_t forceIndex, const Derivatives& value) { derivatives[forceIndex] = value; }
-
-    void setSpecialParameters(std::size_t forceIndex, const SpecialParameters& value) { specialParameters[forceIndex] = value; }
-    void setManifolds(std::size_t forceIndex, const ManifoldData& value) { specialParameters[forceIndex].manifold = value; }
-    void setJoints(std::size_t forceIndex, const JointStruct& value) { specialParameters[forceIndex].joint = value; }
-    void setSprings(std::size_t forceIndex, const SpringStruct& value) { specialParameters[forceIndex].spring = value; }
-    void setMotors(std::size_t forceIndex, const MotorStruct& value) { specialParameters[forceIndex].motor = value; }
 };
 
 }

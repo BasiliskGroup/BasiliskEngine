@@ -24,7 +24,7 @@ Motor::~Motor() {
 }
 
 void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
-    MotorStruct& motors = forceTable->getMotors(index);
+    MotorStruct& motors = forceTable->getMotorTable()->getData(index);
 
     // Compute delta angular position between the two bodies
     float dAngleA = forceTable->getPosA(index).z - forceTable->getInitialA(index).z;
@@ -47,8 +47,8 @@ void Motor::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceB
 }
 
 // Getters
-MotorStruct& Motor::getData() { return solver->getForceTable()->getMotors(index); }
-const MotorStruct& Motor::getData() const { return solver->getForceTable()->getMotors(index); }
+MotorStruct& Motor::getData() { return solver->getForceTable()->getMotorTable()->getData(index); }
+const MotorStruct& Motor::getData() const { return solver->getForceTable()->getMotorTable()->getData(index); }
 float Motor::getSpeed() const { return getData().speed; }
 
 // Setters

@@ -95,10 +95,10 @@ bool Manifold::initialize() {
 }
 
 int Manifold::rows() { return getData().numContacts * 2; }
-int Manifold::rows(ForceTable* forceTable, std::size_t index) { return forceTable->getManifolds(index).numContacts * 2; }
+int Manifold::rows(ForceTable* forceTable, std::size_t index) { return forceTable->getManifoldTable()->getData(index).numContacts * 2; }
 
 void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
-    ManifoldData& manifolds = forceTable->getManifolds(index);
+    ManifoldData& manifolds = forceTable->getManifoldTable()->getData(index);
 
     for (int i = 0; i < manifolds.numContacts; i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
@@ -121,13 +121,13 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, floa
 }
 
 void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    for (int i = 0; i < forceTable->getManifolds(index).numContacts; i++) {
+    for (int i = 0; i < forceTable->getManifoldTable()->getData(index).numContacts; i++) {
         if (body == ForceBodyOffset::A) {
-            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JAn * jacobianMask);
-            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JAt * jacobianMask);
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifoldTable()->getData(index).contacts[i].JAn * jacobianMask);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifoldTable()->getData(index).contacts[i].JAt * jacobianMask);
         } else {
-            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JBn * jacobianMask);
-            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JBt * jacobianMask);
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifoldTable()->getData(index).contacts[i].JBn * jacobianMask);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifoldTable()->getData(index).contacts[i].JBt * jacobianMask);
         }
     }
 }
@@ -137,8 +137,8 @@ Contact& Manifold::getContactRef(int index) { return getData().contacts[index]; 
 int Manifold::getNumContacts() const { return getData().numContacts; }
 float Manifold::getFriction() const { return getData().friction; }
 const Contact& Manifold::getContact(int index) const { return getData().contacts[index]; }
-ManifoldData& Manifold::getData() { return solver->getForceTable()->getManifolds(index); }
-const ManifoldData& Manifold::getData() const { return solver->getForceTable()->getManifolds(index); }
+ManifoldData& Manifold::getData() { return solver->getForceTable()->getManifoldTable()->getData(index); }
+const ManifoldData& Manifold::getData() const { return solver->getForceTable()->getManifoldTable()->getData(index); }
 
 // setters
 void Manifold::setData(const ManifoldData& value) { getData() = value; }

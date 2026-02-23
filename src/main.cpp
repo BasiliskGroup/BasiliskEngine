@@ -6,7 +6,7 @@
  #include <basilisk/physics/forces/joint.h>
  
  int main() {
-     bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk");
+     bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk", false);
  
      bsk::Scene2D* scene = new bsk::Scene2D(engine);
  
