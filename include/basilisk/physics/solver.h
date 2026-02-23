@@ -4,7 +4,6 @@
 #include "basilisk/physics/threading/scratch.h"
 #include <basilisk/util/includes.h>
 #include <basilisk/util/constants.h>
-#include <optional>
 #include <basilisk/physics/coloring/color_queue.h>
 #include <basilisk/physics/tables/adjacency.h>
 #include <basilisk/physics/tables/forceTable.h>
@@ -14,6 +13,7 @@
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
+#include <optional>
 #include <thread>
 #include <barrier>
 #include <semaphore>
@@ -172,8 +172,8 @@ public:
         }
     }
 
-    template<class TForce>
-    inline void processForce(ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
+    template<class TForce, class TForceStruct>
+    inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialForceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);

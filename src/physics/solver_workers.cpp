@@ -65,8 +65,9 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
     }
 }
 
-template<class TForce>
-inline void Solver::processForce(ForceTable* forceTable, std::size_t forceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask) {
+template<class TForce, class TForceStruct>
+inline void Solver::processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask) {
+    std::size_t forceIndex = forceTypeTable->getForceIndex(specialIndex);
     TForce::computeConstraint(forceTable, forceIndex, alpha);
     TForce::computeDerivatives(forceTable, forceIndex, body, jacobianMask);
 
@@ -117,32 +118,32 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     std::size_t end = data.start + data.manifold;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& forceIndex = forceData.force;
-        processForce<Manifold>(forceTable, forceIndex, forceData.offset, scratch, alpha, jacobianMask);
+        const std::size_t& specialIndex = forceData.special;
+        processForce<Manifold>(forceTable->getManifoldTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
     }
 
     // JOINT
     end = start + data.joint;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& forceIndex = forceData.force;
-        processForce<Joint>(forceTable, forceIndex, forceData.offset, scratch, alpha, jacobianMask);
+        const std::size_t& specialIndex = forceData.special;
+        processForce<Joint>(forceTable->getJointTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
     }
 
     // SPRING
     end = start + data.spring;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& forceIndex = forceData.force;
-        processForce<Spring>(forceTable, forceIndex, forceData.offset, scratch, alpha, jacobianMask);
+        const std::size_t& specialIndex = forceData.special;
+        processForce<Spring>(forceTable->getSpringTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
     }
 
     // MOTOR
     end = start + data.motor;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& forceIndex = forceData.force;
-        processForce<Motor>(forceTable, forceIndex, forceData.offset, scratch, alpha, jacobianMask);
+        const std::size_t& specialIndex = forceData.special;
+        processForce<Motor>(forceTable->getMotorTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
     }
 
     // Solve the SPD linear system using LDL and apply the update (Eq. 4)

@@ -412,22 +412,22 @@ void Solver::dsatur() {
             switch (force->getForceType()) {
                 case ForceType::JOINT:
                     colorGroups[color].back().joint++;
-                    tempIndices[ForceType::JOINT].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::JOINT].emplace_back(force->getForceIndex(),force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 case ForceType::MANIFOLD:
                     if (body->getResolvesCollisions() == false || other->getResolvesCollisions() == false) {
                         continue;
                     }
                     colorGroups[color].back().manifold++;
-                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getForceIndex(), force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 case ForceType::SPRING:
                     colorGroups[color].back().spring++;
-                    tempIndices[ForceType::SPRING].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::SPRING].emplace_back(force->getForceIndex(), force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 case ForceType::MOTOR:
                     colorGroups[color].back().motor++;
-                    tempIndices[ForceType::MOTOR].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::MOTOR].emplace_back(force->getForceIndex(), force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 default:
                     throw std::runtime_error("Invalid force type");

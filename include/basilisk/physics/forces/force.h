@@ -49,6 +49,7 @@ public:
     Force* getPrevB() const { return prevB; }
     std::size_t getIndex() const { return index; }
     std::size_t getSpecialIndex() const { return specialIndex; }
+    std::size_t getForceIndex() const { return index; }
     bsk::vec3& getPosA() const;
     bsk::vec3& getPosB() const;
     bsk::vec3& getInitialA() const;
@@ -74,6 +75,7 @@ public:
     void setPrevB(Force* value) { prevB = value; }
     void setIndex(std::size_t index) { this->index = index; }
     void setSpecialIndex(std::size_t index) { this->specialIndex = index; }
+    void setForceIndex(std::size_t index) { this->index = index; }
     void setPosA(const glm::vec3& value);
     void setPosB(const glm::vec3& value);
     void setInitialA(const glm::vec3& value);

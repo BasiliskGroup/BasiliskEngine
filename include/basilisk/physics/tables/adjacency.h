@@ -24,6 +24,7 @@ struct ColoredData {
 
 struct ForceEdgeIndices {
     std::size_t force;
+    std::size_t special;
     ForceBodyOffset offset;
 };
 
