@@ -14,6 +14,7 @@ struct MotorStruct {
     // padding to 16 bytes
     char _padding[12] = { 0 };
 };
+static_assert(sizeof(MotorStruct) % 16 == 0, "MotorStruct must be 16-byte aligned");
 
 // Motor force which applies a torque to two rigid bodies to achieve a desired angular speed
 class Motor : public Force {
@@ -21,11 +22,11 @@ public:
     Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque);
     ~Motor();
 
-    static int rows(ForceTable* forceTable, std::size_t index) { return 1; }
+    static int rows(ForceTable* forceTable, std::size_t specialIndex) { return 1; }
     int rows() override { return 1; }
     bool initialize() override { return true; }
-    static void computeConstraint(ForceTable* forceTable, std::size_t index, float alpha);
-    static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask);
+    static void computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha);
+    static void computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask);
     
     // Getters
     float getSpeed() const;

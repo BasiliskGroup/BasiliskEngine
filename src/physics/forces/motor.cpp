@@ -23,8 +23,9 @@ Motor::~Motor() {
     solver->getForceTable()->getMotorTable()->markAsDeleted(this->specialIndex);
 }
 
-void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
-    MotorStruct& motors = forceTable->getMotorTable()->getData(index);
+void Motor::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
+    std::size_t index = forceTable->getMotorTable()->getForceIndex(specialIndex);
+    MotorStruct& motors = forceTable->getMotorTable()->getData(specialIndex);
 
     // Compute delta angular position between the two bodies
     float dAngleA = forceTable->getPosA(index).z - forceTable->getInitialA(index).z;
@@ -35,7 +36,8 @@ void Motor::computeConstraint(ForceTable* forceTable, std::size_t index, float a
     forceTable->setC(index, 0, deltaAngle - motors.speed * forceTable->getSolver()->getDt());
 }
 
-void Motor::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
+void Motor::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
+    std::size_t index = forceTable->getMotorTable()->getForceIndex(specialIndex);
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A) {
         forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, 1.0f) * jacobianMask);
@@ -47,8 +49,8 @@ void Motor::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceB
 }
 
 // Getters
-MotorStruct& Motor::getData() { return solver->getForceTable()->getMotorTable()->getData(index); }
-const MotorStruct& Motor::getData() const { return solver->getForceTable()->getMotorTable()->getData(index); }
+MotorStruct& Motor::getData() { return solver->getForceTable()->getMotorTable()->getData(specialIndex); }
+const MotorStruct& Motor::getData() const { return solver->getForceTable()->getMotorTable()->getData(specialIndex); }
 float Motor::getSpeed() const { return getData().speed; }
 
 // Setters

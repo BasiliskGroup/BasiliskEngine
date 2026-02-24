@@ -81,6 +81,15 @@ void ForceTypeTable<T>::insert(Force* force) {
     size++;
 }
 
+template<typename T>
+void ForceTypeTable<T>::printIndices() const {
+    std::cout << "--------------------------------" << std::endl;
+    for (std::size_t i = 0; i < size; i++) {
+        std::cout << "Force " << i << " index: " << indexMap[i] << std::endl;
+    }
+    std::cout << "--------------------------------" << std::endl;
+}
+
 template class ForceTypeTable<ManifoldData>;
 template class ForceTypeTable<JointStruct>;
 template class ForceTypeTable<SpringStruct>;

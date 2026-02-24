@@ -146,7 +146,7 @@ public:
             Force* force = forceTable->getForce(forceIndex);
             if (!force) continue;
 
-            TForce::computeConstraint(forceTable, forceIndex, alpha);
+            TForce::computeConstraint(forceTable, i, alpha);
 
             for (int r = 0; r < force->rows(); r++) {
                 ParameterStruct& parameters = forceTable->getParameter(forceIndex, r);

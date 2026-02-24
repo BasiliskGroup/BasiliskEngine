@@ -40,9 +40,10 @@ bool Joint::initialize() {
     return getStiffness(0) != 0 || getStiffness(1) != 0 || getStiffness(2) != 0;
 }
 
-void Joint::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
+void Joint::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
+    std::size_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
     // Compute constraint function at current state C(x)
-    JointStruct& joints = forceTable->getJointTable()->getData(index);
+    JointStruct& joints = forceTable->getJointTable()->getData(specialIndex);
     glm::vec3 Cn;
     glm::vec2 cnxy = transform(forceTable->getPosA(index), joints.rA) - transform(forceTable->getPosB(index), joints.rB);
     Cn.x = cnxy.x;
@@ -59,8 +60,11 @@ void Joint::computeConstraint(ForceTable* forceTable, std::size_t index, float a
     }
 }
 
-void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    JointStruct& joints = forceTable->getJointTable()->getData(index);
+void Joint::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
+    std::size_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
+    JointStruct& joints = forceTable->getJointTable()->getData(specialIndex);
+    
+    std::cout << "ji: " << specialIndex << " index: " << index << "jt size: " << forceTable->getJointTable()->getSize() << std::endl;
 
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A)
@@ -84,8 +88,8 @@ void Joint::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceB
 }
 
 // Getters
-JointStruct& Joint::getData() { return solver->getForceTable()->getJointTable()->getData(index); }
-const JointStruct& Joint::getData() const { return solver->getForceTable()->getJointTable()->getData(index); }
+JointStruct& Joint::getData() { return solver->getForceTable()->getJointTable()->getData(specialIndex); }
+const JointStruct& Joint::getData() const { return solver->getForceTable()->getJointTable()->getData(specialIndex); }
 glm::vec2 Joint::getRA() const { return getData().rA; }
 glm::vec2 Joint::getRB() const { return getData().rB; }
 glm::vec3 Joint::getC0() const { return getData().C0; }

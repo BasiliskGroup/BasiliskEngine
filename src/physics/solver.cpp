@@ -289,6 +289,8 @@ void Solver::step(float dtIncoming) {
     // auto loadPositionalEnd = timeNow();
     // printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
 
+    forceTable->printIndices();
+
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
     int totalIterations = iterations + (postStabilize ? 1 : 0);

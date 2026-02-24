@@ -108,4 +108,15 @@ void ForceTable::setForceType(std::size_t index, ForceType value) {
     forceTypes[index] = value;
 }
 
+void ForceTable::printIndices() const {
+    std::cout << "Manifold indices: " << std::endl;
+    manifoldTable->printIndices();
+    std::cout << "Joint indices: " << std::endl;
+    jointTable->printIndices();
+    std::cout << "Spring indices: " << std::endl;
+    springTable->printIndices();
+    std::cout << "Motor indices: " << std::endl;
+    motorTable->printIndices();
+}
+
 }

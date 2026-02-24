@@ -68,11 +68,11 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
 template<class TForce, class TForceStruct>
 inline void Solver::processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask) {
     std::size_t forceIndex = forceTypeTable->getForceIndex(specialIndex);
-    TForce::computeConstraint(forceTable, forceIndex, alpha);
-    TForce::computeDerivatives(forceTable, forceIndex, body, jacobianMask);
+    TForce::computeConstraint(forceTable, specialIndex, alpha);
+    TForce::computeDerivatives(forceTable, specialIndex, body, jacobianMask);
 
-    int rows = TForce::rows(forceTable, forceIndex);
-    for (int r = 0; r < TForce::rows(forceTable, forceIndex); ++r) {
+    int rows = TForce::rows(forceTable, specialIndex);
+    for (int r = 0; r < rows; ++r) {
         const ParameterStruct& parameters = forceTable->getParameter(forceIndex, r);
         const DerivativeStruct& derivatives = forceTable->getDerivative(forceIndex, r);
 

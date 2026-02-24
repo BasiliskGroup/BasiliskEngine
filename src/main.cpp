@@ -13,9 +13,9 @@
      bsk::Collider* collider = new bsk::Collider({glm::vec2(0.5f, 0.5f), glm::vec2(-0.5f, 0.5f), glm::vec2(-0.5f, -0.5f), glm::vec2(0.5f, -0.5f)});
  
      // box stack
-     for (int i = 0; i < 5; i++) {
-         new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.1f * i, 1.0f + i * 1.1f), 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider);
-     }
+    //  for (int i = 0; i < 5; i++) {
+    //      new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.1f * i, 1.0f + i * 1.1f), 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider);
+    //  }
  
      // add floor
      new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f, -4.0f), 0.0f, glm::vec2(20.0f, 1.0f), glm::vec3(0.0f), collider, -1.0f);
@@ -28,6 +28,7 @@
  
          // Handle mouse input for dragging rigid bodies
          bsk::Mouse* mouse = engine->getMouse();
+         bsk::Keyboard* keyboard = engine->getKeyboard();
          bsk::StaticCamera2D* camera = scene->getCamera();
  
          // Get mouse world position
@@ -61,6 +62,12 @@
              // Delete the drag joint when mouse is released
              delete drag;
              drag = nullptr;
+         }
+
+         if (keyboard->getPressed(bsk::Key::K_SPACE)) {
+
+             // add a new node at the mouse position
+             new bsk::Node2D(scene, nullptr, nullptr, mousePos, 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider);
          }
  
          scene->update();

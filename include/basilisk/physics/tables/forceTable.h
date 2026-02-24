@@ -158,6 +158,9 @@ public:
     // full row
     void setParameters(std::size_t forceIndex, const Parameters& value) { parameters[forceIndex] = value; }
     void setDerivatives(std::size_t forceIndex, const Derivatives& value) { derivatives[forceIndex] = value; }
+
+    // debug
+    void printIndices() const;
 };
 
 }

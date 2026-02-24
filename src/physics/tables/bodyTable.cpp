@@ -25,7 +25,7 @@ BodyTable::BodyTable(std::size_t capacity) :
     
     // Initialize and bind shaders
     velocityShader = new ComputeShader(
-        readFile(internalPath("shaders/velocity.wgsl").c_str()),
+        readFile(internalPath("shaders/physics/velocity.wgsl").c_str()),
         { 
             posBuffer->handle(), 
             initialBuffer->handle(), 
