@@ -16,6 +16,8 @@ struct SpringStruct {
     // padding to 16 bytes
     char _padding[12] = { 0 };
 };
+static_assert(sizeof(SpringStruct) % 16 == 0, "SpringStruct must be 16-byte aligned");
+
 
 // Standard spring force
 class Spring : public Force
@@ -24,11 +26,11 @@ public:
     Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, float stiffness, float rest = -1);
     ~Spring();
 
-    static int rows(ForceTable* forceTable, std::size_t index) { return 1; }
+    static int rows(ForceTable* forceTable, std::size_t specialIndex) { return 1; }
     int rows() override { return 1; }
     bool initialize() override { return true; }
-    static void computeConstraint(ForceTable* forceTable, std::size_t index, float alpha);
-    static void computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask);
+    static void computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha);
+    static void computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask);
     
     // Getters
     glm::vec2 getRA() const;

@@ -28,14 +28,16 @@ Spring::~Spring() {
     solver->getForceTable()->getSpringTable()->markAsDeleted(this->specialIndex);
 }
 
-void Spring::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
+void Spring::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
+    std::size_t index = forceTable->getSpringTable()->getForceIndex(specialIndex);
     // Compute constraint function at current state C(x)
-    SpringStruct& springs = forceTable->getSprings(index);
+    SpringStruct& springs = forceTable->getSpringTable()->getData(specialIndex);
     forceTable->setC(index, 0, length(transform(forceTable->getPosA(index), springs.rA) - transform(forceTable->getPosB(index), springs.rB)) - springs.rest);
 }
 
-void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    SpringStruct& springs = forceTable->getSprings(index);
+void Spring::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
+    std::size_t index = forceTable->getSpringTable()->getForceIndex(specialIndex);
+    SpringStruct& springs = forceTable->getSpringTable()->getData(specialIndex);
 
     // Compute the first and second derivatives for the desired body
     // GLM matrices are column-major: mat2(x1, y1, x2, y2) = columns (x1,x2), (y1,y2)
@@ -89,8 +91,8 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t index, Force
 }
 
 // Getters
-SpringStruct& Spring::getData() { return solver->getForceTable()->getSprings(index); }
-const SpringStruct& Spring::getData() const { return solver->getForceTable()->getSprings(index); }
+SpringStruct& Spring::getData() { return solver->getForceTable()->getSpringTable()->getData(specialIndex); }
+const SpringStruct& Spring::getData() const { return solver->getForceTable()->getSpringTable()->getData(specialIndex); }
 glm::vec2 Spring::getRA() const { return getData().rA; }
 glm::vec2 Spring::getRB() const { return getData().rB; }
 float Spring::getRest() const { return getData().rest; }

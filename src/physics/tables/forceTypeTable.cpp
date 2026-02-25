@@ -5,6 +5,7 @@
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
 
+
 namespace bsk::internal {
 
 template<typename T>
@@ -79,6 +80,15 @@ void ForceTypeTable<T>::insert(Force* force) {
 
     force->setSpecialIndex(size);
     size++;
+}
+
+template<typename T>
+void ForceTypeTable<T>::printIndices() const {
+    std::cout << "--------------------------------" << std::endl;
+    for (std::size_t i = 0; i < size; i++) {
+        std::cout << "Force " << i << " index: " << indexMap[i] << std::endl;
+    }
+    std::cout << "--------------------------------" << std::endl;
 }
 
 template class ForceTypeTable<ManifoldData>;

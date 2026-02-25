@@ -95,16 +95,17 @@ bool Manifold::initialize() {
 }
 
 int Manifold::rows() { return getData().numContacts * 2; }
-int Manifold::rows(ForceTable* forceTable, std::size_t index) { return forceTable->getManifolds(index).numContacts * 2; }
+int Manifold::rows(ForceTable* forceTable, std::size_t specialIndex) { return forceTable->getManifoldTable()->getData(specialIndex).numContacts * 2; }
 
-void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, float alpha) {
-    ManifoldData& manifolds = forceTable->getManifolds(index);
+void Manifold::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
+    std::size_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
+    ManifoldData& manifolds = forceTable->getManifoldTable()->getData(specialIndex);
 
     for (int i = 0; i < manifolds.numContacts; i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
         // Use contact Jacobians directly: C = C0 + J_A·dpA + J_B·dpB (table stores only one J per row)
-        glm::vec3 dpA = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::A)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::A)];
-        glm::vec3 dpB = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::B)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::B)];
+        glm::vec3 dpA = forceTable->getPosA(index) - forceTable->getInitialA(index);
+        glm::vec3 dpB = forceTable->getPosB(index) - forceTable->getInitialB(index);
 
         const Contact& c = manifolds.contacts[i];
         forceTable->setC(index, i * 2 + JN, c.C0.x * (1 - alpha) + glm::dot(c.JAn, dpA) + glm::dot(c.JBn, dpB));
@@ -120,14 +121,15 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t index, floa
     }
 }
 
-void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t index, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    for (int i = 0; i < forceTable->getManifolds(index).numContacts; i++) {
+void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
+    std::size_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
+    for (int i = 0; i < forceTable->getManifoldTable()->getData(specialIndex).numContacts; i++) {
         if (body == ForceBodyOffset::A) {
-            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JAn * jacobianMask);
-            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JAt * jacobianMask);
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JAn * jacobianMask);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JAt * jacobianMask);
         } else {
-            forceTable->setJ(index, i * 2 + JN, forceTable->getManifolds(index).contacts[i].JBn * jacobianMask);
-            forceTable->setJ(index, i * 2 + JT, forceTable->getManifolds(index).contacts[i].JBt * jacobianMask);
+            forceTable->setJ(index, i * 2 + JN, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JBn * jacobianMask);
+            forceTable->setJ(index, i * 2 + JT, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JBt * jacobianMask);
         }
     }
 }
@@ -137,8 +139,8 @@ Contact& Manifold::getContactRef(int index) { return getData().contacts[index]; 
 int Manifold::getNumContacts() const { return getData().numContacts; }
 float Manifold::getFriction() const { return getData().friction; }
 const Contact& Manifold::getContact(int index) const { return getData().contacts[index]; }
-ManifoldData& Manifold::getData() { return solver->getForceTable()->getManifolds(index); }
-const ManifoldData& Manifold::getData() const { return solver->getForceTable()->getManifolds(index); }
+ManifoldData& Manifold::getData() { return solver->getForceTable()->getManifoldTable()->getData(specialIndex); }
+const ManifoldData& Manifold::getData() const { return solver->getForceTable()->getManifoldTable()->getData(specialIndex); }
 
 // setters
 void Manifold::setData(const ManifoldData& value) { getData() = value; }
