@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/tables/virtualTable.h>
+#include <basilisk/compute/gpuWrapper.hpp>
+
 
 namespace bsk::internal {
 

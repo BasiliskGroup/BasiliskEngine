@@ -50,10 +50,10 @@ public:
     std::size_t getIndex() const { return index; }
     std::size_t getSpecialIndex() const { return specialIndex; }
     std::size_t getForceIndex() const { return index; }
-    bsk::vec3& getPosA() const;
-    bsk::vec3& getPosB() const;
-    bsk::vec3& getInitialA() const;
-    bsk::vec3& getInitialB() const;
+    glm::vec3 getPosA() const;
+    glm::vec3 getPosB() const;
+    glm::vec3 getInitialA() const;
+    glm::vec3 getInitialB() const;
     ForceType getForceType() const;
 
     bsk::vec3& getJ(int index) const;

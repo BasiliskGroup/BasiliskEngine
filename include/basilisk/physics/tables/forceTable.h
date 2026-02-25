@@ -41,9 +41,14 @@ struct DerivativeStruct {
     bsk::mat3x3 H;
 };
 
-struct Positional {
-    std::array<bsk::vec3, 2> pos;
-    std::array<bsk::vec3, 2> initial;
+// struct Positional {
+//     std::array<bsk::vec3, 2> pos;
+//     std::array<bsk::vec3, 2> initial;
+// };
+
+struct Bodies {
+    uint32_t a;
+    uint32_t b;
 };
 
 // ------------------------------------------------------------
@@ -69,7 +74,8 @@ private:
     std::vector<Derivatives> derivatives;
     std::vector<ForceType> forceTypes;
     // std::vector<SpecialParameters> specialParameters;
-    std::vector<Positional> positional;
+    // std::vector<Positional> positional;
+    std::vector<Bodies> bodies;
 
     // used to map row vectors to new indices
     std::vector<std::size_t> indexMap;
@@ -97,11 +103,12 @@ public:
     bool getToDelete(std::size_t index) { return toDelete[index]; }
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
-    Positional& getPositional(std::size_t index) { return positional[index]; }
-    bsk::vec3& getPosA(std::size_t index) { return positional[index].pos[0]; }
-    bsk::vec3& getPosB(std::size_t index) { return positional[index].pos[1]; }
-    bsk::vec3& getInitialA(std::size_t index) { return positional[index].initial[0]; }
-    bsk::vec3& getInitialB(std::size_t index) { return positional[index].initial[1]; }
+    Bodies& getBodies(std::size_t index) { return bodies[index]; }
+    // Positional& getPositional(std::size_t index) { return positional[index]; }
+    glm::vec3 getPosA(std::size_t index);
+    glm::vec3 getPosB(std::size_t index);
+    glm::vec3 getInitialA(std::size_t index);
+    glm::vec3 getInitialB(std::size_t index);
 
     Solver* getSolver() { return solver; }
     ForceTypeTable<ManifoldData>* getManifoldTable() { return manifoldTable; }
@@ -134,11 +141,11 @@ public:
     void setToDelete(std::size_t index, bool value) { toDelete[index] = value; }
     void setRows(std::size_t index, int value) { rows[index] = value; }
     void setForceType(std::size_t index, ForceType value);
-    void setPositional(std::size_t index, const Positional& value) { positional[index] = value; }
-    void setPosA(std::size_t index, const glm::vec3& value) { positional[index].pos[static_cast<std::size_t>(ForceBodyOffset::A)] = value; }
-    void setPosB(std::size_t index, const glm::vec3& value) { positional[index].pos[static_cast<std::size_t>(ForceBodyOffset::B)] = value; }
-    void setInitialA(std::size_t index, const glm::vec3& value) { positional[index].initial[static_cast<std::size_t>(ForceBodyOffset::A)] = value; }
-    void setInitialB(std::size_t index, const glm::vec3& value) { positional[index].initial[static_cast<std::size_t>(ForceBodyOffset::B)] = value; }
+    void setBodies(std::size_t index, const Bodies& value) { bodies[index] = value; }
+    void setPosA(std::size_t index, const glm::vec3& value);
+    void setPosB(std::size_t index, const glm::vec3& value);
+    void setInitialA(std::size_t index, const glm::vec3& value);
+    void setInitialB(std::size_t index, const glm::vec3& value);
     void setSolver(Solver* value) { solver = value; }
     
     // index specific

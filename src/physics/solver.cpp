@@ -280,16 +280,16 @@ void Solver::step(float dtIncoming) {
 
     // Load initial positions into forces
     // auto loadPositionalStart = timeNow();
-    for (Force* force = forces; force != nullptr; force = force->getNext()) {
-        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
-    }
+    // for (Force* force = forces; force != nullptr; force = force->getNext()) {
+    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
+    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
+    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
+    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
+    // }
     // auto loadPositionalEnd = timeNow();
     // printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
 
-    forceTable->printIndices();
+    // forceTable->printIndices();
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
@@ -453,9 +453,6 @@ void Solver::dsatur() {
             forceEdgeIndices[color].insert(forceEdgeIndices[color].end(), tempIndices[i].begin(), tempIndices[i].end());
         }
     }
-
-    // Print number of colors used
-    // std::cout << "Number of colors used: " << colorGroups.size() << std::endl;
 }
 
 Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {

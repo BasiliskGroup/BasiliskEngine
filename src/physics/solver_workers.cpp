@@ -100,7 +100,7 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     Rigid* body = data.body; // TODO load mass, moment, and interial in here for entire solving stage
 
     // Skip static / kinematic bodies
-    if (body->getMass() <= 0)
+    if (data.mass <= 0)
         return;
 
     // Initialize left and right hand sides of the linear system (Eqs. 5, 6)
@@ -152,42 +152,42 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
 
     // update position in force table
     // MANIFOLD
-    start = data.start;
-    end = data.start + data.manifold;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        std::size_t forceIndex = forceTable->getManifoldTable()->getForceIndex(forceData.special);
-        Positional& positional = forceTable->getPositional(forceIndex);
-        positional.pos[(std::size_t) forceData.offset] = pos;
-    }
+    // start = data.start;
+    // end = data.start + data.manifold;
+    // for (; start < end; ++start) {
+    //     const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+    //     std::size_t forceIndex = forceTable->getManifoldTable()->getForceIndex(forceData.special);
+    //     Positional& positional = forceTable->getPositional(forceIndex);
+    //     positional.pos[(std::size_t) forceData.offset] = pos;
+    // }
 
-    // JOINT
-    end = start + data.joint;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        std::size_t forceIndex = forceTable->getJointTable()->getForceIndex(forceData.special);
-        Positional& positional = forceTable->getPositional(forceIndex);
-        positional.pos[(std::size_t) forceData.offset] = pos;
-    }
+    // // JOINT
+    // end = start + data.joint;
+    // for (; start < end; ++start) {
+    //     const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+    //     std::size_t forceIndex = forceTable->getJointTable()->getForceIndex(forceData.special);
+    //     Positional& positional = forceTable->getPositional(forceIndex);
+    //     positional.pos[(std::size_t) forceData.offset] = pos;
+    // }
 
-    // SPRING
-    end = start + data.spring;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        std::size_t forceIndex = forceTable->getSpringTable()->getForceIndex(forceData.special);
-        Positional& positional = forceTable->getPositional(forceIndex);
-        positional.pos[(std::size_t) forceData.offset] = pos;
-    }
+    // // SPRING
+    // end = start + data.spring;
+    // for (; start < end; ++start) {
+    //     const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+    //     std::size_t forceIndex = forceTable->getSpringTable()->getForceIndex(forceData.special);
+    //     Positional& positional = forceTable->getPositional(forceIndex);
+    //     positional.pos[(std::size_t) forceData.offset] = pos;
+    // }
     
     
-    // MOTOR
-    end = start + data.motor;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        std::size_t forceIndex = forceTable->getMotorTable()->getForceIndex(forceData.special);
-        Positional& positional = forceTable->getPositional(forceIndex);
-        positional.pos[(std::size_t) forceData.offset] = pos;
-    }
+    // // MOTOR
+    // end = start + data.motor;
+    // for (; start < end; ++start) {
+    //     const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+    //     std::size_t forceIndex = forceTable->getMotorTable()->getForceIndex(forceData.special);
+    //     Positional& positional = forceTable->getPositional(forceIndex);
+    //     positional.pos[(std::size_t) forceData.offset] = pos;
+    // }
 }
 
 // ------------------------------------------------------------

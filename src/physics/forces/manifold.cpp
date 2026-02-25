@@ -104,8 +104,8 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t specialInde
     for (int i = 0; i < manifolds.numContacts; i++) {
         // Compute the Taylor series approximation of the constraint function C(x) (Sec 4)
         // Use contact Jacobians directly: C = C0 + J_A·dpA + J_B·dpB (table stores only one J per row)
-        glm::vec3 dpA = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::A)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::A)];
-        glm::vec3 dpB = forceTable->getPositional(index).pos[static_cast<std::size_t>(ForceBodyOffset::B)] - forceTable->getPositional(index).initial[static_cast<std::size_t>(ForceBodyOffset::B)];
+        glm::vec3 dpA = forceTable->getPosA(index) - forceTable->getInitialA(index);
+        glm::vec3 dpB = forceTable->getPosB(index) - forceTable->getInitialB(index);
 
         const Contact& c = manifolds.contacts[i];
         forceTable->setC(index, i * 2 + JN, c.C0.x * (1 - alpha) + glm::dot(c.JAn, dpA) + glm::dot(c.JBn, dpB));

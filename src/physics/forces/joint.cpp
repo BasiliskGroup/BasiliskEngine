@@ -63,8 +63,6 @@ void Joint::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, 
 void Joint::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
     std::size_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
     JointStruct& joints = forceTable->getJointTable()->getData(specialIndex);
-    
-    std::cout << "ji: " << specialIndex << " index: " << index << "jt size: " << forceTable->getJointTable()->getSize() << std::endl;
 
     // Compute the first and second derivatives for the desired body
     if (body == ForceBodyOffset::A)
