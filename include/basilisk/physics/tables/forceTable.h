@@ -42,16 +42,23 @@ struct DerivativeStruct {
 };
 static_assert(sizeof(DerivativeStruct) % 16 == 0, "DerivativeStruct must be 16-byte aligned");
 
-struct Bodies {
+struct SolverSidesStruct {
+    bsk::vec3 rhs;
+    bsk::mat3x3 lhs;
+};
+static_assert(sizeof(SolverSidesStruct) % 16 == 0, "SolverSides must be 16-byte aligned");
+
+struct BodyStruct {
     uint32_t a;
     uint32_t b;
 
     uint32_t _padding[2];
 };
-static_assert(sizeof(Bodies) % 16 == 0, "Bodies must be 16-byte aligned");
+static_assert(sizeof(BodyStruct) % 16 == 0, "BodyStruct must be 16-byte aligned");
 
 using Parameters = std::array<ParameterStruct, MAX_ROWS>;
 using Derivatives = std::array<DerivativeStruct, MAX_ROWS>;
+using SolverSides = std::array<SolverSidesStruct, MAX_ROWS>;
 
 class Force;
 
@@ -68,7 +75,8 @@ private:
     std::vector<Parameters> parameters;
     std::vector<Derivatives> derivatives;
     std::vector<ForceType> forceTypes;
-    std::vector<Bodies> bodies;
+    std::vector<BodyStruct> bodies;
+    std::vector<SolverSides> solverSides;
 
     // used to map row vectors to new indices
     std::vector<std::size_t> indexMap;
@@ -98,7 +106,7 @@ public:
     bool getToDelete(std::size_t index) { return toDelete[index]; }
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
-    Bodies& getBodies(std::size_t index) { return bodies[index]; }
+    BodyStruct& getBodies(std::size_t index) { return bodies[index]; }
     glm::vec3 getPosA(std::size_t index);
     glm::vec3 getPosB(std::size_t index);
     glm::vec3 getInitialA(std::size_t index);
@@ -120,6 +128,8 @@ public:
     float getFracture(std::size_t forceIndex, int row) { return parameters[forceIndex][row].fracture; }
     float getPenalty(std::size_t forceIndex, int row) { return parameters[forceIndex][row].penalty; }
     float getLambda(std::size_t forceIndex, int row) { return parameters[forceIndex][row].lambda; }
+    bsk::vec3& getRhs(std::size_t forceIndex, int row) { return solverSides[forceIndex][row].rhs; }
+    bsk::mat3x3& getLhs(std::size_t forceIndex, int row) { return solverSides[forceIndex][row].lhs; }
 
     ParameterStruct& getParameter(std::size_t forceIndex, int row) { return parameters[forceIndex][row]; }
     DerivativeStruct& getDerivative(std::size_t forceIndex, int row) { return derivatives[forceIndex][row]; }
@@ -135,13 +145,15 @@ public:
     void setToDelete(std::size_t index, bool value) { toDelete[index] = value; }
     void setRows(std::size_t index, int value) { rows[index] = value; }
     void setForceType(std::size_t index, ForceType value);
-    void setBodies(std::size_t index, const Bodies& value) { bodies[index] = value; }
+    void setBodies(std::size_t index, const BodyStruct& value) { bodies[index] = value; }
     void setPosA(std::size_t index, const glm::vec3& value);
     void setPosB(std::size_t index, const glm::vec3& value);
     void setInitialA(std::size_t index, const glm::vec3& value);
     void setInitialB(std::size_t index, const glm::vec3& value);
     void setSolver(Solver* value) { solver = value; }
-    
+    void setRhs(std::size_t forceIndex, int row, const bsk::vec3& value) { solverSides[forceIndex][row].rhs = value; }
+    void setLhs(std::size_t forceIndex, int row, const bsk::mat3x3& value) { solverSides[forceIndex][row].lhs = value; }
+
     // index specific
     void setJ(std::size_t forceIndex, int row, const glm::vec3& value) { derivatives[forceIndex][row].J = value; }
     void setH(std::size_t forceIndex, int row, const glm::mat3& value) { derivatives[forceIndex][row].H = value; }

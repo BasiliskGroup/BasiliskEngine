@@ -32,7 +32,7 @@ void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        forces, toDelete, parameters, derivatives, forceTypes, rows, bodies, indexMap
+        forces, toDelete, parameters, derivatives, forceTypes, rows, bodies, indexMap, solverSides
     );
 
     capacity = newCapacity;
@@ -52,7 +52,7 @@ void ForceTable::compact() {
     }
 
     compactTensors(toDelete, size,
-        forces, parameters, derivatives, forceTypes, rows, bodies
+        forces, parameters, derivatives, forceTypes, rows, bodies, solverSides
     );
 
     size = active;
