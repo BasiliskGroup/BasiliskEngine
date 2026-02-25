@@ -3,6 +3,8 @@
 
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/tables/virtualTable.h>
+#include <basilisk/compute/gpuWrapper.hpp>
+
 
 namespace bsk::internal {
 
@@ -31,6 +33,13 @@ public:
 
     std::size_t getForceIndex(std::size_t typeTableIndex) const { return indexMap[typeTableIndex]; }
     Force* getForce(std::size_t typeTableIndex) const { return forces[typeTableIndex]; }
+    T& getData(std::size_t typeTableIndex) { return data[typeTableIndex]; }
+
+    std::size_t getSize() const { return size; }
+    std::size_t getCapacity() const { return capacity; }
+
+    // debug
+    void printIndices() const;
 };
 
 }

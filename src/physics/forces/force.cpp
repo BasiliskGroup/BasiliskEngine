@@ -64,10 +64,10 @@ float Force::getFracture(int index) const { return forceTable->getFracture(this-
 float Force::getPenalty(int index) const { return forceTable->getPenalty(this->index, index); }
 float Force::getLambda(int index) const { return forceTable->getLambda(this->index, index); }
 
-bsk::vec3& Force::getPosA() const { return forceTable->getPosA(index); }
-bsk::vec3& Force::getPosB() const { return forceTable->getPosB(index); }
-bsk::vec3& Force::getInitialA() const { return forceTable->getInitialA(index); }
-bsk::vec3& Force::getInitialB() const { return forceTable->getInitialB(index); }
+glm::vec3 Force::getPosA() const { return forceTable->getPosA(index); }
+glm::vec3 Force::getPosB() const { return forceTable->getPosB(index); }
+glm::vec3 Force::getInitialA() const { return forceTable->getInitialA(index); }
+glm::vec3 Force::getInitialB() const { return forceTable->getInitialB(index); }
 ForceType Force::getForceType() const { return forceTable->getForceType(index); }
 
 // setters
