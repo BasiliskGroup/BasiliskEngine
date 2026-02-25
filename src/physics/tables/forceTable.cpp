@@ -45,15 +45,10 @@ void ForceTable::compact() {
         return;
     }
 
-    // Build index map: indexMap[oldIndex] = newIndex (SIZE_MAX for deleted)
+    // Build index map: indexMap[oldIndex] = newIndex (-1 for deleted)
     std::size_t dst = 0;
     for (std::size_t src = 0; src < size; ++src) {
-        if (!toDelete[src]) {
-            indexMap[src] = dst;
-            ++dst;
-        } else {
-            indexMap[src] = SIZE_MAX;
-        }
+        indexMap[src] = !toDelete[src] ? dst++ : -1;
     }
 
     compactTensors(toDelete, size,
@@ -162,6 +157,17 @@ void ForceTable::setInitialA(std::size_t index, const glm::vec3& value) {
 void ForceTable::setInitialB(std::size_t index, const glm::vec3& value) {
     if (bodies[index].b != -1) {
         solver->getBodyTable()->setInitial(bodies[index].b, value);
+    }
+}
+
+void ForceTable::remapBodyIndices() {
+    for (uint i = 0; i < size; i++) {
+        if (bodies[i].a != -1) {
+            bodies[i].a = solver->getBodyTable()->getMappedIndex(bodies[i].a);
+        }
+        if (bodies[i].b != -1) {
+            bodies[i].b = solver->getBodyTable()->getMappedIndex(bodies[i].b);
+        }
     }
 }
 

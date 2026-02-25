@@ -12,9 +12,12 @@ class Rigid;
 class Collider;
 class BVH;
 class ColliderTable;
+class Solver;
 
 class BodyTable : public VirtualTable {
 private:
+    Solver* solver;
+
     // CPU side data
     std::vector<Rigid*> bodies;
     std::vector<bool> toDelete;
@@ -36,6 +39,7 @@ private:
     std::vector<bool> updated;
     std::vector<int> color;
     std::vector<glm::vec3> jacobianMask;
+    std::vector<std::size_t> indexMap;
 
     BVH* bvh;
 
@@ -52,7 +56,7 @@ private:
     ComputeShader* velocityShader;
 
 public:
-    BodyTable(std::size_t capacity);
+    BodyTable(Solver* solver, std::size_t capacity);
     ~BodyTable();
 
     void computeTransforms(); // TODO, determine if this would be better per-object
@@ -89,8 +93,9 @@ public:
     bool getUpdated(std::size_t index) { return updated[index]; }
     int getColor(std::size_t index) { return color[index]; }
     BVH* getBVH() { return bvh; }
-    float getDensity(std::size_t index); //{ return mass[index] / (scale[index].x * scale[index].y * collider[index]->getArea()); }
+    float getDensity(std::size_t index);
     glm::vec3& getJacobianMask(std::size_t index) { return jacobianMask[index]; }
+    std::size_t getMappedIndex(std::size_t index) { return indexMap[index]; }
 
     // setters
     void setBodies(std::size_t index, Rigid* value) { bodies[index] = value; }
@@ -111,7 +116,7 @@ public:
     void setRmat(std::size_t index, const glm::mat2x2& value) { rmat[index] = value; }
     void setUpdated(std::size_t index, bool value) { updated[index] = value; }
     void setColor(std::size_t index, int value) { color[index] = value; }
-    void setDensity(std::size_t index, float value); //{ density[index] = value; }
+    void setDensity(std::size_t index, float value);
     void setJacobianMask(std::size_t index, const glm::vec3& value) { jacobianMask[index] = value; }
 
 private:

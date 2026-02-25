@@ -35,7 +35,7 @@ Solver::Solver() :
     workers(),
     forceEdgeIndices()
 {
-    this->bodyTable = new BodyTable(128);
+    this->bodyTable = new BodyTable(this, 128);
     this->forceTable = new ForceTable(128);
     this->forceTable->setSolver(this);
     defaultParams();

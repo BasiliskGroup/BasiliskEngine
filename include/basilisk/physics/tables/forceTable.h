@@ -32,31 +32,26 @@ struct ParameterStruct {
     float penalty;
     float lambda;
 
-    // TODO determine if we need padding (vec4 aligned)
-    // float _padding;
+    uint32_t _padding;
 };
+static_assert(sizeof(ParameterStruct) % 16 == 0, "ParameterStruct must be 16-byte aligned");
 
 struct DerivativeStruct {
     bsk::vec3 J;
     bsk::mat3x3 H;
 };
-
-// struct Positional {
-//     std::array<bsk::vec3, 2> pos;
-//     std::array<bsk::vec3, 2> initial;
-// };
+static_assert(sizeof(DerivativeStruct) % 16 == 0, "DerivativeStruct must be 16-byte aligned");
 
 struct Bodies {
     uint32_t a;
     uint32_t b;
-};
 
-// ------------------------------------------------------------
-// Force Table Types
-// ------------------------------------------------------------
+    uint32_t _padding[2];
+};
+static_assert(sizeof(Bodies) % 16 == 0, "Bodies must be 16-byte aligned");
+
 using Parameters = std::array<ParameterStruct, MAX_ROWS>;
 using Derivatives = std::array<DerivativeStruct, MAX_ROWS>;
-
 
 class Force;
 
@@ -73,8 +68,6 @@ private:
     std::vector<Parameters> parameters;
     std::vector<Derivatives> derivatives;
     std::vector<ForceType> forceTypes;
-    // std::vector<SpecialParameters> specialParameters;
-    // std::vector<Positional> positional;
     std::vector<Bodies> bodies;
 
     // used to map row vectors to new indices
@@ -98,13 +91,14 @@ public:
     void compact();
     void insert(Force* force);
 
+    void remapBodyIndices();
+
     // getters 
     Force* getForce(std::size_t index) { return forces[index]; }
     bool getToDelete(std::size_t index) { return toDelete[index]; }
     int getRows(std::size_t index) { return rows[index]; }
     ForceType getForceType(std::size_t index) { return forceTypes[index]; }
     Bodies& getBodies(std::size_t index) { return bodies[index]; }
-    // Positional& getPositional(std::size_t index) { return positional[index]; }
     glm::vec3 getPosA(std::size_t index);
     glm::vec3 getPosB(std::size_t index);
     glm::vec3 getInitialA(std::size_t index);
