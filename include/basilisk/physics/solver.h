@@ -13,6 +13,7 @@
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
+#include <basilisk/compute/gpuWrapper.hpp>
 #include <optional>
 #include <thread>
 #include <barrier>
@@ -79,6 +80,9 @@ private:
     std::atomic<bool> running;
     std::vector<std::thread> workers;
 
+    // shaders
+    ComputeShader* velocityShader = nullptr;
+
 public:
     Solver();
     ~Solver();
@@ -127,6 +131,9 @@ public:
 
     // Threading
     void workerLoop(unsigned int threadID);
+
+    // GPU
+    void rebuildVelocityShader();
 
     // Stages
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);

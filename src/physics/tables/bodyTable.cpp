@@ -6,11 +6,11 @@
 #include <basilisk/util/fileHandling.h>
 #include <basilisk/util/print.h>
 #include <basilisk/physics/tables/colliderTable.h>
-
+#include <basilisk/compute/uniforms.hpp>
 
 namespace bsk::internal {
 
-BodyTable::BodyTable(Solver* solver, std::size_t capacity) : 
+BodyTable::BodyTable(Solver* solver, std::size_t capacity, ComputeShader*& velocityShader) : 
     solver(solver),
     bvh(new BVH()),
     posBuffer(new GpuBuffer<bsk::vec3>(capacity)),
@@ -20,22 +20,10 @@ BodyTable::BodyTable(Solver* solver, std::size_t capacity) :
     prevVelBuffer(new GpuBuffer<bsk::vec3>(capacity)),
     frictionBuffer(new GpuBuffer<float>(capacity)),
     massBuffer(new GpuBuffer<float>(capacity)),
-    momentBuffer(new GpuBuffer<float>(capacity))
+    momentBuffer(new GpuBuffer<float>(capacity)),
+    velocityShader(velocityShader)
 {
     resize(capacity); 
-    
-    // Initialize and bind shaders
-    velocityShader = new ComputeShader(
-        readFile(internalPath("shaders/physics/velocity.wgsl").c_str()),
-        { 
-            posBuffer->handle(), 
-            initialBuffer->handle(), 
-            massBuffer->handle(), 
-            velBuffer->handle(), 
-            prevVelBuffer->handle() 
-        },
-        sizeof(VelocityUniforms)
-    );
 }
 
 BodyTable::~BodyTable() {
@@ -144,48 +132,31 @@ void BodyTable::resize(std::size_t newCapacity) {
     // Recreate GPU buffers and velocity shader only when growing an already-initialized table.
     // Skip on first call from constructor (capacity was 0, velocityShader not yet created).
     if (hadGpuResources) {
-        delete velocityShader;
-        velocityShader = nullptr;
-        delete posBuffer;
-        delete initialBuffer;
-        delete inertialBuffer;
-        delete velBuffer;
-        delete prevVelBuffer;
-        delete frictionBuffer;
-        delete massBuffer;
-        delete momentBuffer;
-        posBuffer = new GpuBuffer<bsk::vec3>(capacity);
-        initialBuffer = new GpuBuffer<bsk::vec3>(capacity);
-        inertialBuffer = new GpuBuffer<bsk::vec3>(capacity);
-        velBuffer = new GpuBuffer<bsk::vec3>(capacity);
-        prevVelBuffer = new GpuBuffer<bsk::vec3>(capacity);
-        frictionBuffer = new GpuBuffer<float>(capacity);
-        massBuffer = new GpuBuffer<float>(capacity);
-        momentBuffer = new GpuBuffer<float>(capacity);
-        velocityShader = new ComputeShader(
-            readFile(internalPath("shaders/velocity.wgsl").c_str()),
-            {
-                posBuffer->handle(),
-                initialBuffer->handle(),
-                massBuffer->handle(),
-                velBuffer->handle(),
-                prevVelBuffer->handle()
-            },
-            sizeof(VelocityUniforms)
+        expandGpuBuffers(newCapacity,
+            posBuffer,
+            initialBuffer,
+            inertialBuffer,
+            velBuffer,
+            prevVelBuffer,
+            frictionBuffer,
+            massBuffer,
+            momentBuffer
         );
+
+        solver->rebuildVelocityShader();
     }
 }
 
 void BodyTable::compact() {
     // do a quick check to see if we need to run more complex compact function
-    uint active = numValid(toDelete, size);
+    std::size_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
 
     // Build indexMap: oldIndex -> newIndex (-1 for deleted entries)
-    uint dst = 0;
-    for (uint i = 0; i < size; i++) {
+    std::size_t dst = 0;
+    for (std::size_t i = 0; i < size; i++) {
         indexMap[i] = !toDelete[i] ? dst++ : -1;
     }
 
@@ -199,7 +170,7 @@ bodies, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, mom
     // remap body indices
     solver->getForceTable()->remapBodyIndices();
 
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         toDelete[i] = false;
         bodies[i]->setIndex(i);
     }
@@ -237,7 +208,7 @@ void BodyTable::insert(Rigid* body, glm::vec3 position, glm::vec2 size, float de
 }
 
 void BodyTable::writeToNodes() {
-    for (uint i = 0; i < size; i++) {
+    for (std::size_t i = 0; i < size; i++) {
         Node2D* node = bodies[i]->getNode();
         glm::vec3& pos = this->pos[i];
         node->setPosition(pos);

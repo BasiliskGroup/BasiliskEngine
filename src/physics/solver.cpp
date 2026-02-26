@@ -11,6 +11,8 @@
 #include <basilisk/util/time.h>
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/physics/threading/scratch.h>
+#include <basilisk/util/fileHandling.h>
+#include <basilisk/compute/uniforms.hpp>
 
 
 namespace bsk::internal {
@@ -35,7 +37,7 @@ Solver::Solver() :
     workers(),
     forceEdgeIndices()
 {
-    this->bodyTable = new BodyTable(this, 128);
+    this->bodyTable = new BodyTable(this, 8, velocityShader);
     this->forceTable = new ForceTable(128);
     this->forceTable->setSolver(this);
     defaultParams();
@@ -44,6 +46,9 @@ Solver::Solver() :
     for (unsigned int i = 0; i < NUM_THREADS; i++) {
         workers.emplace_back(&Solver::workerLoop, this, i);
     }
+
+    // set up shaders
+    rebuildVelocityShader();
 }
 
 Solver::~Solver() {
@@ -184,13 +189,13 @@ void Solver::step(float dtIncoming) {
     this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
 
     // compact body table
-    // auto compactBodyTableStart = timeNow();
+    auto compactBodyTableStart = timeNow();
     bodyTable->compact();
-    // auto compactBodyTableEnd = timeNow();
-    // printDurationUS(compactBodyTableStart, compactBodyTableEnd, "Compact Body Table: ");
+    auto compactBodyTableEnd = timeNow();
+    printDurationUS(compactBodyTableStart, compactBodyTableEnd, "Compact Body Table: ");
 
     // Perform broadphase collision detection
-    // auto broadphaseStart = timeNow();
+    auto broadphaseStart = timeNow();
     bodyTable->getBVH()->update();
 
     // Use BVH to find potential collisions
@@ -211,10 +216,10 @@ void Solver::step(float dtIncoming) {
     }
     
     auto broadphaseEnd = timeNow();
-    // printDurationUS(broadphaseStart, broadphaseEnd, "Broadphase: ");
+    printDurationUS(broadphaseStart, broadphaseEnd, "Broadphase: ");
 
     // Initialize and warmstart forces
-    // auto warmstartForcesStart = timeNow();
+    auto warmstartForcesStart = timeNow();
     for (Force* force = forces; force != nullptr;) {
         // Initialization can including caching anything that is constant over the step
         if (!force->initialize()) {
@@ -251,51 +256,38 @@ void Solver::step(float dtIncoming) {
             force = force->getNext();
         }
     }
-    // auto warmstartForcesEnd = timeNow();
-    // printDurationUS(warmstartForcesStart, warmstartForcesEnd, "Warmstart Forces: ");
+    auto warmstartForcesEnd = timeNow();
+    printDurationUS(warmstartForcesStart, warmstartForcesEnd, "Warmstart Forces: ");
 
-    // auto warmstartBodiesStart = timeNow();
+    auto warmstartBodiesStart = timeNow();
     bodyTable->warmstartBodies(dt, gravity);
-    // auto warmstartBodiesEnd = timeNow();
-    // printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
+    auto warmstartBodiesEnd = timeNow();
+    printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
 
     // compact force table
-    // auto compactForceTableStart = timeNow();
+    auto compactForceTableStart = timeNow();
     forceTable->compact();
-    // auto compactForceTableEnd = timeNow();
-    // printDurationUS(compactForceTableStart, compactForceTableEnd, "Compact Force Table: ");
+    auto compactForceTableEnd = timeNow();
+    printDurationUS(compactForceTableStart, compactForceTableEnd, "Compact Force Table: ");
 
     // Print number of bodies and forces before coloring
-    // std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
-    // std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
-    // std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
-    // std::cout << "Number of threads: " << NUM_THREADS << std::endl;
+    std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
+    std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
+    std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
+    std::cout << "Number of threads: " << NUM_THREADS << std::endl;
 
     // Coloring
-    // auto coloringStart = timeNow();
+    auto coloringStart = timeNow();
     resetColoring();
     dsatur();
-    // auto coloringEnd = timeNow();
-    // printDurationUS(coloringStart, coloringEnd, "Coloring: ");
-
-    // Load initial positions into forces
-    // auto loadPositionalStart = timeNow();
-    // for (Force* force = forces; force != nullptr; force = force->getNext()) {
-    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
-    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
-    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
-    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
-    // }
-    // auto loadPositionalEnd = timeNow();
-    // printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
-
-    // forceTable->printIndices();
+    auto coloringEnd = timeNow();
+    printDurationUS(coloringStart, coloringEnd, "Coloring: ");
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
     int totalIterations = iterations + (postStabilize ? 1 : 0);
     
-    // auto solverLoopStart = timeNow();
+    auto solverLoopStart = timeNow();
     for (int it = 0; it < totalIterations; it++) {
         // If using post stabilization, either remove all or none of the pre-existing constraint error
         float alphaValue = alpha;
@@ -306,7 +298,7 @@ void Solver::step(float dtIncoming) {
         currentAlpha.store(alphaValue, std::memory_order_release);
 
         // Primal update
-        // auto primalStart = timeNow();
+        auto primalStart = timeNow();
         currentStage.store(Stage::STAGE_PRIMAL, std::memory_order_release);
 
         // iterate through colors - process bodies by color to enable parallel execution
@@ -322,37 +314,37 @@ void Solver::step(float dtIncoming) {
             finishSignal.acquire();
         }
 
-        // auto primalEnd = timeNow();
-        // printDurationUS(primalStart, primalEnd, "  Primal Update: ");
+        auto primalEnd = timeNow();
+        printDurationUS(primalStart, primalEnd, "  Primal Update: ");
 
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
         if (it < iterations) {
-            // auto dualStart = timeNow();
+            auto dualStart = timeNow();
 
             currentStage.store(Stage::STAGE_DUAL, std::memory_order_release);
             startSignal.release(NUM_THREADS);
             finishSignal.acquire();
 
-            // auto dualEnd = timeNow();
-            // printDurationUS(dualStart, dualEnd, "  Dual Update: ");
+            auto dualEnd = timeNow();
+            printDurationUS(dualStart, dualEnd, "  Dual Update: ");
         }
 
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
         if (it == iterations - 1) {
-            // auto velocityStart = timeNow();
+            auto velocityStart = timeNow();
             bodyTable->updateVelocities(dt);
-            //  auto velocityEnd = timeNow();
-            // printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
+            auto velocityEnd = timeNow();
+            printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
         }
     }
-    // auto solverLoopEnd = timeNow();
-    // printDurationUS(solverLoopStart, solverLoopEnd, "Solver Loop Total: ");
+    auto solverLoopEnd = timeNow();
+    printDurationUS(solverLoopStart, solverLoopEnd, "Solver Loop Total: ");
     
-    // auto stepEnd = timeNow();
-    // printDurationUS(stepStart, stepEnd, "Step Total: ");
-    // std::cout << std::endl;
+    auto stepEnd = timeNow();
+    printDurationUS(stepStart, stepEnd, "Step Total: ");
+    std::cout << std::endl;
 }
 
 // Coloring
@@ -470,6 +462,23 @@ Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {
             return body;
     }
     return nullptr;
+}
+
+void Solver::rebuildVelocityShader() {
+    delete velocityShader;
+    velocityShader = nullptr;
+
+    velocityShader = new ComputeShader(
+        readFile(internalPath("shaders/physics/velocity.wgsl").c_str()),
+        {
+            bodyTable->getPosBuffer()->handle(),
+            bodyTable->getInitialBuffer()->handle(),
+            bodyTable->getMassBuffer()->handle(),
+            bodyTable->getVelBuffer()->handle(),
+            bodyTable->getPrevVelBuffer()->handle()
+        },
+        sizeof(VelocityUniforms)
+    );
 }
 
 }

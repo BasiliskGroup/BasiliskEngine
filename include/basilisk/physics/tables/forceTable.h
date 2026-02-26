@@ -12,6 +12,8 @@
 #include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/tables/adjacency.h>
 #include <basilisk/compute/gpuTypes.hpp>
+#include <basilisk/compute/gpuWrapper.hpp>
+
 
 namespace bsk::internal {
 
@@ -90,6 +92,13 @@ private:
     // structure variables
     std::vector<int> rows;
 
+    // GPU side data
+    GpuBuffer<Parameters>* parameterBuffer;
+    GpuBuffer<Derivatives>* derivativeBuffer;
+    GpuBuffer<SolverSides>* solverSidesBuffer;
+    GpuBuffer<ForceType>* forceTypeBuffer;
+    GpuBuffer<BodyStruct>* bodyBuffer;
+
 public:
     ForceTable(std::size_t capacity);
     ~ForceTable();
@@ -100,6 +109,7 @@ public:
     void insert(Force* force);
 
     void remapBodyIndices();
+    void writeToGPU();
 
     // getters 
     Force* getForce(std::size_t index) { return forces[index]; }

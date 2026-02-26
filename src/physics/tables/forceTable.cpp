@@ -11,7 +11,13 @@ ForceTable::ForceTable(std::size_t capacity) :
     manifoldTable(new ForceTypeTable<ManifoldData>(capacity, this)),
     jointTable(new ForceTypeTable<JointStruct>(capacity, this)),
     springTable(new ForceTypeTable<SpringStruct>(capacity, this)),
-    motorTable(new ForceTypeTable<MotorStruct>(capacity, this))
+    motorTable(new ForceTypeTable<MotorStruct>(capacity, this)),
+
+    parameterBuffer(new GpuBuffer<Parameters>(capacity)),
+    derivativeBuffer(new GpuBuffer<Derivatives>(capacity)),
+    solverSidesBuffer(new GpuBuffer<SolverSides>(capacity)),
+    forceTypeBuffer(new GpuBuffer<ForceType>(capacity)),
+    bodyBuffer(new GpuBuffer<BodyStruct>(capacity))
 {
     resize(capacity);
 }
@@ -31,11 +37,23 @@ void ForceTable::markAsDeleted(std::size_t index) {
 void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
+    const bool hadGpuResources = (capacity > 0);
+
     expandTensors(newCapacity,
         forces, toDelete, parameters, derivatives, forceTypes, rows, bodies, indexMap, solverSides
     );
 
     capacity = newCapacity;
+
+    if (hadGpuResources) {
+        expandGpuBuffers(newCapacity,
+            parameterBuffer,
+            derivativeBuffer,
+            solverSidesBuffer,
+            forceTypeBuffer,
+            bodyBuffer
+        );
+    }
 }
 
 void ForceTable::compact() {

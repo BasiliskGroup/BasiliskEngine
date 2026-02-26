@@ -14,9 +14,9 @@
      });
  
      // floor
-     new bsk::Node2D(scene, nullptr, nullptr,
+     bsk::Node2D* floor = new bsk::Node2D(scene, nullptr, nullptr,
          glm::vec2(0.0f, -4.0f), 0.0f, glm::vec2(200.0f, 1.0f),
-         glm::vec3(0.0f), collider, -1.0f);
+         glm::vec3(0.0f), collider, -1.0f, 1.0);
  
      bsk::Joint* drag = nullptr;
  

@@ -2,6 +2,7 @@
 #define BSK_VIRTUAL_TABLE_H
 
 #include <basilisk/util/includes.h>
+#include <basilisk/compute/gpuWrapper.hpp>
 
 namespace bsk::internal {
 
@@ -75,8 +76,7 @@ void expandTensors(const std::size_t newCapacity, std::vector<T>&... tensors) {
  * @param tensors Variadic list of vectors to compact
  */
 template <typename... T>
-void compactTensors(const std::vector<bool>& toDelete, std::size_t size, std::vector<T>&... tensors)
-{
+void compactTensors(const std::vector<bool>& toDelete, std::size_t size, std::vector<T>&... tensors) {
     std::size_t dst = 0;
 
     for (std::size_t src = 0; src < size; ++src) {
@@ -90,14 +90,17 @@ void compactTensors(const std::vector<bool>& toDelete, std::size_t size, std::ve
     }
 }
 
-/**
- * @brief Counts the number of valid (non-deleted) entries in a toDelete vector
- * 
- * @param toDelete Vector indicating which entries are deleted (true = deleted, false = valid)
- * @param size Size of the toDelete vector to check
- * @return Number of valid entries (where toDelete[i] == false)
- */
 std::size_t numValid(const std::vector<bool>& toDelete, const std::size_t size);
+
+template <typename... Ts>
+void expandGpuBuffers(std::size_t newCapacity, GpuBuffer<Ts>*&... buffers) {
+    (
+        [&] {
+            delete buffers;
+            buffers = new GpuBuffer<Ts>(newCapacity);
+        }(), ...
+    );
+}
 
 }
 

@@ -53,10 +53,10 @@ private:
     GpuBuffer<float>* massBuffer;
     GpuBuffer<float>* momentBuffer;
 
-    ComputeShader* velocityShader;
+    ComputeShader*& velocityShader;
 
 public:
-    BodyTable(Solver* solver, std::size_t capacity);
+    BodyTable(Solver* solver, std::size_t capacity, ComputeShader*& velocityShader);
     ~BodyTable();
 
     void computeTransforms(); // TODO, determine if this would be better per-object
@@ -72,6 +72,7 @@ public:
     void insert(Rigid* body, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity, Collider* collider);
 
     void writeToNodes();
+    void writeToGPU();
 
     // getters
     Rigid* getBodies(std::size_t index) { return bodies[index]; }
@@ -97,6 +98,15 @@ public:
     glm::vec3& getJacobianMask(std::size_t index) { return jacobianMask[index]; }
     std::size_t getMappedIndex(std::size_t index) { return indexMap[index]; }
 
+    GpuBuffer<bsk::vec3>* getPosBuffer() { return posBuffer; }
+    GpuBuffer<bsk::vec3>* getInitialBuffer() { return initialBuffer; }
+    GpuBuffer<bsk::vec3>* getInertialBuffer() { return inertialBuffer; }
+    GpuBuffer<bsk::vec3>* getVelBuffer() { return velBuffer; }
+    GpuBuffer<bsk::vec3>* getPrevVelBuffer() { return prevVelBuffer; }
+    GpuBuffer<float>* getFrictionBuffer() { return frictionBuffer; }
+    GpuBuffer<float>* getMassBuffer() { return massBuffer; }
+    GpuBuffer<float>* getMomentBuffer() { return momentBuffer; }
+
     // setters
     void setBodies(std::size_t index, Rigid* value) { bodies[index] = value; }
     void setToDelete(std::size_t index, bool value) { toDelete[index] = value; }
@@ -119,11 +129,7 @@ public:
     void setDensity(std::size_t index, float value);
     void setJacobianMask(std::size_t index, const glm::vec3& value) { jacobianMask[index] = value; }
 
-private:
-    struct VelocityUniforms {
-        std::uint32_t bodies;
-        float dt;
-    };
+
 };
 
 }
