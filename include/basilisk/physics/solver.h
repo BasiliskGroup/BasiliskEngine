@@ -180,7 +180,7 @@ public:
     }
 
     template<class TForce, class TForceStruct>
-    inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialForceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
+    inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialForceIndex, uint32_t bodyIndex, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);

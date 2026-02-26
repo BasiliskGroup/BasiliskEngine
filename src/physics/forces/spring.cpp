@@ -35,7 +35,7 @@ void Spring::computeConstraint(ForceTable* forceTable, std::size_t specialIndex,
     forceTable->setC(index, 0, length(transform(forceTable->getPosA(index), springs.rA) - transform(forceTable->getPosB(index), springs.rB)) - springs.rest);
 }
 
-void Spring::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
+void Spring::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
     std::size_t index = forceTable->getSpringTable()->getForceIndex(specialIndex);
     SpringStruct& springs = forceTable->getSpringTable()->getData(specialIndex);
 
@@ -53,7 +53,7 @@ void Spring::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex
     glm::vec2 n = d / dlen;
     glm::mat2 dxx = (I - outer(n, n)) / dlen;
 
-    if (body == ForceBodyOffset::A)
+    if (bodyIndex == forceTable->getBodies(index).a)
     {
         glm::vec2 Sr = rotate(forceTable->getPosA(index).z, S * springs.rA);
         glm::vec2 r = rotate(forceTable->getPosA(index).z, springs.rA);

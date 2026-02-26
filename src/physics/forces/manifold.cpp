@@ -121,10 +121,10 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t specialInde
     }
 }
 
-void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
+void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
     std::size_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
     for (int i = 0; i < forceTable->getManifoldTable()->getData(specialIndex).numContacts; i++) {
-        if (body == ForceBodyOffset::A) {
+        if (bodyIndex == forceTable->getBodies(index).a) {
             forceTable->setJ(index, i * 2 + JN, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JAn * jacobianMask);
             forceTable->setJ(index, i * 2 + JT, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JAt * jacobianMask);
         } else {

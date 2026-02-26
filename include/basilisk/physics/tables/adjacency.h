@@ -9,8 +9,6 @@ namespace bsk::internal {
 
 class Rigid;
 
-enum class ForceBodyOffset : unsigned long { A, B };
-
 struct ColoredData {
     Rigid* body;
     std::size_t start;
@@ -25,7 +23,7 @@ struct ColoredData {
 
 struct ForceEdgeIndices {
     std::size_t special;
-    ForceBodyOffset offset;
+    uint32_t bodyIndex;
     ForceType type;
     glm::vec3 jacobianMask;
 };

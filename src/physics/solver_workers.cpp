@@ -70,18 +70,19 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
         WorkRange forceRange = partition(edgeCount, threadID, NUM_THREADS);
         for (std::size_t i = forceRange.start; i < forceRange.end; i++) {
             const ForceEdgeIndices& edge = edges[i];
+            
             switch (edge.type) {
                 case ForceType::MANIFOLD:
-                    processForce<Manifold>(forceTable->getManifoldTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    processForce<Manifold>(forceTable->getManifoldTable(), edge.special, edge.bodyIndex, primalScratch, alpha, edge.jacobianMask);
                     break;
                 case ForceType::JOINT:
-                    processForce<Joint>(forceTable->getJointTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    processForce<Joint>(forceTable->getJointTable(), edge.special, edge.bodyIndex, primalScratch, alpha, edge.jacobianMask);
                     break;
                 case ForceType::SPRING:
-                    processForce<Spring>(forceTable->getSpringTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    processForce<Spring>(forceTable->getSpringTable(), edge.special, edge.bodyIndex, primalScratch, alpha, edge.jacobianMask);
                     break;
                 case ForceType::MOTOR:
-                    processForce<Motor>(forceTable->getMotorTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    processForce<Motor>(forceTable->getMotorTable(), edge.special, edge.bodyIndex, primalScratch, alpha, edge.jacobianMask);
                     break;
                 default:
                     break;
@@ -105,10 +106,10 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
 }
 
 template<class TForce, class TForceStruct>
-inline void Solver::processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask) {
+inline void Solver::processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialIndex, uint32_t bodyIndex, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask) {
     std::size_t forceIndex = forceTypeTable->getForceIndex(specialIndex);
     TForce::computeConstraint(forceTable, specialIndex, alpha);
-    TForce::computeDerivatives(forceTable, specialIndex, body, jacobianMask);
+    TForce::computeDerivatives(forceTable, specialIndex, bodyIndex, jacobianMask);
 
     int rows = TForce::rows(forceTable, specialIndex);
     for (int r = 0; r < rows; ++r) {

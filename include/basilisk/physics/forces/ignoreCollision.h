@@ -15,7 +15,7 @@ public:
     int rows() override { return 0; }
     bool initialize() override { return true; }
     static void computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {}
-    static void computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body) {}
+    static void computeDerivatives(ForceTable* forceTable, std::size_t specialIndex) {}
 };
 
 }

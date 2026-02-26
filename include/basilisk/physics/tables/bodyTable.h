@@ -72,7 +72,7 @@ public:
     void insert(Rigid* body, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity, Collider* collider);
 
     void writeToNodes();
-    void writeToGPU();
+    void writeToGpu();
 
     // getters
     Rigid* getBodies(std::size_t index) { return bodies[index]; }

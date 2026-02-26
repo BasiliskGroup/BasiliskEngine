@@ -404,26 +404,25 @@ void Solver::dsatur() {
             Rigid* other = (force->getBodyA() == body) ? force->getBodyB() : force->getBodyA();
 
         glm::vec3 jacobianMask = body->getJacobianMask();
-            ForceBodyOffset bodyOffset = force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B;
             switch (force->getForceType()) {
                 case ForceType::JOINT:
                     colorGroups[color].back().joint++;
-                    tempIndices[ForceType::JOINT].emplace_back(force->getSpecialIndex(), bodyOffset, ForceType::JOINT, jacobianMask);
+                    tempIndices[ForceType::JOINT].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::JOINT, jacobianMask);
                     break;
                 case ForceType::MANIFOLD:
                     if (body->getResolvesCollisions() == false || other->getResolvesCollisions() == false) {
                         continue;
                     }
                     colorGroups[color].back().manifold++;
-                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getSpecialIndex(), bodyOffset, ForceType::MANIFOLD, jacobianMask);
+                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::MANIFOLD, jacobianMask);
                     break;
                 case ForceType::SPRING:
                     colorGroups[color].back().spring++;
-                    tempIndices[ForceType::SPRING].emplace_back(force->getSpecialIndex(), bodyOffset, ForceType::SPRING, jacobianMask);
+                    tempIndices[ForceType::SPRING].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::SPRING, jacobianMask);
                     break;
                 case ForceType::MOTOR:
                     colorGroups[color].back().motor++;
-                    tempIndices[ForceType::MOTOR].emplace_back(force->getSpecialIndex(), bodyOffset, ForceType::MOTOR, jacobianMask);
+                    tempIndices[ForceType::MOTOR].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::MOTOR, jacobianMask);
                     break;
                 default:
                     throw std::runtime_error("Invalid force type");

@@ -90,11 +90,7 @@ void BodyTable::updateVelocities(float dt) {
     if (dt == 0.0f) return;
 
     // write all buffers to GPU (TODO remove this once main loop is ported to GPU)
-    posBuffer->write(pos);
-    initialBuffer->write(initial);
-    massBuffer->write(mass);
-    velBuffer->write(vel);
-    prevVelBuffer->write(prevVel);
+    writeToGpu();
 
     // set shader uniforms (bodies as u32 to match WGSL layout)
     VelocityUniforms uniforms;
@@ -111,6 +107,14 @@ void BodyTable::updateVelocities(float dt) {
     for (std::size_t i = 0; i < size; i++) {
         bodies[i]->getNode()->setPosition(pos[i]);
     }
+}
+
+void BodyTable::writeToGpu() {
+    posBuffer->write(pos);
+    initialBuffer->write(initial);
+    massBuffer->write(mass);
+    velBuffer->write(vel);
+    prevVelBuffer->write(prevVel);
 }
 
 void BodyTable::markAsDeleted(std::size_t index) {
