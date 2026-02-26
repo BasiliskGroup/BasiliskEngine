@@ -3,6 +3,7 @@
 
 #include <basilisk/util/includes.h>
 #include <basilisk/compute/gpuTypes.hpp>
+#include <basilisk/physics/tables/forceTypeTable.h>
 
 namespace bsk::internal {
 
@@ -25,6 +26,8 @@ struct ColoredData {
 struct ForceEdgeIndices {
     std::size_t special;
     ForceBodyOffset offset;
+    ForceType type;
+    glm::vec3 jacobianMask;
 };
 
 }

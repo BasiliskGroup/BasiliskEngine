@@ -130,7 +130,7 @@ public:
 
     // Stages
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
-    void primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex);
+    void primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex);
     void dualStage(ThreadScratch& scratch, int threadID);
 
     template<class TForce, typename T>

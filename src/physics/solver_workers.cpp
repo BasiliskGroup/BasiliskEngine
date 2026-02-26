@@ -52,16 +52,55 @@ void Solver::workerLoop(unsigned int threadID) {
 void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) {
     // Verify activeColor is within bounds (defensive programming)
     assert ((activeColor < 0 || activeColor >= static_cast<int>(colorGroups.size())) == false);
-    
-    // Get the bodies for this color group - all bodies in the same color can be processed in parallel
-    std::size_t colorSize = colorGroups[activeColor].size();
-    assert (colorSize != 0);
-    
+    assert (colorGroups[activeColor].size() != 0);
+
     PrimalScratch& primalScratch = reinterpret_cast<PrimalScratch&>(scratch.storage);
-    WorkRange range = partition(colorSize, threadID, NUM_THREADS);
-    
-    for (std::size_t i = range.start; i < range.end; i++) {
-        primalUpdateSingle(primalScratch, activeColor, i);
+    float alpha = currentAlpha.load(std::memory_order_acquire);
+
+    // -------------------------------------------------------
+    // Sub-stage 1 (force-parallel): compute rhs and lhs for
+    // every force edge in this color group. All edges in the
+    // same color are independent so threads can work on any
+    // subset without synchronisation.
+    // -------------------------------------------------------
+    const std::vector<ForceEdgeIndices>& edges = forceEdgeIndices[activeColor];
+    std::size_t edgeCount = edges.size();
+
+    if (edgeCount > 0) {
+        WorkRange forceRange = partition(edgeCount, threadID, NUM_THREADS);
+        for (std::size_t i = forceRange.start; i < forceRange.end; i++) {
+            const ForceEdgeIndices& edge = edges[i];
+            switch (edge.type) {
+                case ForceType::MANIFOLD:
+                    processForce<Manifold>(forceTable->getManifoldTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    break;
+                case ForceType::JOINT:
+                    processForce<Joint>(forceTable->getJointTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    break;
+                case ForceType::SPRING:
+                    processForce<Spring>(forceTable->getSpringTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    break;
+                case ForceType::MOTOR:
+                    processForce<Motor>(forceTable->getMotorTable(), edge.special, edge.offset, primalScratch, alpha, edge.jacobianMask);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    // All threads must finish computing before any body starts accumulating
+    dualPassBarrier.arrive_and_wait();
+
+    // -------------------------------------------------------
+    // Sub-stage 2 (body-parallel): accumulate the pre-computed
+    // per-force rhs/lhs into each body's linear system, then
+    // solve and apply the position update.
+    // -------------------------------------------------------
+    std::size_t colorSize = colorGroups[activeColor].size();
+    WorkRange bodyRange = partition(colorSize, threadID, NUM_THREADS);
+    for (std::size_t i = bodyRange.start; i < bodyRange.end; i++) {
+        primalAccumulateSingle(primalScratch, activeColor, i);
     }
 }
 
@@ -95,9 +134,9 @@ inline void Solver::processForce(ForceTypeTable<TForceStruct>* forceTypeTable, s
     }
 }
 
-void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex) {
+void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex) {
     const ColoredData& data = colorGroups[activeColor][bodyColorIndex];
-    Rigid* body = data.body; // TODO load mass, moment, and interial in here for entire solving stage
+    Rigid* body = data.body;
 
     // Skip static / kinematic bodies
     if (data.mass <= 0)
@@ -107,55 +146,18 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     scratch.lhs = diagonal(data.mass, data.mass, data.moment) / (dt * dt);
     glm::vec3 pos = body->getPosition();
     scratch.rhs = scratch.lhs * (pos - data.inertial);
-    glm::vec3 jacobianMask = body->getJacobianMask();
 
-    // Iterate over all forces acting on the body
-    // Load currentAlpha once per body (it's constant during the stage)
-    float alpha = currentAlpha.load(std::memory_order_acquire);
+    // Accumulate the rhs and lhs contributions already written by sub-stage 1.
+    // The force edges for this body are laid out contiguously starting at data.start
+    // in the order: manifold, joint, spring, motor.
 
     // MANIFOLD
     std::size_t start = data.start;
     std::size_t end = data.start + data.manifold;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        processForce<Manifold>(forceTable->getManifoldTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
-    }
-
-    // JOINT
-    end = start + data.joint;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        processForce<Joint>(forceTable->getJointTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
-    }
-
-    // SPRING
-    end = start + data.spring;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        processForce<Spring>(forceTable->getSpringTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
-    }
-
-    // MOTOR
-    end = start + data.motor;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        processForce<Motor>(forceTable->getMotorTable(), specialIndex, forceData.offset, scratch, alpha, jacobianMask);
-    }
-
-    // accumulate rhs and lhs
-
-    // MANIFOLD
-    start = data.start;
-    end = data.start + data.manifold;
-    for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        std::size_t forceIndex = forceTable->getManifoldTable()->getForceIndex(specialIndex);
-        int rows = Manifold::rows(forceTable, specialIndex);
+        std::size_t forceIndex = forceTable->getManifoldTable()->getForceIndex(forceData.special);
+        int rows = Manifold::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
             scratch.rhs += forceTable->getRhs(forceIndex, r);
             scratch.lhs += forceTable->getLhs(forceIndex, r).asGlm();
@@ -166,9 +168,8 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     end = start + data.joint;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        std::size_t forceIndex = forceTable->getJointTable()->getForceIndex(specialIndex);
-        int rows = Joint::rows(forceTable, specialIndex);
+        std::size_t forceIndex = forceTable->getJointTable()->getForceIndex(forceData.special);
+        int rows = Joint::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
             scratch.rhs += forceTable->getRhs(forceIndex, r);
             scratch.lhs += forceTable->getLhs(forceIndex, r).asGlm();
@@ -179,9 +180,8 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     end = start + data.spring;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        std::size_t forceIndex = forceTable->getSpringTable()->getForceIndex(specialIndex);
-        int rows = Spring::rows(forceTable, specialIndex);
+        std::size_t forceIndex = forceTable->getSpringTable()->getForceIndex(forceData.special);
+        int rows = Spring::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
             scratch.rhs += forceTable->getRhs(forceIndex, r);
             scratch.lhs += forceTable->getLhs(forceIndex, r).asGlm();
@@ -192,9 +192,8 @@ void Solver::primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::si
     end = start + data.motor;
     for (; start < end; ++start) {
         const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
-        const std::size_t& specialIndex = forceData.special;
-        std::size_t forceIndex = forceTable->getMotorTable()->getForceIndex(specialIndex);
-        int rows = Motor::rows(forceTable, specialIndex);
+        std::size_t forceIndex = forceTable->getMotorTable()->getForceIndex(forceData.special);
+        int rows = Motor::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
             scratch.rhs += forceTable->getRhs(forceIndex, r);
             scratch.lhs += forceTable->getLhs(forceIndex, r).asGlm();

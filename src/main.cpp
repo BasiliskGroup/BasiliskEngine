@@ -1,5 +1,6 @@
 #include <basilisk/basilisk.h>
  #include <basilisk/physics/forces/joint.h>
+ #include <string>
  
  int main() {
      bsk::Engine* engine = new bsk::Engine(800, 800, "Basilisk", false);
@@ -14,13 +15,18 @@
  
      // floor
      new bsk::Node2D(scene, nullptr, nullptr,
-         glm::vec2(0.0f, -4.0f), 0.0f, glm::vec2(20.0f, 1.0f),
+         glm::vec2(0.0f, -4.0f), 0.0f, glm::vec2(200.0f, 1.0f),
          glm::vec3(0.0f), collider, -1.0f);
  
      bsk::Joint* drag = nullptr;
  
      while (engine->isRunning()) {
          engine->update();
+
+         double fps = 1.0 / engine->getDeltaTime();
+         int numRigids = scene->getSolver()->getNumRigids();
+         std::string title = "Basilisk | Rigids: " + std::to_string(numRigids) + " | FPS: " + std::to_string(static_cast<int>(fps));
+         engine->getWindow()->setTitle(title.c_str());
  
          bsk::Mouse*         mouse    = engine->getMouse();
          bsk::Keyboard*      keyboard = engine->getKeyboard();
