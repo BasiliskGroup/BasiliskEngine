@@ -363,7 +363,7 @@ void Solver::resetColoring() {
 void Solver::dsatur() {
     // Use a set instead of priority_queue for O(log n) updates
     std::set<Rigid*, RigidComparator> colorSet;
-    std::vector<std::vector<ForceEdgeIndices>> tempIndices;
+    std::vector<std::vector<ColorForce>> tempIndices;
 
     // add vector in temp indices for each force type
     tempIndices.resize(ForceType::NUM_FORCE_TYPES);
@@ -392,7 +392,7 @@ void Solver::dsatur() {
         forceEdgeIndices.resize(color + 1);
 
         // add body to color group
-        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, 0, 0, 0, body->getMass(), body->getMoment(), body->getInertial());
+        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, 0, 0, 0);
 
         // clear temp indices
         for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {

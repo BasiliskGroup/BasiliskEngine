@@ -5,7 +5,7 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/util/constants.h>
 #include <basilisk/physics/coloring/color_queue.h>
-#include <basilisk/physics/tables/adjacency.h>
+#include <basilisk/physics/tables/colorTable.h>
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/tables/forceTypeTable.h>
 #include <basilisk/physics/forces/force.h>
@@ -66,8 +66,7 @@ private:
 
     // Coloring
     ColorQueue colorQueue;
-    std::vector<std::vector<ColoredData>> colorGroups;
-    std::vector<std::vector<ForceEdgeIndices>> forceEdgeIndices;
+    ColorTableManager* colorTableManager;
 
     // Threading
     std::barrier<> stageBarrier;
@@ -82,6 +81,8 @@ private:
 
     // shaders
     ComputeShader* velocityShader = nullptr;
+    std::vector<std::vector<ColorBody>> colorGroups;
+    std::vector<std::vector<ColorForce>> forceEdgeIndices;
 
 public:
     Solver();

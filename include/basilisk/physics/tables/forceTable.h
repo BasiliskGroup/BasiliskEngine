@@ -10,7 +10,6 @@
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
-#include <basilisk/physics/tables/adjacency.h>
 #include <basilisk/compute/gpuTypes.hpp>
 #include <basilisk/compute/gpuWrapper.hpp>
 

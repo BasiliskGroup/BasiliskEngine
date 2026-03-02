@@ -1,6 +1,5 @@
-#include "basilisk/physics/tables/adjacency.h"
+#include <basilisk/physics/tables/colorTable.h>
 #include <basilisk/physics/solver.h>
-
 #include <basilisk/util/constants.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/forces/force.h>
@@ -11,6 +10,7 @@
 #include <basilisk/physics/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/tables/forceTypeTable.h>
+
 
 namespace bsk::internal {
 
@@ -63,13 +63,13 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
     // same color are independent so threads can work on any
     // subset without synchronisation.
     // -------------------------------------------------------
-    const std::vector<ForceEdgeIndices>& edges = forceEdgeIndices[activeColor];
+    const std::vector<ColorForce>& edges = forceEdgeIndices[activeColor];
     std::size_t edgeCount = edges.size();
 
     if (edgeCount > 0) {
         WorkRange forceRange = partition(edgeCount, threadID, NUM_THREADS);
         for (std::size_t i = forceRange.start; i < forceRange.end; i++) {
-            const ForceEdgeIndices& edge = edges[i];
+            const ColorForce& edge = edges[i];
             
             switch (edge.type) {
                 case ForceType::MANIFOLD:
@@ -136,17 +136,17 @@ inline void Solver::processForce(ForceTypeTable<TForceStruct>* forceTypeTable, s
 }
 
 void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex) {
-    const ColoredData& data = colorGroups[activeColor][bodyColorIndex];
+    const ColorBody& data = colorGroups[activeColor][bodyColorIndex];
     Rigid* body = data.body;
 
     // Skip static / kinematic bodies
-    if (data.mass <= 0)
+    if (body->getMass() <= 0)
         return;
 
     // Initialize left and right hand sides of the linear system (Eqs. 5, 6)
-    scratch.lhs = diagonal(data.mass, data.mass, data.moment) / (dt * dt);
+    scratch.lhs = diagonal(body->getMass(), body->getMass(), body->getMoment()) / (dt * dt);
     glm::vec3 pos = body->getPosition();
-    scratch.rhs = scratch.lhs * (pos - data.inertial);
+    scratch.rhs = scratch.lhs * (pos - body->getInertial());
 
     // Accumulate the rhs and lhs contributions already written by sub-stage 1.
     // The force edges for this body are laid out contiguously starting at data.start
@@ -156,7 +156,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     std::size_t start = data.start;
     std::size_t end = data.start + data.manifold;
     for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
         std::size_t forceIndex = forceTable->getManifoldTable()->getForceIndex(forceData.special);
         int rows = Manifold::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
@@ -168,7 +168,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     // JOINT
     end = start + data.joint;
     for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
         std::size_t forceIndex = forceTable->getJointTable()->getForceIndex(forceData.special);
         int rows = Joint::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
@@ -180,7 +180,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     // SPRING
     end = start + data.spring;
     for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
         std::size_t forceIndex = forceTable->getSpringTable()->getForceIndex(forceData.special);
         int rows = Spring::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
@@ -192,7 +192,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     // MOTOR
     end = start + data.motor;
     for (; start < end; ++start) {
-        const ForceEdgeIndices& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
         std::size_t forceIndex = forceTable->getMotorTable()->getForceIndex(forceData.special);
         int rows = Motor::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {

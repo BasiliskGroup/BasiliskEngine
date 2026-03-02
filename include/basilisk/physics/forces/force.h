@@ -2,7 +2,6 @@
 #define BSK_PHYSICS_FORCES_FORCE_H
 
 #include <basilisk/util/includes.h>
-#include <basilisk/physics/tables/adjacency.h>
 #include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
