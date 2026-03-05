@@ -392,7 +392,7 @@ void Solver::dsatur() {
         colors.tables[color].bodies.emplace_back(body, colors.tables[color].forces.size(), 0, 0, 0, 0);
 
         // clear temp indices
-        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+        for (uint32_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
             tempIndices[i].clear();
         }
 
@@ -439,7 +439,7 @@ void Solver::dsatur() {
         }
 
         // insert forces in sorted order into edge indices
-        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+        for (uint32_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
             colors.tables[color].forces.insert(colors.tables[color].forces.end(), tempIndices[i].begin(), tempIndices[i].end());
         }
     }

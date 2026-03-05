@@ -145,19 +145,19 @@ public:
 
     // Stages
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
-    void primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex);
+    void primalAccumulateSingle(PrimalScratch& scratch, int activeColor, uint32_t bodyColorIndex);
     void dualStage(ThreadScratch& scratch, int threadID);
 
     template<class TForce, typename T>
     void dualUpdatePass(ForceTypeTable<T>* table, int threadID) {
-        std::size_t tableSize = table->getSize();
+        uint32_t tableSize = table->getSize();
         if (tableSize == 0) return;
 
         WorkRange range = partition(tableSize, threadID, NUM_THREADS);
         float alpha = currentAlpha.load(std::memory_order_acquire);
 
-        for (std::size_t i = range.start; i < range.end; i++) {
-            std::size_t forceIndex = table->getForceIndex(i);
+        for (uint32_t i = range.start; i < range.end; i++) {
+            uint32_t forceIndex = table->getForceIndex(i);
             Force* force = forceTable->getForce(forceIndex);
             if (!force) continue;
 
@@ -188,7 +188,7 @@ public:
     }
 
     template<class TForce, class TForceStruct>
-    inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialForceIndex, uint32_t bodyIndex, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
+    inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, uint32_t specialForceIndex, uint32_t bodyIndex, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);

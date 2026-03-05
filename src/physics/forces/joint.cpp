@@ -40,8 +40,8 @@ bool Joint::initialize() {
     return getStiffness(0) != 0 || getStiffness(1) != 0 || getStiffness(2) != 0;
 }
 
-void Joint::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
-    std::size_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
+void Joint::computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha) {
+    uint32_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
     // Compute constraint function at current state C(x)
     JointStruct& joints = forceTable->getJointTable()->getData(specialIndex);
     glm::vec3 Cn;
@@ -60,8 +60,8 @@ void Joint::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, 
     }
 }
 
-void Joint::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
-    std::size_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
+void Joint::computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
+    uint32_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
     JointStruct& joints = forceTable->getJointTable()->getData(specialIndex);
 
     // Compute the first and second derivatives for the desired body

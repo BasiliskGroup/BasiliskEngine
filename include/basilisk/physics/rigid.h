@@ -24,7 +24,7 @@ private:
     Force* forces;
     Rigid* next;
     Rigid* prev;
-    std::size_t index;
+    uint32_t index;
     Collider* collider;
 
     // Coloring
@@ -74,7 +74,7 @@ public:
     void setNext(Rigid* next);
     void setPrev(Rigid* prev);
     void setNode(Node2D* node);
-    void setIndex(std::size_t index);
+    void setIndex(uint32_t index);
     void setJacobianMask(const glm::vec3& jacobianMask);
     void setResolvesCollisions(bool resolvesCollisions) { this->resolvesCollisions = resolvesCollisions; }
     void setCollisionGroup(int group) { this->collisionGroup = group; }
@@ -102,7 +102,7 @@ public:
     Solver* getSolver() const { return solver; }
     float getDensity() const;
     glm::vec3 getVel() const;
-    std::size_t getIndex() const { return index; }
+    uint32_t getIndex() const { return index; }
     void getAABB(glm::vec2& bl, glm::vec2& tr) const;
     bool getResolvesCollisions() const { return resolvesCollisions; }
     int getCollisionGroup() const { return collisionGroup; }

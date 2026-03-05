@@ -28,7 +28,7 @@ std::pair<float, float> getMassProperties(const std::vector<glm::vec2>& vertices
     float centroidY = 0.0f;
     float I_origin = 0.0f;
     
-    for (std::size_t i = 0; i < vertices.size(); i++) {
+    for (uint32_t i = 0; i < vertices.size(); i++) {
         const glm::vec2& v1 = vertices[i];
         const glm::vec2& v2 = vertices[(i + 1) % vertices.size()];
         

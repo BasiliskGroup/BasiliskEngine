@@ -95,10 +95,10 @@ bool Manifold::initialize() {
 }
 
 int Manifold::rows() { return getData().numContacts * 2; }
-int Manifold::rows(ForceTable* forceTable, std::size_t specialIndex) { return forceTable->getManifoldTable()->getData(specialIndex).numContacts * 2; }
+int Manifold::rows(ForceTable* forceTable, uint32_t specialIndex) { return forceTable->getManifoldTable()->getData(specialIndex).numContacts * 2; }
 
-void Manifold::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
-    std::size_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
+void Manifold::computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha) {
+    uint32_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
     ManifoldData& manifolds = forceTable->getManifoldTable()->getData(specialIndex);
 
     for (int i = 0; i < manifolds.numContacts; i++) {
@@ -121,8 +121,8 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t specialInde
     }
 }
 
-void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
-    std::size_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
+void Manifold::computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
+    uint32_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
     for (int i = 0; i < forceTable->getManifoldTable()->getData(specialIndex).numContacts; i++) {
         if (bodyIndex == forceTable->getBodies(index).a) {
             forceTable->setJ(index, i * 2 + JN, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JAn * jacobianMask);

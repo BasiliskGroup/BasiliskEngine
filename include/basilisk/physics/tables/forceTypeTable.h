@@ -18,25 +18,25 @@ private:
 
     std::vector<Force*> forces;
     std::vector<bool> toDelete;
-    std::vector<std::size_t> indexMap;
+    std::vector<uint32_t> indexMap;
     std::vector<T> data;
 
 public:
-    ForceTypeTable(std::size_t capacity, ForceTable* forceTable);
+    ForceTypeTable(uint32_t capacity, ForceTable* forceTable);
     ~ForceTypeTable() = default;
 
-    void markAsDeleted(std::size_t index);
-    void resize(std::size_t newCapacity);
+    void markAsDeleted(uint32_t index);
+    void resize(uint32_t newCapacity);
     void compact();
     void remap();
     void insert(Force* force);
 
-    std::size_t getForceIndex(std::size_t typeTableIndex) const { return indexMap[typeTableIndex]; }
-    Force* getForce(std::size_t typeTableIndex) const { return forces[typeTableIndex]; }
-    T& getData(std::size_t typeTableIndex) { return data[typeTableIndex]; }
+    uint32_t getForceIndex(uint32_t typeTableIndex) const { return indexMap[typeTableIndex]; }
+    Force* getForce(uint32_t typeTableIndex) const { return forces[typeTableIndex]; }
+    T& getData(uint32_t typeTableIndex) { return data[typeTableIndex]; }
 
-    std::size_t getSize() const { return size; }
-    std::size_t getCapacity() const { return capacity; }
+    uint32_t getSize() const { return size; }
+    uint32_t getCapacity() const { return capacity; }
 
     // debug
     void printIndices() const;

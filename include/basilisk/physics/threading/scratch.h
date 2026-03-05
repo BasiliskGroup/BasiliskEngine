@@ -18,19 +18,19 @@ struct DualScratch {
 };
 
 // union
-constexpr std::size_t MAX_STAGE_BYTES = std::max({ 
+constexpr uint32_t MAX_STAGE_BYTES = std::max({ 
     sizeof(PrimalScratch) 
 });
 struct alignas(alignof(PrimalScratch)) ThreadScratch { std::byte storage[MAX_STAGE_BYTES]; };
 
 // partitioning
 struct WorkRange {
-    std::size_t start;
-    std::size_t end;
+    uint32_t start;
+    uint32_t end;
 };
 
 // partitioning
-WorkRange partition(std::size_t totalWork, std::size_t threadID, std::size_t numThreads);
+WorkRange partition(uint32_t totalWork, uint32_t threadID, uint32_t numThreads);
 
 }
 

@@ -64,11 +64,11 @@ public:
     Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB);
     ~Manifold();
 
-    static int rows(ForceTable* forceTable, std::size_t specialIndex);
+    static int rows(ForceTable* forceTable, uint32_t specialIndex);
     int rows() override;
     bool initialize() override;
-    static void computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha);
-    static void computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask);
+    static void computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha);
+    static void computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask);
 
     static int collide(Rigid* bodyA, Rigid* bodyB, Contact* contacts);
     

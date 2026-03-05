@@ -10,7 +10,7 @@
 
 namespace bsk::internal {
 
-BodyTable::BodyTable(Solver* solver, std::size_t capacity, ComputeShader*& velocityShader) : 
+BodyTable::BodyTable(Solver* solver, uint32_t capacity, ComputeShader*& velocityShader) : 
     solver(solver),
     bvh(new BVH()),
     posBuffer(new GpuBuffer<bsk::vec3>(capacity)),
@@ -54,7 +54,7 @@ void BodyTable::warmstartBodies(const float dt, const std::optional<glm::vec3>& 
         bvh->computeMassProperties();
     }
     
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         // Don't let bodies rotate too fast
         vel[i].z = glm::clamp(vel[i].z, -50.0f, 50.0f);
 
@@ -104,7 +104,7 @@ void BodyTable::updateVelocities(float dt) {
     velBuffer->read(vel.data(), vel.size());
     prevVelBuffer->read(prevVel.data(), prevVel.size());
 
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         bodies[i]->getNode()->setPosition(pos[i]);
     }
 }
@@ -117,12 +117,12 @@ void BodyTable::writeToGpu() {
     prevVelBuffer->write(prevVel);
 }
 
-void BodyTable::markAsDeleted(std::size_t index) {
+void BodyTable::markAsDeleted(uint32_t index) {
     toDelete[index] = true;
     bodies[index] = nullptr;
 }
 
-void BodyTable::resize(std::size_t newCapacity) {
+void BodyTable::resize(uint32_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     const bool hadGpuResources = (capacity > 0);
@@ -153,14 +153,14 @@ void BodyTable::resize(std::size_t newCapacity) {
 
 void BodyTable::compact() {
     // do a quick check to see if we need to run more complex compact function
-    std::size_t active = numValid(toDelete, size);
+    uint32_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
 
     // Build indexMap: oldIndex -> newIndex (-1 for deleted entries)
-    std::size_t dst = 0;
-    for (std::size_t i = 0; i < size; i++) {
+    uint32_t dst = 0;
+    for (uint32_t i = 0; i < size; i++) {
         indexMap[i] = !toDelete[i] ? dst++ : -1;
     }
 
@@ -174,7 +174,7 @@ bodies, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, mom
     // remap body indices
     solver->getForceTable()->remapBodyIndices();
 
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         toDelete[i] = false;
         bodies[i]->setIndex(i);
     }
@@ -212,7 +212,7 @@ void BodyTable::insert(Rigid* body, glm::vec3 position, glm::vec2 size, float de
 }
 
 void BodyTable::writeToNodes() {
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         Node2D* node = bodies[i]->getNode();
         glm::vec3& pos = this->pos[i];
         node->setPosition(pos);
@@ -223,16 +223,16 @@ glm::vec3 BodyTable::getGravity(Rigid* body) const {
     return getGravity(body->getIndex());
 }
 
-glm::vec3 BodyTable::getGravity(std::size_t index) const {
+glm::vec3 BodyTable::getGravity(uint32_t index) const {
     return { bvh->computeGravity(bodies[index]), 0.0f };
 }
 
-float BodyTable::getDensity(std::size_t index) {
+float BodyTable::getDensity(uint32_t index) {
     Collider* collider = Solver::colliderTable->getCollider(this->collider[index]);
     return mass[index] / (scale[index].x * scale[index].y * collider->getArea());
 }
 
-void BodyTable::setDensity(std::size_t index, float value) {
+void BodyTable::setDensity(uint32_t index, float value) {
     Collider* collider = Solver::colliderTable->getCollider(this->collider[index]);
     mass[index] = value * (scale[index].x * scale[index].y * collider->getArea());
 }

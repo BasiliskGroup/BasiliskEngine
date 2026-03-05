@@ -7,8 +7,8 @@
 namespace bsk::internal {
 
 bool gjk(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
-    std::size_t freeIndex = 0;
-    for (std::size_t i = 0; i < GJK_ITERATIONS; ++i) {
+    uint32_t freeIndex = 0;
+    for (uint32_t i = 0; i < GJK_ITERATIONS; ++i) {
         // get next direction or test simplex if full
         freeIndex = handleSimplex(bodyA, bodyB, pair, freeIndex);
 
@@ -31,7 +31,7 @@ bool gjk(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
     return false;
 }
 
-std::size_t handleSimplex(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair, std::size_t freeIndex) {
+uint32_t handleSimplex(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair, uint32_t freeIndex) {
     switch (freeIndex) {
         case 0: return handle0(bodyA, bodyB, pair);
         case 1: return handle1(bodyA, bodyB, pair);
@@ -41,17 +41,17 @@ std::size_t handleSimplex(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair, std::
     }
 }
 
-std::size_t handle0(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
+uint32_t handle0(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
     pair.searchDir = glm::vec2(bodyB->getPosition().x, bodyB->getPosition().y) - glm::vec2(bodyA->getPosition().x, bodyA->getPosition().y);
     return 0;
 }
 
-std::size_t handle1(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
+uint32_t handle1(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
     pair.searchDir = -pair.simplex[0];
     return 1;
 }
 
-std::size_t handle2(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
+uint32_t handle2(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
     glm::vec2 CB = pair.simplex[1] - pair.simplex[0];
     glm::vec2 CO =               - pair.simplex[0];
     tripleProduct(CB, CO, CB, pair.searchDir);
@@ -64,7 +64,7 @@ std::size_t handle2(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
     return 2;
 }
 
-std::size_t handle3(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
+uint32_t handle3(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
     glm::vec2 AB = pair.simplex[1] - pair.simplex[2];
     glm::vec2 AC = pair.simplex[0] - pair.simplex[2];
     glm::vec2 AO =               - pair.simplex[2];
@@ -92,7 +92,7 @@ std::size_t handle3(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair) {
     return -1;
 }
 
-void addSupport(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair, std::size_t insertIndex) {
+void addSupport(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair, uint32_t insertIndex) {
     // Step 1: Transform search direction from world space to each body's local space
     // The search direction is in Minkowski space (worldA - worldB), so we need to find
     // the furthest vertex in each body's local coordinate system along this direction.
@@ -129,10 +129,10 @@ void addSupport(Rigid* bodyA, Rigid* bodyB, CollisionPair& pair, std::size_t ins
 }
 
 void getFar(const Rigid* body, const glm::vec2 &dir, glm::vec2 &simplexLocal) {
-    std::size_t farIndex = 0;
+    uint32_t farIndex = 0;
     Collider* collider = body->getCollider();
     float maxDot = glm::dot(collider->getVertices()[0], dir);
-    for (std::size_t i = 0; i < collider->getVertices().size(); ++i) {
+    for (uint32_t i = 0; i < collider->getVertices().size(); ++i) {
         float d = glm::dot(collider->getVertices()[i], dir);
         if (d > maxDot) {
             maxDot = d;

@@ -28,15 +28,15 @@ Spring::~Spring() {
     solver->getForceTable()->getSpringTable()->markAsDeleted(this->specialIndex);
 }
 
-void Spring::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
-    std::size_t index = forceTable->getSpringTable()->getForceIndex(specialIndex);
+void Spring::computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha) {
+    uint32_t index = forceTable->getSpringTable()->getForceIndex(specialIndex);
     // Compute constraint function at current state C(x)
     SpringStruct& springs = forceTable->getSpringTable()->getData(specialIndex);
     forceTable->setC(index, 0, length(transform(forceTable->getPosA(index), springs.rA) - transform(forceTable->getPosB(index), springs.rB)) - springs.rest);
 }
 
-void Spring::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
-    std::size_t index = forceTable->getSpringTable()->getForceIndex(specialIndex);
+void Spring::computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
+    uint32_t index = forceTable->getSpringTable()->getForceIndex(specialIndex);
     SpringStruct& springs = forceTable->getSpringTable()->getData(specialIndex);
 
     // Compute the first and second derivatives for the desired body

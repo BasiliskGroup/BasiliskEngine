@@ -4,7 +4,7 @@
 
 namespace bsk::internal {
 
-ColliderTable::ColliderTable(std::size_t capacity)
+ColliderTable::ColliderTable(uint32_t capacity)
     : VirtualTable()
 {
     resize(capacity);
@@ -20,7 +20,7 @@ ColliderTable::~ColliderTable() {
     }
 }
 
-void ColliderTable::resize(std::size_t newCapacity) {
+void ColliderTable::resize(uint32_t newCapacity) {
     // Only expand, never shrink
     if (newCapacity <= capacity) return;
     expandTensors(newCapacity,
@@ -33,7 +33,7 @@ void ColliderTable::compact() {
     // NOTE: This function is very expensive but should only be called once per frame
     // If needed, find a cheaper solution
     // do a quick check to see if we need to run more complex compact function
-    std::size_t active = numValid(toDelete, size);
+    uint32_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
@@ -46,7 +46,7 @@ void ColliderTable::compact() {
     size = active;
 
     // Update collider indices
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         toDelete[i] = false;
         // All colliders after compact should be valid so we don't check for nullptrs
         colliders[i]->setIndex(i);
@@ -82,7 +82,7 @@ void ColliderTable::insert(Collider* collider, const std::vector<glm::vec2>& ver
     size++;
 }
 
-void ColliderTable::markAsDeleted(std::size_t index) {
+void ColliderTable::markAsDeleted(uint32_t index) {
     // Called when a collider is deleted - marks it for removal during next compact()
     colliders[index] = nullptr;
     toDelete[index] = true;
