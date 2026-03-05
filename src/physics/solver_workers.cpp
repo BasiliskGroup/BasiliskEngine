@@ -48,12 +48,8 @@ void Solver::workerLoop(unsigned int threadID) {
 // ------------------------------------------------------------
 // Primal Stage
 // ------------------------------------------------------------
-
 void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) {
     // Verify activeColor is within bounds (defensive programming)
-    assert ((activeColor < 0 || activeColor >= static_cast<int>(colorGroups.size())) == false);
-    assert (colorGroups[activeColor].size() != 0);
-
     PrimalScratch& primalScratch = reinterpret_cast<PrimalScratch&>(scratch.storage);
     float alpha = currentAlpha.load(std::memory_order_acquire);
 
@@ -63,7 +59,7 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
     // same color are independent so threads can work on any
     // subset without synchronisation.
     // -------------------------------------------------------
-    const std::vector<ColorForce>& edges = forceEdgeIndices[activeColor];
+    const std::vector<ColorForce>& edges = colors.tables[activeColor].forces;
     std::size_t edgeCount = edges.size();
 
     if (edgeCount > 0) {
@@ -98,7 +94,7 @@ void Solver::primalStage(ThreadScratch& scratch, int threadID, int activeColor) 
     // per-force rhs/lhs into each body's linear system, then
     // solve and apply the position update.
     // -------------------------------------------------------
-    std::size_t colorSize = colorGroups[activeColor].size();
+    std::size_t colorSize = colors.tables[activeColor].bodies.size();
     WorkRange bodyRange = partition(colorSize, threadID, NUM_THREADS);
     for (std::size_t i = bodyRange.start; i < bodyRange.end; i++) {
         primalAccumulateSingle(primalScratch, activeColor, i);
@@ -136,7 +132,7 @@ inline void Solver::processForce(ForceTypeTable<TForceStruct>* forceTypeTable, s
 }
 
 void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex) {
-    const ColorBody& data = colorGroups[activeColor][bodyColorIndex];
+    const ColorBody& data = colors.tables[activeColor].bodies[bodyColorIndex];
     Rigid* body = data.body;
 
     // Skip static / kinematic bodies
@@ -156,7 +152,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     std::size_t start = data.start;
     std::size_t end = data.start + data.manifold;
     for (; start < end; ++start) {
-        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = colors.tables[activeColor].forces[start];
         std::size_t forceIndex = forceTable->getManifoldTable()->getForceIndex(forceData.special);
         int rows = Manifold::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
@@ -168,7 +164,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     // JOINT
     end = start + data.joint;
     for (; start < end; ++start) {
-        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = colors.tables[activeColor].forces[start];
         std::size_t forceIndex = forceTable->getJointTable()->getForceIndex(forceData.special);
         int rows = Joint::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
@@ -180,7 +176,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     // SPRING
     end = start + data.spring;
     for (; start < end; ++start) {
-        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = colors.tables[activeColor].forces[start];
         std::size_t forceIndex = forceTable->getSpringTable()->getForceIndex(forceData.special);
         int rows = Spring::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {
@@ -192,7 +188,7 @@ void Solver::primalAccumulateSingle(PrimalScratch& scratch, int activeColor, std
     // MOTOR
     end = start + data.motor;
     for (; start < end; ++start) {
-        const ColorForce& forceData = forceEdgeIndices[activeColor][start];
+        const ColorForce& forceData = colors.tables[activeColor].forces[start];
         std::size_t forceIndex = forceTable->getMotorTable()->getForceIndex(forceData.special);
         int rows = Motor::rows(forceTable, forceData.special);
         for (int r = 0; r < rows; ++r) {

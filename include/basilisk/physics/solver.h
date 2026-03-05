@@ -66,7 +66,7 @@ private:
 
     // Coloring
     ColorQueue colorQueue;
-    ColorTableManager* colorTableManager;
+    ColorTableManager colors;
 
     // Threading
     std::barrier<> stageBarrier;
@@ -81,8 +81,15 @@ private:
 
     // shaders
     ComputeShader* velocityShader = nullptr;
-    std::vector<std::vector<ColorBody>> colorGroups;
-    std::vector<std::vector<ColorForce>> forceEdgeIndices;
+
+    // struct Color {
+    //     std::vector<ColorBody> bodies;
+    //     std::vector<ColorForce> forces;
+    // };
+
+    // std::vector<Color> colors;
+    // std::vector<std::vector<ColorBody>> colorGroups;
+    // std::vector<std::vector<ColorForce>> forceEdgeIndices;
 
 public:
     Solver();

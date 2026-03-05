@@ -34,8 +34,7 @@ Solver::Solver() :
     currentAlpha(0.0f),
     currentColor(0),
     running(true),
-    workers(),
-    forceEdgeIndices()
+    workers()
 {
     this->bodyTable = new BodyTable(this, 8, velocityShader);
     this->forceTable = new ForceTable(128);
@@ -303,9 +302,9 @@ void Solver::step(float dtIncoming) {
 
         // iterate through colors - process bodies by color to enable parallel execution
         // Bodies of the same color can be processed in parallel since they have no dependencies
-        for (int activeColor = 0; activeColor < colorGroups.size(); activeColor++) {
+        for (int activeColor = 0; activeColor < colors.tables.size(); activeColor++) {
             // Skip empty color groups (shouldn't happen with proper dsatur, but be safe)
-            if (colorGroups[activeColor].empty()) {
+            if (colors.tables[activeColor].bodies.empty()) {
                 continue;
             }
             
@@ -356,8 +355,7 @@ void Solver::resetColoring() {
     // Clear priority queue by swapping with empty queue
     ColorQueue empty;
     colorQueue.swap(empty);
-    colorGroups.clear();
-    forceEdgeIndices.clear();
+    colors.tables.clear();
 }
 
 void Solver::dsatur() {
@@ -388,11 +386,10 @@ void Solver::dsatur() {
         body->useColor(color);
 
         // ensure we have enough colors
-        colorGroups.resize(color + 1);
-        forceEdgeIndices.resize(color + 1);
+        colors.tables.resize(color + 1);
 
         // add body to color group
-        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, 0, 0, 0);
+        colors.tables[color].bodies.emplace_back(body, colors.tables[color].forces.size(), 0, 0, 0, 0);
 
         // clear temp indices
         for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
@@ -406,22 +403,22 @@ void Solver::dsatur() {
         glm::vec3 jacobianMask = body->getJacobianMask();
             switch (force->getForceType()) {
                 case ForceType::JOINT:
-                    colorGroups[color].back().joint++;
+                    colors.tables[color].bodies.back().joint++;
                     tempIndices[ForceType::JOINT].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::JOINT, jacobianMask);
                     break;
                 case ForceType::MANIFOLD:
                     if (body->getResolvesCollisions() == false || other->getResolvesCollisions() == false) {
                         continue;
                     }
-                    colorGroups[color].back().manifold++;
+                    colors.tables[color].bodies.back().manifold++;
                     tempIndices[ForceType::MANIFOLD].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::MANIFOLD, jacobianMask);
                     break;
                 case ForceType::SPRING:
-                    colorGroups[color].back().spring++;
+                    colors.tables[color].bodies.back().spring++;
                     tempIndices[ForceType::SPRING].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::SPRING, jacobianMask);
                     break;
                 case ForceType::MOTOR:
-                    colorGroups[color].back().motor++;
+                    colors.tables[color].bodies.back().motor++;
                     tempIndices[ForceType::MOTOR].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::MOTOR, jacobianMask);
                     break;
                 default:
@@ -443,7 +440,7 @@ void Solver::dsatur() {
 
         // insert forces in sorted order into edge indices
         for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
-            forceEdgeIndices[color].insert(forceEdgeIndices[color].end(), tempIndices[i].begin(), tempIndices[i].end());
+            colors.tables[color].forces.insert(colors.tables[color].forces.end(), tempIndices[i].begin(), tempIndices[i].end());
         }
     }
 }
