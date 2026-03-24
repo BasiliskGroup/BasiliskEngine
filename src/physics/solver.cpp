@@ -35,7 +35,7 @@ Solver::Solver() :
     workers(),
     forceEdgeIndices()
 {
-    this->bodyTable = new BodyTable(128);
+    this->bodyTable = new BodyTable(this, 128);
     this->forceTable = new ForceTable(128);
     this->forceTable->setSolver(this);
     defaultParams();
@@ -280,14 +280,16 @@ void Solver::step(float dtIncoming) {
 
     // Load initial positions into forces
     // auto loadPositionalStart = timeNow();
-    for (Force* force = forces; force != nullptr; force = force->getNext()) {
-        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
-        forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
-    }
+    // for (Force* force = forces; force != nullptr; force = force->getNext()) {
+    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
+    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
+    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
+    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
+    // }
     // auto loadPositionalEnd = timeNow();
     // printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
+
+    // forceTable->printIndices();
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
@@ -412,22 +414,22 @@ void Solver::dsatur() {
             switch (force->getForceType()) {
                 case ForceType::JOINT:
                     colorGroups[color].back().joint++;
-                    tempIndices[ForceType::JOINT].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::JOINT].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 case ForceType::MANIFOLD:
                     if (body->getResolvesCollisions() == false || other->getResolvesCollisions() == false) {
                         continue;
                     }
                     colorGroups[color].back().manifold++;
-                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 case ForceType::SPRING:
                     colorGroups[color].back().spring++;
-                    tempIndices[ForceType::SPRING].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::SPRING].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 case ForceType::MOTOR:
                     colorGroups[color].back().motor++;
-                    tempIndices[ForceType::MOTOR].emplace_back(force->getIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    tempIndices[ForceType::MOTOR].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
                     break;
                 default:
                     throw std::runtime_error("Invalid force type");
@@ -451,9 +453,6 @@ void Solver::dsatur() {
             forceEdgeIndices[color].insert(forceEdgeIndices[color].end(), tempIndices[i].begin(), tempIndices[i].end());
         }
     }
-
-    // Print number of colors used
-    // std::cout << "Number of colors used: " << colorGroups.size() << std::endl;
 }
 
 Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {

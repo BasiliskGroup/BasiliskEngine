@@ -10,7 +10,8 @@
 
 namespace bsk::internal {
 
-BodyTable::BodyTable(std::size_t capacity) : 
+BodyTable::BodyTable(Solver* solver, std::size_t capacity) : 
+    solver(solver),
     bvh(new BVH()),
     posBuffer(new GpuBuffer<bsk::vec3>(capacity)),
     initialBuffer(new GpuBuffer<bsk::vec3>(capacity)),
@@ -25,7 +26,7 @@ BodyTable::BodyTable(std::size_t capacity) :
     
     // Initialize and bind shaders
     velocityShader = new ComputeShader(
-        readFile(internalPath("shaders/velocity.wgsl").c_str()),
+        readFile(internalPath("shaders/physics/velocity.wgsl").c_str()),
         { 
             posBuffer->handle(), 
             initialBuffer->handle(), 
@@ -135,7 +136,7 @@ void BodyTable::resize(std::size_t newCapacity) {
     const bool hadGpuResources = (capacity > 0);
 
     expandTensors(newCapacity,
-    bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping, jacobianMask
+    bodies, toDelete, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping, jacobianMask, indexMap
     );
 
     capacity = newCapacity;
@@ -182,12 +183,21 @@ void BodyTable::compact() {
         return;
     }
 
+    // Build indexMap: oldIndex -> newIndex (-1 for deleted entries)
+    uint dst = 0;
+    for (uint i = 0; i < size; i++) {
+        indexMap[i] = !toDelete[i] ? dst++ : -1;
+    }
+
     // TODO check to see who needs to be compacted and who will just get cleared anyway
     compactTensors(toDelete, size,
 bodies, pos, initial, inertial, vel, prevVel, scale, friction, radius, mass, moment, collider, mat, imat, rmat, updated, color, sleeping, jacobianMask
     );
 
     size = active;
+
+    // remap body indices
+    solver->getForceTable()->remapBodyIndices();
 
     for (uint i = 0; i < size; i++) {
         toDelete[i] = false;

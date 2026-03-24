@@ -1,6 +1,9 @@
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/forces/force.h>
 #include <basilisk/physics/tables/forceTypeTable.h>
+#include <basilisk/physics/rigid.h>
+#include <basilisk/physics/solver.h>
+#include <basilisk/physics/tables/bodyTable.h>
 
 namespace bsk::internal {
 
@@ -29,7 +32,7 @@ void ForceTable::resize(std::size_t newCapacity) {
     if (newCapacity <= capacity) return;
 
     expandTensors(newCapacity,
-        forces, toDelete, parameters, derivatives, specialParameters, forceTypes, rows, positional, indexMap
+        forces, toDelete, parameters, derivatives, forceTypes, rows, bodies, indexMap, solverSides
     );
 
     capacity = newCapacity;
@@ -42,19 +45,14 @@ void ForceTable::compact() {
         return;
     }
 
-    // Build index map: indexMap[oldIndex] = newIndex (SIZE_MAX for deleted)
+    // Build index map: indexMap[oldIndex] = newIndex (-1 for deleted)
     std::size_t dst = 0;
     for (std::size_t src = 0; src < size; ++src) {
-        if (!toDelete[src]) {
-            indexMap[src] = dst;
-            ++dst;
-        } else {
-            indexMap[src] = SIZE_MAX;
-        }
+        indexMap[src] = !toDelete[src] ? dst++ : -1;
     }
 
     compactTensors(toDelete, size,
-        forces, parameters, derivatives, specialParameters, forceTypes, rows, positional
+        forces, parameters, derivatives, forceTypes, rows, bodies, solverSides
     );
 
     size = active;
@@ -88,6 +86,9 @@ void ForceTable::insert(Force* force) {
     toDelete[size] = false;
     rows[size] = 0;
 
+    bodies[size].a = force->getBodyA() ? force->getBodyA()->getIndex() : -1;
+    bodies[size].b = force->getBodyB() ? force->getBodyB()->getIndex() : -1;
+
     for (int i = 0; i < MAX_ROWS; i++) {
         derivatives[size][i].J = glm::vec3(0.0f);
         derivatives[size][i].H = glm::mat3x3(0.0f);
@@ -105,28 +106,68 @@ void ForceTable::insert(Force* force) {
 }
 
 void ForceTable::setForceType(std::size_t index, ForceType value) {
-    SpecialParameters& sp = specialParameters[index];
     forceTypes[index] = value;
+}
 
-    switch (forceTypes[index]) {
-        case ForceType::MANIFOLD:
-            new (&sp.manifold) ManifoldData();
-            break;
+void ForceTable::printIndices() const {
+    std::cout << "Manifold indices: " << std::endl;
+    manifoldTable->printIndices();
+    std::cout << "Joint indices: " << std::endl;
+    jointTable->printIndices();
+    std::cout << "Spring indices: " << std::endl;
+    springTable->printIndices();
+    std::cout << "Motor indices: " << std::endl;
+    motorTable->printIndices();
+}
 
-        case ForceType::JOINT:
-            new (&sp.joint) JointStruct();
-            break;
+glm::vec3 ForceTable::getPosA(std::size_t index) {
+    return bodies[index].a != -1 ? solver->getBodyTable()->getPos(bodies[index].a) : glm::vec3(0.0f);
+}
 
-        case ForceType::SPRING:
-            new (&sp.spring) SpringStruct();
-            break;
+glm::vec3 ForceTable::getPosB(std::size_t index) {
+    return bodies[index].b != -1 ? solver->getBodyTable()->getPos(bodies[index].b) : glm::vec3(0.0f);
+}
 
-        case ForceType::MOTOR:
-            new (&sp.motor) MotorStruct();
-            break;
+glm::vec3 ForceTable::getInitialA(std::size_t index) {
+    return bodies[index].a != -1 ? solver->getBodyTable()->getInitial(bodies[index].a) : glm::vec3(0.0f);
+}
 
-        default:
-            break;
+glm::vec3 ForceTable::getInitialB(std::size_t index) {
+    return bodies[index].b != -1 ? solver->getBodyTable()->getInitial(bodies[index].b) : glm::vec3(0.0f);
+}
+
+void ForceTable::setPosA(std::size_t index, const glm::vec3& value) {
+    if (bodies[index].a != -1) {
+        solver->getBodyTable()->setPos(bodies[index].a, value);
+    }
+}
+
+void ForceTable::setPosB(std::size_t index, const glm::vec3& value) {
+    if (bodies[index].b != -1) {
+        solver->getBodyTable()->setPos(bodies[index].b, value);
+    }
+}
+
+void ForceTable::setInitialA(std::size_t index, const glm::vec3& value) {
+    if (bodies[index].a != -1) {
+        solver->getBodyTable()->setInitial(bodies[index].a, value);
+    }
+}
+
+void ForceTable::setInitialB(std::size_t index, const glm::vec3& value) {
+    if (bodies[index].b != -1) {
+        solver->getBodyTable()->setInitial(bodies[index].b, value);
+    }
+}
+
+void ForceTable::remapBodyIndices() {
+    for (uint i = 0; i < size; i++) {
+        if (bodies[i].a != -1) {
+            bodies[i].a = solver->getBodyTable()->getMappedIndex(bodies[i].a);
+        }
+        if (bodies[i].b != -1) {
+            bodies[i].b = solver->getBodyTable()->getMappedIndex(bodies[i].b);
+        }
     }
 }
 
