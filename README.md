@@ -1,5 +1,7 @@
 # Basilisk Engine
 
+Progress: ███████░░░░ 70%
+
 ## Building and Running the Project
 
 To build this project from source, you'll use **CMake**. Follow these steps from the command line:
