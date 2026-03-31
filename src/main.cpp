@@ -16,7 +16,7 @@
 
 namespace {
 
-constexpr int SIDE_LENGTH = 32;
+constexpr int SIDE_LENGTH = 100;
 constexpr float DELTA = SIDE_LENGTH * 0.6f;
 constexpr int OCTAVES = 10;
 constexpr int N = 4;
@@ -25,10 +25,29 @@ inline bool vec2Eq(const glm::vec2& a, const glm::vec2& b) {
     return glm::length2(a - b) < 1e-6f;
 }
 
+bsk::Material getCircularColor(int i, int i_max, int j = 1, int j_max = 1) {
+    const float pi = static_cast<float>(M_PI);
+    const float t = static_cast<float>(i) / static_cast<float>(std::max(i_max, 1));
+    const float u = static_cast<float>(j) / static_cast<float>(std::max(j_max, 1));
+    return bsk::Material(glm::vec3(
+        (150.0f + 50.0f * std::sin(2.0f * pi * t + 0.0f * pi / 3.0f) + 50.0f * u) / 255.0f,
+        (150.0f + 50.0f * std::sin(2.0f * pi * t + 2.0f * pi / 3.0f) + 50.0f * u) / 255.0f,
+        (150.0f + 50.0f * std::sin(2.0f * pi * t + 4.0f * pi / 3.0f) + 50.0f * u) / 255.0f
+    ));
+}
+
+// ----------------------------------------------
+// Build Marching Squares
+// ----------------------------------------------
+
 struct Edge {
     glm::vec2 a;
     glm::vec2 b;
 };
+
+inline bool operator==(const Edge& x, const Edge& y) {
+    return vec2Eq(x.a, y.a) && vec2Eq(x.b, y.b);
+}
 
 class Seg {
 public:
@@ -39,17 +58,11 @@ public:
             return false;
         }
 
-        if (vec2Eq(chain.front(), a)) {
-            chain.insert(chain.begin(), b);
-        } else if (vec2Eq(chain.back(), a)) {
-            chain.push_back(b);
-        } else if (vec2Eq(chain.front(), b)) {
-            chain.insert(chain.begin(), a);
-        } else if (vec2Eq(chain.back(), b)) {
-            chain.push_back(a);
-        } else {
-            return false;
-        }
+        if (vec2Eq(chain.front(), a)) chain.insert(chain.begin(), b);
+        else if (vec2Eq(chain.back(), a)) chain.push_back(b);
+        else if (vec2Eq(chain.front(), b)) chain.insert(chain.begin(), a);
+        else if (vec2Eq(chain.back(), b)) chain.push_back(a);
+        else return false;
 
         bl = glm::min(bl, glm::min(a, b));
         tr = glm::max(tr, glm::max(a, b));
@@ -57,6 +70,7 @@ public:
     }
 
     bool merge(Seg& other) {
+        // Merge two chains when their endpoints touch.
         if (vec2Eq(chain.front(), other.chain.front())) {
             std::reverse(chain.begin(), chain.end());
             chain.insert(chain.end(), other.chain.begin(), other.chain.end());
@@ -79,6 +93,7 @@ public:
     }
 
     bool validate() const {
+        // Earcut expects closed rings (first point duplicated at end).
         if (chain.size() < 3) return false;
         return vec2Eq(chain.front(), chain.back());
     }
@@ -111,7 +126,73 @@ public:
     glm::vec2 tr;
 };
 
+// ----------------------------------------------
+// Build Polygons
+// ----------------------------------------------
+
+class Convex {
+private:
+    // define structs for identifying edges
+    struct Vec2Hash {
+        std::size_t operator()(const glm::vec2& v) const noexcept {
+            return std::hash<float>()(v.x) ^ (std::hash<float>()(v.y) << 1);
+        }
+    };
+
+    // Custom hash function for Edge
+    struct EdgeHash {
+        std::size_t operator()(const Edge& e) const noexcept {
+            std::size_t h1 = Vec2Hash{}(e.a);
+            std::size_t h2 = Vec2Hash{}(e.b);
+            return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
+        }
+    };
+    
+    // construct ordered map // TODO replace int with pointers into linked list
+    std::unordered_map<Edge, int, EdgeHash> edgeToIndex; // start index of vertices. NOTE final index will wrap around
+    std::vector<glm::vec2> vertices;
+
+public: 
+    Convex(glm::vec2& a, glm::vec2& b, glm::vec2& c) : vertices{ a, b, c } {}
+
+    bool add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+        // find which edge to insert onto
+        int index = -1;
+        glm::vec2 insert, first, last;
+
+        if (edgeToIndex.find(Edge{b, a}) != edgeToIndex.end()) { 
+            index = edgeToIndex[Edge{b, a}]; 
+            edgeToIndex.erase(Edge{b, a}); 
+            first = b; last = a; insert = c;
+        } else if (edgeToIndex.find(Edge{c, b}) != edgeToIndex.end()) { 
+            index = edgeToIndex[Edge{c, b}]; 
+            edgeToIndex.erase(Edge{c, b}); 
+            first = c; last = b; insert = a;
+        } else if (edgeToIndex.find(Edge{a, c}) != edgeToIndex.end()) { 
+            index = edgeToIndex[Edge{a, c}]; 
+            edgeToIndex.erase(Edge{a, c}); 
+            first = a; last = c; insert = b;
+        } else {
+            return false;
+        }
+
+        vertices.insert(vertices.begin() + index, insert);
+
+        // insert new edges into map
+        edgeToIndex[Edge{first, insert}] = index;
+        edgeToIndex[Edge{insert, last}] = index + 1;
+
+        // found and inserted
+        return true;
+    }
+};
+
 class Polygon {
+private:
+    std::vector<Seg> segs;
+    std::vector<uint32_t> earcutIndices;
+    std::vector<glm::vec2> earcutVertices;
+
 public:
     void add(const glm::vec2& a, const glm::vec2& b) {
         for (std::size_t i = 0; i < segs.size(); ++i) {
@@ -129,8 +210,9 @@ public:
     void draw(
         bsk::Scene2D* scene,
         const glm::vec2& offset,
-        bsk::Material* material
-    ) const {
+        int poly,
+        int poly_max
+    ) {
         if (segs.empty()) {
             return;
         }
@@ -152,28 +234,9 @@ public:
         std::vector<std::vector<EarcutPoint>> polygon;
         polygon.reserve(rings.size());
 
-        // Optional helper payload you can feed into your mesh builder.
-        std::vector<glm::vec2> earcutVertices;
         earcutVertices.reserve(rings.size() * 8);
 
-        auto pointInRing = [](const glm::vec2& point, const Seg& ringSeg) -> bool {
-            if (ringSeg.chain.size() < 4) {
-                return false;
-            }
-            bool inside = false;
-            // Ignore the duplicated closing vertex by stopping at size()-1.
-            for (std::size_t i = 0, j = ringSeg.chain.size() - 2; i < ringSeg.chain.size() - 1; j = i++) {
-                const glm::vec2& a = ringSeg.chain[i];
-                const glm::vec2& b = ringSeg.chain[j];
-                const bool intersects = ((a.y > point.y) != (b.y > point.y)) &&
-                    (point.x < (b.x - a.x) * (point.y - a.y) / ((b.y - a.y) + 1e-12f) + a.x);
-                if (intersects) {
-                    inside = !inside;
-                }
-            }
-            return inside;
-        };
-
+        // TODO optimize this, reduce memory allocations
         auto emitRing = [&](std::size_t i, bool asOuter) {
             // Outer ring must be CCW; holes must be CW.
             rings[i].orientCCW();
@@ -185,7 +248,7 @@ public:
             auto& ring = polygon.back();
             ring.reserve(rings[i].chain.size());
             for (const glm::vec2& p : rings[i].chain) {
-                const glm::vec2 world = p + offset;
+                const glm::vec2 world = p;
                 ring.push_back({static_cast<double>(world.x), static_cast<double>(world.y)});
                 earcutVertices.push_back(world);
             }
@@ -205,10 +268,6 @@ public:
             if (!rings[i].validate()) {
                 continue;
             }
-            // Option 2: only emit contained rings as holes.
-            if (rings[i].chain.empty() || !pointInRing(rings[i].chain[0], rings[outerIdx])) {
-                continue;
-            }
             emitRing(i, false);
         }
 
@@ -216,9 +275,7 @@ public:
             return;
         }
 
-        std::vector<uint32_t> earcutIndices = mapbox::earcut<uint32_t>(polygon);
-        (void)earcutVertices;
-        (void)earcutIndices;
+        this->earcutIndices = mapbox::earcut<uint32_t>(polygon);
 
         // generate mesh
         std::vector<float> meshVertices;
@@ -231,8 +288,57 @@ public:
             meshVertices.push_back(0.0f);
         }
         bsk::Mesh* mesh = new bsk::Mesh(meshVertices, earcutIndices);
-        bsk::Node2D* node = new bsk::Node2D(mesh, material, { 0.0f, 0.0f }, 0.0f, glm::vec2(1.0f, 1.0f));
+        bsk::Material* material = new bsk::Material(getCircularColor(poly, poly_max));
+        bsk::Node2D* node = new bsk::Node2D(mesh, material, offset, 0.0f, glm::vec2(1.0f, 1.0f));
         scene->add(node);
+
+        // display all triangles in the mesh
+        // int numTriangles = earcutIndices.size() / 3;
+        // for (std::size_t i = 0; i < earcutIndices.size(); i += 3) {
+        //     // collect vertices from the mesh
+        //     std::vector<float> vertices;
+        //     vertices.reserve(3 * 5);
+        //     for (std::size_t j = 0; j < 3; ++j) {
+        //         const std::size_t idx = earcutIndices[i + j];
+        //         vertices.push_back(earcutVertices[idx].x);
+        //         vertices.push_back(-earcutVertices[idx].y);
+        //         vertices.push_back(0.0f);
+        //         vertices.push_back(0.0f);
+        //         vertices.push_back(0.0f);
+        //     }
+        //     bsk::Mesh* mesh = new bsk::Mesh(vertices, std::vector<uint32_t>{0, 1, 2});
+        //     bsk::Material* material = new bsk::Material(getCircularColor(poly, poly_max, i, numTriangles));
+        //     bsk::Node2D* node = new bsk::Node2D(mesh, material, offset, 0.0f, glm::vec2(1.0f, 1.0f));
+        //     scene->add(node);
+        // }
+
+        decompose();
+    }
+
+    std::vector<Convex> decompose() {
+        std::vector<Convex> polygons;
+
+        // iterate over each triangle (3 vertices)
+        for (int i = 0; i < earcutIndices.size(); i += 3) {
+            const int a = earcutIndices[i];
+            const int b = earcutIndices[i + 1];
+            const int c = earcutIndices[i + 2];
+
+            bool found = false;
+            for (int j = 0; j < polygons.size(); j++) {
+                if (polygons[j].add(earcutVertices[a], earcutVertices[b], earcutVertices[c])) {
+                    found = true;
+                    break;
+                }
+            }
+
+            // make a new convex shape if we didn't find a match
+            if (!found) {
+                polygons.emplace_back(earcutVertices[a], earcutVertices[b], earcutVertices[c]);
+            }
+        }
+
+        return polygons;
     }
 
 private:
@@ -248,13 +354,15 @@ private:
         }
         segs.push_back(other);
     }
-
-    std::vector<Seg> segs;
 };
+
+// ----------------------------------------------
+// Generate Noise Grid and BFS
+// ----------------------------------------------
 
 class Grid {
 public:
-    explicit Grid(std::vector<std::vector<int>> grid) : weights(std::move(grid)) { dfs(); }
+    explicit Grid(std::vector<std::vector<int>> grid) : weights(std::move(grid)) { bfs(); }
 
     bool isInside(int x, int y) const {
         return x >= 0 && x < SIDE_LENGTH && y >= 0 && y < SIDE_LENGTH;
@@ -264,7 +372,7 @@ public:
         return isInside(x, y) && weights[x][y] == 1;
     }
 
-    void dfs() {
+    void bfs() {
         components.clear();
         std::unordered_set<int> unvisited;
         unvisited.reserve(SIDE_LENGTH * SIDE_LENGTH);
@@ -278,6 +386,7 @@ public:
 
         std::deque<std::pair<int, int>> queue;
         while (!unvisited.empty()) {
+            // Flood-fill one connected component at a time.
             const int seed = *unvisited.begin();
             unvisited.erase(seed);
             queue.push_back(decode(seed));
@@ -309,16 +418,6 @@ public:
                 }
             }
         }
-    }
-
-    bsk::Material getCircularColor(int i, int comps) const {
-        const float pi = static_cast<float>(M_PI);
-        const float t = static_cast<float>(i) / static_cast<float>(std::max(comps, 1));
-        return bsk::Material(glm::vec3(
-            (200.0f + 50.0f * std::sin(2.0f * pi * t + 0.0f * pi / 3.0f)) / 255.0f,
-            (200.0f + 50.0f * std::sin(2.0f * pi * t + 2.0f * pi / 3.0f)) / 255.0f,
-            (200.0f + 50.0f * std::sin(2.0f * pi * t + 4.0f * pi / 3.0f)) / 255.0f
-        ));
     }
 
     void genComps(bsk::Scene2D* scene, const glm::vec2& offset) {
@@ -356,6 +455,7 @@ public:
                         const int ay = y + dy;
                         const int key = encode(ax, ay);
                         if (seenAnchors.insert(key).second) {
+                            // Preserve discovery order while removing duplicates.
                             orderedAnchors.emplace_back(ax, ay);
                         }
                     }
@@ -370,7 +470,7 @@ public:
                 }
             }
 
-            polygon.draw(scene, offset, materials[i].get());
+            polygon.draw(scene, offset, i, components.size());
         }
     }
 
@@ -418,6 +518,10 @@ private:
 
 } // namespace
 
+// ----------------------------------------------
+// Main
+// ----------------------------------------------
+
 int main() {
     bsk::Engine* engine = new bsk::Engine(1200, 900, "Marching Squares");
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
@@ -432,6 +536,7 @@ int main() {
     PerlinNoise noise;
     std::mt19937 rng(std::random_device{}());
     std::uniform_real_distribution<double> startDist(0.0, 10000.0);
+    // Randomize the sampled region each run for varied maps.
     const double noiseStartX = startDist(rng);
     const double noiseStartY = startDist(rng);
     for (int x = 0; x < SIDE_LENGTH; ++x) {
@@ -455,9 +560,10 @@ int main() {
     }
 
     Grid grid(weights);
-    grid.dfs();
+    grid.bfs();
     grid.genComps(scene, glm::vec2(DELTA, DELTA));
     grid.genMarch(scene, glm::vec2(-DELTA, -DELTA));
+    std::cout << "Done" << std::endl;
 
     while (engine->isRunning()) {
         engine->update();
