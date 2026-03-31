@@ -62,9 +62,13 @@
                  }
                  delete hovered;
              } else {
-                 new bsk::Node2D(scene, nullptr, nullptr,
+                 bsk::Node2D* node = new bsk::Node2D(nullptr, nullptr,
                      mousePos, 0.0f, glm::vec2(1.0f, 1.0f),
                      glm::vec3(0.0f), collider);
+                scene->add(node);
+                 if (rand() % 2 == 0) {
+                    node->setHasGravity(false);
+                 }
              }
          }
  

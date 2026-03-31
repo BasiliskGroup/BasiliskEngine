@@ -34,6 +34,7 @@ private:
         glm::vec3 velocity = glm::vec3(0.0f);
         bool resolvesCollisions = true;
         int collisionGroup = 0;
+        bool hasGravity = true;
     } physicsData;
 
 public:
@@ -61,6 +62,7 @@ public:
     void setJacobianMask(const glm::vec3& jacobianMask);
     void setResolvesCollisions(bool resolvesCollisions);
     void setCollisionGroup(int group);
+    void setHasGravity(bool hasGravity);
 
     Scene2D* getScene() { return (Scene2D*) scene; }
     Rigid* getRigid() { return rigid; }
@@ -75,6 +77,7 @@ public:
     glm::vec3 getJacobianMask();
     bool getResolvesCollisions() const { return physicsData.resolvesCollisions; }
     int getCollisionGroup() const { return physicsData.collisionGroup; }
+    bool getHasGravity() const { return physicsData.hasGravity; }
 
     std::vector<CollisionData> getCollisions();
 

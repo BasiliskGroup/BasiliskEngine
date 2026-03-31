@@ -187,6 +187,11 @@ void Node2D::setCollisionGroup(int group) {
     if (this->rigid) this->rigid->setCollisionGroup(group);
 }
 
+void Node2D::setHasGravity(bool hasGravity) {
+    physicsData.hasGravity = hasGravity;
+    if (this->rigid) this->rigid->setHasGravity(hasGravity);
+}
+
 void Node2D::setVelocity(glm::vec3 velocity) {
     if (this->rigid) this->rigid->setVelocity(velocity);
 }
@@ -208,6 +213,7 @@ void Node2D::bindRigid(Mesh* mesh, Material* material, glm::vec2 position, float
         rigid = new Rigid(scene2d->getSolver(), this, collider, { this->position, this->rotation }, this->scale, density, friction, velocity);
         rigid->setResolvesCollisions(physicsData.resolvesCollisions);
         rigid->setCollisionGroup(physicsData.collisionGroup);
+        rigid->setHasGravity(physicsData.hasGravity);
     }
 }
 
@@ -244,6 +250,7 @@ void Node2D::setRigid(const Node2D& other) {
     );
     this->rigid->setResolvesCollisions(physicsData.resolvesCollisions);
     this->rigid->setCollisionGroup(physicsData.collisionGroup);
+    this->rigid->setHasGravity(physicsData.hasGravity);
 }
 
 void Node2D::setRigid(Node2D&& other) {
@@ -510,6 +517,7 @@ std::shared_ptr<Node2D> Node2D::orphanCopy() const {
     copy->setLayer(layer);
     copy->setResolvesCollisions(physicsData.resolvesCollisions);
     copy->setCollisionGroup(physicsData.collisionGroup);
+    copy->setHasGravity(physicsData.hasGravity);
     return copy;
 }
 
