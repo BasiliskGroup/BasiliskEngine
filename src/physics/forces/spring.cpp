@@ -11,6 +11,9 @@ namespace bsk::internal {
 Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, float stiffness, float rest)
     : Force(solver, bodyA, bodyB)
 {
+    // register to spring table
+    solver->getForceTable()->getSpringTable()->insert(this);
+
     setRA(rA);
     setRB(rB);
     setRest(rest);
@@ -19,8 +22,6 @@ Spring::Spring(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::ve
         setRest(length(transform(bodyA->getPosition(), getRA()) - transform(bodyB->getPosition(), getRB())));
     solver->getForceTable()->setForceType(this->index, ForceType::SPRING);
 
-    // register to spring table
-    solver->getForceTable()->getSpringTable()->insert(this);
 }
 
 Spring::~Spring() {

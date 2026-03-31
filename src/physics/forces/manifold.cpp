@@ -11,14 +11,14 @@ namespace bsk::internal {
 Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     : Force(solver, bodyA, bodyB)
 {
+    // register to manifold table
+    solver->getForceTable()->getManifoldTable()->insert(this);
+
     setFmax(0, 0.0f);
     setFmax(2, 0.0f);
     setFmin(0, -INFINITY);
     setFmin(2, -INFINITY);
     solver->getForceTable()->setForceType(this->index, ForceType::MANIFOLD);
-
-    // register to manifold table
-    solver->getForceTable()->getManifoldTable()->insert(this);
 }
 
 Manifold::~Manifold() {

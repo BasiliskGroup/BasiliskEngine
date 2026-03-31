@@ -11,6 +11,9 @@ namespace bsk::internal {
 Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, glm::vec3 stiffness, float fracture)
     : Force(solver, bodyA, bodyB)
 {
+    // register to joint table
+    solver->getForceTable()->getJointTable()->insert(this);
+
     setRA(rA);
     setRB(rB);
     setStiffness(0, stiffness.x);
@@ -22,9 +25,6 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
     setRestAngle((bodyA ? bodyA->getPosition().z : 0.0f) - bodyB->getPosition().z);
     setTorqueArm(lengthSq((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize()));
     solver->getForceTable()->setForceType(this->index, ForceType::JOINT);
-
-    // register to joint table
-    solver->getForceTable()->getJointTable()->insert(this);
 }
 
 Joint::~Joint() {

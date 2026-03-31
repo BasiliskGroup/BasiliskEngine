@@ -9,13 +9,13 @@ namespace bsk::internal {
 Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque)
     : Force(solver, bodyA, bodyB)
 {
+    // register to motor table
+    solver->getForceTable()->getMotorTable()->insert(this);
+
     setSpeed(speed);
     setFmax(0, maxTorque);
     setFmin(0, -maxTorque);
     solver->getForceTable()->setForceType(this->index, ForceType::MOTOR);
-
-    // register to motor table
-    solver->getForceTable()->getMotorTable()->insert(this);
 }
 
 Motor::~Motor() {

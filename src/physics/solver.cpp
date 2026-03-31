@@ -191,7 +191,7 @@ void Solver::step(float dtIncoming) {
     auto compactBodyTableStart = timeNow();
     bodyTable->compact();
     auto compactBodyTableEnd = timeNow();
-    printDurationUS(compactBodyTableStart, compactBodyTableEnd, "Compact Body Table: ");
+    // printDurationUS(compactBodyTableStart, compactBodyTableEnd, "Compact Body Table: ");
 
     // Perform broadphase collision detection
     auto broadphaseStart = timeNow();
@@ -215,7 +215,7 @@ void Solver::step(float dtIncoming) {
     }
     
     auto broadphaseEnd = timeNow();
-    printDurationUS(broadphaseStart, broadphaseEnd, "Broadphase: ");
+    // printDurationUS(broadphaseStart, broadphaseEnd, "Broadphase: ");
 
     // Initialize and warmstart forces
     auto warmstartForcesStart = timeNow();
@@ -256,31 +256,31 @@ void Solver::step(float dtIncoming) {
         }
     }
     auto warmstartForcesEnd = timeNow();
-    printDurationUS(warmstartForcesStart, warmstartForcesEnd, "Warmstart Forces: ");
+    // printDurationUS(warmstartForcesStart, warmstartForcesEnd, "Warmstart Forces: ");
 
     auto warmstartBodiesStart = timeNow();
     bodyTable->warmstartBodies(dt, gravity);
     auto warmstartBodiesEnd = timeNow();
-    printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
+    // printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
 
     // compact force table
     auto compactForceTableStart = timeNow();
     forceTable->compact();
     auto compactForceTableEnd = timeNow();
-    printDurationUS(compactForceTableStart, compactForceTableEnd, "Compact Force Table: ");
+    // printDurationUS(compactForceTableStart, compactForceTableEnd, "Compact Force Table: ");
 
-    // Print number of bodies and forces before coloring
-    std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
-    std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
-    std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
-    std::cout << "Number of threads: " << NUM_THREADS << std::endl;
+    // // print number of bodies and forces before coloring
+    // std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
+    // std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
+    // std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
+    // std::cout << "Number of threads: " << NUM_THREADS << std::endl;
 
     // Coloring
     auto coloringStart = timeNow();
     resetColoring();
     dsatur();
     auto coloringEnd = timeNow();
-    printDurationUS(coloringStart, coloringEnd, "Coloring: ");
+    // printDurationUS(coloringStart, coloringEnd, "Coloring: ");
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
@@ -314,7 +314,7 @@ void Solver::step(float dtIncoming) {
         }
 
         auto primalEnd = timeNow();
-        printDurationUS(primalStart, primalEnd, "  Primal Update: ");
+        // printDurationUS(primalStart, primalEnd, "  Primal Update: ");
 
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
@@ -327,7 +327,7 @@ void Solver::step(float dtIncoming) {
             finishSignal.acquire();
 
             auto dualEnd = timeNow();
-            printDurationUS(dualStart, dualEnd, "  Dual Update: ");
+            // printDurationUS(dualStart, dualEnd, "  Dual Update: ");
         }
 
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
@@ -335,15 +335,15 @@ void Solver::step(float dtIncoming) {
             auto velocityStart = timeNow();
             bodyTable->updateVelocities(dt);
             auto velocityEnd = timeNow();
-            printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
+            // printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
         }
     }
     auto solverLoopEnd = timeNow();
-    printDurationUS(solverLoopStart, solverLoopEnd, "Solver Loop Total: ");
+    // printDurationUS(solverLoopStart, solverLoopEnd, "Solver Loop Total: ");
     
     auto stepEnd = timeNow();
-    printDurationUS(stepStart, stepEnd, "Step Total: ");
-    std::cout << std::endl;
+    // printDurationUS(stepStart, stepEnd, "Step Total: ");
+    // std::cout << std::endl;
 }
 
 // Coloring

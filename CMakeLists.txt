@@ -111,6 +111,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(assimp)
 
+# Mapbox Earcut (header-only) bundled via Assimp's contrib
+set(ASSIMP_EARCUT_INCLUDE_DIR "${CMAKE_BINARY_DIR}/_deps/assimp-src/contrib/earcut-hpp")
+
 # ======================================================
 # PyBind11
 # ======================================================
@@ -220,8 +223,11 @@ file(GLOB_RECURSE BASILISK_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-# Remove main.cpp since engine executable builds it
-list(REMOVE_ITEM BASILISK_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+# Top-level src/*.cpp are executable entry points; exclude them from library sources
+file(GLOB BASILISK_APP_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+)
+list(REMOVE_ITEM BASILISK_SOURCES ${BASILISK_APP_SOURCES})
 
 add_library(basilisk_lib STATIC ${BASILISK_SOURCES})
 
@@ -229,6 +235,7 @@ target_include_directories(basilisk_lib
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
+        ${ASSIMP_EARCUT_INCLUDE_DIR}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include/internal
 )
@@ -342,60 +349,39 @@ add_custom_target(copy_resources ALL
 )
 
 # ======================================================
-# Engine executable
+# Executables (one target per top-level src/*.cpp)
 # ======================================================
-set(BASILISK_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+set(BASILISK_APP_TARGETS "")
+if(BASILISK_APP_SOURCES)
+    foreach(BASILISK_APP_SOURCE ${BASILISK_APP_SOURCES})
+        get_filename_component(BASILISK_APP_TARGET ${BASILISK_APP_SOURCE} NAME_WE)
+        add_executable(${BASILISK_APP_TARGET} ${BASILISK_APP_SOURCE})
 
-if(EXISTS ${BASILISK_MAIN})
-    add_executable(engine ${BASILISK_MAIN})
+        target_include_directories(${BASILISK_APP_TARGET} PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+        )
 
-    target_include_directories(engine PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-    )
+        target_link_libraries(${BASILISK_APP_TARGET}
+            PRIVATE
+                basilisk_lib
+        )
 
-    target_link_libraries(engine
-        PRIVATE
-            basilisk_lib
-    )
+        # Link Rust GPU static library for compute bindings
+        if(RUST_GPU_LIB_NAME)
+            target_link_libraries(${BASILISK_APP_TARGET} PRIVATE rust_gpu_imported)
+            add_dependencies(${BASILISK_APP_TARGET} rust_gpu_lib)
+        endif()
 
-    # Link Rust GPU static library for compute bindings
-    if(RUST_GPU_LIB_NAME)
-        target_link_libraries(engine PRIVATE rust_gpu_imported)
-        add_dependencies(engine rust_gpu_lib)
-    endif()
+        set_target_properties(${BASILISK_APP_TARGET} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+        )
 
-    set_target_properties(engine PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-
-    add_dependencies(engine copy_resources)
-
-    message(STATUS "Added test executable: engine")
+        add_dependencies(${BASILISK_APP_TARGET} copy_resources)
+        list(APPEND BASILISK_APP_TARGETS ${BASILISK_APP_TARGET})
+        message(STATUS "Added executable: ${BASILISK_APP_TARGET}")
+    endforeach()
 else()
-    message(WARNING "main.cpp not found — skipping engine build.")
-endif()
-
-# Forces test executable (joints, springs, motors, manifolds)
-set(BASILISK_FORCES_TEST_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/main_forces_test.cpp)
-if(EXISTS ${BASILISK_FORCES_TEST_MAIN})
-    add_executable(engine_forces_test ${BASILISK_FORCES_TEST_MAIN})
-    target_include_directories(engine_forces_test PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-    )
-    target_link_libraries(engine_forces_test
-        PRIVATE
-            basilisk_lib
-    )
-    # Link Rust GPU static library for compute bindings
-    if(RUST_GPU_LIB_NAME)
-        target_link_libraries(engine_forces_test PRIVATE rust_gpu_imported)
-        add_dependencies(engine_forces_test rust_gpu_lib)
-    endif()
-    set_target_properties(engine_forces_test PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-    add_dependencies(engine_forces_test copy_resources)
-    message(STATUS "Added forces test executable: engine_forces_test")
+    message(WARNING "No top-level src/*.cpp files found — skipping executable builds.")
 endif()
 
 # ======================================================
@@ -403,9 +389,6 @@ endif()
 # ======================================================
 # Only add dependencies if Rust GPU library is available
 if(RUST_GPU_LIB_NAME)
-    if(TARGET engine)
-        add_dependencies(engine rust_gpu_lib)
-    endif()
     add_dependencies(basilisk_lib rust_gpu_lib)
 endif()
 
@@ -425,18 +408,20 @@ if(DEFINED ENV{CIBUILDWHEEL})
     message(STATUS "AddressSanitizer disabled in cibuildwheel environment")
 endif()
 
-if(BASILISK_ENABLE_ASAN AND TARGET engine AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
+if(BASILISK_ENABLE_ASAN AND BASILISK_APP_TARGETS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU" AND NOT CMAKE_CROSSCOMPILING)
     # Only enable ASan for Debug builds
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(engine PRIVATE
-            -fsanitize=address
-            -fno-omit-frame-pointer
-            -g
-        )
-        target_link_options(engine PRIVATE
-            -fsanitize=address
-            -fno-omit-frame-pointer
-        )
+        foreach(BASILISK_APP_TARGET ${BASILISK_APP_TARGETS})
+            target_compile_options(${BASILISK_APP_TARGET} PRIVATE
+                -fsanitize=address
+                -fno-omit-frame-pointer
+                -g
+            )
+            target_link_options(${BASILISK_APP_TARGET} PRIVATE
+                -fsanitize=address
+                -fno-omit-frame-pointer
+            )
+        endforeach()
         set(ENV{ASAN_OPTIONS} "detect_leaks=1:halt_on_error=0:verbosity=1")
     endif()
 endif()
