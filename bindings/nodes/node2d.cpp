@@ -194,6 +194,9 @@ void bind_node2d(py::module_& m) {
         .def_property("collision_group",
             [](const Node2D& n) { return n.getCollisionGroup(); },
             [](Node2D& n, int v) { n.setCollisionGroup(v); })
+        .def_property("has_gravity",
+            [](const Node2D& n) { return n.getHasGravity(); },
+            [](Node2D& n, bool v) { n.setHasGravity(v); })
 
         // Hierarchy
         .def("add", &Node2D::add, py::arg("child"))
@@ -223,6 +226,8 @@ void bind_node2d(py::module_& m) {
         .def("set_jacobian_mask", &Node2D::setJacobianMask, py::arg("jacobian_mask"))
         .def("set_resolves_collisions", &Node2D::setResolvesCollisions, py::arg("resolves_collisions"))
         .def("get_resolves_collisions", &Node2D::getResolvesCollisions)
+        .def("set_has_gravity", &Node2D::setHasGravity, py::arg("has_gravity"))
+        .def("get_has_gravity", &Node2D::getHasGravity)
 
         .def("orphan_copy", &Node2D::orphanCopy, "Returns an orphaned copy of this node (no rigid, only physics properties)");
 }
