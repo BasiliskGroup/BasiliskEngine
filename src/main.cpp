@@ -14,7 +14,7 @@ namespace {
 
 constexpr int SIDE_LENGTH = 100;
 constexpr float DELTA = SIDE_LENGTH * 0.6f;
-constexpr int OCTAVES = 25;
+constexpr int OCTAVES = 5;
 
 using namespace bsk::internal;
 
@@ -46,12 +46,13 @@ void addEarcutPolygonToScene(bsk::Scene2D* scene, const std::vector<glm::vec2>& 
 void addConvexToScene(bsk::Scene2D* scene, const Convex& convex, const glm::vec2& offset,
     const bsk::Material& material)
 {
-    const auto& ringRef = convex.ring();
-    if (ringRef.size() < 3) {
+    std::vector<glm::vec2> ring;
+    for (auto it = convex.begin(); it != convex.end(); ++it) {
+        ring.push_back(*it);
+    }
+    if (ring.size() < 3) {
         return;
     }
-
-    std::vector<glm::vec2> ring = ringRef;
     float area = 0.0f;
     for (std::size_t i = 0; i < ring.size(); ++i) {
         const glm::vec2& p = ring[i];
@@ -126,7 +127,7 @@ int main()
     std::vector<std::vector<int>> weights(SIDE_LENGTH, std::vector<int>(SIDE_LENGTH, -1));
     PerlinNoise noise;
     std::mt19937 rng(std::random_device{}());
-    std::uniform_real_distribution<double> startDist(0.0, 10000.0);
+    std::uniform_real_distribution<double> startDist(0.0, 0.0); // 10000.0);
     const double noiseStartX = startDist(rng);
     const double noiseStartY = startDist(rng);
     for (int x = 0; x < SIDE_LENGTH; ++x) {

@@ -271,6 +271,7 @@ std::vector<MarchComponentGeometry> Grid::genMarch() {
     std::vector<MarchComponentGeometry> out;
     out.reserve(components.size());
 
+    std::size_t componentIndex = 0;
     for (const auto& component : components) {
         Polygon polygon;
         std::unordered_set<int> seenAnchors;
@@ -303,6 +304,9 @@ std::vector<MarchComponentGeometry> Grid::genMarch() {
         geom.filledVertices = polygon.filledVerts();
         geom.filledIndices = polygon.filledIndices();
         geom.convexPieces = polygon.decompose();
+        std::cout << geom.convexPieces.size()
+                  << " convex piece(s)\n";
+        ++componentIndex;
         out.push_back(std::move(geom));
     }
 

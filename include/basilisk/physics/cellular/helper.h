@@ -52,6 +52,10 @@ struct Vec2Hash {
     }
 };
 
+struct Vec2KeyEq {
+    bool operator()(const glm::vec2& x, const glm::vec2& y) const noexcept { return edgeVecEq(x, y); }
+};
+
 // Custom hash function for Edge
 struct EdgeHash {
     std::size_t operator()(const Edge& e) const noexcept {
