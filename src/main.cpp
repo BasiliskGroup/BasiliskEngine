@@ -8,6 +8,7 @@
 #include <deque>
 #include <memory>
 #include <random>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -18,11 +19,23 @@ namespace {
 
 constexpr int SIDE_LENGTH = 100;
 constexpr float DELTA = SIDE_LENGTH * 0.6f;
-constexpr int OCTAVES = 10;
+constexpr int OCTAVES = 8;
 constexpr int N = 4;
+constexpr float RDP_EPSILON = 0.85f; // comfortably between 0.707 and 1.0
 
 inline bool vec2Eq(const glm::vec2& a, const glm::vec2& b) {
     return glm::length2(a - b) < 1e-6f;
+}
+
+constexpr float EDGE_KEY_EPS = 1e-3f;
+
+inline std::int64_t quantizeCoord(float v) {
+    return static_cast<std::int64_t>(std::llround(static_cast<double>(v) / EDGE_KEY_EPS));
+}
+
+inline bool edgeVecEq(const glm::vec2& a, const glm::vec2& b) {
+    return quantizeCoord(a.x) == quantizeCoord(b.x) &&
+           quantizeCoord(a.y) == quantizeCoord(b.y);
 }
 
 bsk::Material getCircularColor(int i, int i_max, int j = 1, int j_max = 1) {
@@ -46,7 +59,7 @@ struct Edge {
 };
 
 inline bool operator==(const Edge& x, const Edge& y) {
-    return vec2Eq(x.a, y.a) && vec2Eq(x.b, y.b);
+    return edgeVecEq(x.a, y.a) && edgeVecEq(x.b, y.b);
 }
 
 class Seg {
@@ -135,7 +148,9 @@ private:
     // define structs for identifying edges
     struct Vec2Hash {
         std::size_t operator()(const glm::vec2& v) const noexcept {
-            return std::hash<float>()(v.x) ^ (std::hash<float>()(v.y) << 1);
+            const std::int64_t qx = quantizeCoord(v.x);
+            const std::int64_t qy = quantizeCoord(v.y);
+            return std::hash<std::int64_t>()(qx) ^ (std::hash<std::int64_t>()(qy) << 1);
         }
     };
 
@@ -148,44 +163,195 @@ private:
         }
     };
     
-    // construct ordered map // TODO replace int with pointers into linked list
-    std::unordered_map<Edge, int, EdgeHash> edgeToIndex; // start index of vertices. NOTE final index will wrap around
+    // Directed boundary edge u->v maps to the index of v in `vertices` (insert splits u->v by
+    // inserting before v). Rebuilt from the full ring after every change so indices stay valid.
+    std::unordered_map<Edge, int, EdgeHash> edgeToIndex;
     std::vector<glm::vec2> vertices;
 
+    void rebuildEdges() {
+        edgeToIndex.clear();
+        const int n = static_cast<int>(vertices.size());
+        if (n < 3) {
+            return;
+        }
+        for (int i = 0; i < n; ++i) {
+            const int j = (i + 1) % n;
+            edgeToIndex[Edge{vertices[static_cast<std::size_t>(i)], vertices[static_cast<std::size_t>(j)]}] = j;
+        }
+    }
+
 public: 
-    Convex(glm::vec2& a, glm::vec2& b, glm::vec2& c) : vertices{ a, b, c } {}
+    Convex(glm::vec2& a, glm::vec2& b, glm::vec2& c) : vertices{ a, b, c } { rebuildEdges(); }
 
     bool add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
-        // find which edge to insert onto
         int index = -1;
-        glm::vec2 insert, first, last;
+        glm::vec2 insert;
 
-        if (edgeToIndex.find(Edge{b, a}) != edgeToIndex.end()) { 
-            index = edgeToIndex[Edge{b, a}]; 
-            edgeToIndex.erase(Edge{b, a}); 
-            first = b; last = a; insert = c;
-        } else if (edgeToIndex.find(Edge{c, b}) != edgeToIndex.end()) { 
-            index = edgeToIndex[Edge{c, b}]; 
-            edgeToIndex.erase(Edge{c, b}); 
-            first = c; last = b; insert = a;
-        } else if (edgeToIndex.find(Edge{a, c}) != edgeToIndex.end()) { 
-            index = edgeToIndex[Edge{a, c}]; 
-            edgeToIndex.erase(Edge{a, c}); 
-            first = a; last = c; insert = b;
+        if (edgeToIndex.find(Edge{b, a}) != edgeToIndex.end()) {
+            index = edgeToIndex[Edge{b, a}];
+            insert = c;
+        } else if (edgeToIndex.find(Edge{c, b}) != edgeToIndex.end()) {
+            index = edgeToIndex[Edge{c, b}];
+            insert = a;
+        } else if (edgeToIndex.find(Edge{a, c}) != edgeToIndex.end()) {
+            index = edgeToIndex[Edge{a, c}];
+            insert = b;
         } else {
             return false;
         }
 
         vertices.insert(vertices.begin() + index, insert);
-
-        // insert new edges into map
-        edgeToIndex[Edge{first, insert}] = index;
-        edgeToIndex[Edge{insert, last}] = index + 1;
-
-        // found and inserted
+        rebuildEdges();
         return true;
     }
+
+    void draw(bsk::Scene2D* scene, const glm::vec2& offset, int i, int i_max, int j, int j_max) {
+        if (vertices.size() < 3) {
+            return;
+        }
+
+        using EarcutPoint = std::array<double, 2>;
+        std::vector<glm::vec2> ring = vertices;
+
+        float area = 0.0f;
+        for (std::size_t i = 0; i < ring.size(); ++i) {
+            const glm::vec2& p = ring[i];
+            const glm::vec2& q = ring[(i + 1) % ring.size()];
+            area += p.x * q.y - q.x * p.y;
+        }
+        if (area < 0.0f) {
+            std::reverse(ring.begin(), ring.end());
+        }
+
+        std::vector<std::vector<EarcutPoint>> polygon;
+        polygon.emplace_back();
+        polygon[0].reserve(ring.size());
+        for (const glm::vec2& p : ring) {
+            polygon[0].push_back({static_cast<double>(p.x), static_cast<double>(p.y)});
+        }
+
+        const std::vector<uint32_t> earcutIndices = mapbox::earcut<uint32_t>(polygon);
+        if (earcutIndices.empty()) {
+            return;
+        }
+
+        std::vector<float> meshVertices;
+        meshVertices.reserve(ring.size() * 5);
+        for (const glm::vec2& v : ring) {
+            meshVertices.push_back(v.x);
+            meshVertices.push_back(-v.y);
+            meshVertices.push_back(0.0f);
+            meshVertices.push_back(0.0f);
+            meshVertices.push_back(0.0f);
+        }
+
+        bsk::Mesh* mesh = new bsk::Mesh(meshVertices, earcutIndices);
+        bsk::Material* material = new bsk::Material(getCircularColor(j, j_max));
+        bsk::Node2D* node = new bsk::Node2D(mesh, material, offset, 0.0f, glm::vec2(1.0f, 1.0f));
+        scene->add(node);
+    }
 };
+
+// ----------------------------------------------
+// RDP
+// ----------------------------------------------
+
+// Squared distance from point p to segment (a, b)
+static float pointSegmentDistSq(const glm::vec2& p,
+    const glm::vec2& a,
+    const glm::vec2& b)
+{
+glm::vec2 ab = b - a;
+float lenSq = glm::dot(ab, ab);
+
+if (lenSq == 0.0f) {
+return glm::dot(p - a, p - a);
+}
+
+float t = glm::dot(p - a, ab) / lenSq;
+t = glm::clamp(t, 0.0f, 1.0f);
+
+glm::vec2 proj = a + t * ab;
+return glm::dot(p - proj, p - proj);
+}
+
+// Recursive RDP on index range [start, end]
+static void rdpRecursive(const std::vector<glm::vec2>& pts,
+    int start, int end,
+    float epsSq,
+    std::vector<bool>& keep)
+{
+    float maxDistSq = 0.0f;
+    int index = -1;
+
+    for (int i = start + 1; i < end; ++i) {
+        float d = pointSegmentDistSq(pts[i], pts[start], pts[end]);
+        if (d > maxDistSq) {
+            maxDistSq = d;
+            index = i;
+        }
+    }
+
+    if (maxDistSq > epsSq && index != -1) {
+        keep[index] = true;
+        rdpRecursive(pts, start, index, epsSq, keep);
+        rdpRecursive(pts, index, end, epsSq, keep);
+    }
+}
+
+// Main function
+void simplifyRDP(const std::vector<glm::vec2>& input,
+    std::vector<glm::vec2>& output,
+    float epsilon)
+{
+    output.clear();
+
+    if (input.size() < 3) {
+        output = input;
+        return;
+    }
+
+    // ---- Step 1: find a stable cut point ----
+    // Pick vertex with max distance from centroid (heuristic)
+    glm::vec2 centroid(0.0f);
+    for (const auto& p : input) centroid += p;
+    centroid /= static_cast<float>(input.size());
+
+    int startIdx = 0;
+    float maxDist = -1.0f;
+    for (int i = 0; i < (int)input.size(); ++i) {
+        float d = glm::length2(input[i] - centroid);
+        if (d > maxDist) {
+            maxDist = d;
+            startIdx = i;
+        }
+    }
+
+    // ---- Step 2: unwrap polygon into polyline ----
+    std::vector<glm::vec2> pts;
+    pts.reserve(input.size() + 1);
+
+    for (int i = 0; i < (int)input.size(); ++i) {
+        pts.push_back(input[(startIdx + i) % input.size()]);
+    }
+    pts.push_back(pts[0]); // close loop explicitly
+
+    // ---- Step 3: RDP ----
+    float epsSq = epsilon * epsilon;
+    std::vector<bool> keep(pts.size(), false);
+
+    keep[0] = true;
+    keep[pts.size() - 1] = true;
+
+    rdpRecursive(pts, 0, pts.size() - 1, epsSq, keep);
+
+    // ---- Step 4: rebuild output (skip duplicate last point) ----
+    for (int i = 0; i < (int)pts.size() - 1; ++i) {
+        if (keep[i]) {
+            output.push_back(pts[i]);
+        }
+    }
+}
 
 class Polygon {
 private:
@@ -244,10 +410,25 @@ public:
                 std::reverse(rings[i].chain.begin(), rings[i].chain.end());
             }
 
+            // simplify with RDP
+            std::vector<glm::vec2> ringPoints = rings[i].chain;
+            if (!ringPoints.empty() && vec2Eq(ringPoints.front(), ringPoints.back())) {
+                ringPoints.pop_back();
+            }
+            if (ringPoints.size() < 3) {
+                return;
+            }
+
+            std::vector<glm::vec2> simplifiedRing;
+            simplifyRDP(ringPoints, simplifiedRing, RDP_EPSILON);
+            if (simplifiedRing.size() < 3) {
+                return;
+            }
+
             polygon.emplace_back();
             auto& ring = polygon.back();
-            ring.reserve(rings[i].chain.size());
-            for (const glm::vec2& p : rings[i].chain) {
+            ring.reserve(simplifiedRing.size());
+            for (const glm::vec2& p : simplifiedRing) {
                 const glm::vec2 world = p;
                 ring.push_back({static_cast<double>(world.x), static_cast<double>(world.y)});
                 earcutVertices.push_back(world);
@@ -292,30 +473,10 @@ public:
         bsk::Node2D* node = new bsk::Node2D(mesh, material, offset, 0.0f, glm::vec2(1.0f, 1.0f));
         scene->add(node);
 
-        // display all triangles in the mesh
-        // int numTriangles = earcutIndices.size() / 3;
-        // for (std::size_t i = 0; i < earcutIndices.size(); i += 3) {
-        //     // collect vertices from the mesh
-        //     std::vector<float> vertices;
-        //     vertices.reserve(3 * 5);
-        //     for (std::size_t j = 0; j < 3; ++j) {
-        //         const std::size_t idx = earcutIndices[i + j];
-        //         vertices.push_back(earcutVertices[idx].x);
-        //         vertices.push_back(-earcutVertices[idx].y);
-        //         vertices.push_back(0.0f);
-        //         vertices.push_back(0.0f);
-        //         vertices.push_back(0.0f);
-        //     }
-        //     bsk::Mesh* mesh = new bsk::Mesh(vertices, std::vector<uint32_t>{0, 1, 2});
-        //     bsk::Material* material = new bsk::Material(getCircularColor(poly, poly_max, i, numTriangles));
-        //     bsk::Node2D* node = new bsk::Node2D(mesh, material, offset, 0.0f, glm::vec2(1.0f, 1.0f));
-        //     scene->add(node);
-        // }
-
-        decompose();
+        decompose(scene, poly, poly_max);
     }
 
-    std::vector<Convex> decompose() {
+    std::vector<Convex> decompose(bsk::Scene2D* scene, int poly, int poly_max) {
         std::vector<Convex> polygons;
 
         // iterate over each triangle (3 vertices)
@@ -337,6 +498,14 @@ public:
                 polygons.emplace_back(earcutVertices[a], earcutVertices[b], earcutVertices[c]);
             }
         }
+
+        // draw all convex shapes 
+        glm::vec2 offset = glm::vec2(DELTA, -DELTA);
+        for (int i = 0; i < polygons.size(); i++) {
+            polygons[i].draw(scene, offset, poly, poly_max, i, polygons.size());
+        }
+
+        std::cout << polygons.size() << std::endl;
 
         return polygons;
     }
