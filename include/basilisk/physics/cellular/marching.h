@@ -65,10 +65,7 @@ public:
 
 private:
     void merge(Seg& other);
-
-    // for decomposition (recursive)
-    void add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
-    void merge(Convex& convex, glm::vec2& first, glm::vec2& last, glm::vec2& insert);
+    void decomposeBayazitEntry(const std::vector<glm::vec2>& ring);
 };
 
 // ----------------------------------------------

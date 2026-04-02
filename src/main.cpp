@@ -15,6 +15,7 @@ namespace {
 constexpr int SIDE_LENGTH = 100;
 constexpr float DELTA = SIDE_LENGTH * 0.6f;
 constexpr int OCTAVES = 8;
+constexpr float VALIDATION_EPS = 1e-6f;
 
 using namespace bsk::internal;
 
@@ -29,6 +30,107 @@ std::vector<float> interleavedMeshFrom2D(const std::vector<glm::vec2>& verts2d) 
         meshVertices.push_back(0.0f);
     }
     return meshVertices;
+}
+
+float cross2(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    const glm::vec2 ab = b - a;
+    const glm::vec2 ac = c - a;
+    return ab.x * ac.y - ab.y * ac.x;
+}
+
+bool onSegment(const glm::vec2& a, const glm::vec2& b, const glm::vec2& p) {
+    return p.x <= std::max(a.x, b.x) + VALIDATION_EPS &&
+           p.x + VALIDATION_EPS >= std::min(a.x, b.x) &&
+           p.y <= std::max(a.y, b.y) + VALIDATION_EPS &&
+           p.y + VALIDATION_EPS >= std::min(a.y, b.y);
+}
+
+bool segmentsIntersect(const glm::vec2& p1, const glm::vec2& q1, const glm::vec2& p2, const glm::vec2& q2) {
+    const float o1 = cross2(p1, q1, p2);
+    const float o2 = cross2(p1, q1, q2);
+    const float o3 = cross2(p2, q2, p1);
+    const float o4 = cross2(p2, q2, q1);
+
+    if ((o1 > VALIDATION_EPS && o2 < -VALIDATION_EPS || o1 < -VALIDATION_EPS && o2 > VALIDATION_EPS) &&
+        (o3 > VALIDATION_EPS && o4 < -VALIDATION_EPS || o3 < -VALIDATION_EPS && o4 > VALIDATION_EPS))
+    {
+        return true;
+    }
+
+    if (std::abs(o1) <= VALIDATION_EPS && onSegment(p1, q1, p2)) return true;
+    if (std::abs(o2) <= VALIDATION_EPS && onSegment(p1, q1, q2)) return true;
+    if (std::abs(o3) <= VALIDATION_EPS && onSegment(p2, q2, p1)) return true;
+    if (std::abs(o4) <= VALIDATION_EPS && onSegment(p2, q2, q1)) return true;
+    return false;
+}
+
+bool validateConvexPiece(const Convex& piece, std::string& reason) {
+    const auto& ring = piece.vertices;
+    if (ring.size() < 3) {
+        reason = "fewer than 3 vertices";
+        return false;
+    }
+
+    float signedArea2 = 0.0f;
+    for (std::size_t i = 0; i < ring.size(); ++i) {
+        const glm::vec2& p = ring[i];
+        const glm::vec2& q = ring[(i + 1) % ring.size()];
+        signedArea2 += p.x * q.y - q.x * p.y;
+    }
+    if (std::abs(signedArea2) <= VALIDATION_EPS) {
+        reason = "degenerate area";
+        return false;
+    }
+
+    bool sawPositive = false;
+    bool sawNegative = false;
+    for (std::size_t i = 0; i < ring.size(); ++i) {
+        const float turn = cross2(ring[i], ring[(i + 1) % ring.size()], ring[(i + 2) % ring.size()]);
+        if (turn > VALIDATION_EPS) sawPositive = true;
+        if (turn < -VALIDATION_EPS) sawNegative = true;
+        if (sawPositive && sawNegative) {
+            reason = "non-convex turn sequence";
+            return false;
+        }
+    }
+
+    for (std::size_t i = 0; i < ring.size(); ++i) {
+        const std::size_t iNext = (i + 1) % ring.size();
+        for (std::size_t j = i + 1; j < ring.size(); ++j) {
+            const std::size_t jNext = (j + 1) % ring.size();
+            if (i == j || i == jNext || iNext == j || iNext == jNext) {
+                continue;
+            }
+            if (segmentsIntersect(ring[i], ring[iNext], ring[j], ring[jNext])) {
+                reason = "self-intersecting edges";
+                return false;
+            }
+        }
+    }
+
+    reason.clear();
+    return true;
+}
+
+void validateConvexPieces(const std::vector<MarchComponentGeometry>& geometry) {
+    int invalidCount = 0;
+    int totalCount = 0;
+
+    for (std::size_t poly = 0; poly < geometry.size(); ++poly) {
+        const auto& pieces = geometry[poly].convexPieces;
+        for (std::size_t j = 0; j < pieces.size(); ++j) {
+            ++totalCount;
+            std::string reason;
+            if (!validateConvexPiece(pieces[j], reason)) {
+                ++invalidCount;
+                std::cout << "[convex validation] invalid piece component=" << poly
+                          << " piece=" << j << " reason=" << reason << "\n";
+            }
+        }
+    }
+
+    std::cout << "[convex validation] checked " << totalCount
+              << " piece(s), invalid=" << invalidCount << "\n";
 }
 
 void addEarcutPolygonToScene(bsk::Scene2D* scene, const std::vector<glm::vec2>& verts2d,
@@ -46,28 +148,48 @@ void addEarcutPolygonToScene(bsk::Scene2D* scene, const std::vector<glm::vec2>& 
 void addConvexToScene(bsk::Scene2D* scene, const Convex& convex, const glm::vec2& offset,
     const bsk::Material& material)
 {
-    std::vector<glm::vec2> ring;
-    for (auto it = convex.begin(); it != convex.end(); ++it) {
-        ring.push_back(*it);
-    }
+    std::vector<glm::vec2> ring = convex.vertices;
     if (ring.size() < 3) {
         return;
     }
-    float area = 0.0f;
+
+    float area2 = 0.0f;
     for (std::size_t i = 0; i < ring.size(); ++i) {
         const glm::vec2& p = ring[i];
         const glm::vec2& q = ring[(i + 1) % ring.size()];
-        area += p.x * q.y - q.x * p.y;
+        area2 += p.x * q.y - q.x * p.y;
     }
-    if (area < 0.0f) {
+    if (area2 < 0.0f) {
         std::reverse(ring.begin(), ring.end());
+    }
+
+    // Compute polygon centroid (center of geometry) from area moments.
+    area2 = 0.0f;
+    glm::vec2 centroid(0.0f, 0.0f);
+    for (std::size_t i = 0; i < ring.size(); ++i) {
+        const glm::vec2& p = ring[i];
+        const glm::vec2& q = ring[(i + 1) % ring.size()];
+        const float cross = p.x * q.y - q.x * p.y;
+        area2 += cross;
+        centroid += (p + q) * cross;
+    }
+
+    if (std::abs(area2) > 1e-6f) {
+        centroid /= (3.0f * area2);
+    } else {
+        // Degenerate fallback.
+        centroid = ring[0];
     }
 
     using EarcutPoint = std::array<double, 2>;
     std::vector<std::vector<EarcutPoint>> polygon;
     polygon.emplace_back();
     polygon[0].reserve(ring.size());
+    std::vector<glm::vec2> centeredRing;
+    centeredRing.reserve(ring.size());
     for (const glm::vec2& p : ring) {
+        const glm::vec2 centered = p - centroid;
+        centeredRing.push_back(centered);
         polygon[0].push_back({static_cast<double>(p.x), static_cast<double>(p.y)});
     }
 
@@ -76,10 +198,10 @@ void addConvexToScene(bsk::Scene2D* scene, const Convex& convex, const glm::vec2
         return;
     }
 
-    auto meshVerts = interleavedMeshFrom2D(ring);
+    auto meshVerts = interleavedMeshFrom2D(centeredRing);
     auto* mesh = new bsk::Mesh(std::move(meshVerts), earcutIndices);
     auto* mat = new bsk::Material(material);
-    new bsk::Node2D(scene, mesh, mat, offset, 0.0f, glm::vec2(1.0f, 1.0f));
+    new bsk::Node2D(scene, mesh, mat, offset + centroid, 0.0f, glm::vec2(0.9f, 0.9f));
 }
 
 void drawConnectedComponents(bsk::Scene2D* scene, const Grid& grid, const glm::vec2& offset)
@@ -153,6 +275,7 @@ int main()
     drawConnectedComponents(scene, grid, glm::vec2(DELTA, DELTA));
 
     std::vector<MarchComponentGeometry> marchGeom = grid.genMarch();
+    validateConvexPieces(marchGeom);
     drawMarchGeometry(scene, marchGeom);
 
     std::cout << "Done\n";

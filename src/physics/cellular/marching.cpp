@@ -2,6 +2,376 @@
 
 namespace bsk::internal {
 
+namespace {
+constexpr float RAY_EPS = 1e-5f;
+constexpr float BAYAZIT_EPS = 1e-6f;
+constexpr int BAYAZIT_MAX_RECURSION = 128;
+
+std::vector<glm::vec2> toOpenRing(const std::vector<glm::vec2>& chain) {
+    std::vector<glm::vec2> ring = chain;
+    if (!ring.empty() && vec2Eq(ring.front(), ring.back())) {
+        ring.pop_back();
+    }
+    return ring;
+}
+
+std::vector<glm::vec2> simplifyRingForDecompose(const std::vector<glm::vec2>& chain) {
+    std::vector<glm::vec2> openRing = toOpenRing(chain);
+    if (openRing.size() < 3) {
+        return {};
+    }
+
+    std::vector<glm::vec2> simplified;
+    RDP(openRing, simplified, RDP_EPSILON);
+    if (simplified.size() < 3) {
+        return {};
+    }
+    return simplified;
+}
+
+float signedAreaOpen(const std::vector<glm::vec2>& ring) {
+    if (ring.size() < 3) {
+        return 0.0f;
+    }
+    float area = 0.0f;
+    for (std::size_t i = 0; i < ring.size(); ++i) {
+        const glm::vec2& p = ring[i];
+        const glm::vec2& q = ring[(i + 1) % ring.size()];
+        area += p.x * q.y - q.x * p.y;
+    }
+    return 0.5f * area;
+}
+
+const glm::vec2& at(const std::vector<glm::vec2>& poly, int i) {
+    const int n = static_cast<int>(poly.size());
+    int idx = i % n;
+    if (idx < 0) {
+        idx += n;
+    }
+    return poly[static_cast<std::size_t>(idx)];
+}
+
+float cross2(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    const glm::vec2 ab = b - a;
+    const glm::vec2 ac = c - a;
+    return ab.x * ac.y - ab.y * ac.x;
+}
+
+float sqDist(const glm::vec2& a, const glm::vec2& b) {
+    const glm::vec2 d = b - a;
+    return glm::dot(d, d);
+}
+
+// ----------------------------------------------
+// Hole bridging
+// ----------------------------------------------
+
+bool segmentCrossesRing(const glm::vec2& a, const glm::vec2& b,
+    const std::vector<glm::vec2>& ring)
+{
+    const float eps = 1e-5f;
+    const std::size_t n = ring.size();
+    for (std::size_t i = 0; i < n; ++i) {
+        const glm::vec2& p = ring[i];
+        const glm::vec2& q = ring[(i + 1) % n];
+
+        // Skip edges that share an endpoint with the bridge
+        if (vec2Eq(p, a) || vec2Eq(p, b) || vec2Eq(q, a) || vec2Eq(q, b)) {
+            continue;
+        }
+
+        const float d1 = cross2(a, b, p);
+        const float d2 = cross2(a, b, q);
+        const float d3 = cross2(p, q, a);
+        const float d4 = cross2(p, q, b);
+
+        if (((d1 > eps && d2 < -eps) || (d1 < -eps && d2 > eps)) &&
+            ((d3 > eps && d4 < -eps) || (d3 < -eps && d4 > eps)))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool tryBridgeHole(std::vector<glm::vec2>& outer, const std::vector<glm::vec2>& hole) {
+    if (outer.size() < 3 || hole.size() < 3) {
+        return false;
+    }
+
+    float bestDist = std::numeric_limits<float>::infinity();
+    std::size_t bestOuter = static_cast<std::size_t>(-1);
+    std::size_t bestHole  = static_cast<std::size_t>(-1);
+
+    for (std::size_t hi = 0; hi < hole.size(); ++hi) {
+        for (std::size_t oi = 0; oi < outer.size(); ++oi) {
+            const float d = sqDist(hole[hi], outer[oi]);
+            if (d >= bestDist) {
+                continue;
+            }
+            // Reject if the bridge crosses the outer ring or the hole itself
+            if (segmentCrossesRing(hole[hi], outer[oi], outer)) {
+                continue;
+            }
+            if (segmentCrossesRing(hole[hi], outer[oi], hole)) {
+                continue;
+            }
+            bestDist  = d;
+            bestOuter = oi;
+            bestHole  = hi;
+        }
+    }
+
+    if (bestOuter == static_cast<std::size_t>(-1)) {
+        return false;
+    }
+
+    // Stitch: outer[0..bestOuter] -> hole[bestHole..bestHole] -> outer[bestOuter..end]
+    // The bridge edge is duplicated (once each direction) to close the seam.
+    std::vector<glm::vec2> merged;
+    merged.reserve(outer.size() + hole.size() + 2);
+
+    for (std::size_t i = 0; i <= bestOuter; ++i) {
+        merged.push_back(outer[i]);
+    }
+    for (std::size_t k = 0; k <= hole.size(); ++k) {
+        merged.push_back(hole[(bestHole + k) % hole.size()]);
+    }
+    // Return to the outer bridge vertex to close the seam
+    merged.push_back(outer[bestOuter]);
+    for (std::size_t i = bestOuter + 1; i < outer.size(); ++i) {
+        merged.push_back(outer[i]);
+    }
+
+    outer = std::move(merged);
+    return true;
+}
+
+// ----------------------------------------------
+// Bayazit helpers
+// ----------------------------------------------
+
+bool left(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    return cross2(a, b, c) > BAYAZIT_EPS;
+}
+
+bool leftOn(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    return cross2(a, b, c) >= -BAYAZIT_EPS;
+}
+
+bool right(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    return cross2(a, b, c) < -BAYAZIT_EPS;
+}
+
+bool rightOn(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    return cross2(a, b, c) <= BAYAZIT_EPS;
+}
+
+bool lineIntersection(const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& q1, const glm::vec2& q2,
+    glm::vec2& out)
+{
+    const glm::vec2 r = p2 - p1;
+    const glm::vec2 s = q2 - q1;
+    const float denom = r.x * s.y - r.y * s.x;
+    if (std::abs(denom) <= BAYAZIT_EPS) {
+        return false;
+    }
+    const glm::vec2 qp = q1 - p1;
+    const float t = (qp.x * s.y - qp.y * s.x) / denom;
+    out = p1 + t * r;
+    return true;
+}
+
+// Point-in-polygon via ray casting (for open rings).
+bool pointInPolygon(const glm::vec2& pt, const std::vector<glm::vec2>& poly) {
+    int crossings = 0;
+    const int n = static_cast<int>(poly.size());
+    for (int i = 0; i < n; ++i) {
+        const glm::vec2& a = poly[static_cast<std::size_t>(i)];
+        const glm::vec2& b = poly[static_cast<std::size_t>((i + 1) % n)];
+        if ((a.y <= pt.y && pt.y < b.y) || (b.y <= pt.y && pt.y < a.y)) {
+            const float t = (pt.y - a.y) / (b.y - a.y);
+            if (pt.x < a.x + t * (b.x - a.x)) {
+                ++crossings;
+            }
+        }
+    }
+    return (crossings % 2) == 1;
+}
+
+// Returns true if the diagonal from poly[i] to p is interior to the polygon.
+bool diagonalIsValid(const std::vector<glm::vec2>& poly, int i, const glm::vec2& p) {
+    const glm::vec2 mid = 0.5f * (at(poly, i) + p);
+    return pointInPolygon(mid, poly);
+}
+
+bool isConvexPolygon(const std::vector<glm::vec2>& poly) {
+    if (poly.size() < 3) {
+        return false;
+    }
+    for (int i = 0; i < static_cast<int>(poly.size()); ++i) {
+        if (right(at(poly, i - 1), at(poly, i), at(poly, i + 1))) {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::vector<glm::vec2> slicePoly(const std::vector<glm::vec2>& poly, int i, int j) {
+    std::vector<glm::vec2> out;
+    const int n = static_cast<int>(poly.size());
+    if (n == 0) {
+        return out;
+    }
+    int idx = i;
+    out.push_back(at(poly, idx));
+    while (idx != j) {
+        idx = (idx + 1) % n;
+        out.push_back(at(poly, idx));
+    }
+    return out;
+}
+
+void emitConvexPiece(const std::vector<glm::vec2>& piece, std::vector<Convex>& outPieces) {
+    if (piece.size() < 3) {
+        return;
+    }
+    Convex c(piece[0], piece[1], piece[2]);
+    c.vertices = piece;
+    outPieces.push_back(std::move(c));
+}
+
+void bayazitDecompose(const std::vector<glm::vec2>& poly, std::vector<Convex>& outPieces, int depth) {
+    if (poly.size() < 3 || depth > BAYAZIT_MAX_RECURSION) {
+        return;
+    }
+    if (isConvexPolygon(poly)) {
+        emitConvexPiece(poly, outPieces);
+        return;
+    }
+
+    const int n = static_cast<int>(poly.size());
+    for (int i = 0; i < n; ++i) {
+        if (!right(at(poly, i - 1), at(poly, i), at(poly, i + 1))) {
+            continue;
+        }
+
+        float lowerDist = std::numeric_limits<float>::infinity();
+        float upperDist = std::numeric_limits<float>::infinity();
+        int lowerIndex = -1;
+        int upperIndex = -1;
+        glm::vec2 lowerInt(0.0f);
+        glm::vec2 upperInt(0.0f);
+
+        for (int j = 0; j < n; ++j) {
+            glm::vec2 p(0.0f);
+
+            if (left(at(poly, i - 1), at(poly, i), at(poly, j)) &&
+                rightOn(at(poly, i - 1), at(poly, i), at(poly, j - 1)) &&
+                lineIntersection(at(poly, i - 1), at(poly, i), at(poly, j), at(poly, j - 1), p) &&
+                right(at(poly, i + 1), at(poly, i), p) &&
+                diagonalIsValid(poly, i, p))
+            {
+                const float d = sqDist(at(poly, i), p);
+                if (d < lowerDist) {
+                    lowerDist = d;
+                    lowerIndex = j;
+                    lowerInt = p;
+                }
+            }
+
+            if (left(at(poly, i + 1), at(poly, i), at(poly, j + 1)) &&
+                rightOn(at(poly, i + 1), at(poly, i), at(poly, j)) &&
+                lineIntersection(at(poly, i + 1), at(poly, i), at(poly, j), at(poly, j + 1), p) &&
+                left(at(poly, i - 1), at(poly, i), p) &&
+                diagonalIsValid(poly, i, p))
+            {
+                const float d = sqDist(at(poly, i), p);
+                if (d < upperDist) {
+                    upperDist = d;
+                    upperIndex = j;
+                    upperInt = p;
+                }
+            }
+        }
+
+        std::vector<glm::vec2> lowerPoly;
+        std::vector<glm::vec2> upperPoly;
+
+        if (lowerIndex == -1 || upperIndex == -1) {
+            // Fallback split to guarantee progress.
+            const int j = (i + 2) % n;
+            lowerPoly = slicePoly(poly, i, j);
+            upperPoly = slicePoly(poly, j, i);
+        } else if (lowerIndex == (upperIndex + 1) % n) {
+            const glm::vec2 steiner = 0.5f * (lowerInt + upperInt);
+            lowerPoly = slicePoly(poly, i, upperIndex);
+            lowerPoly.push_back(steiner);
+            upperPoly = slicePoly(poly, lowerIndex, i);
+            upperPoly.push_back(steiner);
+        } else {
+            float bestDist = std::numeric_limits<float>::infinity();
+            int bestIndex = -1;
+
+            int j = lowerIndex;
+            int steps = 0;
+            while (j != upperIndex && steps < n) {
+                if (leftOn(at(poly, i - 1), at(poly, i), at(poly, j)) &&
+                    rightOn(at(poly, i + 1), at(poly, i), at(poly, j)))
+                {
+                    const float d = sqDist(at(poly, i), at(poly, j));
+                    if (d < bestDist) {
+                        bestDist = d;
+                        bestIndex = j;
+                    }
+                }
+                j = (j + 1) % n;
+                ++steps;
+            }
+
+            if (bestIndex == -1) {
+                bestIndex = lowerIndex;
+            }
+
+            lowerPoly = slicePoly(poly, i, bestIndex);
+            upperPoly = slicePoly(poly, bestIndex, i);
+        }
+
+        if (lowerPoly.size() < 3 || upperPoly.size() < 3) {
+            // Final fallback: emit fan to avoid losing geometry.
+            for (int k = 1; k + 1 < n; ++k) {
+                const glm::vec2& a = poly[0];
+                const glm::vec2& b = poly[static_cast<std::size_t>(k)];
+                const glm::vec2& c = poly[static_cast<std::size_t>(k + 1)];
+                if (cross2(a, b, c) > BAYAZIT_EPS) {
+                    emitConvexPiece({a, b, c}, outPieces);
+                }
+            }
+            return;
+        }
+
+        if (lowerPoly.size() < upperPoly.size()) {
+            bayazitDecompose(lowerPoly, outPieces, depth + 1);
+            bayazitDecompose(upperPoly, outPieces, depth + 1);
+        } else {
+            bayazitDecompose(upperPoly, outPieces, depth + 1);
+            bayazitDecompose(lowerPoly, outPieces, depth + 1);
+        }
+        return;
+    }
+
+    // Should not happen for non-degenerate polygons; fallback to fan.
+    for (int k = 1; k + 1 < static_cast<int>(poly.size()); ++k) {
+        const glm::vec2& a = poly[0];
+        const glm::vec2& b = poly[static_cast<std::size_t>(k)];
+        const glm::vec2& c = poly[static_cast<std::size_t>(k + 1)];
+        if (cross2(a, b, c) > BAYAZIT_EPS) {
+            emitConvexPiece({a, b, c}, outPieces);
+        }
+    }
+}
+} // anonymous namespace
+
 // ----------------------------------------------
 // Seg
 // ----------------------------------------------
@@ -189,48 +559,71 @@ void Polygon::earcut() {
     this->earcutIndices = mapbox::earcut<uint32_t>(polygon);
 }
 
-void Polygon::add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
-    bool found = false;
-    glm::vec2 first, last, insert;
-    int p = 0;
-
-    // find if we have a match
-    for (; p < polygons.size(); ++p) {
-        if (polygons[p].add(a, b, c, first, last, insert)) {
-            found = true;
-            break;
-        }
+void Polygon::decomposeBayazitEntry(const std::vector<glm::vec2>& ring) {
+    if (ring.size() < 3) {
+        return;
     }
-
-    if (!found) {
-        polygons.emplace_back(a, b, c);
+    std::vector<glm::vec2> poly = ring;
+    if (signedAreaOpen(poly) < 0.0f) {
+        std::reverse(poly.begin(), poly.end());
     }
-
-    // merge may be too expensive for what its worth right now
-    // merge(polygons[p], first, last, insert);
-}
-
-void Polygon::merge(Convex& convex, glm::vec2& first, glm::vec2& last, glm::vec2& insert) {
-
-    int p = 0;
-    for (; p < polygons.size(); ++p) {
-        if (polygons[p].merge(convex, first, last, insert)) {
-            return;
-        }
-    }
+    bayazitDecompose(poly, polygons, 0);
 }
 
 std::vector<Convex>& Polygon::decompose() {
     polygons.clear();
 
-    for (std::size_t i = 0; i + 2 < earcutIndices.size(); i += 3) {
-        const int a = static_cast<int>(earcutIndices[i]);
-        const int b = static_cast<int>(earcutIndices[i + 1]);
-        const int c = static_cast<int>(earcutIndices[i + 2]);
+    std::vector<std::vector<glm::vec2>> rings;
+    rings.reserve(segs.size());
 
-        add(earcutVertices[a], earcutVertices[b], earcutVertices[c]);
+    for (const Seg& seg : segs) {
+        if (!seg.isLoop()) {
+            continue;
+        }
+        std::vector<glm::vec2> ring = simplifyRingForDecompose(seg.chain);
+        if (ring.size() < 3) {
+            continue;
+        }
+        rings.push_back(std::move(ring));
     }
 
+    if (rings.empty()) {
+        return polygons;
+    }
+
+    std::size_t outerIdx = 0;
+    float outerAbsArea = 0.0f;
+    for (std::size_t i = 0; i < rings.size(); ++i) {
+        const float area = std::abs(signedAreaOpen(rings[i]));
+        if (area > outerAbsArea) {
+            outerAbsArea = area;
+            outerIdx = i;
+        }
+    }
+
+    std::vector<glm::vec2> outer = rings[outerIdx];
+    if (signedAreaOpen(outer) < 0.0f) {
+        std::reverse(outer.begin(), outer.end());
+    }
+
+    for (std::size_t i = 0; i < rings.size(); ++i) {
+        if (i == outerIdx) {
+            continue;
+        }
+
+        std::vector<glm::vec2> hole = rings[i];
+        if (signedAreaOpen(hole) > 0.0f) {
+            std::reverse(hole.begin(), hole.end());
+        }
+
+        if (!tryBridgeHole(outer, hole)) {
+            // Fallback: still emit hole geometry instead of dropping it.
+            // decomposeBayazitEntry(hole);
+            std::cout << "[bayazit] skipped hole: bridge failed\n";
+        }
+    }
+
+    decomposeBayazitEntry(outer);
     return polygons;
 }
 
@@ -332,4 +725,4 @@ std::vector<MarchComponentGeometry> Grid::genMarch() {
     return out;
 }
 
-}
+} // namespace bsk::internal
