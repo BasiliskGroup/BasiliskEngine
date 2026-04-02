@@ -19,6 +19,7 @@ private:
     struct Node {
         glm::vec2 pos;
         Node* next = nullptr;
+        Node* prev = nullptr;
     };
 
     Node* head = nullptr;
@@ -138,7 +139,9 @@ public:
     iterator operator[](const glm::vec2& v);
     const_iterator operator[](const glm::vec2& v) const;
 
-    bool add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
+    bool add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, glm::vec2& first, glm::vec2& last, glm::vec2& insert);
+    bool merge(Convex& other, glm::vec2& first, glm::vec2& last, glm::vec2& insert);
+    bool isConvex(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) const;
 };
 
 }

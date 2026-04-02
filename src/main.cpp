@@ -14,7 +14,7 @@ namespace {
 
 constexpr int SIDE_LENGTH = 100;
 constexpr float DELTA = SIDE_LENGTH * 0.6f;
-constexpr int OCTAVES = 5;
+constexpr int OCTAVES = 8;
 
 using namespace bsk::internal;
 
@@ -127,7 +127,7 @@ int main()
     std::vector<std::vector<int>> weights(SIDE_LENGTH, std::vector<int>(SIDE_LENGTH, -1));
     PerlinNoise noise;
     std::mt19937 rng(std::random_device{}());
-    std::uniform_real_distribution<double> startDist(0.0, 0.0); // 10000.0);
+    std::uniform_real_distribution<double> startDist(0.0, 10000.0);
     const double noiseStartX = startDist(rng);
     const double noiseStartY = startDist(rng);
     for (int x = 0; x < SIDE_LENGTH; ++x) {

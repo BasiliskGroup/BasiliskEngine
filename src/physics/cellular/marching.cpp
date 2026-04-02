@@ -189,27 +189,46 @@ void Polygon::earcut() {
     this->earcutIndices = mapbox::earcut<uint32_t>(polygon);
 }
 
-std::vector<Convex> Polygon::decompose() {
-    std::vector<Convex> polygons;
+void Polygon::add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) {
+    bool found = false;
+    glm::vec2 first, last, insert;
+    int p = 0;
+
+    // find if we have a match
+    for (; p < polygons.size(); ++p) {
+        if (polygons[p].add(a, b, c, first, last, insert)) {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        polygons.emplace_back(a, b, c);
+    }
+
+    // merge may be too expensive for what its worth right now
+    // merge(polygons[p], first, last, insert);
+}
+
+void Polygon::merge(Convex& convex, glm::vec2& first, glm::vec2& last, glm::vec2& insert) {
+
+    int p = 0;
+    for (; p < polygons.size(); ++p) {
+        if (polygons[p].merge(convex, first, last, insert)) {
+            return;
+        }
+    }
+}
+
+std::vector<Convex>& Polygon::decompose() {
+    polygons.clear();
 
     for (std::size_t i = 0; i + 2 < earcutIndices.size(); i += 3) {
         const int a = static_cast<int>(earcutIndices[i]);
         const int b = static_cast<int>(earcutIndices[i + 1]);
         const int c = static_cast<int>(earcutIndices[i + 2]);
 
-        bool found = false;
-        for (Convex& p : polygons) {
-            if (p.add(earcutVertices[static_cast<std::size_t>(a)], earcutVertices[static_cast<std::size_t>(b)],
-                    earcutVertices[static_cast<std::size_t>(c)])) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            polygons.emplace_back(earcutVertices[static_cast<std::size_t>(a)],
-                earcutVertices[static_cast<std::size_t>(b)], earcutVertices[static_cast<std::size_t>(c)]);
-        }
+        add(earcutVertices[a], earcutVertices[b], earcutVertices[c]);
     }
 
     return polygons;
@@ -303,7 +322,7 @@ std::vector<MarchComponentGeometry> Grid::genMarch() {
         MarchComponentGeometry geom;
         geom.filledVertices = polygon.filledVerts();
         geom.filledIndices = polygon.filledIndices();
-        geom.convexPieces = polygon.decompose();
+        geom.convexPieces = std::move(polygon.decompose());
         std::cout << geom.convexPieces.size()
                   << " convex piece(s)\n";
         ++componentIndex;

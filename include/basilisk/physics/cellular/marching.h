@@ -52,6 +52,7 @@ private:
     std::vector<Seg> segs;
     std::vector<uint32_t> earcutIndices;
     std::vector<glm::vec2> earcutVertices;
+    std::vector<Convex> polygons;
         
 public:
     void add(const glm::vec2& a, const glm::vec2& b);
@@ -60,10 +61,14 @@ public:
     const std::vector<glm::vec2>& filledVerts() const { return earcutVertices; }
     const std::vector<uint32_t>& filledIndices() const { return earcutIndices; }
 
-    std::vector<Convex> decompose();
+    std::vector<Convex>& decompose();
 
 private:
     void merge(Seg& other);
+
+    // for decomposition (recursive)
+    void add(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c);
+    void merge(Convex& convex, glm::vec2& first, glm::vec2& last, glm::vec2& insert);
 };
 
 // ----------------------------------------------
