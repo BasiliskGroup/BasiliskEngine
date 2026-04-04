@@ -201,7 +201,7 @@ void addConvexToScene(bsk::Scene2D* scene, const Convex& convex, const glm::vec2
     auto meshVerts = interleavedMeshFrom2D(centeredRing);
     auto* mesh = new bsk::Mesh(std::move(meshVerts), earcutIndices);
     auto* mat = new bsk::Material(material);
-    new bsk::Node2D(scene, mesh, mat, offset + centroid, 0.0f, glm::vec2(0.9f, 0.9f));
+    new bsk::Node2D(scene, mesh, mat, offset + centroid, 0.0f, glm::vec2(1.0f));
 }
 
 void drawConnectedComponents(bsk::Scene2D* scene, const Grid& grid, const glm::vec2& offset)
