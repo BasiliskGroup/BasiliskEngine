@@ -5,6 +5,7 @@
 #include <span>
 #include <random>
 #include <algorithm>
+#include <cmath>
 
 namespace {
 
@@ -106,6 +107,39 @@ bsk::Mesh* meshFromCCWPolygon(const std::vector<glm::vec2>& ccwVerts) {
     return meshFromCCWPolygon(std::span<const glm::vec2>(ccwVerts.data(), ccwVerts.size()));
 }
 
+// Node2D::updateModel translates by (position.x, -position.y). World XY from getModel()*vertex uses
+// that convention; stored position must undo the Y sign for a given world point.
+glm::vec2 worldXYToNode2DStore(glm::vec2 worldXY) {
+    return glm::vec2(worldXY.x, -worldXY.y);
+}
+
+// For the engine default quad (local x, y in [-0.5, 0.5]): rotation and scale so the quad is a thin
+// bar along the segment from world `a` to world `b` (same XY space as getModel() * vertex).
+// `positionWorldMid` is the segment midpoint in that world space — pass through worldXYToNode2DStore
+// before Node2D::setPosition.
+struct SegmentSquareTransform {
+    glm::vec2 positionWorldMid{};
+    float rotation = 0.0f;
+    glm::vec2 scale{1.0f, 1.0f};
+};
+
+SegmentSquareTransform segmentSquareTransformFromAToB(glm::vec2 a, glm::vec2 b, float thickness) {
+    glm::vec2 d = b - a;
+    float len = glm::length(d);
+    SegmentSquareTransform xf;
+    if (len < 1e-6f) {
+        xf.positionWorldMid = a;
+        xf.rotation = 0.0f;
+        xf.scale = glm::vec2(0.0f, thickness);
+        return xf;
+    }
+    d /= len;
+    xf.positionWorldMid = 0.5f * (a + b);
+    xf.rotation = -std::atan2(d.y, d.x);
+    xf.scale = glm::vec2(len, thickness);
+    return xf;
+}
+
 } // namespace
 
 int main() {
@@ -115,6 +149,10 @@ int main() {
 
     bsk::Material* red = new bsk::Material(glm::vec3(1.0f, 0.0f, 0.0f));
     bsk::Material* blue = new bsk::Material(glm::vec3(0.0f, 0.0f, 1.0f));
+    bsk::Material* green = new bsk::Material(glm::vec3(0.0f, 0.85f, 0.25f));
+
+    constexpr float kNormalDrawLength = 3.0f;
+    constexpr float kNormalThickness = 0.18f;
 
     // OBJECT A
     std::vector<glm::vec2> vA = GenerateRandomConvexPolygon(10);
@@ -125,6 +163,8 @@ int main() {
     std::vector<glm::vec2> vB = GenerateRandomConvexPolygon(5);
     bsk::Mesh* meshB = meshFromCCWPolygon(vB);
     bsk::Node2D* nodeB = new bsk::Node2D(scene, meshB, red, glm::vec2(1.0f, 1.0f), 5.0f, glm::vec2(1.5f, 2.5f));
+
+    bsk::Node2D* normalNode = new bsk::Node2D(scene, nullptr, green, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
 
     bsk::Keyboard* keys = engine->getKeyboard();
     const float moveSpeed = 2.0f;
@@ -149,12 +189,14 @@ int main() {
         std::vector<glm::vec2> wA;
         glm::mat4 modelA = nodeA->getModel();
         for (const auto& vertex : vA) {
-            wA.push_back(modelA * glm::vec4(vertex, 0.0f, 1.0f));
+            glm::vec4 w = modelA * glm::vec4(vertex, 0.0f, 1.0f);
+            wA.emplace_back(w.x, w.y);
         }
         std::vector<glm::vec2> wB;
         glm::mat4 modelB = nodeB->getModel();
         for (const auto& vertex : vB) {
-            wB.push_back(modelB * glm::vec4(vertex, 0.0f, 1.0f));
+            glm::vec4 w = modelB * glm::vec4(vertex, 0.0f, 1.0f);
+            wB.emplace_back(w.x, w.y);
         }
 
         // compute collision
@@ -162,12 +204,33 @@ int main() {
         bsk::internal::ConvexShape shapeA(wA, glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f));
         bsk::internal::ConvexShape shapeB(wB, glm::vec2(1.0f, 1.0f), 0.0f, glm::vec2(1.0f, 1.0f));
         bool collided = bsk::internal::gjk(shapeA, shapeB, pair);
+        bool epaOk = false;
         if (collided) {
+            epaOk = bsk::internal::epa(shapeA, shapeB, pair);
             nodeA->setMaterial(red);
             nodeB->setMaterial(red);
         } else {
             nodeA->setMaterial(blue);
             nodeB->setMaterial(blue);
+        }
+
+        std::cout << collided << " " << epaOk << " " << glm::length2(pair.normal) << " " << wA.empty() << std::endl;
+
+        if (collided && epaOk && glm::length2(pair.normal) > 1e-12f && !wA.empty()) {
+            glm::vec2 centroidA(0.0f);
+            for (const glm::vec2& p : wA) {
+                centroidA += p;
+            }
+            centroidA /= static_cast<float>(wA.size());
+
+            glm::vec2 n = glm::normalize(pair.normal);
+            glm::vec2 half = n * (0.5f * kNormalDrawLength);
+            SegmentSquareTransform xf = segmentSquareTransformFromAToB(centroidA - half, centroidA + half, kNormalThickness);
+            normalNode->setPosition(worldXYToNode2DStore(xf.positionWorldMid));
+            normalNode->setRotation(xf.rotation);
+            normalNode->setScale(xf.scale);
+        } else {
+            normalNode->setScale(glm::vec2(0.0f));
         }
 
         scene->render();

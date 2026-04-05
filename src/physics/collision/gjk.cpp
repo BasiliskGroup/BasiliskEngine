@@ -7,7 +7,7 @@ namespace bsk::internal {
 void addSupport(const ConvexShape& shapeA, const ConvexShape& shapeB, CollisionPair& pair, uint32_t insertIndex) {
     glm::vec2 farA = getFar(shapeA, pair.searchDir);
     glm::vec2 farB = getFar(shapeB, -pair.searchDir);
-    pair.simplex[insertIndex] = farA - farB;
+    pair.sps[insertIndex] = farA - farB;
 }
 
 glm::vec2 getFar(const ConvexShape& shape, const glm::vec2& dir) {
@@ -34,7 +34,7 @@ bool gjk(const ConvexShape& shapeA, const ConvexShape& shapeB, CollisionPair& pa
             return true;
         }
         addSupport(shapeA, shapeB, pair, pair.freeIndex);
-        if (glm::dot(pair.simplex[pair.freeIndex], pair.searchDir) < EPSILON) {
+        if (glm::dot(pair.sps[pair.freeIndex], pair.searchDir) < EPSILON) {
             return false;
         }
         pair.freeIndex++;
@@ -58,13 +58,13 @@ uint32_t handle0(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
 }
 
 uint32_t handle1(const ConvexShape& shapeA, const ConvexShape& shapeB, CollisionPair& pair) {
-    pair.searchDir = -pair.simplex[0];
+    pair.searchDir = -pair.sps[0];
     return 1;
 }
 
 uint32_t handle2(const ConvexShape& shapeA, const ConvexShape& shapeB, CollisionPair& pair) {
-    glm::vec2 CB = pair.simplex[1] - pair.simplex[0];
-    glm::vec2 CO =               - pair.simplex[0];
+    glm::vec2 CB = pair.sps[1] - pair.sps[0];
+    glm::vec2 CO =               - pair.sps[0];
     tripleProduct(CB, CO, CB, pair.searchDir);
 
     if (glm::length2(pair.searchDir) < EPSILON) {
@@ -76,25 +76,25 @@ uint32_t handle2(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
 }
 
 uint32_t handle3(const ConvexShape& shapeA, const ConvexShape& shapeB, CollisionPair& pair) {
-    glm::vec2 AB = pair.simplex[1] - pair.simplex[2];
-    glm::vec2 AC = pair.simplex[0] - pair.simplex[2];
-    glm::vec2 AO =               - pair.simplex[2];
-    glm::vec2 CO =               - pair.simplex[0];
+    glm::vec2 AB = pair.sps[1] - pair.sps[2];
+    glm::vec2 AC = pair.sps[0] - pair.sps[2];
+    glm::vec2 AO =               - pair.sps[2];
+    glm::vec2 CO =               - pair.sps[0];
 
     // remove 0
     glm::vec2 perp;
     perpTowards(AB, CO, perp);
     if (glm::dot(perp, AO) > -EPSILON) {
-        pair.simplex[0] = pair.simplex[2];
+        pair.sps[0] = pair.sps[2];
         pair.searchDir = perp;
         return 2;
     }
 
     // remove 1
-    glm::vec2 BO = -pair.simplex[1];
+    glm::vec2 BO = -pair.sps[1];
     perpTowards(AC, BO, perp);
     if (glm::dot(perp, AO) > -EPSILON) {
-        pair.simplex[1] = pair.simplex[2];
+        pair.sps[1] = pair.sps[2];
         pair.searchDir = perp;
         return 2;
     }
