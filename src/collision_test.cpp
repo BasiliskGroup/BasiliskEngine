@@ -123,6 +123,16 @@ struct SegmentSquareTransform {
     glm::vec2 scale{1.0f, 1.0f};
 };
 
+// Arithmetic mean of vertices in world space (matches mesh geometric center for this convex test mesh).
+glm::vec2 geomCentroidWorld(const std::vector<glm::vec2>& worldVerts) {
+    glm::vec2 c(0.0f);
+    for (const glm::vec2& p : worldVerts) {
+        c += p;
+    }
+    const float n = static_cast<float>(worldVerts.size());
+    return n > 0.0f ? c / n : c;
+}
+
 SegmentSquareTransform segmentSquareTransformFromAToB(glm::vec2 a, glm::vec2 b, float thickness) {
     glm::vec2 d = b - a;
     float len = glm::length(d);
@@ -145,14 +155,20 @@ SegmentSquareTransform segmentSquareTransformFromAToB(glm::vec2 a, glm::vec2 b, 
 int main() {
     bsk::Engine* engine = new bsk::Engine(800, 800, "Collision Test");
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
-    scene->setCamera(new bsk::StaticCamera2D(engine, glm::vec2(0.0f, 0.0f), 15.0f));
+    scene->setCamera(new bsk::StaticCamera2D(engine, glm::vec2(0.0f, 0.0f), 10.0f));
 
     bsk::Material* red = new bsk::Material(glm::vec3(1.0f, 0.0f, 0.0f));
     bsk::Material* blue = new bsk::Material(glm::vec3(0.0f, 0.0f, 1.0f));
     bsk::Material* green = new bsk::Material(glm::vec3(0.0f, 0.85f, 0.25f));
+    bsk::Material* yellow = new bsk::Material(glm::vec3(1.0f, 0.92f, 0.2f));
+    bsk::Material* cyan = new bsk::Material(glm::vec3(0.2f, 0.95f, 1.0f));
+    bsk::Material* magenta = new bsk::Material(glm::vec3(1.0f, 0.2f, 0.85f));
+    bsk::Material* white = new bsk::Material(glm::vec3(0.95f, 0.95f, 0.95f));
 
     constexpr float kNormalDrawLength = 3.0f;
-    constexpr float kNormalThickness = 0.18f;
+    constexpr float kNormalThickness = 0.09f;
+    constexpr float kNormalTipBlockSize = 0.13f;
+    constexpr float kContactMarkerScale = 0.09f;
 
     // OBJECT A
     std::vector<glm::vec2> vA = GenerateRandomConvexPolygon(10);
@@ -165,6 +181,19 @@ int main() {
     bsk::Node2D* nodeB = new bsk::Node2D(scene, meshB, red, glm::vec2(1.0f, 1.0f), 5.0f, glm::vec2(1.5f, 2.5f));
 
     bsk::Node2D* normalNode = new bsk::Node2D(scene, nullptr, green, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
+    bsk::Node2D* normalTipNode = new bsk::Node2D(scene, nullptr, white, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
+
+    bsk::Node2D* contactA1 = new bsk::Node2D(scene, nullptr, yellow, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
+    bsk::Node2D* contactA2 = new bsk::Node2D(scene, nullptr, cyan, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
+    bsk::Node2D* contactB1 = new bsk::Node2D(scene, nullptr, magenta, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
+    bsk::Node2D* contactB2 = new bsk::Node2D(scene, nullptr, white, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
+
+    normalNode->setLayer(0.85);
+    normalTipNode->setLayer(0.86);
+    contactA1->setLayer(0.9);
+    contactA2->setLayer(0.9);
+    contactB1->setLayer(0.9);
+    contactB2->setLayer(0.9);
 
     bsk::Keyboard* keys = engine->getKeyboard();
     const float moveSpeed = 2.0f;
@@ -199,14 +228,26 @@ int main() {
             wB.emplace_back(w.x, w.y);
         }
 
+        const glm::vec2 geoCenterA = geomCentroidWorld(wA);
+        const glm::vec2 geoCenterB = geomCentroidWorld(wB);
+
         // compute collision
         bsk::internal::CollisionPair pair;
-        bsk::internal::ConvexShape shapeA(wA, glm::vec2(0.0f, 0.0f), 0.0f, glm::vec2(1.0f, 1.0f));
-        bsk::internal::ConvexShape shapeB(wB, glm::vec2(1.0f, 1.0f), 0.0f, glm::vec2(1.0f, 1.0f));
+        bsk::internal::ConvexShape shapeA(wA, geoCenterA, 0.0f, glm::vec2(1.0f, 1.0f));
+        bsk::internal::ConvexShape shapeB(wB, geoCenterB, 0.0f, glm::vec2(1.0f, 1.0f));
         bool collided = bsk::internal::gjk(shapeA, shapeB, pair);
         bool epaOk = false;
+        bool satOk = false;
         if (collided) {
-            epaOk = bsk::internal::epa(shapeA, shapeB, pair);
+            bsk::internal::sat(shapeA.vertices, shapeB.vertices, pair);
+            epaOk = true;
+            pair.normal = -pair.normal;
+            // if (epaOk && glm::length2(pair.normal) > 1e-12f) {
+            //     satOk = bsk::internal::sat(shapeA, shapeB, pair);
+            // }
+            bsk::internal::findContactPoints(shapeA.vertices, shapeB.vertices, pair);
+            satOk = true;
+            std::cout << pair.numA << " " << pair.numB << std::endl;
             nodeA->setMaterial(red);
             nodeB->setMaterial(red);
         } else {
@@ -214,23 +255,43 @@ int main() {
             nodeB->setMaterial(blue);
         }
 
-        std::cout << collided << " " << epaOk << " " << glm::length2(pair.normal) << " " << wA.empty() << std::endl;
-
         if (collided && epaOk && glm::length2(pair.normal) > 1e-12f && !wA.empty()) {
-            glm::vec2 centroidA(0.0f);
-            for (const glm::vec2& p : wA) {
-                centroidA += p;
-            }
-            centroidA /= static_cast<float>(wA.size());
-
             glm::vec2 n = glm::normalize(pair.normal);
             glm::vec2 half = n * (0.5f * kNormalDrawLength);
-            SegmentSquareTransform xf = segmentSquareTransformFromAToB(centroidA - half, centroidA + half, kNormalThickness);
+            glm::vec2 tip = geoCenterA + half;
+            SegmentSquareTransform xf = segmentSquareTransformFromAToB(geoCenterA - half, tip, kNormalThickness);
             normalNode->setPosition(worldXYToNode2DStore(xf.positionWorldMid));
             normalNode->setRotation(xf.rotation);
             normalNode->setScale(xf.scale);
+
+            normalTipNode->setPosition(worldXYToNode2DStore(tip + n * (0.5f * kNormalTipBlockSize)));
+            normalTipNode->setRotation(xf.rotation);
+            normalTipNode->setScale(glm::vec2(kNormalTipBlockSize));
         } else {
             normalNode->setScale(glm::vec2(0.0f));
+            normalTipNode->setScale(glm::vec2(0.0f));
+        }
+
+        auto placeContact = [&](bsk::Node2D* node, const glm::vec2& worldXY, bool visible) {
+            if (visible) {
+                node->setPosition(worldXYToNode2DStore(worldXY));
+                node->setRotation(0.0f);
+                node->setScale(glm::vec2(kContactMarkerScale));
+            } else {
+                node->setScale(glm::vec2(0.0f));
+            }
+        };
+
+        if (collided && satOk) {
+            placeContact(contactA1, pair.a1, pair.numA >= 1);
+            placeContact(contactA2, pair.a2, pair.numA >= 2);
+            placeContact(contactB1, pair.b1, pair.numB >= 1);
+            placeContact(contactB2, pair.b2, pair.numB >= 2);
+        } else {
+            contactA1->setScale(glm::vec2(0.0f));
+            contactA2->setScale(glm::vec2(0.0f));
+            contactB1->setScale(glm::vec2(0.0f));
+            contactB2->setScale(glm::vec2(0.0f));
         }
 
         scene->render();

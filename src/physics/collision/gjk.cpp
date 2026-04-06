@@ -1,5 +1,4 @@
 #include <basilisk/physics/collision/gjk.h>
-// #include <basilisk/physics/maths.h>
 #include <basilisk/util/maths.h>
 
 namespace bsk::internal {
