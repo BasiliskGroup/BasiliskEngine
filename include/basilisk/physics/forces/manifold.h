@@ -8,20 +8,8 @@ namespace bsk::internal {
 // ------------------------------------------------------------
 // Table Struct
 // ------------------------------------------------------------
-// Used to track contact features between frames
-union FeaturePair {
-    struct Edges {
-        char inEdge1;
-        char outEdge1;
-        char inEdge2;
-        char outEdge2;
-    } e;
-    int value;
-};
-
 // Contact point information for a single contact
 struct Contact {
-    FeaturePair feature;
     glm::vec2 rA;
     glm::vec2 rB;
     glm::vec2 normal;

@@ -180,6 +180,19 @@ int main() {
     bsk::Mesh* meshB = meshFromCCWPolygon(vB);
     bsk::Node2D* nodeB = new bsk::Node2D(scene, meshB, red, glm::vec2(1.0f, 1.0f), 5.0f, glm::vec2(1.5f, 2.5f));
 
+    // print both meshes
+    std::cout << "polygon(";
+    for (const auto& vertex : vA) {
+        std::cout << "(" <<  vertex.x << ", " << vertex.y << "), ";
+    }
+    std::cout << ")" << std::endl;
+    
+    std::cout << "polygon(";
+    for (const auto& vertex : vB) {
+        std::cout << "(" <<  vertex.x << ", " << vertex.y << "), ";
+    }
+    std::cout << ")" << std::endl;
+
     bsk::Node2D* normalNode = new bsk::Node2D(scene, nullptr, green, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
     bsk::Node2D* normalTipNode = new bsk::Node2D(scene, nullptr, white, glm::vec2(0.0f), 0.0f, glm::vec2(0.0f));
 

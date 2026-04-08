@@ -15,24 +15,11 @@ using namespace bsk::internal;
 void bind_manifold(py::module_& m) {
     // Bind the Contact struct
     py::class_<Contact>(m, "Contact")
-        .def_readwrite("feature", &Contact::feature)
         .def_readwrite("rA", &Contact::rA)
         .def_readwrite("rB", &Contact::rB)
         .def_readwrite("normal", &Contact::normal)
         .def_readwrite("C0", &Contact::C0)
         .def_readwrite("stick", &Contact::stick);
-    
-    // Bind the FeaturePair union
-    py::class_<FeaturePair>(m, "FeaturePair")
-        .def_readwrite("e", &FeaturePair::e)
-        .def_readwrite("value", &FeaturePair::value);
-    
-    // Bind the Edges struct
-    py::class_<FeaturePair::Edges>(m, "Edges")
-        .def_readwrite("inEdge1", &FeaturePair::Edges::inEdge1)
-        .def_readwrite("outEdge1", &FeaturePair::Edges::outEdge1)
-        .def_readwrite("inEdge2", &FeaturePair::Edges::inEdge2)
-        .def_readwrite("outEdge2", &FeaturePair::Edges::outEdge2);
     
     py::class_<Manifold, Force>(m, "Manifold")
         .def(py::init<Solver*, Rigid*, Rigid*>(),

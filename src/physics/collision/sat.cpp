@@ -137,6 +137,9 @@ void findContactPoints(
         numB = 1;
     }
 
+    if (numA == 1) clippedA1 = clippedA0;
+    if (numB == 1) clippedB1 = clippedB0;
+
     cp.a1 = clippedA0; cp.a2 = clippedA1; cp.numA = numA;
     cp.b1 = clippedB0; cp.b2 = clippedB1; cp.numB = numB;
 }
