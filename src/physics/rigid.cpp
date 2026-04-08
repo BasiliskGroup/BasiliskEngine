@@ -4,7 +4,7 @@
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/bodyTable.h>
 #include <basilisk/physics/collision/bvh.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 #include <basilisk/nodes/node2d.h>
 
 namespace bsk::internal {

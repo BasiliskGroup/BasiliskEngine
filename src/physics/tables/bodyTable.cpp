@@ -1,7 +1,7 @@
 #include <basilisk/physics/tables/bodyTable.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/nodes/node2d.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/util/fileHandling.h>
 #include <basilisk/util/print.h>

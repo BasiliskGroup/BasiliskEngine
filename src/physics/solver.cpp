@@ -3,7 +3,7 @@
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/forces/force.h>
 #include <basilisk/physics/forces/manifold.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/colliderTable.h>
 #include <basilisk/physics/tables/bodyTable.h>

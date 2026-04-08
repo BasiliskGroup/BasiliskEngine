@@ -1,6 +1,6 @@
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/physics/rigid.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 
 namespace bsk::internal {
 

@@ -2,7 +2,7 @@
 #include <basilisk/physics/forces/joint.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/tables/forceTypeTable.h>
 
@@ -23,7 +23,7 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
     setFmin(2, -fracture);
     setFracture(2, fracture);
     setRestAngle((bodyA ? bodyA->getPosition().z : 0.0f) - bodyB->getPosition().z);
-    setTorqueArm(lengthSq((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize()));
+    setTorqueArm(glm::length2((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize()));
     solver->getForceTable()->setForceType(this->index, ForceType::JOINT);
 }
 
