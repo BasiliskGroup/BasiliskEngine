@@ -27,6 +27,9 @@ private:
     uint32_t index;
     Collider* collider;
 
+    // TODO move to rigid table
+    bool hasGravity = true;
+
     // Coloring
     int degree;
     int satur;
@@ -78,6 +81,7 @@ public:
     void setJacobianMask(const glm::vec3& jacobianMask);
     void setResolvesCollisions(bool resolvesCollisions) { this->resolvesCollisions = resolvesCollisions; }
     void setCollisionGroup(int group) { this->collisionGroup = group; }
+    void setHasGravity(bool hasGravity) { this->hasGravity = hasGravity; }
 
     // Getters
     glm::vec3 getPosition() const;
@@ -106,6 +110,7 @@ public:
     void getAABB(glm::vec2& bl, glm::vec2& tr) const;
     bool getResolvesCollisions() const { return resolvesCollisions; }
     int getCollisionGroup() const { return collisionGroup; }
+    bool getHasGravity() const { return hasGravity; }
 
     std::vector<CollisionData> getCollisions();
     glm::vec3 getJacobianMask() const;

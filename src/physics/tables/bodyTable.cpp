@@ -59,7 +59,7 @@ void BodyTable::warmstartBodies(const float dt, const std::optional<glm::vec3>& 
         vel[i].z = glm::clamp(vel[i].z, -50.0f, 50.0f);
 
         // compute gravity
-        gravity = gravityOpt.has_value() ? gravityOpt.value() : getGravity(i);
+        gravity = bodies[i]->getHasGravity() ? (gravityOpt.has_value() ? gravityOpt.value() : getGravity(i)) : glm::vec3(0.0f);
 
         // Compute inertial position (Eq 2)
         inertial[i] = pos[i] + vel[i] * dt;
