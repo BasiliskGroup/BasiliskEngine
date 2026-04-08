@@ -7,7 +7,7 @@
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/tables/forceTypeTable.h>
 

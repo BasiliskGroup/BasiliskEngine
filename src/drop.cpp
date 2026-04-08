@@ -1,6 +1,6 @@
 #include <basilisk/basilisk.h>
 #include <basilisk/physics/forces/joint.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 
 #include <vector>
  

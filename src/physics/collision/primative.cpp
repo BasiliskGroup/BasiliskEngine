@@ -1,6 +1,6 @@
 #include <basilisk/physics/collision/primative.h>
 #include <basilisk/physics/rigid.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 #include <basilisk/util/constants.h>
 
 namespace bsk::internal {

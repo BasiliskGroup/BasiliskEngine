@@ -2,7 +2,7 @@
 #include <basilisk/physics/forces/spring.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/solver.h>
-#include <basilisk/physics/maths.h>
+#include <basilisk/util/maths.h>
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/tables/forceTypeTable.h>
 
