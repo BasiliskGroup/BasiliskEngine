@@ -5,7 +5,7 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/util/constants.h>
 #include <basilisk/physics/coloring/color_queue.h>
-#include <basilisk/physics/tables/adjacency.h>
+#include <basilisk/physics/tables/colorTable.h>
 #include <basilisk/physics/tables/forceTable.h>
 #include <basilisk/physics/tables/forceTypeTable.h>
 #include <basilisk/physics/forces/force.h>
@@ -13,6 +13,7 @@
 #include <basilisk/physics/forces/manifold.h>
 #include <basilisk/physics/forces/motor.h>
 #include <basilisk/physics/forces/spring.h>
+#include <basilisk/compute/gpuWrapper.hpp>
 #include <optional>
 #include <thread>
 #include <barrier>
@@ -65,8 +66,7 @@ private:
 
     // Coloring
     ColorQueue colorQueue;
-    std::vector<std::vector<ColoredData>> colorGroups;
-    std::vector<std::vector<ForceEdgeIndices>> forceEdgeIndices;
+    ColorTableManager colors;
 
     // Threading
     std::barrier<> stageBarrier;
@@ -78,6 +78,18 @@ private:
     std::atomic<int> currentColor;
     std::atomic<bool> running;
     std::vector<std::thread> workers;
+
+    // shaders
+    ComputeShader* velocityShader = nullptr;
+
+    // struct Color {
+    //     std::vector<ColorBody> bodies;
+    //     std::vector<ColorForce> forces;
+    // };
+
+    // std::vector<Color> colors;
+    // std::vector<std::vector<ColorBody>> colorGroups;
+    // std::vector<std::vector<ColorForce>> forceEdgeIndices;
 
 public:
     Solver();
@@ -128,21 +140,24 @@ public:
     // Threading
     void workerLoop(unsigned int threadID);
 
+    // GPU
+    void rebuildVelocityShader();
+
     // Stages
     void primalStage(ThreadScratch& scratch, int threadID, int activeColor);
-    void primalUpdateSingle(PrimalScratch& scratch, int activeColor, std::size_t bodyColorIndex);
+    void primalAccumulateSingle(PrimalScratch& scratch, int activeColor, uint32_t bodyColorIndex);
     void dualStage(ThreadScratch& scratch, int threadID);
 
     template<class TForce, typename T>
     void dualUpdatePass(ForceTypeTable<T>* table, int threadID) {
-        std::size_t tableSize = table->getSize();
+        uint32_t tableSize = table->getSize();
         if (tableSize == 0) return;
 
         WorkRange range = partition(tableSize, threadID, NUM_THREADS);
         float alpha = currentAlpha.load(std::memory_order_acquire);
 
-        for (std::size_t i = range.start; i < range.end; i++) {
-            std::size_t forceIndex = table->getForceIndex(i);
+        for (uint32_t i = range.start; i < range.end; i++) {
+            uint32_t forceIndex = table->getForceIndex(i);
             Force* force = forceTable->getForce(forceIndex);
             if (!force) continue;
 
@@ -173,7 +188,7 @@ public:
     }
 
     template<class TForce, class TForceStruct>
-    inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, std::size_t specialForceIndex, ForceBodyOffset body, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
+    inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, uint32_t specialForceIndex, uint32_t bodyIndex, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);

@@ -9,13 +9,13 @@ namespace bsk::internal {
 Motor::Motor(Solver* solver, Rigid* bodyA, Rigid* bodyB, float speed, float maxTorque)
     : Force(solver, bodyA, bodyB)
 {
+    // register to motor table
+    solver->getForceTable()->getMotorTable()->insert(this);
+
     setSpeed(speed);
     setFmax(0, maxTorque);
     setFmin(0, -maxTorque);
     solver->getForceTable()->setForceType(this->index, ForceType::MOTOR);
-
-    // register to motor table
-    solver->getForceTable()->getMotorTable()->insert(this);
 }
 
 Motor::~Motor() {
@@ -23,8 +23,8 @@ Motor::~Motor() {
     solver->getForceTable()->getMotorTable()->markAsDeleted(this->specialIndex);
 }
 
-void Motor::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
-    std::size_t index = forceTable->getMotorTable()->getForceIndex(specialIndex);
+void Motor::computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha) {
+    uint32_t index = forceTable->getMotorTable()->getForceIndex(specialIndex);
     MotorStruct& motors = forceTable->getMotorTable()->getData(specialIndex);
 
     // Compute delta angular position between the two bodies
@@ -36,10 +36,10 @@ void Motor::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, 
     forceTable->setC(index, 0, deltaAngle - motors.speed * forceTable->getSolver()->getDt());
 }
 
-void Motor::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    std::size_t index = forceTable->getMotorTable()->getForceIndex(specialIndex);
+void Motor::computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
+    uint32_t index = forceTable->getMotorTable()->getForceIndex(specialIndex);
     // Compute the first and second derivatives for the desired body
-    if (body == ForceBodyOffset::A) {
+    if (bodyIndex == forceTable->getBodies(index).a) {
         forceTable->setJ(index, 0, glm::vec3(0.0f, 0.0f, 1.0f) * jacobianMask);
         forceTable->setH(index, 0, glm::mat3(0, 0, 0, 0, 0, 0, 0, 0, 0));
     } else {

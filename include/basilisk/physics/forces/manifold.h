@@ -8,20 +8,8 @@ namespace bsk::internal {
 // ------------------------------------------------------------
 // Table Struct
 // ------------------------------------------------------------
-// Used to track contact features between frames
-union FeaturePair {
-    struct Edges {
-        char inEdge1;
-        char outEdge1;
-        char inEdge2;
-        char outEdge2;
-    } e;
-    int value;
-};
-
 // Contact point information for a single contact
 struct Contact {
-    FeaturePair feature;
     glm::vec2 rA;
     glm::vec2 rB;
     glm::vec2 normal;
@@ -64,11 +52,11 @@ public:
     Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB);
     ~Manifold();
 
-    static int rows(ForceTable* forceTable, std::size_t specialIndex);
+    static int rows(ForceTable* forceTable, uint32_t specialIndex);
     int rows() override;
     bool initialize() override;
-    static void computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha);
-    static void computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask);
+    static void computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha);
+    static void computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask);
 
     static int collide(Rigid* bodyA, Rigid* bodyB, Contact* contacts);
     

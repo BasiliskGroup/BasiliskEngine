@@ -272,7 +272,7 @@ void Rigid::setNode(Node2D* node) {
     this->node = node;
 }
 
-void Rigid::setIndex(std::size_t index) {
+void Rigid::setIndex(uint32_t index) {
     this->index = index;
 }
 

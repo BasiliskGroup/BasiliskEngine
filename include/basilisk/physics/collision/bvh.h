@@ -11,7 +11,7 @@ class Rigid;
 class BVH {
 private: 
     Primative* root;
-    std::size_t size;
+    uint32_t size;
     std::unordered_map<Rigid*, Primative*> primatives;
     int rebuildTimer;
 
@@ -33,7 +33,7 @@ public:
     std::vector<Rigid*> query(Rigid* rigid) const;
     
     // Utility
-    std::size_t getSize() const { return size; }
+    uint32_t getSize() const { return size; }
     bool isEmpty() const { return root == nullptr; }
 
     // Gravity operations

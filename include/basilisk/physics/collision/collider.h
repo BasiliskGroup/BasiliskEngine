@@ -11,7 +11,7 @@ class ColliderTable;
 class Collider {
 private:
     ColliderTable* table;
-    std::size_t index;
+    uint32_t index;
 
 public: 
     Collider(std::vector<glm::vec2> vertices);
@@ -20,7 +20,7 @@ public:
     void markForDeletion();
 
     // getters
-    std::size_t getIndex() const { return index; }
+    uint32_t getIndex() const { return index; }
     ColliderTable* getTable() const { return table; }
     std::vector<glm::vec2>& getVertices() const;
     float getMass(glm::vec2 scale, float density) const;
@@ -37,7 +37,7 @@ public:
     float getBaseRadius() const;
 
     // setters
-    void setIndex(std::size_t index) { this->index = index; }
+    void setIndex(uint32_t index) { this->index = index; }
     void setVertices(const std::vector<glm::vec2>& vertices);
     void setCOM(const glm::vec2& com);
     void setGC(const glm::vec2& gc);

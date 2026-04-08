@@ -11,6 +11,8 @@
 #include <basilisk/util/time.h>
 #include <basilisk/physics/collision/bvh.h>
 #include <basilisk/physics/threading/scratch.h>
+#include <basilisk/util/fileHandling.h>
+#include <basilisk/compute/uniforms.hpp>
 
 
 namespace bsk::internal {
@@ -32,10 +34,9 @@ Solver::Solver() :
     currentAlpha(0.0f),
     currentColor(0),
     running(true),
-    workers(),
-    forceEdgeIndices()
+    workers()
 {
-    this->bodyTable = new BodyTable(this, 128);
+    this->bodyTable = new BodyTable(this, 8, velocityShader);
     this->forceTable = new ForceTable(128);
     this->forceTable->setSolver(this);
     defaultParams();
@@ -44,6 +45,9 @@ Solver::Solver() :
     for (unsigned int i = 0; i < NUM_THREADS; i++) {
         workers.emplace_back(&Solver::workerLoop, this, i);
     }
+
+    // set up shaders
+    rebuildVelocityShader();
 }
 
 Solver::~Solver() {
@@ -184,13 +188,13 @@ void Solver::step(float dtIncoming) {
     this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
 
     // compact body table
-    // auto compactBodyTableStart = timeNow();
+    auto compactBodyTableStart = timeNow();
     bodyTable->compact();
-    // auto compactBodyTableEnd = timeNow();
+    auto compactBodyTableEnd = timeNow();
     // printDurationUS(compactBodyTableStart, compactBodyTableEnd, "Compact Body Table: ");
 
     // Perform broadphase collision detection
-    // auto broadphaseStart = timeNow();
+    auto broadphaseStart = timeNow();
     bodyTable->getBVH()->update();
 
     // Use BVH to find potential collisions
@@ -214,7 +218,7 @@ void Solver::step(float dtIncoming) {
     // printDurationUS(broadphaseStart, broadphaseEnd, "Broadphase: ");
 
     // Initialize and warmstart forces
-    // auto warmstartForcesStart = timeNow();
+    auto warmstartForcesStart = timeNow();
     for (Force* force = forces; force != nullptr;) {
         // Initialization can including caching anything that is constant over the step
         if (!force->initialize()) {
@@ -251,51 +255,38 @@ void Solver::step(float dtIncoming) {
             force = force->getNext();
         }
     }
-    // auto warmstartForcesEnd = timeNow();
+    auto warmstartForcesEnd = timeNow();
     // printDurationUS(warmstartForcesStart, warmstartForcesEnd, "Warmstart Forces: ");
 
-    // auto warmstartBodiesStart = timeNow();
+    auto warmstartBodiesStart = timeNow();
     bodyTable->warmstartBodies(dt, gravity);
-    // auto warmstartBodiesEnd = timeNow();
+    auto warmstartBodiesEnd = timeNow();
     // printDurationUS(warmstartBodiesStart, warmstartBodiesEnd, "Warmstart Bodies: ");
 
     // compact force table
-    // auto compactForceTableStart = timeNow();
+    auto compactForceTableStart = timeNow();
     forceTable->compact();
-    // auto compactForceTableEnd = timeNow();
+    auto compactForceTableEnd = timeNow();
     // printDurationUS(compactForceTableStart, compactForceTableEnd, "Compact Force Table: ");
 
-    // Print number of bodies and forces before coloring
+    // // print number of bodies and forces before coloring
     // std::cout << "Bodies: " << numRigids << ", Forces: " << numForces << std::endl;
     // std::cout << "Body Table Size: " << bodyTable->getSize() << std::endl;
     // std::cout << "Force Table Size: " << forceTable->getSize() << std::endl;
     // std::cout << "Number of threads: " << NUM_THREADS << std::endl;
 
     // Coloring
-    // auto coloringStart = timeNow();
+    auto coloringStart = timeNow();
     resetColoring();
     dsatur();
-    // auto coloringEnd = timeNow();
+    auto coloringEnd = timeNow();
     // printDurationUS(coloringStart, coloringEnd, "Coloring: ");
-
-    // Load initial positions into forces
-    // auto loadPositionalStart = timeNow();
-    // for (Force* force = forces; force != nullptr; force = force->getNext()) {
-    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getPosition() : glm::vec3(0.0f);
-    //     forceTable->getPositional(force->getIndex()).pos[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getPosition() : glm::vec3(0.0f);
-    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::A)] = force->getBodyA() ? force->getBodyA()->getInitial() : glm::vec3(0.0f);
-    //     forceTable->getPositional(force->getIndex()).initial[static_cast<std::size_t>(ForceBodyOffset::B)] = force->getBodyB() ? force->getBodyB()->getInitial() : glm::vec3(0.0f);
-    // }
-    // auto loadPositionalEnd = timeNow();
-    // printDurationUS(loadPositionalStart, loadPositionalEnd, "Load Positional: ");
-
-    // forceTable->printIndices();
 
     // Main solver loop
     // If using post stabilization, we'll use one extra iteration for the stabilization
     int totalIterations = iterations + (postStabilize ? 1 : 0);
     
-    // auto solverLoopStart = timeNow();
+    auto solverLoopStart = timeNow();
     for (int it = 0; it < totalIterations; it++) {
         // If using post stabilization, either remove all or none of the pre-existing constraint error
         float alphaValue = alpha;
@@ -306,14 +297,14 @@ void Solver::step(float dtIncoming) {
         currentAlpha.store(alphaValue, std::memory_order_release);
 
         // Primal update
-        // auto primalStart = timeNow();
+        auto primalStart = timeNow();
         currentStage.store(Stage::STAGE_PRIMAL, std::memory_order_release);
 
         // iterate through colors - process bodies by color to enable parallel execution
         // Bodies of the same color can be processed in parallel since they have no dependencies
-        for (int activeColor = 0; activeColor < colorGroups.size(); activeColor++) {
+        for (int activeColor = 0; activeColor < colors.tables.size(); activeColor++) {
             // Skip empty color groups (shouldn't happen with proper dsatur, but be safe)
-            if (colorGroups[activeColor].empty()) {
+            if (colors.tables[activeColor].bodies.empty()) {
                 continue;
             }
             
@@ -322,35 +313,35 @@ void Solver::step(float dtIncoming) {
             finishSignal.acquire();
         }
 
-        // auto primalEnd = timeNow();
+        auto primalEnd = timeNow();
         // printDurationUS(primalStart, primalEnd, "  Primal Update: ");
 
         // Dual update, only for non stabilized iterations in the case of post stabilization
         // If doing more than one post stabilization iteration, we can still do a dual update,
         // but make sure not to persist the penalty or lambda updates done during the stabilization iterations for the next frame.
         if (it < iterations) {
-            // auto dualStart = timeNow();
+            auto dualStart = timeNow();
 
             currentStage.store(Stage::STAGE_DUAL, std::memory_order_release);
             startSignal.release(NUM_THREADS);
             finishSignal.acquire();
 
-            // auto dualEnd = timeNow();
+            auto dualEnd = timeNow();
             // printDurationUS(dualStart, dualEnd, "  Dual Update: ");
         }
 
         // If we are are the final iteration before post stabilization, compute velocities (BDF1)
         if (it == iterations - 1) {
-            // auto velocityStart = timeNow();
+            auto velocityStart = timeNow();
             bodyTable->updateVelocities(dt);
-            //  auto velocityEnd = timeNow();
+            auto velocityEnd = timeNow();
             // printDurationUS(velocityStart, velocityEnd, "  Velocity Update: ");
         }
     }
-    // auto solverLoopEnd = timeNow();
+    auto solverLoopEnd = timeNow();
     // printDurationUS(solverLoopStart, solverLoopEnd, "Solver Loop Total: ");
     
-    // auto stepEnd = timeNow();
+    auto stepEnd = timeNow();
     // printDurationUS(stepStart, stepEnd, "Step Total: ");
     // std::cout << std::endl;
 }
@@ -364,14 +355,13 @@ void Solver::resetColoring() {
     // Clear priority queue by swapping with empty queue
     ColorQueue empty;
     colorQueue.swap(empty);
-    colorGroups.clear();
-    forceEdgeIndices.clear();
+    colors.tables.clear();
 }
 
 void Solver::dsatur() {
     // Use a set instead of priority_queue for O(log n) updates
     std::set<Rigid*, RigidComparator> colorSet;
-    std::vector<std::vector<ForceEdgeIndices>> tempIndices;
+    std::vector<std::vector<ColorForce>> tempIndices;
 
     // add vector in temp indices for each force type
     tempIndices.resize(ForceType::NUM_FORCE_TYPES);
@@ -396,14 +386,13 @@ void Solver::dsatur() {
         body->useColor(color);
 
         // ensure we have enough colors
-        colorGroups.resize(color + 1);
-        forceEdgeIndices.resize(color + 1);
+        colors.tables.resize(color + 1);
 
         // add body to color group
-        colorGroups[color].emplace_back(body, forceEdgeIndices[color].size(), 0, 0, 0, 0, body->getMass(), body->getMoment(), body->getInertial());
+        colors.tables[color].bodies.emplace_back(body, colors.tables[color].forces.size(), 0, 0, 0, 0);
 
         // clear temp indices
-        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+        for (uint32_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
             tempIndices[i].clear();
         }
 
@@ -411,25 +400,26 @@ void Solver::dsatur() {
         for (Force* force = body->getForces(); force != nullptr; force = (force->getBodyA() == body) ? force->getNextA() : force->getNextB()) {
             Rigid* other = (force->getBodyA() == body) ? force->getBodyB() : force->getBodyA();
 
+        glm::vec3 jacobianMask = body->getJacobianMask();
             switch (force->getForceType()) {
                 case ForceType::JOINT:
-                    colorGroups[color].back().joint++;
-                    tempIndices[ForceType::JOINT].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    colors.tables[color].bodies.back().joint++;
+                    tempIndices[ForceType::JOINT].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::JOINT, jacobianMask);
                     break;
                 case ForceType::MANIFOLD:
                     if (body->getResolvesCollisions() == false || other->getResolvesCollisions() == false) {
                         continue;
                     }
-                    colorGroups[color].back().manifold++;
-                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    colors.tables[color].bodies.back().manifold++;
+                    tempIndices[ForceType::MANIFOLD].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::MANIFOLD, jacobianMask);
                     break;
                 case ForceType::SPRING:
-                    colorGroups[color].back().spring++;
-                    tempIndices[ForceType::SPRING].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    colors.tables[color].bodies.back().spring++;
+                    tempIndices[ForceType::SPRING].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::SPRING, jacobianMask);
                     break;
                 case ForceType::MOTOR:
-                    colorGroups[color].back().motor++;
-                    tempIndices[ForceType::MOTOR].emplace_back(force->getSpecialIndex(), force->getBodyA() == body ? ForceBodyOffset::A : ForceBodyOffset::B);
+                    colors.tables[color].bodies.back().motor++;
+                    tempIndices[ForceType::MOTOR].emplace_back(force->getSpecialIndex(), body->getIndex(), ForceType::MOTOR, jacobianMask);
                     break;
                 default:
                     throw std::runtime_error("Invalid force type");
@@ -449,8 +439,8 @@ void Solver::dsatur() {
         }
 
         // insert forces in sorted order into edge indices
-        for (std::size_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
-            forceEdgeIndices[color].insert(forceEdgeIndices[color].end(), tempIndices[i].begin(), tempIndices[i].end());
+        for (uint32_t i = 0; i < ForceType::NUM_FORCE_TYPES; i++) {
+            colors.tables[color].forces.insert(colors.tables[color].forces.end(), tempIndices[i].begin(), tempIndices[i].end());
         }
     }
 }
@@ -468,6 +458,23 @@ Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {
             return body;
     }
     return nullptr;
+}
+
+void Solver::rebuildVelocityShader() {
+    delete velocityShader;
+    velocityShader = nullptr;
+
+    velocityShader = new ComputeShader(
+        readFile(internalPath("shaders/physics/velocity.wgsl").c_str()),
+        {
+            bodyTable->getPosBuffer()->handle(),
+            bodyTable->getInitialBuffer()->handle(),
+            bodyTable->getMassBuffer()->handle(),
+            bodyTable->getVelBuffer()->handle(),
+            bodyTable->getPrevVelBuffer()->handle()
+        },
+        sizeof(VelocityUniforms)
+    );
 }
 
 }

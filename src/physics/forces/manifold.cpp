@@ -8,17 +8,20 @@
 
 namespace bsk::internal {
 
+constexpr float PERSIST_THRESH_SQ      = 0.01f;   // ~0.1 units; tune to object scale
+constexpr float PERSIST_NORMAL_THRESH  = 0.95f;   // ~18 degrees of normal drift allowed
+
 Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
     : Force(solver, bodyA, bodyB)
 {
+    // register to manifold table
+    solver->getForceTable()->getManifoldTable()->insert(this);
+
     setFmax(0, 0.0f);
     setFmax(2, 0.0f);
     setFmin(0, -INFINITY);
     setFmin(2, -INFINITY);
     solver->getForceTable()->setForceType(this->index, ForceType::MANIFOLD);
-
-    // register to manifold table
-    solver->getForceTable()->getManifoldTable()->insert(this);
 }
 
 Manifold::~Manifold() {
@@ -38,6 +41,7 @@ bool Manifold::initialize() {
     int oldNumContacts = getNumContacts();
 
     // Compute new contacts
+    // setNumContacts();
     setNumContacts(collide(bodyA, bodyB, &getContactRef(0)));
 
     // Merge old contact data with new contacts
@@ -47,19 +51,28 @@ bool Manifold::initialize() {
         setLambda(i * 2 + 0, 0.0f);
         setLambda(i * 2 + 1, 0.0f);
 
+        float bestDist = PERSIST_THRESH_SQ;
+        int bestJ = -1;
         for (int j = 0; j < oldNumContacts; j++) {
-            if (getContact(i).feature.value == oldContacts[j].feature.value) {
-                setPenalty(i * 2 + 0, oldPenalty[j * 2 + 0]);
-                setPenalty(i * 2 + 1, oldPenalty[j * 2 + 1]);
-                setLambda(i * 2 + 0, oldLambda[j * 2 + 0]);
-                setLambda(i * 2 + 1, oldLambda[j * 2 + 1]);
-                getContactRef(i).stick = oldStick[j];
+            float distSq = glm::length2(getContact(i).rA - oldContacts[j].rA);
+            float normalAlignment = glm::dot(getContact(i).normal, oldContacts[j].normal);
+            if (distSq < bestDist && normalAlignment > PERSIST_NORMAL_THRESH) {
+                bestDist = distSq;
+                bestJ = j;
+            }
+        }
 
-                // If static friction in last frame, use the old contact points
-                if (oldStick[j]) {
-                    getContactRef(i).rA = oldContacts[j].rA;
-                    getContactRef(i).rB = oldContacts[j].rB;
-                }
+        if (bestJ >= 0) {
+            setPenalty(i * 2 + 0, oldPenalty[bestJ * 2 + 0]);
+            setPenalty(i * 2 + 1, oldPenalty[bestJ * 2 + 1]);
+            setLambda(i * 2 + 0, oldLambda[bestJ * 2 + 0]);
+            setLambda(i * 2 + 1, oldLambda[bestJ * 2 + 1]);
+            getContactRef(i).stick = oldStick[bestJ];
+
+            // If static friction in last frame, use the old contact points
+            if (oldStick[bestJ]) {
+                getContactRef(i).rA = oldContacts[bestJ].rA;
+                getContactRef(i).rB = oldContacts[bestJ].rB;
             }
         }
     }
@@ -95,10 +108,10 @@ bool Manifold::initialize() {
 }
 
 int Manifold::rows() { return getData().numContacts * 2; }
-int Manifold::rows(ForceTable* forceTable, std::size_t specialIndex) { return forceTable->getManifoldTable()->getData(specialIndex).numContacts * 2; }
+int Manifold::rows(ForceTable* forceTable, uint32_t specialIndex) { return forceTable->getManifoldTable()->getData(specialIndex).numContacts * 2; }
 
-void Manifold::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
-    std::size_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
+void Manifold::computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha) {
+    uint32_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
     ManifoldData& manifolds = forceTable->getManifoldTable()->getData(specialIndex);
 
     for (int i = 0; i < manifolds.numContacts; i++) {
@@ -121,10 +134,10 @@ void Manifold::computeConstraint(ForceTable* forceTable, std::size_t specialInde
     }
 }
 
-void Manifold::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    std::size_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
+void Manifold::computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
+    uint32_t index = forceTable->getManifoldTable()->getForceIndex(specialIndex);
     for (int i = 0; i < forceTable->getManifoldTable()->getData(specialIndex).numContacts; i++) {
-        if (body == ForceBodyOffset::A) {
+        if (bodyIndex == forceTable->getBodies(index).a) {
             forceTable->setJ(index, i * 2 + JN, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JAn * jacobianMask);
             forceTable->setJ(index, i * 2 + JT, forceTable->getManifoldTable()->getData(specialIndex).contacts[i].JAt * jacobianMask);
         } else {

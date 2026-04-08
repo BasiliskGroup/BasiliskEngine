@@ -35,6 +35,7 @@ class Window {
         inline int getFPS() { return (int)round(1.0 / deltaTime); }
 
         inline void setViewport(int x, int y, int width, int height) { glViewport(x, y, width, height); }
+        inline void setTitle(const char* title) { glfwSetWindowTitle(window, title); }
         inline void enableDepthTest() { glEnable(GL_DEPTH_TEST);  }
         inline void enableCullFace() { glEnable(GL_CULL_FACE); }
         inline void enableMultisample() { glEnable(GL_MULTISAMPLE); }

@@ -32,7 +32,7 @@ public:
      * @brief Constructs a ColliderTable with the specified initial capacity
      * @param capacity Initial capacity for the internal arrays
      */
-    ColliderTable(std::size_t capacity);
+    ColliderTable(uint32_t capacity);
     
     /**
      * @brief Destructor that deletes all associated colliders
@@ -46,13 +46,13 @@ public:
      * happens during compact() which should be called periodically.
      * @param index Index of the collider to mark as deleted
      */
-    void markAsDeleted(std::size_t index);
+    void markAsDeleted(uint32_t index);
 
     /**
      * @brief Resizes the internal arrays to accommodate more colliders
      * @param new_capacity New capacity (must be greater than current capacity)
      */
-    void resize(std::size_t new_capacity);
+    void resize(uint32_t new_capacity);
     
     /**
      * @brief Compacts the table by removing all marked colliders
@@ -76,61 +76,61 @@ public:
     /**
      * @brief Gets the current number of active colliders in the table
      */
-    std::size_t getSize() const { return size; }
+    uint32_t getSize() const { return size; }
     
     /**
      * @brief Gets the current capacity of the internal arrays
      */
-    std::size_t getCapacity() const { return capacity; } 
+    uint32_t getCapacity() const { return capacity; } 
 
     /**
      * @brief Gets the collider pointer at the specified index
      * @param index Index of the collider
      * @return Pointer to the Collider object, or nullptr if deleted
      */
-    Collider* getCollider(std::size_t index) const { return colliders[index]; }
+    Collider* getCollider(uint32_t index) const { return colliders[index]; }
     
     /**
      * @brief Gets the vertices for the collider at the specified index
      * @param index Index of the collider
      * @return Reference to the vector of vertices
      */
-    std::vector<glm::vec2>& getVertices(std::size_t index) { return vertices[index]; }
+    std::vector<glm::vec2>& getVertices(uint32_t index) { return vertices[index]; }
     
     /**
      * @brief Gets the center of mass for the collider at the specified index
      * @param index Index of the collider
      * @return Reference to the center of mass position
      */
-    glm::vec2& getCOM(std::size_t index) { return com[index]; }
+    glm::vec2& getCOM(uint32_t index) { return com[index]; }
     
     /**
      * @brief Gets the geometric center (AABB center) for the collider at the specified index
      * @param index Index of the collider
      * @return Reference to the geometric center position
      */
-    glm::vec2& getGC(std::size_t index) { return gc[index]; }
+    glm::vec2& getGC(uint32_t index) { return gc[index]; }
     
     /**
      * @brief Gets the half dimensions (half-width, half-height) for the collider at the specified index
      * @param index Index of the collider
      * @return Reference to the half dimensions
      */
-    glm::vec2& getHalfDim(std::size_t index) { return halfDim[index]; }
+    glm::vec2& getHalfDim(uint32_t index) { return halfDim[index]; }
     
     /**
      * @brief Gets the area of the collider at the specified index
      * @param index Index of the collider
      * @return Area value
      */
-    float getArea(std::size_t index) const { return area[index]; }
+    float getArea(uint32_t index) const { return area[index]; }
     
     /**
      * @brief Gets the moment of inertia of the collider at the specified index
      * @param index Index of the collider
      * @return Moment of inertia value
      */
-    float getMoment(std::size_t index) const { return moment[index]; }
+    float getMoment(uint32_t index) const { return moment[index]; }
 
     // Setters
     /**
@@ -138,49 +138,49 @@ public:
      * @param index Index to set
      * @param collider Pointer to the Collider object
      */
-    void setCollider(std::size_t index, Collider* collider) { colliders[index] = collider; }
+    void setCollider(uint32_t index, Collider* collider) { colliders[index] = collider; }
     
     /**
      * @brief Sets the vertices for the collider at the specified index
      * @param index Index to set
      * @param vertices Vector of 2D vertices
      */
-    void setVerts(std::size_t index, const std::vector<glm::vec2>& vertices) { this->vertices[index] = vertices; }
+    void setVerts(uint32_t index, const std::vector<glm::vec2>& vertices) { this->vertices[index] = vertices; }
     
     /**
      * @brief Sets the center of mass for the collider at the specified index
      * @param index Index to set
      * @param com Center of mass position
      */
-    void setCOM(std::size_t index, const glm::vec2& com) { this->com[index] = com; }
+    void setCOM(uint32_t index, const glm::vec2& com) { this->com[index] = com; }
     
     /**
      * @brief Sets the geometric center (AABB center) for the collider at the specified index
      * @param index Index to set
      * @param gc Geometric center position
      */
-    void setGC(std::size_t index, const glm::vec2& gc) { this->gc[index] = gc; }
+    void setGC(uint32_t index, const glm::vec2& gc) { this->gc[index] = gc; }
     
     /**
      * @brief Sets the half dimensions for the collider at the specified index
      * @param index Index to set
      * @param halfDim Half dimensions (half-width, half-height)
      */
-    void setHalfDim(std::size_t index, const glm::vec2& halfDim) { this->halfDim[index] = halfDim; }
+    void setHalfDim(uint32_t index, const glm::vec2& halfDim) { this->halfDim[index] = halfDim; }
     
     /**
      * @brief Sets the area for the collider at the specified index
      * @param index Index to set
      * @param area Area value
      */
-    void setArea(std::size_t index, float area) { this->area[index] = area; }
+    void setArea(uint32_t index, float area) { this->area[index] = area; }
     
     /**
      * @brief Sets the moment of inertia for the collider at the specified index
      * @param index Index to set
      * @param moment Moment of inertia value
      */
-    void setMoment(std::size_t index, float moment) { this->moment[index] = moment; }
+    void setMoment(uint32_t index, float moment) { this->moment[index] = moment; }
 };
 
 }

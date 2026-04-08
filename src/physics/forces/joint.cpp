@@ -11,6 +11,9 @@ namespace bsk::internal {
 Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2 rB, glm::vec3 stiffness, float fracture)
     : Force(solver, bodyA, bodyB)
 {
+    // register to joint table
+    solver->getForceTable()->getJointTable()->insert(this);
+
     setRA(rA);
     setRB(rB);
     setStiffness(0, stiffness.x);
@@ -22,9 +25,6 @@ Joint::Joint(Solver* solver, Rigid* bodyA, Rigid* bodyB, glm::vec2 rA, glm::vec2
     setRestAngle((bodyA ? bodyA->getPosition().z : 0.0f) - bodyB->getPosition().z);
     setTorqueArm(lengthSq((bodyA ? bodyA->getSize() : glm::vec2{ 0, 0 }) + bodyB->getSize()));
     solver->getForceTable()->setForceType(this->index, ForceType::JOINT);
-
-    // register to joint table
-    solver->getForceTable()->getJointTable()->insert(this);
 }
 
 Joint::~Joint() {
@@ -40,8 +40,8 @@ bool Joint::initialize() {
     return getStiffness(0) != 0 || getStiffness(1) != 0 || getStiffness(2) != 0;
 }
 
-void Joint::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, float alpha) {
-    std::size_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
+void Joint::computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha) {
+    uint32_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
     // Compute constraint function at current state C(x)
     JointStruct& joints = forceTable->getJointTable()->getData(specialIndex);
     glm::vec3 Cn;
@@ -60,12 +60,12 @@ void Joint::computeConstraint(ForceTable* forceTable, std::size_t specialIndex, 
     }
 }
 
-void Joint::computeDerivatives(ForceTable* forceTable, std::size_t specialIndex, ForceBodyOffset body, const glm::vec3& jacobianMask) {
-    std::size_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
+void Joint::computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask) {
+    uint32_t index = forceTable->getJointTable()->getForceIndex(specialIndex);
     JointStruct& joints = forceTable->getJointTable()->getData(specialIndex);
 
     // Compute the first and second derivatives for the desired body
-    if (body == ForceBodyOffset::A)
+    if (bodyIndex == forceTable->getBodies(index).a)
     {
         glm::vec2 r = rotate(forceTable->getPosA(index).z, joints.rA);
         forceTable->setJ(index, 0, glm::vec3(1.0f, 0.0f, -r.y) * jacobianMask);

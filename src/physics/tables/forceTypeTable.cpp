@@ -9,18 +9,18 @@
 namespace bsk::internal {
 
 template<typename T>
-ForceTypeTable<T>::ForceTypeTable(std::size_t capacity, ForceTable* forceTable) : forceTable(forceTable) {
+ForceTypeTable<T>::ForceTypeTable(uint32_t capacity, ForceTable* forceTable) : forceTable(forceTable) {
     resize(capacity);
 }
 
 template<typename T>
-void ForceTypeTable<T>::markAsDeleted(std::size_t index) {
+void ForceTypeTable<T>::markAsDeleted(uint32_t index) {
     toDelete[index] = true;
     forces[index] = nullptr;
 }
 
 template<typename T>
-void ForceTypeTable<T>::resize(std::size_t newCapacity) {
+void ForceTypeTable<T>::resize(uint32_t newCapacity) {
     if (newCapacity <= capacity) return;
     
     expandTensors(newCapacity,
@@ -33,7 +33,7 @@ void ForceTypeTable<T>::resize(std::size_t newCapacity) {
 template<typename T>
 void ForceTypeTable<T>::compact() {
     // do a quick check to see if we need to run more complex compact function
-    std::size_t active = numValid(toDelete, size);
+    uint32_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
@@ -45,7 +45,7 @@ void ForceTypeTable<T>::compact() {
     size = active;
 
     // TODO check process with remapping
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         toDelete[i] = false;
         forces[i]->setSpecialIndex(i);
     }
@@ -53,14 +53,14 @@ void ForceTypeTable<T>::compact() {
 
 template<typename T>
 void ForceTypeTable<T>::remap() {
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         if (toDelete[i]) {
             continue;
         }
 
-        std::size_t oldForceIndex = indexMap[i];
+        uint32_t oldForceIndex = indexMap[i];
         if (oldForceIndex >= forceTable->getCapacity()) continue;
-        std::size_t newForceIndex = forceTable->getMappedIndex(oldForceIndex);
+        uint32_t newForceIndex = forceTable->getMappedIndex(oldForceIndex);
         if (newForceIndex == SIZE_MAX) continue;  // deleted force (orphaned entry)
         indexMap[i] = newForceIndex;
     }
@@ -85,7 +85,7 @@ void ForceTypeTable<T>::insert(Force* force) {
 template<typename T>
 void ForceTypeTable<T>::printIndices() const {
     std::cout << "--------------------------------" << std::endl;
-    for (std::size_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         std::cout << "Force " << i << " index: " << indexMap[i] << std::endl;
     }
     std::cout << "--------------------------------" << std::endl;

@@ -32,14 +32,14 @@ private:
     std::vector<float> mass;
     std::vector<float> moment;
     std::vector<float> radius;
-    std::vector<std::size_t> collider;
+    std::vector<uint32_t> collider;
     std::vector<glm::mat2x2> mat;
     std::vector<glm::mat2x2> imat;
     std::vector<glm::mat2x2> rmat;
     std::vector<bool> updated;
     std::vector<int> color;
-    std::vector<glm::vec3> jacobianMask;
-    std::vector<std::size_t> indexMap;
+    std::vector<glm::vec3> jacobianMask; // TODO create buffer later
+    std::vector<uint32_t> indexMap;
 
     BVH* bvh;
 
@@ -53,77 +53,83 @@ private:
     GpuBuffer<float>* massBuffer;
     GpuBuffer<float>* momentBuffer;
 
-    ComputeShader* velocityShader;
+    ComputeShader*& velocityShader;
 
 public:
-    BodyTable(Solver* solver, std::size_t capacity);
+    BodyTable(Solver* solver, uint32_t capacity, ComputeShader*& velocityShader);
     ~BodyTable();
 
     void computeTransforms(); // TODO, determine if this would be better per-object
     void warmstartBodies(const float dt, const std::optional<glm::vec3>& gravity);
     void updateVelocities(float dt);
-    glm::vec3 getGravity(std::size_t index) const;
+    glm::vec3 getGravity(uint32_t index) const;
     glm::vec3 getGravity(Rigid* body) const;
 
-    void markAsDeleted(std::size_t index);
+    void markAsDeleted(uint32_t index);
 
-    void resize(std::size_t newCapacity) override;
+    void resize(uint32_t newCapacity) override;
     void compact() override;
     void insert(Rigid* body, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity, Collider* collider);
 
     void writeToNodes();
+    void writeToGpu();
 
     // getters
-    Rigid* getBodies(std::size_t index) { return bodies[index]; }
-    bool getToDelete(std::size_t index) { return toDelete[index]; }
-    glm::vec3& getPos(std::size_t index) { return pos[index]; }
-    glm::vec3& getInitial(std::size_t index) { return initial[index]; }
-    glm::vec3& getInertial(std::size_t index) { return inertial[index]; }
-    glm::vec3& getVel(std::size_t index) { return vel[index]; }
-    glm::vec3& getPrevVel(std::size_t index) { return prevVel[index]; }
-    glm::vec2 getScale(std::size_t index) { return scale[index]; }
-    float getFriction(std::size_t index) { return friction[index]; }
-    float getMass(std::size_t index) { return mass[index]; }
-    float getMoment(std::size_t index) { return moment[index]; }
-    float getRadius(std::size_t index) { return radius[index]; }
-    std::size_t getCollider(std::size_t index) { return collider[index]; }
-    glm::mat2x2& getMat(std::size_t index) { return mat[index]; }
-    glm::mat2x2& getImat(std::size_t index) { return imat[index]; }
-    glm::mat2x2& getRmat(std::size_t index) { return rmat[index]; }
-    bool getUpdated(std::size_t index) { return updated[index]; }
-    int getColor(std::size_t index) { return color[index]; }
+    Rigid* getBodies(uint32_t index) { return bodies[index]; }
+    bool getToDelete(uint32_t index) { return toDelete[index]; }
+    glm::vec3& getPos(uint32_t index) { return pos[index]; }
+    glm::vec3& getInitial(uint32_t index) { return initial[index]; }
+    glm::vec3& getInertial(uint32_t index) { return inertial[index]; }
+    glm::vec3& getVel(uint32_t index) { return vel[index]; }
+    glm::vec3& getPrevVel(uint32_t index) { return prevVel[index]; }
+    glm::vec2 getScale(uint32_t index) { return scale[index]; }
+    float getFriction(uint32_t index) { return friction[index]; }
+    float getMass(uint32_t index) { return mass[index]; }
+    float getMoment(uint32_t index) { return moment[index]; }
+    float getRadius(uint32_t index) { return radius[index]; }
+    uint32_t getCollider(uint32_t index) { return collider[index]; }
+    glm::mat2x2& getMat(uint32_t index) { return mat[index]; }
+    glm::mat2x2& getImat(uint32_t index) { return imat[index]; }
+    glm::mat2x2& getRmat(uint32_t index) { return rmat[index]; }
+    bool getUpdated(uint32_t index) { return updated[index]; }
+    int getColor(uint32_t index) { return color[index]; }
     BVH* getBVH() { return bvh; }
-    float getDensity(std::size_t index);
-    glm::vec3& getJacobianMask(std::size_t index) { return jacobianMask[index]; }
-    std::size_t getMappedIndex(std::size_t index) { return indexMap[index]; }
+    float getDensity(uint32_t index);
+    glm::vec3& getJacobianMask(uint32_t index) { return jacobianMask[index]; }
+    uint32_t getMappedIndex(uint32_t index) { return indexMap[index]; }
+
+    GpuBuffer<bsk::vec3>* getPosBuffer() { return posBuffer; }
+    GpuBuffer<bsk::vec3>* getInitialBuffer() { return initialBuffer; }
+    GpuBuffer<bsk::vec3>* getInertialBuffer() { return inertialBuffer; }
+    GpuBuffer<bsk::vec3>* getVelBuffer() { return velBuffer; }
+    GpuBuffer<bsk::vec3>* getPrevVelBuffer() { return prevVelBuffer; }
+    GpuBuffer<float>* getFrictionBuffer() { return frictionBuffer; }
+    GpuBuffer<float>* getMassBuffer() { return massBuffer; }
+    GpuBuffer<float>* getMomentBuffer() { return momentBuffer; }
 
     // setters
-    void setBodies(std::size_t index, Rigid* value) { bodies[index] = value; }
-    void setToDelete(std::size_t index, bool value) { toDelete[index] = value; }
-    void setPos(std::size_t index, const glm::vec3& value) { pos[index] = value; }
-    void setInitial(std::size_t index, const glm::vec3& value) { initial[index] = value; }
-    void setInertial(std::size_t index, const glm::vec3& value) { inertial[index] = value; }
-    void setVel(std::size_t index, const glm::vec3& value) { vel[index] = value; }
-    void setPrevVel(std::size_t index, const glm::vec3& value) { prevVel[index] = value; }
-    void setScale(std::size_t index, const glm::vec2& value) { scale[index] = value; }
-    void setFriction(std::size_t index, float value) { friction[index] = value; }
-    void setMass(std::size_t index, float value) { mass[index] = value; }
-    void setMoment(std::size_t index, float value) { moment[index] = value; }
-    void setRadius(std::size_t index, float value) { radius[index] = value; }
-    void setCollider(std::size_t index, std::size_t value) { collider[index] = value; }
-    void setMat(std::size_t index, const glm::mat2x2& value) { mat[index] = value; }
-    void setImat(std::size_t index, const glm::mat2x2& value) { imat[index] = value; }
-    void setRmat(std::size_t index, const glm::mat2x2& value) { rmat[index] = value; }
-    void setUpdated(std::size_t index, bool value) { updated[index] = value; }
-    void setColor(std::size_t index, int value) { color[index] = value; }
-    void setDensity(std::size_t index, float value);
-    void setJacobianMask(std::size_t index, const glm::vec3& value) { jacobianMask[index] = value; }
+    void setBodies(uint32_t index, Rigid* value) { bodies[index] = value; }
+    void setToDelete(uint32_t index, bool value) { toDelete[index] = value; }
+    void setPos(uint32_t index, const glm::vec3& value) { pos[index] = value; }
+    void setInitial(uint32_t index, const glm::vec3& value) { initial[index] = value; }
+    void setInertial(uint32_t index, const glm::vec3& value) { inertial[index] = value; }
+    void setVel(uint32_t index, const glm::vec3& value) { vel[index] = value; }
+    void setPrevVel(uint32_t index, const glm::vec3& value) { prevVel[index] = value; }
+    void setScale(uint32_t index, const glm::vec2& value) { scale[index] = value; }
+    void setFriction(uint32_t index, float value) { friction[index] = value; }
+    void setMass(uint32_t index, float value) { mass[index] = value; }
+    void setMoment(uint32_t index, float value) { moment[index] = value; }
+    void setRadius(uint32_t index, float value) { radius[index] = value; }
+    void setCollider(uint32_t index, uint32_t value) { collider[index] = value; }
+    void setMat(uint32_t index, const glm::mat2x2& value) { mat[index] = value; }
+    void setImat(uint32_t index, const glm::mat2x2& value) { imat[index] = value; }
+    void setRmat(uint32_t index, const glm::mat2x2& value) { rmat[index] = value; }
+    void setUpdated(uint32_t index, bool value) { updated[index] = value; }
+    void setColor(uint32_t index, int value) { color[index] = value; }
+    void setDensity(uint32_t index, float value);
+    void setJacobianMask(uint32_t index, const glm::vec3& value) { jacobianMask[index] = value; }
 
-private:
-    struct VelocityUniforms {
-        std::uint32_t bodies;
-        float dt;
-    };
+
 };
 
 }

@@ -2,6 +2,7 @@
 #define BSK_VIRTUAL_TABLE_H
 
 #include <basilisk/util/includes.h>
+#include <basilisk/compute/gpuWrapper.hpp>
 
 namespace bsk::internal {
 
@@ -16,15 +17,15 @@ namespace bsk::internal {
  */
 class VirtualTable {
 protected:
-    std::size_t size = 0;      ///< Current number of active entries in the table
-    std::size_t capacity = 0;  ///< Current capacity of the internal arrays
+    uint32_t size = 0;      ///< Current number of active entries in the table
+    uint32_t capacity = 0;  ///< Current capacity of the internal arrays
 
 public:
     /**
      * @brief Resizes the internal arrays to accommodate more entries
      * @param new_capacity New capacity for the internal arrays
      */
-    virtual void resize(std::size_t new_capacity) = 0;
+    virtual void resize(uint32_t new_capacity) = 0;
     
     /**
      * @brief Compacts the table by removing all marked entries
@@ -38,13 +39,13 @@ public:
      * @brief Gets the current number of active entries in the table
      * @return Current size (number of active entries)
      */
-    std::size_t getSize() const { return size; }
+    uint32_t getSize() const { return size; }
     
     /**
      * @brief Gets the current capacity of the internal arrays
      * @return Current capacity
      */
-    std::size_t getCapacity() const { return capacity; } 
+    uint32_t getCapacity() const { return capacity; } 
 };
 
 /**
@@ -58,7 +59,7 @@ public:
  * @param tensors Variadic list of vectors to resize
  */
 template <typename... T>
-void expandTensors(const std::size_t newCapacity, std::vector<T>&... tensors) {
+void expandTensors(const uint32_t newCapacity, std::vector<T>&... tensors) {
     ( tensors.resize(newCapacity), ... );
 }
 
@@ -75,11 +76,10 @@ void expandTensors(const std::size_t newCapacity, std::vector<T>&... tensors) {
  * @param tensors Variadic list of vectors to compact
  */
 template <typename... T>
-void compactTensors(const std::vector<bool>& toDelete, std::size_t size, std::vector<T>&... tensors)
-{
-    std::size_t dst = 0;
+void compactTensors(const std::vector<bool>& toDelete, uint32_t size, std::vector<T>&... tensors) {
+    uint32_t dst = 0;
 
-    for (std::size_t src = 0; src < size; ++src) {
+    for (uint32_t src = 0; src < size; ++src) {
         if (!toDelete[src]) {
             if (dst != src) {
                 // Use move for efficient transfer
@@ -90,14 +90,17 @@ void compactTensors(const std::vector<bool>& toDelete, std::size_t size, std::ve
     }
 }
 
-/**
- * @brief Counts the number of valid (non-deleted) entries in a toDelete vector
- * 
- * @param toDelete Vector indicating which entries are deleted (true = deleted, false = valid)
- * @param size Size of the toDelete vector to check
- * @return Number of valid entries (where toDelete[i] == false)
- */
-std::size_t numValid(const std::vector<bool>& toDelete, const std::size_t size);
+uint32_t numValid(const std::vector<bool>& toDelete, const uint32_t size);
+
+template <typename... Ts>
+void expandGpuBuffers(uint32_t newCapacity, GpuBuffer<Ts>*&... buffers) {
+    (
+        [&] {
+            delete buffers;
+            buffers = new GpuBuffer<Ts>(newCapacity);
+        }(), ...
+    );
+}
 
 }
 

@@ -2,7 +2,6 @@
 #define BSK_PHYSICS_FORCES_FORCE_H
 
 #include <basilisk/util/includes.h>
-#include <basilisk/physics/tables/adjacency.h>
 #include <basilisk/compute/gpuTypes.hpp>
 
 namespace bsk::internal {
@@ -25,8 +24,8 @@ protected:
     Force* prevA;
     Force* prevB;
 
-    std::size_t index;
-    std::size_t specialIndex = -1; // default to invalid index
+    uint32_t index;
+    uint32_t specialIndex = -1; // default to invalid index
 
 public:
     Force(Solver* solver, Rigid* bodyA, Rigid* bodyB);
@@ -47,9 +46,9 @@ public:
     Force* getPrev() const { return prev; }
     Force* getPrevA() const { return prevA; }
     Force* getPrevB() const { return prevB; }
-    std::size_t getIndex() const { return index; }
-    std::size_t getSpecialIndex() const { return specialIndex; }
-    std::size_t getForceIndex() const { return index; }
+    uint32_t getIndex() const { return index; }
+    uint32_t getSpecialIndex() const { return specialIndex; }
+    uint32_t getForceIndex() const { return index; }
     glm::vec3 getPosA() const;
     glm::vec3 getPosB() const;
     glm::vec3 getInitialA() const;
@@ -73,9 +72,9 @@ public:
     void setNextB(Force* value) { nextB = value; }
     void setPrevA(Force* value) { prevA = value; }
     void setPrevB(Force* value) { prevB = value; }
-    void setIndex(std::size_t index) { this->index = index; }
-    void setSpecialIndex(std::size_t index) { this->specialIndex = index; }
-    void setForceIndex(std::size_t index) { this->index = index; }
+    void setIndex(uint32_t index) { this->index = index; }
+    void setSpecialIndex(uint32_t index) { this->specialIndex = index; }
+    void setForceIndex(uint32_t index) { this->index = index; }
     void setPosA(const glm::vec3& value);
     void setPosB(const glm::vec3& value);
     void setInitialA(const glm::vec3& value);
