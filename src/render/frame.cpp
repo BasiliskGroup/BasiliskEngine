@@ -134,6 +134,52 @@ void Frame::render(int x, int y, int width, int height) {
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
+void Frame::render(unsigned int textureID) {
+    // Get the current viewport
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // Get the screen dimensions from the engine
+    int screenWidth  = viewport[2] * engine->getWindow()->getWindowScaleX();
+    int screenHeight = viewport[3] * engine->getWindow()->getWindowScaleY();
+    float screenAspectRatio = (float)screenWidth / (float)screenHeight;
+
+    // Set the render rect based on screen size and this frame's aspect ratio
+    int x, y, width, height;
+    if (aspectRatio > screenAspectRatio) { // frame is wider than screen
+        width = screenWidth;
+        height = width / aspectRatio;
+        x = 0;
+        y = (screenHeight - height) / 2;
+    }
+    else { // screen is wider than frame
+        height = screenHeight;
+        width = height * aspectRatio;
+        x = (screenWidth - width) / 2;
+        y = 0;
+    }
+
+    // Update the viewport and render
+    glViewport(x, y, width, height);
+    shader->use();
+    // Bind the texture to the shader
+    glActiveTexture(GL_TEXTURE0 + 4);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    shader->setUniform("uTexture", 4);
+    // Set the texture size
+    shader->setUniform("textureSize", glm::vec2(this->width, this->height));
+    // Draw frame as fully opaque so we don't blend with window clear color
+    // (otherwise semi-transparent black in the frame would become gray)
+    GLint blendSrc, blendDst;
+    glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrc);
+    glGetIntegerv(GL_BLEND_DST_RGB, &blendDst);
+    glBlendFunc(GL_ONE, GL_ZERO);
+    vao->render();
+    glBlendFunc(blendSrc, blendDst);
+    // Reset viewport to previous dimensions
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+}
+
 void Frame::clear(float r, float g, float b, float a) {
     fbo->clear(r, g, b, a);
 }

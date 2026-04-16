@@ -74,7 +74,7 @@ RenderBuffer::~RenderBuffer() {
         glDeleteVertexArrays(1, &VAO);
         glDeleteBuffers(1, &VBO);
         glDeleteBuffers(1, &EBO);
-        glDeleteTextures(1, &texture);
+        glDeleteTextures(1, &renderTexture);
         glDeleteProgram(shaderProgram);
         if (particleProgram) glDeleteProgram(particleProgram);
         if (particleVAO) glDeleteVertexArrays(1, &particleVAO);
@@ -117,35 +117,8 @@ bool RenderBuffer::initialize(const char* vertexShaderPath, const char* fragment
         std::cerr << "RenderBuffer already initialized!" << std::endl;
         return false;
     }
-    shaderProgram = createShaderProgram(vertexShaderPath, fragmentShaderPath);
-    if (shaderProgram == 0) return false;
-    setupQuad();
+
     setupTexture();
-
-    std::string pvsSource = loadShaderSource("../shaders/physics/particle_vertex.glsl");
-    std::string pfsSource = loadShaderSource("../shaders/physics/particle_fragment.glsl");
-    if (pvsSource.empty() || pfsSource.empty()) {
-        std::cerr << "Failed to load particle render shaders" << std::endl;
-        return false;
-    }
-    GLuint pvs = compileShader(GL_VERTEX_SHADER, pvsSource.c_str());
-    GLuint pfs = compileShader(GL_FRAGMENT_SHADER, pfsSource.c_str());
-    particleProgram = glCreateProgram();
-    glAttachShader(particleProgram, pvs);
-    glAttachShader(particleProgram, pfs);
-    glLinkProgram(particleProgram);
-    glDeleteShader(pvs);
-    glDeleteShader(pfs);
-
-    glGenVertexArrays(1, &particleVAO);
-    glGenBuffers(1, &particleVBO);
-    glBindVertexArray(particleVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-    glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * sizeof(ParticleVertex), nullptr, GL_DYNAMIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void*)offsetof(ParticleVertex, pos));
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), (void*)offsetof(ParticleVertex, color));
-    glEnableVertexAttribArray(1);
 
     initialized = true;
     return true;
@@ -287,67 +260,26 @@ void RenderBuffer::markChunkDirty(int px, int py) {
 // Public API
 // ---------------------------------------------------------------------------
 
-void RenderBuffer::render() {
-    if (!initialized) { std::cerr << "RenderBuffer not initialized!\n"; return; }
+void RenderBuffer::updateTexture() {
 
-    // cells
-    glBindTexture(GL_TEXTURE_2D, texture);
-    if (gpuCellScratch.size() == static_cast<size_t>(width * height)) {
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
-                        GL_RED_INTEGER, GL_UNSIGNED_INT, gpuCellScratch.data());
-    } else {
-        // Fallback before first GPU readback: show current CPU buffer as packed cells.
-        auto& active = getActiveBuffer();
-        gpuCellScratch.resize(active.size());
-        for (size_t i = 0; i < active.size(); ++i) {
-            gpuCellScratch[i] = packCell(active[i], 0u);
-        }
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height,
-                        GL_RED_INTEGER, GL_UNSIGNED_INT, gpuCellScratch.data());
-    }
-    glUseProgram(shaderProgram);
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // Add the particles to the gpuCellScratch
+    for (uint32_t i = 0; i < nextParticleIndex; ++i) {
+        // Skip inactive particles
+        if ((particleCpu[i]._pad & 1u) == 0u) { continue; }
 
-    // particles
-    if (activeParticleCount > 0) {
-        uint32_t renderCount = 0u;
-        for (uint32_t i = 0; i < nextParticleIndex; ++i) {
-            if ((particleCpu[i]._pad & 1u) == 0u) {
-                continue;
-            }
-            particleRenderPos[renderCount] = particleCpu[i].pos;
-            particleRenderColor[renderCount] = displayRgbFromPackedCell(particleCpu[i].color);
-            const size_t base = static_cast<size_t>(renderCount) * 5u;
-            particleRenderInterleaved[base + 0] = particleRenderPos[renderCount].x;
-            particleRenderInterleaved[base + 1] = particleRenderPos[renderCount].y;
-            particleRenderInterleaved[base + 2] = particleRenderColor[renderCount].r;
-            particleRenderInterleaved[base + 3] = particleRenderColor[renderCount].g;
-            particleRenderInterleaved[base + 4] = particleRenderColor[renderCount].b;
-            renderCount++;
-        }
-        if (renderCount == 0u) return;
-        glUseProgram(particleProgram);
-        GLint bufferSizeLoc = glGetUniformLocation(particleProgram, "uBufferSize");
-        glUniform2f(bufferSizeLoc, static_cast<float>(width), static_cast<float>(height));
-        GLint viewport[4] = {0, 0, 0, 0};
-        glGetIntegerv(GL_VIEWPORT, viewport);
-        const float cellPixelX = static_cast<float>(viewport[2]) / static_cast<float>(width);
-        const float cellPixelY = static_cast<float>(viewport[3]) / static_cast<float>(height);
-        const float cellPointSize = std::max(1.0f, std::min(cellPixelX, cellPixelY));
-        GLint pointSizeLoc = glGetUniformLocation(particleProgram, "uPointSize");
-        glUniform1f(pointSizeLoc, cellPointSize);
-        glBindVertexArray(particleVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-        glBufferSubData(
-            GL_ARRAY_BUFFER,
-            0,
-            static_cast<GLsizeiptr>(static_cast<size_t>(renderCount) * 5u * sizeof(float)),
-            particleRenderInterleaved.data()
-        );
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(renderCount));
+        // Check if the particle is within the bounds of the buffer
+        int x = (int)(particleCpu[i].pos.x);
+        int y = (int)(particleCpu[i].pos.y);
+        if (x < 0 || x >= width || y < 0 || y >= height) { continue; }
+
+        // Write the particle to the gpuCellScratch
+        unsigned int index = static_cast<unsigned int>(y * width + x);
+        gpuCellScratch[index] = particleCpu[i].color;
     }
+
+    // Write buffer data to texture
+    glBindTexture(GL_TEXTURE_2D, renderTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED_INTEGER, GL_UNSIGNED_INT, gpuCellScratch.data());
 }
 
 void RenderBuffer::setActivePixel(int x, int y, const Color& color) {
@@ -749,51 +681,14 @@ std::string RenderBuffer::loadShaderSource(const char* filepath) {
     std::stringstream ss; ss << file.rdbuf(); return ss.str();
 }
 
-GLuint RenderBuffer::compileShader(GLenum type, const char* source) {
-    GLuint s = glCreateShader(type);
-    glShaderSource(s, 1, &source, nullptr);
-    glCompileShader(s);
-    int ok; glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
-    if (!ok) { char log[512]; glGetShaderInfoLog(s, 512, nullptr, log); std::cerr << log << "\n"; }
-    return s;
-}
-
-GLuint RenderBuffer::createShaderProgram(const char* vp, const char* fp) {
-    std::string vc = loadShaderSource(vp), fc = loadShaderSource(fp);
-    if (vc.empty() || fc.empty()) return 0;
-    GLuint vs = compileShader(GL_VERTEX_SHADER, vc.c_str());
-    GLuint fs = compileShader(GL_FRAGMENT_SHADER, fc.c_str());
-    GLuint p  = glCreateProgram();
-    glAttachShader(p, vs); glAttachShader(p, fs); glLinkProgram(p);
-    int ok; glGetProgramiv(p, GL_LINK_STATUS, &ok);
-    if (!ok) { char log[512]; glGetProgramInfoLog(p, 512, nullptr, log); std::cerr << log << "\n"; }
-    glDeleteShader(vs); glDeleteShader(fs);
-    return p;
-}
-
-void RenderBuffer::setupQuad() {
-    float verts[] = { -1,1,0,1,  -1,-1,0,0,  1,-1,1,0,  1,1,1,1 };
-    unsigned int idx[] = { 0,1,2, 0,2,3 };
-    glGenVertexArrays(1, &VAO); glGenBuffers(1, &VBO); glGenBuffers(1, &EBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx), idx, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2*sizeof(float)));
-    glEnableVertexAttribArray(1);
-}
-
 void RenderBuffer::setupTexture() {
-    glGenTextures(1, &texture); glBindTexture(GL_TEXTURE_2D, texture);
+    glGenTextures(1, &renderTexture); 
+    glBindTexture(GL_TEXTURE_2D, renderTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, width, height, 0,
-                 GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
 }
 
 bool RenderBuffer::windowToPixel(int wx, int wy, int ww, int wh, int& px, int& py) const {

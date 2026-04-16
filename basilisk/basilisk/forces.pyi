@@ -5,27 +5,13 @@ from __future__ import annotations
 import basilisk
 import glm
 import typing
-__all__: list[str] = ['Contact', 'Edges', 'FeaturePair', 'Force', 'Joint', 'Manifold', 'Motor', 'Spring']
+__all__: list[str] = ['Contact', 'Force', 'Joint', 'Manifold', 'Motor', 'Spring']
 class Contact:
     C0: glm.vec2
-    feature: ...
     normal: glm.vec2
     rA: glm.vec2
     rB: glm.vec2
     stick: bool
-class Edges:
-    inEdge1: str
-    inEdge2: str
-    outEdge1: str
-    outEdge2: str
-class FeaturePair:
-    e: ...
-    @property
-    def value(self) -> int:
-        ...
-    @value.setter
-    def value(self, arg0: typing.SupportsInt) -> None:
-        ...
 class Force:
     def disable(self) -> None:
         ...

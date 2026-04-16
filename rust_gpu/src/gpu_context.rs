@@ -1,4 +1,5 @@
 use wgpu::*;
+use std::env;
 
 pub struct GpuContext {
     pub device: Device,
@@ -7,8 +8,27 @@ pub struct GpuContext {
 
 impl GpuContext {
     pub fn new() -> Self {
+        // Avoid the GLES/EGL backend by default on Linux because it can fail at runtime
+        // with EGL_BAD_ACCESS depending on driver/display stack (Wayland/X11/headless).
+        // Vulkan is the most reliable backend for compute here.
+        let backends = match env::var("BSK_WGPU_BACKENDS").ok().as_deref() {
+            Some("vulkan") => Backends::VULKAN,
+            Some("gl") | Some("gles") => Backends::GL,
+            Some("all") => Backends::all(),
+            Some(_) | None => {
+                #[cfg(target_os = "linux")]
+                {
+                    Backends::VULKAN
+                }
+                #[cfg(not(target_os = "linux"))]
+                {
+                    Backends::all()
+                }
+            }
+        };
+
         let instance = Instance::new(InstanceDescriptor {
-            backends: Backends::all(),
+            backends,
             flags: InstanceFlags::empty(),
             gles_minor_version: Gles3MinorVersion::Automatic,
             dx12_shader_compiler: Default::default(),

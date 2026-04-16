@@ -69,7 +69,9 @@ enum KeyCode {
     K_ESCAPE = GLFW_KEY_ESCAPE,
     K_SPACE = GLFW_KEY_SPACE,
     K_UP = GLFW_KEY_UP,
-    K_DOWN = GLFW_KEY_DOWN
+    K_DOWN = GLFW_KEY_DOWN,
+    K_LEFT = GLFW_KEY_LEFT,
+    K_RIGHT = GLFW_KEY_RIGHT,
 };
 
 class Keyboard {

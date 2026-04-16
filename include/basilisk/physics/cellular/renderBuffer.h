@@ -25,7 +25,7 @@ public:
     bool initialize(const char* vertexShaderPath, const char* fragmentShaderPath);
     void initializeCompute();
 
-    void render();
+    void updateTexture();
 
     void setActivePixel(int x, int y, const Color& color);
     Color getActivePixel(int x, int y) const;
@@ -46,6 +46,8 @@ public:
 
     void applyBrush(int pixelX, int pixelY, int radius, const Color& color);
     void applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t spawnCount, const Color& color);
+
+    unsigned int getRenderTexture() { return renderTexture; }
 
 private:
     int width;
@@ -79,7 +81,7 @@ private:
     // OpenGL
     GLuint shaderProgram = 0;
     GLuint VAO = 0, VBO = 0, EBO = 0;
-    GLuint texture = 0;
+    GLuint renderTexture = 0;
     GLuint particleProgram = 0;
     GLuint particleVAO = 0;
     GLuint particleVBO = 0;

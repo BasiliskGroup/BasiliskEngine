@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #include <basilisk/physics/cellular/renderBuffer.h>
+#include <basilisk/basilisk.h>
 
 // Rainbow color with uneven sine curves, full cycle every 10 seconds
 static std::array<unsigned char, 3> baseBrushColorForMaterial(unsigned char mat_id) {
@@ -73,33 +74,7 @@ static void initializeBuffer(RenderBuffer& renderBuffer) {
 }
 
 int main() {
-    if (!glfwInit()) {
-        std::cerr << "Failed to initialize GLFW" << std::endl;
-        return -1;
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Sand Simulation", nullptr, nullptr);
-    if (!window) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
+    bsk::Engine* engine = new bsk::Engine(800, 800, "Sand Simulation", false, false);
 
     RenderBuffer renderBuffer(BUFFER_WIDTH, BUFFER_HEIGHT);
     if (!renderBuffer.initialize("shaders/physics/vertex.glsl", "shaders/physics/fragment.glsl")) {
@@ -110,7 +85,6 @@ int main() {
 
     // Set up GPU compute for sand sim
     renderBuffer.initializeCompute();
-    glfwSetWindowTitle(window, "Sand Simulation (GPU)");
 
     initializeBuffer(renderBuffer);
 
@@ -123,49 +97,35 @@ int main() {
     const auto targetFrameTime = std::chrono::milliseconds(2); // 4 FPS
     auto nextFrameTime = clock::now();
 
-    while (!glfwWindowShouldClose(window)) {
-        nextFrameTime += targetFrameTime;
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, true);
-        }
+    bsk::Shader* sandShader = new bsk::Shader("shaders/sand.vert", "shaders/sand.frag");
+    bsk::Frame* sandFrame = new bsk::Frame(engine, sandShader, BUFFER_WIDTH, BUFFER_HEIGHT);
 
-        static bool lastSpaceState = false;
-        bool currentSpaceState = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-        if (currentSpaceState && !lastSpaceState) {
+    while (engine->isRunning()) {
+        engine->update();
+
+        if (engine->getKeyboard()->getPressed(bsk::Key::K_SPACE)) {
             particleMode = !particleMode;
             std::cout << "Brush mode: " << (particleMode ? "particles" : "cells") << std::endl;
         }
-        lastSpaceState = currentSpaceState;
 
         // F key toggles fire mode — newly spawned cells will have on_fire bit set
-        static bool lastFState = false;
-        bool fDown = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
-        if (fDown && !lastFState) {
+        if (engine->getKeyboard()->getPressed(bsk::Key::K_F)) {
             fireMode = !fireMode;
             std::cout << "Fire mode: " << (fireMode ? "ON" : "OFF") << std::endl;
         }
-        lastFState = fDown;
 
         // S key toggles static mode — newly spawned cells will have static material bit set
-        static bool lastSState = false;
-        bool sDown = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
-        if (sDown && !lastSState) {
+        if (engine->getKeyboard()->getPressed(bsk::Key::K_S)) {
             staticMode = !staticMode;
             std::cout << "Static mode: " << (staticMode ? "ON" : "OFF") << std::endl;
         }
-        lastSState = sDown;
 
         // Left mouse draws sand or spawns particles
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        if (engine->getMouse()->getLeftDown()) {
             double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-
-            int windowWidth, windowHeight;
-            glfwGetWindowSize(window, &windowWidth, &windowHeight);
-
             int pixelX, pixelY;
-            if (renderBuffer.windowToPixel(static_cast<int>(xpos), static_cast<int>(ypos),
-                                           windowWidth, windowHeight, pixelX, pixelY)) {
+            if (renderBuffer.windowToPixel(engine->getMouse()->getX(), engine->getMouse()->getY(),
+                                           engine->getWindowWidth(), engine->getWindowHeight(), pixelX, pixelY)) {
                 Color brushColor = rainbowBrushColor(mat_id, fireMode);
                 brushColor.mat_id =
                     static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
@@ -178,33 +138,22 @@ int main() {
         }
         
         // Arrow Right = next id, Left = previous (wraps 0..MAX_MATERIAL_ID)
-        static bool lastMatLeft = false;
-        static bool lastMatRight = false;
-        const bool matLeft = glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
-        const bool matRight = glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
-        if (matRight && !lastMatRight) {
-            mat_id = (mat_id >= MAX_MATERIAL_ID) ? 0 : static_cast<unsigned char>(mat_id + 1);
-            std::cout << "Material id: " << static_cast<int>(mat_id) << std::endl;
-        }
-        if (matLeft && !lastMatLeft) {
+        if (engine->getKeyboard()->getPressed(bsk::Key::K_LEFT)) {
             mat_id = (mat_id == 0) ? MAX_MATERIAL_ID : static_cast<unsigned char>(mat_id - 1);
             std::cout << "Material id: " << static_cast<int>(mat_id) << std::endl;
         }
-        lastMatLeft = matLeft;
-        lastMatRight = matRight;
-
+        if (engine->getKeyboard()->getPressed(bsk::Key::K_RIGHT)) {
+            mat_id = (mat_id >= MAX_MATERIAL_ID) ? 0 : static_cast<unsigned char>(mat_id + 1);
+            std::cout << "Material id: " << static_cast<int>(mat_id) << std::endl;
+        }
         renderBuffer.simulate();
+        renderBuffer.updateTexture();
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        sandFrame->render(renderBuffer.getRenderTexture());
 
-        renderBuffer.render();
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-        std::this_thread::sleep_until(nextFrameTime);
+        engine->render();
     }
 
-    glfwTerminate();
+    delete engine;
     return 0;
 }
