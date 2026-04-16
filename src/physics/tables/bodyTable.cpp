@@ -21,6 +21,8 @@ BodyTable::BodyTable(Solver* solver, uint32_t capacity, ComputeShader*& velocity
     frictionBuffer(new GpuBuffer<float>(capacity)),
     massBuffer(new GpuBuffer<float>(capacity)),
     momentBuffer(new GpuBuffer<float>(capacity)),
+    velStagingBuffer(new StagingBuffer<bsk::vec3>(capacity)),
+    prevVelStagingBuffer(new StagingBuffer<bsk::vec3>(capacity)),
     velocityShader(velocityShader)
 {
     resize(capacity); 
@@ -37,6 +39,8 @@ BodyTable::~BodyTable() {
     delete frictionBuffer; frictionBuffer = nullptr;
     delete massBuffer;     massBuffer = nullptr;
     delete momentBuffer;   momentBuffer = nullptr;
+    delete velStagingBuffer;     velStagingBuffer = nullptr;
+    delete prevVelStagingBuffer; prevVelStagingBuffer = nullptr;
 
     delete bvh;            bvh = nullptr;
 }
@@ -98,11 +102,18 @@ void BodyTable::updateVelocities(float dt) {
     uniforms.dt = dt;
     velocityShader->setUniform(uniforms);
 
-    velocityShader->dispatch(size, 1, 1);
+    GpuEncoder encoder;
+    encoder.dispatch(velocityShader->handle(), size, 1, 1);
+    encoder.copyToStaging(*velBuffer, *velStagingBuffer);
+    encoder.copyToStaging(*prevVelBuffer, *prevVelStagingBuffer);
+    encoder.submit();
 
-    // read back from GPU (count = element count, like sand sim renderBuffer)
-    velBuffer->read(vel.data(), vel.size());
-    prevVelBuffer->read(prevVel.data(), prevVel.size());
+    velStagingBuffer->mapAsync();
+    prevVelStagingBuffer->mapAsync();
+
+    // Read back results from staging buffers after submit.
+    velStagingBuffer->collect(vel.data(), vel.size());
+    prevVelStagingBuffer->collect(prevVel.data(), prevVel.size());
 
     for (uint32_t i = 0; i < size; i++) {
         bodies[i]->getNode()->setPosition(pos[i]);
@@ -146,6 +157,10 @@ void BodyTable::resize(uint32_t newCapacity) {
             massBuffer,
             momentBuffer
         );
+        delete velStagingBuffer;
+        velStagingBuffer = new StagingBuffer<bsk::vec3>(newCapacity);
+        delete prevVelStagingBuffer;
+        prevVelStagingBuffer = new StagingBuffer<bsk::vec3>(newCapacity);
 
         solver->rebuildVelocityShader();
     }

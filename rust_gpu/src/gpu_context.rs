@@ -2,64 +2,49 @@ use wgpu::*;
 
 pub struct GpuContext {
     pub device: Device,
-    pub queue: Queue,
+    pub queue:  Queue,
 }
 
 impl GpuContext {
-    // constructor
-    pub fn new () -> Self {
-        // Select backends based on platform. On Linux, we primarily use Vulkan.
-        // Note: The C++ wrapper (gpuWrapper.hpp) will skip GPU init entirely
-        // when ASan is enabled on Linux to avoid heap-use-after-free in libvulkan.
-        #[cfg(target_os = "macos")]
-        let backends = Backends::METAL | Backends::VULKAN;
-        
-        #[cfg(target_os = "linux")]
-        let backends = Backends::VULKAN;
-        
-        #[cfg(target_os = "windows")]
-        let backends = Backends::DX12 | Backends::VULKAN;
-        
-        #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
-        let backends = Backends::METAL | Backends::VULKAN | Backends::DX12;
-        
+    pub fn new() -> Self {
         let instance = Instance::new(InstanceDescriptor {
-            backends,
-            dx12_shader_compiler: Default::default()
+            backends: Backends::all(),
+            flags: InstanceFlags::empty(),
+            gles_minor_version: Gles3MinorVersion::Automatic,
+            dx12_shader_compiler: Default::default(),
         });
 
-        let adapter = pollster::block_on(instance.request_adapter(
-            &RequestAdapterOptions {
-                power_preference: PowerPreference::HighPerformance,
-                compatible_surface: None,
-                force_fallback_adapter: false
-            }
-        ))
-            .expect("No adapter");
+        let adapter = pollster::block_on(instance.request_adapter(&RequestAdapterOptions {
+            power_preference:       PowerPreference::HighPerformance,
+            compatible_surface:     None,
+            force_fallback_adapter: false,
+        }))
+        .expect("No suitable GPU adapter found");
 
         let (device, queue) = pollster::block_on(adapter.request_device(
             &DeviceDescriptor {
-                label: None,
-                features: Features::empty(),
-                limits: Limits::default()
+                label:    None,
+                required_features: Features::empty(),
+                required_limits: Limits::default(),
             },
-            None
+            None,
         ))
-            .expect("Device creaton failed");
+        .expect("Device creation failed");
 
         Self { device, queue }
     }
 
-    // submit command buffer to GPU queue
     pub fn submit(&self, cmd: CommandBuffer) {
         self.queue.submit(Some(cmd));
     }
 
-    // poll the device to process submitted work
-    pub fn poll(&self, wait: bool) {
-        match wait {
-            true => self.device.poll(Maintain::Wait),
-            false => self.device.poll(Maintain::Poll),
-        };
+    /// Non-blocking poll — process any completed work without waiting.
+    pub fn poll(&self) {
+        self.device.poll(Maintain::Poll);
+    }
+
+    /// Blocking poll — stall CPU until all submitted GPU work is complete.
+    pub fn poll_wait(&self) {
+        self.device.poll(Maintain::Wait);
     }
 }

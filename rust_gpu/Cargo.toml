@@ -5,10 +5,10 @@ edition = "2021"
 
 [lib]
 name = "rust_gpu"
-crate-type = ["staticlib"]
+crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
-wgpu = "0.17.2"
+wgpu = "0.20"
 pollster = "0.3"
 bytemuck = { version = "1.14", features = ["derive"] }
 

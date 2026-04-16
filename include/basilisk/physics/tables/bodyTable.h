@@ -52,6 +52,8 @@ private:
     GpuBuffer<float>* frictionBuffer;
     GpuBuffer<float>* massBuffer;
     GpuBuffer<float>* momentBuffer;
+    StagingBuffer<bsk::vec3>* velStagingBuffer;
+    StagingBuffer<bsk::vec3>* prevVelStagingBuffer;
 
     ComputeShader*& velocityShader;
 
