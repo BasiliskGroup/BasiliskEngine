@@ -149,8 +149,7 @@ int main() {
         renderBuffer.simulate();
         renderBuffer.updateTexture();
 
-        sandFrame->render(renderBuffer.getRenderTexture());
-
+        sandFrame->render(renderBuffer.getRenderTexture(), 0, 0, 800, 800);
         engine->render();
     }
 

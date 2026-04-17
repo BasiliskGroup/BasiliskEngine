@@ -41,6 +41,7 @@ class Frame {
         void render();
         void render(int x, int y, int width, int height);
         void render(unsigned int textureID);
+        void render(unsigned int textureID, int x, int y, int width, int height);
         
         inline Shader* getShader() { return shader; }
         inline VBO* getVBO() { return vbo; }

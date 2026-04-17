@@ -180,6 +180,26 @@ void Frame::render(unsigned int textureID) {
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
+void Frame::render(unsigned int textureID, int x, int y, int width, int height) {
+     // Get the current viewport
+     GLint viewport[4];
+     glGetIntegerv(GL_VIEWPORT, viewport);
+ 
+     // Update the viewport and render
+     glViewport(x, y, width, height);
+     shader->use();
+     shader->setUniform("uTexture", 4);
+     shader->setUniform("textureSize", glm::vec2(this->width, this->height));
+     GLint blendSrc, blendDst;
+     glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrc);
+     glGetIntegerv(GL_BLEND_DST_RGB, &blendDst);
+     glBlendFunc(GL_ONE, GL_ZERO);
+     vao->render();
+     glBlendFunc(blendSrc, blendDst);
+     // Reset viewport to previous dimensions
+     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+}
+
 void Frame::clear(float r, float g, float b, float a) {
     fbo->clear(r, g, b, a);
 }
