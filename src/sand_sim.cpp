@@ -8,7 +8,7 @@
 #include <basilisk/physics/cellular/cellBuffer.h>
 #include <basilisk/basilisk.h>
 
-constexpr glm::vec2 CELL_SCALE(1.0f, 1.0f);
+glm::vec2 CELL_SCALE(1.0f, 1.0f);
 
 // Rainbow color with uneven sine curves, full cycle every 10 seconds
 static std::array<unsigned char, 3> baseBrushColorForMaterial(unsigned char mat_id) {
@@ -49,9 +49,8 @@ static Color rainbowBrushColor(unsigned char mat_id, bool on_fire) {
     );
 }
 
-const int BUFFER_WIDTH  = 400;
-const int BUFFER_HEIGHT = 400;
-static_assert(BUFFER_WIDTH % CHUNK_SIZE == 0 && BUFFER_HEIGHT % CHUNK_SIZE == 0);
+const int BUFFER_WIDTH  = 505;
+const int BUFFER_HEIGHT = 505;
 const int WINDOW_WIDTH  = 800;
 const int WINDOW_HEIGHT = 800;
 const int BRUSH_RADIUS  = BUFFER_HEIGHT / 50;
@@ -77,8 +76,9 @@ static void initializeBuffer(CellBuffer& cellBuffer) {
 int main() {
     bsk::Engine* engine = new bsk::Engine(WINDOW_WIDTH, WINDOW_HEIGHT, "Sand Simulation", false, false);
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
-    scene->setCamera(new bsk::Camera2D(engine, glm::vec2(0.0f), 500.0f));
+    scene->setCamera(new bsk::Camera2D(engine, glm::vec2(0.0f), 50.0f));
     scene->add(new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f), 0.0f, glm::vec2(1.0f, 1.0f)));
+    ((bsk::Camera2D*)scene->getCamera())->setSpeed(30.0f);
 
     CellBuffer cellBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, CELL_SCALE);
     if (!cellBuffer.initialize("shaders/physics/vertex.glsl", "shaders/physics/fragment.glsl")) {
@@ -141,11 +141,13 @@ int main() {
                 engine->getMouse()->getWorldX(scene->getCamera()),
                 engine->getMouse()->getWorldY(scene->getCamera())
             );
+
+            std::cout << "Mouse world: " << mouseWorld.x << ", " << mouseWorld.y << std::endl;
             
-            const float halfW = BUFFER_WIDTH  * CELL_SCALE.x / 2;
-            const float halfH = BUFFER_HEIGHT * CELL_SCALE.y / 2;
-            int pixelX = (int)((2 * mouseWorld.x + halfW) / CELL_SCALE.x / bufferScale.x);
-            int pixelY = (int)((2 * mouseWorld.y + halfH) / CELL_SCALE.y / bufferScale.y);
+            // const float halfW = BUFFER_WIDTH  * CELL_SCALE.x / 2;
+            // const float halfH = BUFFER_HEIGHT * CELL_SCALE.y / 2;
+            int pixelX = (int)(mouseWorld.x / CELL_SCALE.x + BUFFER_WIDTH / 2);
+            int pixelY = (int)(mouseWorld.y / CELL_SCALE.y + BUFFER_HEIGHT / 2);
             
             if (pixelX >= 0 && pixelX < BUFFER_WIDTH && pixelY >= 0 && pixelY < BUFFER_HEIGHT) {
                 Color brushColor = rainbowBrushColor(mat_id, fireMode);
@@ -158,14 +160,34 @@ int main() {
             }
         }
 
+        if (engine->getKeyboard()->getDown(bsk::Key::K_UP)) {
+            CELL_SCALE.x += 0.1f * engine->getDeltaTime();
+            CELL_SCALE.y += 0.1f * engine->getDeltaTime();
+        }
+        if (engine->getKeyboard()->getDown(bsk::Key::K_DOWN)) {
+            CELL_SCALE.x -= 0.1f * engine->getDeltaTime();
+            CELL_SCALE.y -= 0.1f * engine->getDeltaTime();
+        }
+
+        // update camera
+        cameraPos = scene->getCamera()->getPosition();
+
         // upadte buffer
         cellBuffer.simulate();
         cellBuffer.updateTexture();
 
         // render everything
         scene->render();
-        sandFrame->render(cellBuffer.getRenderTexture(), -8 * cameraPos.x, -8 * cameraPos.y, 2 * cameraScale.x, 2 * cameraScale.y);
+        int scaleX = (int)((BUFFER_WIDTH * WINDOW_WIDTH   * CELL_SCALE.x) / cameraScale.x);
+        int scaleY = (int)((BUFFER_HEIGHT * WINDOW_HEIGHT * CELL_SCALE.y) / cameraScale.y);
+        sandFrame->render(
+            cellBuffer.getRenderTexture(), 
+            -scaleX / 2 + WINDOW_WIDTH  / 2 - cameraPos.x * (WINDOW_WIDTH / cameraScale.x ), 
+            -scaleY / 2 + WINDOW_HEIGHT / 2 - cameraPos.y * (WINDOW_HEIGHT / cameraScale.y), 
+            scaleX, 
+            scaleY);
         engine->render();
+
     }
 
     delete scene;
