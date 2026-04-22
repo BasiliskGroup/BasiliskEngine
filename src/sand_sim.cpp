@@ -8,7 +8,7 @@
 #include <basilisk/physics/cellular/cellBuffer.h>
 #include <basilisk/basilisk.h>
 
-glm::vec2 CELL_SCALE(1.0f, 1.0f);
+float CELL_SCALE(0.1f);
 
 // Rainbow color with uneven sine curves, full cycle every 10 seconds
 static std::array<unsigned char, 3> baseBrushColorForMaterial(unsigned char mat_id) {
@@ -77,7 +77,8 @@ int main() {
     bsk::Engine* engine = new bsk::Engine(WINDOW_WIDTH, WINDOW_HEIGHT, "Sand Simulation", false, false);
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
     scene->setCamera(new bsk::Camera2D(engine, glm::vec2(0.0f), 50.0f));
-    scene->add(new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f), 0.0f, glm::vec2(1.0f, 1.0f)));
+    bsk::Collider* collider = new bsk::Collider({{0.5f, 0.5f}, {-0.5f, 0.5f}, {-0.5f, -0.5f}, {0.5f, -0.5f}});
+    bsk::Node2D* node = new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f), 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider, 1.0f, 0.5f);
     ((bsk::Camera2D*)scene->getCamera())->setSpeed(30.0f);
 
     CellBuffer cellBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, CELL_SCALE);
@@ -102,8 +103,7 @@ int main() {
     auto nextFrameTime = clock::now();
 
     bsk::Shader* sandShader = new bsk::Shader("shaders/sand.vert", "shaders/sand.frag");
-    bsk::Frame* sandFrame = new bsk::Frame(engine, sandShader, BUFFER_WIDTH, BUFFER_HEIGHT);
-
+    bsk::Frame* sandFrame = new bsk::Frame(engine, sandShader, cellBuffer.getWidth(), cellBuffer.getHeight());
     
     int enabled = glfwGetWindowAttrib(engine->getWindow()->getWindow(), GLFW_COCOA_RETINA_FRAMEBUFFER);
     std::cout << "Retina enabled: " << enabled << std::endl;
@@ -111,7 +111,6 @@ int main() {
     // scaling for the buffer to match the scene scale
     glm::vec2 cameraPos = scene->getCamera()->getPosition();
     glm::vec2 cameraScale = scene->getCamera()->getViewScale();
-    glm::vec2 bufferScale = cameraScale / glm::vec2(BUFFER_WIDTH, BUFFER_HEIGHT);
 
     while (engine->isRunning()) {
         engine->update();
@@ -135,6 +134,21 @@ int main() {
             std::cout << "Static mode: " << (staticMode ? "ON" : "OFF") << std::endl;
         }
 
+        // plot node aabb
+        glm::vec2 bl, tr;
+        int br_x, br_y, tr_x, tr_y;
+        node->getRigid()->getAABB(bl, tr);
+        cellBuffer.worldToPixel(bl, br_x, br_y);
+        cellBuffer.worldToPixel(tr, tr_x, tr_y);
+
+        Color aabbColor = Color::White();
+        aabbColor.mat_id = static_cast<unsigned char>((aabbColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
+
+        cellBuffer.applyBrush(br_x, br_y, 1, aabbColor);
+        cellBuffer.applyBrush(tr_x, tr_y, 1, aabbColor);
+        cellBuffer.applyBrush(br_x, tr_y, 1, aabbColor);
+        cellBuffer.applyBrush(tr_x, br_y, 1, aabbColor);
+
         // Left mouse draws sand or spawns particles
         if (engine->getMouse()->getLeftDown()) {
             glm::vec2 mouseWorld = glm::vec2(
@@ -142,31 +156,15 @@ int main() {
                 engine->getMouse()->getWorldY(scene->getCamera())
             );
 
-            std::cout << "Mouse world: " << mouseWorld.x << ", " << mouseWorld.y << std::endl;
-            
-            // const float halfW = BUFFER_WIDTH  * CELL_SCALE.x / 2;
-            // const float halfH = BUFFER_HEIGHT * CELL_SCALE.y / 2;
-            int pixelX = (int)(mouseWorld.x / CELL_SCALE.x + BUFFER_WIDTH / 2);
-            int pixelY = (int)(mouseWorld.y / CELL_SCALE.y + BUFFER_HEIGHT / 2);
+            int pixelX, pixelY;
+            cellBuffer.worldToPixel(mouseWorld, pixelX, pixelY);
             
             if (pixelX >= 0 && pixelX < BUFFER_WIDTH && pixelY >= 0 && pixelY < BUFFER_HEIGHT) {
                 Color brushColor = rainbowBrushColor(mat_id, fireMode);
-                brushColor.mat_id =
-                    static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
-                if (particleMode)
-                    cellBuffer.applyParticleBrush(pixelX, pixelY, BRUSH_RADIUS, 64, brushColor);
-                else
-                    cellBuffer.applyBrush(pixelX, pixelY, BRUSH_RADIUS, brushColor);
+                brushColor.mat_id = static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
+                if (particleMode) cellBuffer.applyParticleBrush(pixelX, pixelY, BRUSH_RADIUS, 64, brushColor);
+                else cellBuffer.applyBrush(pixelX, pixelY, BRUSH_RADIUS, brushColor);
             }
-        }
-
-        if (engine->getKeyboard()->getDown(bsk::Key::K_UP)) {
-            CELL_SCALE.x += 0.1f * engine->getDeltaTime();
-            CELL_SCALE.y += 0.1f * engine->getDeltaTime();
-        }
-        if (engine->getKeyboard()->getDown(bsk::Key::K_DOWN)) {
-            CELL_SCALE.x -= 0.1f * engine->getDeltaTime();
-            CELL_SCALE.y -= 0.1f * engine->getDeltaTime();
         }
 
         // update camera
@@ -178,12 +176,12 @@ int main() {
 
         // render everything
         scene->render();
-        int scaleX = (int)((BUFFER_WIDTH * WINDOW_WIDTH   * CELL_SCALE.x) / cameraScale.x);
-        int scaleY = (int)((BUFFER_HEIGHT * WINDOW_HEIGHT * CELL_SCALE.y) / cameraScale.y);
+        int scaleX = (int)((BUFFER_WIDTH * WINDOW_WIDTH   * CELL_SCALE) / cameraScale.x);
+        int scaleY = (int)((BUFFER_HEIGHT * WINDOW_HEIGHT * CELL_SCALE) / cameraScale.y);
         sandFrame->render(
             cellBuffer.getRenderTexture(), 
-            -scaleX / 2 + WINDOW_WIDTH  / 2 - cameraPos.x * (WINDOW_WIDTH / cameraScale.x ), 
-            -scaleY / 2 + WINDOW_HEIGHT / 2 - cameraPos.y * (WINDOW_HEIGHT / cameraScale.y), 
+            -scaleX / 2.0f + WINDOW_WIDTH  / 2.0f - cameraPos.x * (WINDOW_WIDTH / cameraScale.x ), 
+            -scaleY / 2.0f + WINDOW_HEIGHT / 2.0f - cameraPos.y * (WINDOW_HEIGHT / cameraScale.y), 
             scaleX, 
             scaleY);
         engine->render();

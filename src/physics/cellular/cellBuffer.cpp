@@ -4,11 +4,11 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <chrono>
 #include <cstdint>
 #include <cstddef>
 #include <cmath>
 #include <random>
+
 
 using namespace bsk::internal;
 
@@ -36,30 +36,14 @@ inline Color unpackCell(uint32_t v) {
     const uint8_t b = static_cast<uint8_t>(v & 0xFFu);
     return Color(r, g, b, mat, fire);
 }
-
-// Match fire tint in shaders/fragment.glsl (particles use GL path, not the buffer texture).
-inline glm::vec3 displayRgbFromPackedCell(uint32_t packed) {
-    const Color c = unpackCell(packed);
-    glm::vec3 rgb(
-        static_cast<float>(c.r) / 255.0f,
-        static_cast<float>(c.g) / 255.0f,
-        static_cast<float>(c.b) / 255.0f
-    );
-    if (c.on_fire != 0u) {
-        rgb.r = std::min(1.0f, rgb.r * 0.35f + 0.95f);
-        rgb.g = std::min(1.0f, rgb.g * 0.4f + 0.25f);
-        rgb.b *= 0.15f;
-    }
-    return rgb;
-}
 }
 
 // ---------------------------------------------------------------------------
 // Construction / destruction
 // ---------------------------------------------------------------------------
 
-CellBuffer::CellBuffer(int width, int height, const glm::vec2& cellScale)
-    : width(width), height(height),
+CellBuffer::CellBuffer(int width, int height, float cellScale)
+    : width(width), height(height), cellScale(cellScale),
       buffers({ std::vector<Color>(width * height), std::vector<Color>(width * height) }),
       chunksWide((width  + CHUNK_SIZE - 1) / CHUNK_SIZE),
       chunksHigh((height + CHUNK_SIZE - 1) / CHUNK_SIZE),
@@ -67,21 +51,11 @@ CellBuffer::CellBuffer(int width, int height, const glm::vec2& cellScale)
                  ((height + CHUNK_SIZE - 1) / CHUNK_SIZE)),
       chunkActive   (numChunks, 1u),  // start fully active so frame 0 runs everywhere
       chunkActiveOut(numChunks, 0u)
-{
-    this->cellScale = cellScale;
-    this->bufferWorldOrigin = glm::vec2(
-        -static_cast<float>(width) * cellScale.x * 0.5f,
-        -static_cast<float>(height) * cellScale.y * 0.5f);
-}
+{}
 
 CellBuffer::~CellBuffer() {
     if (initialized) {
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
         glDeleteTextures(1, &renderTexture);
-        glDeleteProgram(shaderProgram);
-        if (particleProgram) glDeleteProgram(particleProgram);
     }
 
     if (computeInitialized) {
@@ -134,7 +108,6 @@ void CellBuffer::initializeCompute() {
     initGpu();
 
     const size_t cellCount  = width * height;
-    const size_t chunkCount = numChunks;
     gpuCellScratch.resize(cellCount);
 
     // Storage buffers
@@ -142,10 +115,10 @@ void CellBuffer::initializeCompute() {
     cellsB             = new GpuBufferU32(cellCount);
     intent             = new GpuBufferU32(cellCount);
     claim              = new GpuBufferU32(cellCount);
-    gpuChunkActive     = new GpuBufferU32(chunkCount);
-    gpuActiveChunkList = new GpuBufferU32(chunkCount);
-    gpuChunkIntent     = new GpuBufferU32(chunkCount);
-    gpuChunkActiveOut  = new GpuBufferU32(chunkCount);
+    gpuChunkActive     = new GpuBufferU32(numChunks);
+    gpuActiveChunkList = new GpuBufferU32(numChunks);
+    gpuChunkIntent     = new GpuBufferU32(numChunks);
+    gpuChunkActiveOut  = new GpuBufferU32(numChunks);
 
     // particles
     particlesA = new GpuBuffer<Particle>(MAX_PARTICLES);
@@ -155,9 +128,6 @@ void CellBuffer::initializeCompute() {
     particleFreeStackStaging = new StagingBufferU32(MAX_PARTICLES);
     particleFreeCountStaging = new StagingBufferU32(1);
     particleCpu.resize(MAX_PARTICLES);
-    particleRenderPos.resize(MAX_PARTICLES);
-    particleRenderColor.resize(MAX_PARTICLES);
-    particleRenderInterleaved.resize(static_cast<size_t>(MAX_PARTICLES) * 5u);
     particleFreeStackCpu.resize(MAX_PARTICLES, 0u);
     particleFreeCountCpu = 0u;
     nextParticleIndex = 0u;
@@ -171,7 +141,7 @@ void CellBuffer::initializeCompute() {
 
     // Staging buffers — sized to match what they'll receive
     cellsStaging = new StagingBufferU32(cellCount);
-    chunkStaging = new StagingBufferU32(chunkCount);
+    chunkStaging = new StagingBufferU32(numChunks);
 
     struct SimUniforms {
         uint32_t width;
@@ -370,46 +340,22 @@ void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t
     }
 }
 
-void CellBuffer::simulate() {
-    if (computeInitialized) simulateGPU();
-}
-
 // ---------------------------------------------------------------------------
 // GPU simulation — pipelined
 // ---------------------------------------------------------------------------
 
-void CellBuffer::simulateGPU() {
+void CellBuffer::simulate() {
     if (!computeInitialized) return;
-
-    using Clock = std::chrono::high_resolution_clock;
-    static uint64_t frameCounter = 0;
-    frameCounter++;
-    const bool doLog = (frameCounter % 30u) == 31u; // avoid console spam
-
-    double tUpload = 0.0; // GPU buffer writes from CPU
-    double tBrushUpload = 0.0; // brush-only uploads
-    double tDispatch = 0.0;
-    double tRead = 0.0;
-    double tParticleRead = 0.0;
-    double tParticleRenderPrep = 0.0;
-    double tParticleDispatch = 0.0;
-    uint32_t debugActiveChunkCount = 0u;
-    uint64_t debugApproxSparseRowOps = 0u;
-    bool usedSparseReadback = false;
 
     // ------------------------------------------------------------------
     // STEP 1 — Collect last frame's cell readback, merge brush pixels
     // ------------------------------------------------------------------
     if (pendingCellsReadback) {
-        auto t0 = Clock::now();
         gpuCellScratch.resize(static_cast<size_t>(width * height));
         cellsStaging->collect(gpuCellScratch.data(), gpuCellScratch.size());
-        auto t1 = Clock::now();
-        tRead += std::chrono::duration<double, std::milli>(t1 - t0).count();
         pendingCellsReadback = false;
     }
     if (pendingParticleReadback && nextParticleIndex > 0u) {
-        auto tp0 = Clock::now();
         particlesStaging->collectRegion(particleCpu.data(), 0, nextParticleIndex);
         uint32_t freeCountTmp = 0u;
         particleFreeCountStaging->collect(&freeCountTmp, 1);
@@ -423,8 +369,6 @@ void CellBuffer::simulateGPU() {
                 activeParticleCount++;
             }
         }
-        auto tp1 = Clock::now();
-        tParticleRead += std::chrono::duration<double, std::milli>(tp1 - tp0).count();
         pendingParticleReadback = false;
     }
 
@@ -432,10 +376,7 @@ void CellBuffer::simulateGPU() {
     // STEP 2 — Collect chunk readback, rebuild chunkActive cleanly
     // ------------------------------------------------------------------
     if (pendingChunkReadback) {
-        auto t0 = Clock::now();
         chunkStaging->collect(chunkActiveOut.data(), chunkActiveOut.size());
-        auto t1 = Clock::now();
-        tRead += std::chrono::duration<double, std::milli>(t1 - t0).count();
         pendingChunkReadback = false;
 
         // Zero, then re-expand from GPU output only
@@ -466,7 +407,6 @@ void CellBuffer::simulateGPU() {
     // (No full-grid CPU->GPU upload; simulation state stays on GPU.)
     // ------------------------------------------------------------------
     if (!pendingBrushPixels.empty()) {
-        auto t0 = Clock::now();
 
         std::sort(pendingBrushPixels.begin(), pendingBrushPixels.end(),
                   [](const BrushPixel& a, const BrushPixel& b) { return a.idx < b.idx; });
@@ -492,16 +432,7 @@ void CellBuffer::simulateGPU() {
         }
 
         pendingBrushPixels.clear();
-        auto t1 = Clock::now();
-        tBrushUpload += std::chrono::duration<double, std::milli>(t1 - t0).count();
     }
-
-    // Diagnostic: remove once chunk quiescence is confirmed
-    // {
-    //     uint32_t activeCount = 0;
-    //     for (uint32_t v : chunkActive) activeCount += (v != 0u);
-    //     std::cout << "Active chunks: " << activeCount << " / " << numChunks << "\n";
-    // }
 
     // ------------------------------------------------------------------
     // STEP 5 — Advance frame parity
@@ -520,17 +451,12 @@ void CellBuffer::simulateGPU() {
             activeChunkListIndices[activeChunkCount++] = ci;
         }
     }
-    debugActiveChunkCount = activeChunkCount;
-    debugApproxSparseRowOps = static_cast<uint64_t>(activeChunkCount) * static_cast<uint64_t>(CHUNK_SIZE);
 
     {
-        auto t0 = Clock::now();
         gpuChunkActive->write(chunkActive.data(), chunkActive.size());
         gpuActiveChunkList->write(activeChunkListIndices.data(), activeChunkListIndices.size());
         gpuChunkIntent   ->zero();
         gpuChunkActiveOut->zero();
-        auto t1 = Clock::now();
-        tUpload += std::chrono::duration<double, std::milli>(t1 - t0).count();
     }
 
     // ------------------------------------------------------------------
@@ -566,8 +492,8 @@ void CellBuffer::simulateGPU() {
     applyShader  ->setUniform(u);
     pU.dt = 1.0f / 60.0f;
     pU.num_particles = nextParticleIndex;
-    pU.gravity = GRAVITY * CELL_WIDTH;
-    pU.cell_width = CELL_WIDTH;
+    pU.gravity = GRAVITY * cellScale;
+    pU.cell_width = cellScale;
     pU.grid_width = static_cast<uint32_t>(width);
     pU.grid_height = static_cast<uint32_t>(height);
     pU.chunk_size = static_cast<uint32_t>(CHUNK_SIZE);
@@ -579,21 +505,17 @@ void CellBuffer::simulateGPU() {
 
     {
         GpuEncoder enc;
-        auto t0 = Clock::now();
         if (activeChunkCount > 0u) {
             enc.dispatch(intentShader->handle(), activeChunkCount, 1u, 1u);
         }
         enc.dispatch(resolveShader->handle(), gx, gy);
         enc.dispatch(applyShader  ->handle(), gx, gy);
         if (nextParticleIndex > 0u) {
-            auto tp0 = Clock::now();
             const uint32_t particleGroups = (nextParticleIndex + 255u) / 256u;
             enc.dispatch(particleShader->handle(), particleGroups, 1u, 1u);
             enc.copyToStaging(*particlesA, *particlesStaging);
             enc.copyToStaging(*particleFreeCount, *particleFreeCountStaging);
             enc.copyToStaging(*particleFreeStack, *particleFreeStackStaging);
-            auto tp1 = Clock::now();
-            tParticleDispatch += std::chrono::duration<double, std::milli>(tp1 - tp0).count();
         }
         // Keep simulation state on GPU: cellsA will be the next frame's input.
         enc.copyBuffer(*cellsB, *cellsA);
@@ -604,13 +526,11 @@ void CellBuffer::simulateGPU() {
         const bool forceFullReadbackForParticles = activeParticleCount > 0u;
         if (forceFullReadbackForParticles ||
             activeChunkCount == static_cast<uint32_t>(numChunks) ||
-            debugApproxSparseRowOps > sparseRowCopyOpsLimit) {
+            (static_cast<uint64_t>(activeChunkCount) * static_cast<uint64_t>(CHUNK_SIZE)) > sparseRowCopyOpsLimit) {
             // Too large/sparse not beneficial: just read back the full buffer.
-            usedSparseReadback = false;
             enc.copyToStaging(*cellsB, *cellsStaging);
         } else if (activeChunkCount > 0u) {
             // Sparse readback: one 16-element copy per chunk row.
-            usedSparseReadback = true;
             for (uint32_t ai = 0; ai < activeChunkCount; ++ai) {
                 const uint32_t chunkIndex = activeChunkListIndices[ai];
                 const uint32_t cx = chunkIndex % static_cast<uint32_t>(chunksWide);
@@ -641,8 +561,6 @@ void CellBuffer::simulateGPU() {
         }
         enc.copyToStaging(*gpuChunkActiveOut, *chunkStaging);
         enc.submit();
-        auto t1 = Clock::now();
-        tDispatch += std::chrono::duration<double, std::milli>(t1 - t0).count();
     }
 
     // ------------------------------------------------------------------
@@ -658,24 +576,10 @@ void CellBuffer::simulateGPU() {
     }
     pendingCellsReadback = true;
     pendingChunkReadback = true;
-
-    if (doLog) {
-        std::cout << "[GPU timings] upload(ms)=" << tUpload
-                  << " brushUpload(ms)=" << tBrushUpload
-                  << " activeChunks=" << debugActiveChunkCount
-                  << " approxRowOps=" << debugApproxSparseRowOps
-                  << " sparseReadback=" << (usedSparseReadback ? "1" : "0")
-                  << " dispatch(ms)=" << tDispatch
-                  << " read(ms)=" << tRead
-                  << " particles=" << activeParticleCount
-                  << " particleDispatch(ms)=" << tParticleDispatch
-                  << " particleRead(ms)=" << tParticleRead
-                  << "\n";
-    }
 }
 
 // ---------------------------------------------------------------------------
-// GL helpers (unchanged)
+// GL helpers
 // ---------------------------------------------------------------------------
 
 std::string CellBuffer::loadShaderSource(const char* filepath) {
@@ -697,7 +601,18 @@ void CellBuffer::setupTexture() {
 bool CellBuffer::windowToPixel(int wx, int wy, int ww, int wh, int& px, int& py) const {
     px = (wx * width)  / ww;
     py = ((wh - wy) * height) / wh;
-    return px >= 0 && px < width && py >= 0 && py < height;
+    return pixelInBounds(px, py);
+}
+
+bool CellBuffer::worldToPixel(const glm::vec2& worldPos, int& px, int& py) const {
+    px = (int) (worldPos.x / cellScale + width / 2.0f);
+    py = (int) (worldPos.y / cellScale + height / 2.0f);
+    return pixelInBounds(px, py);
+}
+
+void CellBuffer::pixelToWorld(int px, int py, glm::vec2& worldPos) const {
+    worldPos.x = (px - width / 2.0f) * cellScale;
+    worldPos.y = (py - height / 2.0f) * cellScale;
 }
 
 const std::vector<Color>& CellBuffer::getActiveBuffer() const {

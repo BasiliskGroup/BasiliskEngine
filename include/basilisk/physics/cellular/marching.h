@@ -4,13 +4,18 @@
 #include <basilisk/util/includes.h>
 #include <basilisk/physics/cellular/helper.h>
 #include <basilisk/physics/cellular/rdp.h>
-#include <basilisk/physics/cellular/convexDecompose.h>
 
 #include <earcut.hpp>
 #include <utility>
 #include <vector>
 
 namespace bsk::internal {
+
+class Convex {
+public:
+    std::vector<glm::vec2> vertices;
+    Convex(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) : vertices{a, b, c} {};
+};
 
 struct MarchComponentGeometry {
     std::vector<glm::vec2> filledVertices;

@@ -11,17 +11,13 @@ namespace bci = bsk::internal;
 
 // Must match @workgroup_size in WGSL shaders
 static constexpr int CHUNK_SIZE = 16;
-static constexpr float CELL_WIDTH = 1.0f;
-static constexpr float GRAVITY = 9.8f;
+static constexpr float GRAVITY = 9.8f; // for particle system
 
 class CellBuffer {
 private:
     int width;
     int height;
-
-    // for rendering within a scene: world position of simulation cell (0,0); +x,+y runs to buffer max (y-up world)
-    glm::vec2 bufferWorldOrigin;
-    glm::vec2 cellScale; // scale of a single cell, get full scale of buffer by multiplying by width and height
+    float cellScale; // scale of a single cell
 
     struct BrushPixel { int idx; Color color; };
     std::vector<BrushPixel> pendingBrushPixels;  // pixels to inject into GPU each frame
@@ -49,10 +45,7 @@ private:
     bool pendingParticleReadback = false;
 
     // OpenGL
-    GLuint shaderProgram = 0;
-    GLuint VAO = 0, VBO = 0, EBO = 0;
     GLuint renderTexture = 0;
-    GLuint particleProgram = 0;
     bool initialized = false;
 
     // GPU storage buffers
@@ -82,9 +75,6 @@ private:
     bci::StagingBuffer<uint32_t>* particleFreeStackStaging = nullptr;
     bci::StagingBuffer<uint32_t>* particleFreeCountStaging = nullptr;
     std::vector<Particle> particleCpu;
-    std::vector<glm::vec2> particleRenderPos;
-    std::vector<glm::vec3> particleRenderColor;
-    std::vector<float> particleRenderInterleaved;
     std::vector<uint32_t> particleFreeStackCpu;
     uint32_t particleFreeCountCpu = 0;
     uint32_t nextParticleIndex = 0;
@@ -107,9 +97,6 @@ private:
 
     // GL helpers
     std::string loadShaderSource(const char* filepath);
-    GLuint compileShader(GLenum type, const char* source);
-    GLuint createShaderProgram(const char* vertexPath, const char* fragmentPath);
-    void setupQuad();
     void setupTexture();
 
     std::vector<Color>& getActiveBuffer() { return firstActive ? buffers.first  : buffers.second; }
@@ -118,8 +105,10 @@ private:
     const std::vector<Color>& getBackBuffer()   const;
     void swapBuffers() { firstActive = !firstActive; }
 
+    bool pixelInBounds(int px, int py) const { return px >= 0 && px < width && py >= 0 && py < height; }
+
 public:
-    CellBuffer(int width, int height, const glm::vec2& cellScale);
+    CellBuffer(int width, int height, float cellScale);
     ~CellBuffer();
 
     CellBuffer(const CellBuffer&)            = delete;
@@ -138,22 +127,15 @@ public:
 
     int getWidth()  const { return width; }
     int getHeight() const { return height; }
-
-    glm::vec2 getBufferWorldOrigin() const { return bufferWorldOrigin; }
-    glm::vec2 getCellScale() const { return cellScale; }
-    /** Upper world corner (exclusive cell grid); origin + (width*scale.x, height*scale.y). */
-    glm::vec2 getBufferWorldExtent() const {
-        return bufferWorldOrigin + glm::vec2(static_cast<float>(width) * cellScale.x,
-                                             static_cast<float>(height) * cellScale.y);
-    }
+    float getCellScale() const { return cellScale; }
 
     std::vector<Color>& getData() { return getActiveBuffer(); }
 
     void simulate();
-    void simulateGPU();
 
-    bool windowToPixel(int windowX, int windowY, int windowWidth, int windowHeight,
-                       int& pixelX, int& pixelY) const;
+    bool windowToPixel(int windowX, int windowY, int windowWidth, int windowHeight, int& pixelX, int& pixelY) const;
+    bool worldToPixel(const glm::vec2& worldPos, int& pixelX, int& pixelY) const;
+    void pixelToWorld(int pixelX, int pixelY, glm::vec2& worldPos) const;
 
     void applyBrush(int pixelX, int pixelY, int radius, const Color& color);
     void applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t spawnCount, const Color& color);
