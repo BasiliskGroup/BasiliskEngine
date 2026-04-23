@@ -85,6 +85,7 @@ private:
 
     // cellular
     CellBuffer* cellBuffer;
+    std::vector<uint32_t> sandManifoldForceIndices;
 
 public:
     Solver();
@@ -185,6 +186,11 @@ public:
 
     template<class TForce, class TForceStruct>
     inline void processForce(ForceTypeTable<TForceStruct>* forceTypeTable, uint32_t specialForceIndex, uint32_t bodyIndex, PrimalScratch& scratch, float alpha, const glm::vec3& jacobianMask);
+
+    // Sand manifold tracking across ForceTable compaction
+    void clearSandManifoldForceIndices();
+    void addSandManifoldForceIndex(uint32_t forceIndex);
+    void remapSandManifoldForceIndices(const std::vector<uint32_t>& forceIndexMap, uint32_t oldForceCount);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);

@@ -69,6 +69,10 @@ void ForceTable::compact() {
         indexMap[src] = !toDelete[src] ? dst++ : -1;
     }
 
+    if (solver != nullptr) {
+        solver->remapSandManifoldForceIndices(indexMap, size);
+    }
+
     compactTensors(toDelete, size,
         forces, parameters, derivatives, forceTypes, rows, bodies, solverSides
     );

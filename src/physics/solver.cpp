@@ -193,6 +193,28 @@ void Solver::defaultParams() {
     postStabilize = true;
 }
 
+void Solver::clearSandManifoldForceIndices() {
+    sandManifoldForceIndices.clear();
+}
+
+void Solver::addSandManifoldForceIndex(uint32_t forceIndex) {
+    sandManifoldForceIndices.push_back(forceIndex);
+}
+
+void Solver::remapSandManifoldForceIndices(const std::vector<uint32_t>& forceIndexMap, uint32_t oldForceCount) {
+    size_t write = 0;
+    for (size_t i = 0; i < sandManifoldForceIndices.size(); ++i) {
+        const uint32_t oldIndex = sandManifoldForceIndices[i];
+        if (oldIndex >= oldForceCount) continue;
+
+        const uint32_t mapped = forceIndexMap[oldIndex];
+        if (mapped == static_cast<uint32_t>(-1)) continue;
+
+        sandManifoldForceIndices[write++] = mapped;
+    }
+    sandManifoldForceIndices.resize(write);
+}
+
 void Solver::step(float dtIncoming) {    
     this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
 
@@ -228,7 +250,7 @@ void Solver::step(float dtIncoming) {
     // 2. collect sand from AABB
     // 3. turn sand into world vertices
     // 4. create manifold with rigid and all convex comps
-    std::vector<uint32_t> sandManifoldIndices;
+    clearSandManifoldForceIndices();
     const float cellScale = cellBuffer->getCellScale();
     const float halfWidth = static_cast<float>(cellBuffer->getWidth()) * 0.5f;
     const float halfHeight = static_cast<float>(cellBuffer->getHeight()) * 0.5f;
@@ -285,7 +307,7 @@ void Solver::step(float dtIncoming) {
                 }
 
                 Manifold* manifold = new Manifold(this, body, worldVertices);
-                sandManifoldIndices.push_back(manifold->getSpecialIndex());
+                addSandManifoldForceIndex(manifold->getIndex());
             }
         }
     }
@@ -376,13 +398,12 @@ void Solver::step(float dtIncoming) {
         }
     }
 
-    // 5. delete all sand manifolds
-    ForceTypeTable<ManifoldData>* manifoldTable = forceTable->getManifoldTable();
-    for (uint32_t specialIndex : sandManifoldIndices) {
-        if (specialIndex >= manifoldTable->getSize()) continue;
-        if (manifoldTable->isDeleted(specialIndex)) continue;
+    // 5. delete all sand manifolds at end of step
+    for (uint32_t forceIndex : sandManifoldForceIndices) {
+        if (forceIndex >= forceTable->getSize()) continue;
+        if (forceTable->getToDelete(forceIndex)) continue;
 
-        Force* force = manifoldTable->getForce(specialIndex);
+        Force* force = forceTable->getForce(forceIndex);
         Manifold* manifold = dynamic_cast<Manifold*>(force);
         if (manifold == nullptr) continue;
 
@@ -390,7 +411,7 @@ void Solver::step(float dtIncoming) {
         if (manifold->getBodyB() != nullptr) continue;
         delete manifold;
     }
-    sandManifoldIndices.clear();
+    clearSandManifoldForceIndices();
 }
 
 // Coloring
