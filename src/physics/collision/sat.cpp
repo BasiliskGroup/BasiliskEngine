@@ -9,8 +9,8 @@ void sat(
     const std::vector<glm::vec2>& polyB,
     CollisionPair& cp)
 {
-    float     minOverlap = std::numeric_limits<float>::infinity();
-    glm::vec2 mtvAxis    = glm::vec2(0.f);
+    float  minOverlap = std::numeric_limits<float>::infinity();
+    glm::vec2 mtvAxis = glm::vec2(0.f);
 
     for (int pass = 0; pass < 2; ++pass)
     {

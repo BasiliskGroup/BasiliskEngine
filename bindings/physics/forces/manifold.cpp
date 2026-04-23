@@ -27,7 +27,7 @@ void bind_manifold(py::module_& m) {
              py::arg("bodyA"),
              py::arg("bodyB"))
         
-        .def_static("collide", &Manifold::collide,
+        .def_static("collide", static_cast<int (*)(Rigid*, Rigid*, Contact*)>(&Manifold::collide),
                     py::arg("bodyA"),
                     py::arg("bodyB"),
                     py::arg("contacts"))

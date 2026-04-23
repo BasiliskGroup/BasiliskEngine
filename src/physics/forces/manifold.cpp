@@ -12,7 +12,20 @@ constexpr float PERSIST_THRESH_SQ      = 0.01f;   // ~0.1 units; tune to object 
 constexpr float PERSIST_NORMAL_THRESH  = 0.95f;   // ~18 degrees of normal drift allowed
 
 Manifold::Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB)
-    : Force(solver, bodyA, bodyB)
+    : Force(solver, bodyA, bodyB), hasStaticWorldShape(false)
+{
+    // register to manifold table
+    solver->getForceTable()->getManifoldTable()->insert(this);
+
+    setFmax(0, 0.0f);
+    setFmax(2, 0.0f);
+    setFmin(0, -INFINITY);
+    setFmin(2, -INFINITY);
+    solver->getForceTable()->setForceType(this->index, ForceType::MANIFOLD);
+}
+
+Manifold::Manifold(Solver* solver, Rigid* bodyA, const std::vector<glm::vec2>& worldVerticesB)
+    : Force(solver, bodyA, nullptr), staticWorldVerticesB(worldVerticesB), hasStaticWorldShape(true)
 {
     // register to manifold table
     solver->getForceTable()->getManifoldTable()->insert(this);
@@ -31,7 +44,7 @@ Manifold::~Manifold() {
 
 bool Manifold::initialize() {
     // Compute friction
-    setFriction(sqrtf(bodyA->getFriction() * bodyB->getFriction()));
+    setFriction(hasStaticWorldShape ? bodyA->getFriction() : sqrtf(bodyA->getFriction() * bodyB->getFriction()));
 
     // Store previous contact state
     Contact oldContacts[2] = { getContact(0), getContact(1) };
@@ -42,7 +55,9 @@ bool Manifold::initialize() {
 
     // Compute new contacts
     // setNumContacts();
-    setNumContacts(collide(bodyA, bodyB, &getContactRef(0)));
+    setNumContacts(hasStaticWorldShape
+        ? collide(bodyA, staticWorldVerticesB, &getContactRef(0))
+        : collide(bodyA, bodyB, &getContactRef(0)));
 
     // Merge old contact data with new contacts
     for (int i = 0; i < getNumContacts(); i++) {
@@ -88,7 +103,7 @@ bool Manifold::initialize() {
         );
 
         glm::vec2 rAW = rotate(bodyA->getPosition().z, getContact(i).rA);
-        glm::vec2 rBW = rotate(bodyB->getPosition().z, getContact(i).rB);
+        glm::vec2 worldA = glm::vec2(bodyA->getPosition().x, bodyA->getPosition().y) + rAW;
 
         // Precompute the constraint and derivatives at C(x-), since we use a truncated Taylor series for contacts (Sec 4).
         // Note that we discard the second order term, since it is insignificant for contacts
@@ -98,10 +113,18 @@ bool Manifold::initialize() {
         Contact& contact = getContactRef(i);
         contact.JAn = glm::vec3(basisRow0.x, basisRow0.y, cross(rAW, normal));
         contact.JAt = glm::vec3(basisRow1.x, basisRow1.y, cross(rAW, tangent));
-        contact.JBn = glm::vec3(-basisRow0.x, -basisRow0.y, -cross(rBW, normal));
-        contact.JBt = glm::vec3(-basisRow1.x, -basisRow1.y, -cross(rBW, tangent));
-
-        getContactRef(i).C0 = basis * (glm::vec2(bodyA->getPosition().x, bodyA->getPosition().y) + rAW - glm::vec2(bodyB->getPosition().x, bodyB->getPosition().y) - rBW) + glm::vec2(COLLISION_MARGIN, 0);
+        if (hasStaticWorldShape) {
+            // In static-world mode, rB already stores a world-space point.
+            contact.JBn = glm::vec3(0.0f);
+            contact.JBt = glm::vec3(0.0f);
+            contact.C0 = basis * (worldA - contact.rB) + glm::vec2(COLLISION_MARGIN, 0);
+        } else {
+            glm::vec2 rBW = rotate(bodyB->getPosition().z, getContact(i).rB);
+            glm::vec2 worldB = glm::vec2(bodyB->getPosition().x, bodyB->getPosition().y) + rBW;
+            contact.JBn = glm::vec3(-basisRow0.x, -basisRow0.y, -cross(rBW, normal));
+            contact.JBt = glm::vec3(-basisRow1.x, -basisRow1.y, -cross(rBW, tangent));
+            contact.C0 = basis * (worldA - worldB) + glm::vec2(COLLISION_MARGIN, 0);
+        }
     }
 
     return getNumContacts() > 0;

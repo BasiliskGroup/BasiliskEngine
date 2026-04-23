@@ -50,6 +50,7 @@ static_assert(sizeof(GpuManifoldData) % 16 == 0, "GpuManifoldData must be 16-byt
 class Manifold : public Force {
 public:
     Manifold(Solver* solver, Rigid* bodyA, Rigid* bodyB);
+    Manifold(Solver* solver, Rigid* bodyA, const std::vector<glm::vec2>& worldVerticesB);
     ~Manifold();
 
     static int rows(ForceTable* forceTable, uint32_t specialIndex);
@@ -57,8 +58,12 @@ public:
     bool initialize() override;
     static void computeConstraint(ForceTable* forceTable, uint32_t specialIndex, float alpha);
     static void computeDerivatives(ForceTable* forceTable, uint32_t specialIndex, uint32_t bodyIndex, const glm::vec3& jacobianMask);
-
+    static int collide(
+        const std::vector<glm::vec2>& worldVerticesA,
+        const std::vector<glm::vec2>& worldVerticesB,
+        Contact* contacts);
     static int collide(Rigid* bodyA, Rigid* bodyB, Contact* contacts);
+    static int collide(Rigid* bodyA, const std::vector<glm::vec2>& worldVerticesB, Contact* contacts);
     
     // Getters
     const Contact& getContact(int index) const;
@@ -72,6 +77,11 @@ public:
     void setNumContacts(int value);
     void setFriction(float value);
     void setData(const ManifoldData& value);
+
+    // NOTE this should only be used for static sand ans should be transfered to the GPU after the full migration
+private:
+    std::vector<glm::vec2> staticWorldVerticesB;
+    bool hasStaticWorldShape = false;
 };
 
 }

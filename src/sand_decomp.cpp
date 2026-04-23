@@ -12,7 +12,7 @@
 
 namespace {
 
-constexpr int SIDE_LENGTH = 100;
+constexpr int SIDE_LENGTH = 32;
 constexpr float DELTA = SIDE_LENGTH * 0.6f;
 constexpr int OCTAVES = 8;
 constexpr float VALIDATION_EPS = 1e-6f;
@@ -64,7 +64,7 @@ bool segmentsIntersect(const glm::vec2& p1, const glm::vec2& q1, const glm::vec2
     return false;
 }
 
-bool validateConvexPiece(const Convex& piece, std::string& reason) {
+bool validateConvexPiece(const BayazitConvex& piece, std::string& reason) {
     const auto& ring = piece.vertices;
     if (ring.size() < 3) {
         reason = "fewer than 3 vertices";
@@ -145,7 +145,7 @@ void addEarcutPolygonToScene(bsk::Scene2D* scene, const std::vector<glm::vec2>& 
     new bsk::Node2D(scene, mesh, mat, offset, 0.0f, glm::vec2(1.0f, 1.0f));
 }
 
-void addConvexToScene(bsk::Scene2D* scene, const Convex& convex, const glm::vec2& offset,
+void addConvexToScene(bsk::Scene2D* scene, const BayazitConvex& convex, const glm::vec2& offset,
     const bsk::Material& material)
 {
     std::vector<glm::vec2> ring = convex.vertices;
@@ -204,7 +204,7 @@ void addConvexToScene(bsk::Scene2D* scene, const Convex& convex, const glm::vec2
     new bsk::Node2D(scene, mesh, mat, offset + centroid, 0.0f, glm::vec2(1.0f));
 }
 
-void drawConnectedComponents(bsk::Scene2D* scene, const Grid& grid, const glm::vec2& offset)
+void drawConnectedComponents(bsk::Scene2D* scene, const MarchingGrid& grid, const glm::vec2& offset)
 {
     const auto& comps = grid.connectedComponents();
     const int compCount = static_cast<int>(comps.size());
@@ -235,8 +235,7 @@ void drawMarchGeometry(bsk::Scene2D* scene, const std::vector<MarchComponentGeom
 
 } // namespace
 
-int main()
-{
+int main() {
     bsk::Engine* engine = new bsk::Engine(1200, 900, "Marching Squares");
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
 
@@ -265,20 +264,15 @@ int main()
     for (int x = 0; x < SIDE_LENGTH; ++x) {
         for (int y = 0; y < SIDE_LENGTH; ++y) {
             if (weights[x][y] > 0) {
-                new bsk::Node2D(scene, nullptr, whiteMat,
-                    glm::vec2(static_cast<float>(x), static_cast<float>(y)) + perlinOffset);
+                new bsk::Node2D(scene, nullptr, whiteMat, glm::vec2(static_cast<float>(x), static_cast<float>(y)) + perlinOffset);
             }
         }
     }
 
-    Grid grid(std::move(weights));
-    drawConnectedComponents(scene, grid, glm::vec2(DELTA, DELTA));
-
+    MarchingGrid grid(std::move(weights));
+    grid.bfs();
     std::vector<MarchComponentGeometry> marchGeom = grid.genMarch();
-    validateConvexPieces(marchGeom);
     drawMarchGeometry(scene, marchGeom);
-
-    std::cout << "Done\n";
 
     while (engine->isRunning()) {
         engine->update();

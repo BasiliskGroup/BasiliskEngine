@@ -24,8 +24,9 @@ private:
     Force* forces;
     Rigid* next;
     Rigid* prev;
-    uint32_t index;
     Collider* collider;
+
+    uint32_t index;
 
     // TODO move to rigid table
     bool hasGravity = true;

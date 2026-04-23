@@ -11,23 +11,23 @@
 
 namespace bsk::internal {
 
-class Convex {
+class BayazitConvex {
 public:
     std::vector<glm::vec2> vertices;
-    Convex(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) : vertices{a, b, c} {};
+    BayazitConvex(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c) : vertices{a, b, c} {};
 };
 
 struct MarchComponentGeometry {
     std::vector<glm::vec2> filledVertices;
     std::vector<uint32_t> filledIndices;
-    std::vector<Convex> convexPieces;
+    std::vector<BayazitConvex> convexPieces;
 };
 
 // ----------------------------------------------
-// Seg
+// BayazitSeg
 // ----------------------------------------------
 
-class Seg {
+class BayazitSeg {
 private:
     std::vector<glm::vec2> chain;
     glm::vec2 bl;
@@ -36,11 +36,11 @@ private:
     friend class Polygon;
 
 public:
-    Seg(const glm::vec2& a, const glm::vec2& b) : chain{a, b}, bl(glm::min(a, b)), tr(glm::max(a, b)) {}
+    BayazitSeg(const glm::vec2& a, const glm::vec2& b) : chain{a, b}, bl(glm::min(a, b)), tr(glm::max(a, b)) {}
     
     // adding new line segments
     bool add(const glm::vec2& a, const glm::vec2& b);
-    bool merge(Seg& other);
+    bool merge(BayazitSeg& other);
     
     // preparing the segment for earcut
     bool isLoop() const;
@@ -54,10 +54,10 @@ public:
 
 class Polygon {
 private:
-    std::vector<Seg> segs;
+    std::vector<BayazitSeg> segs;
     std::vector<uint32_t> earcutIndices;
     std::vector<glm::vec2> earcutVertices;
-    std::vector<Convex> polygons;
+    std::vector<BayazitConvex> polygons;
         
 public:
     void add(const glm::vec2& a, const glm::vec2& b);
@@ -66,18 +66,18 @@ public:
     const std::vector<glm::vec2>& filledVerts() const { return earcutVertices; }
     const std::vector<uint32_t>& filledIndices() const { return earcutIndices; }
 
-    std::vector<Convex>& decompose();
+    std::vector<BayazitConvex>& decompose();
 
 private:
-    void merge(Seg& other);
+    void merge(BayazitSeg& other);
     void decomposeBayazitEntry(const std::vector<glm::vec2>& ring);
 };
 
 // ----------------------------------------------
-// Marching Grid
+// MarchingGrid
 // ----------------------------------------------
 
-class Grid {
+class MarchingGrid {
 private:
     std::vector<std::vector<int>> weights;
     std::vector<std::vector<std::pair<int, int>>> components;
@@ -106,13 +106,11 @@ private:
     }};
 
 public:
-    explicit Grid(std::vector<std::vector<int>> grid)
+    explicit MarchingGrid(std::vector<std::vector<int>> grid)
         : weights(std::move(grid))
         , width(static_cast<int>(weights.size()))
         , height(weights.empty() ? 0 : static_cast<int>(weights[0].size()))
-    {
-        bfs();
-    }
+    {}
 
     bool isInside(int x, int y) const { return x >= 0 && x < width && y >= 0 && y < height; }
     bool isValid(int x, int y) const { return isInside(x, y) && weights[x][y] == 1; }

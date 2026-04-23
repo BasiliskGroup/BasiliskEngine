@@ -7,7 +7,7 @@
 #include <basilisk/physics/cellular/color.h>
 #include <basilisk/compute/gpuWrapper.hpp>
 
-namespace bci = bsk::internal;
+namespace bsk::internal {
 
 // Must match @workgroup_size in WGSL shaders
 static constexpr int CHUNK_SIZE = 16;
@@ -49,14 +49,14 @@ private:
     bool initialized = false;
 
     // GPU storage buffers
-    bci::GpuBuffer<uint32_t>* cellsA            = nullptr; // shader reads from here
-    bci::GpuBuffer<uint32_t>* cellsB            = nullptr; // shader writes here
-    bci::GpuBuffer<uint32_t>* intent            = nullptr;
-    bci::GpuBuffer<uint32_t>* claim             = nullptr;
-    bci::GpuBuffer<uint32_t>* gpuChunkActive    = nullptr;
-    bci::GpuBuffer<uint32_t>* gpuActiveChunkList = nullptr; // compact list of active chunk indices for intent dispatch
-    bci::GpuBuffer<uint32_t>* gpuChunkIntent    = nullptr;
-    bci::GpuBuffer<uint32_t>* gpuChunkActiveOut = nullptr;
+    GpuBuffer<uint32_t>* cellsA            = nullptr; // shader reads from here
+    GpuBuffer<uint32_t>* cellsB            = nullptr; // shader writes here
+    GpuBuffer<uint32_t>* intent            = nullptr;
+    GpuBuffer<uint32_t>* claim             = nullptr;
+    GpuBuffer<uint32_t>* gpuChunkActive    = nullptr;
+    GpuBuffer<uint32_t>* gpuActiveChunkList = nullptr; // compact list of active chunk indices for intent dispatch
+    GpuBuffer<uint32_t>* gpuChunkIntent    = nullptr;
+    GpuBuffer<uint32_t>* gpuChunkActiveOut = nullptr;
 
     // All particles are read each frame but only written when created.
     // Layout must match shaders/particles.wgsl (vec2, vec2, u32 color, u32 flags).
@@ -68,12 +68,12 @@ private:
     };
     static_assert(sizeof(Particle) == 24, "Particle must match WGSL struct layout");
 
-    bci::GpuBuffer<Particle>* particlesA = nullptr;
-    bci::StagingBuffer<Particle>* particlesStaging = nullptr;
-    bci::GpuBuffer<uint32_t>* particleFreeStack = nullptr;
-    bci::GpuBuffer<uint32_t>* particleFreeCount = nullptr;
-    bci::StagingBuffer<uint32_t>* particleFreeStackStaging = nullptr;
-    bci::StagingBuffer<uint32_t>* particleFreeCountStaging = nullptr;
+    GpuBuffer<Particle>* particlesA = nullptr;
+    StagingBuffer<Particle>* particlesStaging = nullptr;
+    GpuBuffer<uint32_t>* particleFreeStack = nullptr;
+    GpuBuffer<uint32_t>* particleFreeCount = nullptr;
+    StagingBuffer<uint32_t>* particleFreeStackStaging = nullptr;
+    StagingBuffer<uint32_t>* particleFreeCountStaging = nullptr;
     std::vector<Particle> particleCpu;
     std::vector<uint32_t> particleFreeStackCpu;
     uint32_t particleFreeCountCpu = 0;
@@ -82,14 +82,14 @@ private:
     static constexpr uint32_t MAX_PARTICLES = 100'000;
 
     // Staging buffers (CPU-readable, written by encoder copy commands)
-    bci::StagingBuffer<uint32_t>* cellsStaging = nullptr; // full cell readback
-    bci::StagingBuffer<uint32_t>* chunkStaging = nullptr; // chunk_active_out readback
+    StagingBuffer<uint32_t>* cellsStaging = nullptr; // full cell readback
+    StagingBuffer<uint32_t>* chunkStaging = nullptr; // chunk_active_out readback
 
     // Shaders
-    bci::ComputeShader* intentShader   = nullptr;
-    bci::ComputeShader* resolveShader  = nullptr;
-    bci::ComputeShader* applyShader    = nullptr;
-    bci::ComputeShader* particleShader = nullptr;
+    ComputeShader* intentShader   = nullptr;
+    ComputeShader* resolveShader  = nullptr;
+    ComputeShader* applyShader    = nullptr;
+    ComputeShader* particleShader = nullptr;
 
     // Chunk helpers
     void markChunkDirty(int px, int py);
@@ -142,3 +142,5 @@ public:
 
     unsigned int getRenderTexture() { return renderTexture; }
 };
+
+}

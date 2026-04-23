@@ -22,10 +22,19 @@
          glm::vec2(0.0f, -4.0f), 0.0f, glm::vec2(20.0f, 1.0f),
          glm::vec3(0.0f), collider, -1.0f);
  
-     bsk::Joint* drag = nullptr;
+    bsk::Joint* drag = nullptr;
+    bsk::Manifold* rightClickManifold = nullptr;
     std::vector<bsk::Node2D*> contactMarkers;
  
-     while (engine->isRunning()) {
+    auto manifoldIsAlive = [&](bsk::Manifold* manifold) -> bool {
+        if (!manifold) return false;
+        for (bsk::Force* force = scene->getSolver()->getForces(); force; force = force->getNext()) {
+            if (force == manifold) return true;
+        }
+        return false;
+    };
+
+    while (engine->isRunning()) {
          engine->update();
  
          bsk::Mouse*         mouse    = engine->getMouse();
@@ -78,7 +87,33 @@
              }
          }
  
+        // --- Static test manifold ---
+        if (mouse->getRightClicked()) {
+            if (manifoldIsAlive(rightClickManifold)) {
+                delete rightClickManifold;
+            }
+            rightClickManifold = nullptr;
+            glm::vec2 local;
+            bsk::Rigid* picked = scene->getSolver()->pick(mousePos, local);
+            if (picked) {
+                std::vector<glm::vec2> worldBox = {
+                    mousePos + glm::vec2( 0.5f,  0.5f),
+                    mousePos + glm::vec2(-0.5f,  0.5f),
+                    mousePos + glm::vec2(-0.5f, -0.5f),
+                    mousePos + glm::vec2( 0.5f, -0.5f)
+                };
+                rightClickManifold = new bsk::Manifold(scene->getSolver(), picked, worldBox);
+            }
+        }
+        if (mouse->getRightReleased() && manifoldIsAlive(rightClickManifold)) {
+            delete rightClickManifold;
+            rightClickManifold = nullptr;
+        }
+
         scene->update();
+        if (!manifoldIsAlive(rightClickManifold)) {
+            rightClickManifold = nullptr;
+        }
 
         // Rebuild contact markers every frame.
         for (bsk::Node2D* marker : contactMarkers) delete marker;
@@ -90,13 +125,13 @@
 
             bsk::Rigid* bodyA = manifold->getBodyA();
             bsk::Rigid* bodyB = manifold->getBodyB();
-            if (!bodyA || !bodyB) continue;
+            if (!bodyA) continue;
 
             const int numContacts = manifold->getNumContacts();
             for (int i = 0; i < numContacts; ++i) {
                 const auto& c = manifold->getContact(i);
                 glm::vec2 worldA = bsk::internal::transform(bodyA->getPosition(), c.rA);
-                glm::vec2 worldB = bsk::internal::transform(bodyB->getPosition(), c.rB);
+                glm::vec2 worldB = bodyB ? bsk::internal::transform(bodyB->getPosition(), c.rB) : c.rB;
 
                 bsk::Node2D* markerA = new bsk::Node2D(
                     scene, nullptr, material,
@@ -118,6 +153,7 @@
          engine->render();
      }
  
+    if (manifoldIsAlive(rightClickManifold)) delete rightClickManifold;
     for (bsk::Node2D* marker : contactMarkers) delete marker;
      delete collider;
      delete scene;

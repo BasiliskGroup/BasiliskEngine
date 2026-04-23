@@ -5,7 +5,7 @@ namespace bsk::internal {
 namespace {
 constexpr float RAY_EPS = 1e-5f;
 constexpr float BAYAZIT_EPS = 1e-6f;
-constexpr int BAYAZIT_MAX_RECURSION = 128;
+constexpr int BAYAZIT_MAX_RECURSION = 32;
 
 std::vector<glm::vec2> toOpenRing(const std::vector<glm::vec2>& chain) {
     std::vector<glm::vec2> ring = chain;
@@ -232,16 +232,16 @@ std::vector<glm::vec2> slicePoly(const std::vector<glm::vec2>& poly, int i, int 
     return out;
 }
 
-void emitConvexPiece(const std::vector<glm::vec2>& piece, std::vector<Convex>& outPieces) {
+void emitConvexPiece(const std::vector<glm::vec2>& piece, std::vector<BayazitConvex>& outPieces) {
     if (piece.size() < 3) {
         return;
     }
-    Convex c(piece[0], piece[1], piece[2]);
+    BayazitConvex c(piece[0], piece[1], piece[2]);
     c.vertices = piece;
     outPieces.push_back(std::move(c));
 }
 
-void bayazitDecompose(const std::vector<glm::vec2>& poly, std::vector<Convex>& outPieces, int depth) {
+void bayazitDecompose(const std::vector<glm::vec2>& poly, std::vector<BayazitConvex>& outPieces, int depth) {
     if (poly.size() < 3 || depth > BAYAZIT_MAX_RECURSION) {
         return;
     }
@@ -373,10 +373,10 @@ void bayazitDecompose(const std::vector<glm::vec2>& poly, std::vector<Convex>& o
 } // anonymous namespace
 
 // ----------------------------------------------
-// Seg
+// BayazitSeg
 // ----------------------------------------------
 
-bool Seg::add(const glm::vec2& a, const glm::vec2& b) {
+bool BayazitSeg::add(const glm::vec2& a, const glm::vec2& b) {
     if (glm::length(a - b) >= 2.0f) {
         return false;
     }
@@ -392,7 +392,7 @@ bool Seg::add(const glm::vec2& a, const glm::vec2& b) {
     return true;
 }
 
-bool Seg::merge(Seg& other) {
+bool BayazitSeg::merge(BayazitSeg& other) {
     // Merge two chains when their endpoints touch.
     if (vec2Eq(chain.front(), other.chain.front())) {
         std::reverse(chain.begin(), chain.end());
@@ -419,13 +419,13 @@ bool Seg::merge(Seg& other) {
     return true;
 }
 
-bool Seg::isLoop() const {
+bool BayazitSeg::isLoop() const {
     // Earcut expects closed rings (first point duplicated at end).
     if (chain.size() < 3) return false;
     return vec2Eq(chain.front(), chain.back());
 }
 
-float Seg::signedArea() const {
+float BayazitSeg::signedArea() const {
     float area = 0.0f;
     for (size_t i = 0; i + 1 < chain.size(); ++i) {
         const auto& p = chain[i];
@@ -435,7 +435,7 @@ float Seg::signedArea() const {
     return 0.5f * area;
 }
 
-bool Seg::orientCCW() {
+bool BayazitSeg::orientCCW() {
     if (!isLoop()) return false;
 
     float area = signedArea();
@@ -457,7 +457,7 @@ void Polygon::add(const glm::vec2& a, const glm::vec2& b) {
         if (!segs[i].add(a, b)) {
             continue;
         }
-        Seg merged = segs[i];
+        BayazitSeg merged = segs[i];
         segs.erase(segs.begin() + static_cast<std::ptrdiff_t>(i));
         merge(merged);
         return;
@@ -465,12 +465,12 @@ void Polygon::add(const glm::vec2& a, const glm::vec2& b) {
     segs.emplace_back(a, b);
 }
 
-void Polygon::merge(Seg& other) {
+void Polygon::merge(BayazitSeg& other) {
     for (std::size_t i = 0; i < segs.size(); ++i) {
         if (!segs[i].merge(other)) {
             continue;
         }
-        Seg merged = segs[i];
+        BayazitSeg merged = segs[i];
         segs.erase(segs.begin() + static_cast<std::ptrdiff_t>(i));
         merge(merged);
         return;
@@ -483,7 +483,7 @@ void Polygon::earcut() {
         return;
     }
 
-    std::vector<Seg> rings = segs;
+    std::vector<BayazitSeg> rings = segs;
 
     // Largest ring is treated as the outer shell.
     std::size_t outerIdx = 0;
@@ -570,13 +570,13 @@ void Polygon::decomposeBayazitEntry(const std::vector<glm::vec2>& ring) {
     bayazitDecompose(poly, polygons, 0);
 }
 
-std::vector<Convex>& Polygon::decompose() {
+std::vector<BayazitConvex>& Polygon::decompose() {
     polygons.clear();
 
     std::vector<std::vector<glm::vec2>> rings;
     rings.reserve(segs.size());
 
-    for (const Seg& seg : segs) {
+    for (const BayazitSeg& seg : segs) {
         if (!seg.isLoop()) {
             continue;
         }
@@ -628,10 +628,10 @@ std::vector<Convex>& Polygon::decompose() {
 }
 
 // ----------------------------------------------
-// Marching Grid
+// MarchingGrid
 // ----------------------------------------------
 
-void Grid::bfs() {
+void MarchingGrid::bfs() {
     components.clear();
     std::unordered_set<int> unvisited;
     unvisited.reserve(width * height);
@@ -679,7 +679,7 @@ void Grid::bfs() {
     }
 }
 
-std::vector<MarchComponentGeometry> Grid::genMarch() {
+std::vector<MarchComponentGeometry> MarchingGrid::genMarch() {
     std::vector<MarchComponentGeometry> out;
     out.reserve(components.size());
 
@@ -716,8 +716,6 @@ std::vector<MarchComponentGeometry> Grid::genMarch() {
         geom.filledVertices = polygon.filledVerts();
         geom.filledIndices = polygon.filledIndices();
         geom.convexPieces = std::move(polygon.decompose());
-        std::cout << geom.convexPieces.size()
-                  << " convex piece(s)\n";
         ++componentIndex;
         out.push_back(std::move(geom));
     }

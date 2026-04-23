@@ -44,6 +44,7 @@
 #include "physics/forces/motor.h"
 #include "physics/forces/manifold.h"
 #include "physics/collision/collider.h"
+#include "physics/cellular/cellBuffer.h"
 
 namespace bsk {
     // render
@@ -69,6 +70,7 @@ namespace bsk {
     using Spring = internal::Spring;
     using Motor = internal::Motor;
     using Collider = internal::Collider;
+    using CellBuffer = internal::CellBuffer;
 
     // render
     using Mesh = internal::Mesh;

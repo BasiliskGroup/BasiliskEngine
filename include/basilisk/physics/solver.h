@@ -28,6 +28,7 @@ class Force;
 class ColliderTable;
 class BodyTable;
 class ForceTable;
+class CellBuffer;
 template<typename T> class ForceTypeTable;
 struct ThreadScratch;
 struct WorkRange;
@@ -82,14 +83,8 @@ private:
     // shaders
     ComputeShader* velocityShader = nullptr;
 
-    // struct Color {
-    //     std::vector<ColorBody> bodies;
-    //     std::vector<ColorForce> forces;
-    // };
-
-    // std::vector<Color> colors;
-    // std::vector<std::vector<ColorBody>> colorGroups;
-    // std::vector<std::vector<ColorForce>> forceEdgeIndices;
+    // cellular
+    CellBuffer* cellBuffer;
 
 public:
     Solver();
@@ -109,6 +104,7 @@ public:
     static ColliderTable* getColliderTable() { return colliderTable.get(); }
     BodyTable* getBodyTable() const { return bodyTable; }
     ForceTable* getForceTable() const { return forceTable; }
+    CellBuffer* getCellBuffer() const { return cellBuffer; }
     Rigid* getBodies() const { return bodies; }
     Force* getForces() const { return forces; }
     int getNumRigids() const { return numRigids; }

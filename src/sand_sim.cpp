@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
-#include <basilisk/physics/cellular/cellBuffer.h>
 #include <basilisk/basilisk.h>
 
 float CELL_SCALE(0.1f);
@@ -25,8 +24,8 @@ static std::array<unsigned char, 3> baseBrushColorForMaterial(unsigned char mat_
         case 9:  return {185u, 215u, 230u};  // GLASS
         case 10: return {155u, 160u, 170u};  // METAL
         case 11: return {70u,  150u, 170u};  // PLASTIC
-        case 12: return {200u, 200u, 200u}; // SNOW
-        case 13: return {170u, 170u, 170u}; // VAPOR
+        case 12: return {200u, 200u, 200u};  // SNOW
+        case 13: return {170u, 170u, 170u};  // VAPOR
 
         default: return {90u,  90u,  90u};
     }
@@ -49,11 +48,8 @@ static Color rainbowBrushColor(unsigned char mat_id, bool on_fire) {
     );
 }
 
-const int BUFFER_WIDTH  = 505;
-const int BUFFER_HEIGHT = 505;
 const int WINDOW_WIDTH  = 800;
 const int WINDOW_HEIGHT = 800;
-const int BRUSH_RADIUS  = BUFFER_HEIGHT / 50;
 
 // Highest base material index selectable with arrow keys (wraps 0..MAX_MATERIAL_ID).
 // Bit 4 (value 16) of the packed material field is reserved for the "static" property.
@@ -65,14 +61,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-static void initializeBuffer(CellBuffer& cellBuffer) {
-    for (int y = 0; y < cellBuffer.getHeight(); ++y) {
-        for (int x = 0; x < cellBuffer.getWidth(); ++x) {
-            cellBuffer.setActivePixel(x, y, Color::Empty());
-        }
-    }
-}
-
 int main() {
     bsk::Engine* engine = new bsk::Engine(WINDOW_WIDTH, WINDOW_HEIGHT, "Sand Simulation", false, false);
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
@@ -81,17 +69,12 @@ int main() {
     bsk::Node2D* node = new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f), 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider, 1.0f, 0.5f);
     ((bsk::Camera2D*)scene->getCamera())->setSpeed(30.0f);
 
-    CellBuffer cellBuffer(BUFFER_WIDTH, BUFFER_HEIGHT, CELL_SCALE);
-    if (!cellBuffer.initialize("shaders/physics/vertex.glsl", "shaders/physics/fragment.glsl")) {
-        std::cerr << "Failed to initialize CellBuffer" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
+    bsk::CellBuffer* cellBuffer = scene->getSolver()->getCellBuffer();
+    int bufferWidth = cellBuffer->getWidth();
+    int bufferHeight = cellBuffer->getHeight();
 
     // Set up GPU compute for sand sim
-    cellBuffer.initializeCompute();
-
-    initializeBuffer(cellBuffer);
+    cellBuffer->initializeCompute();
 
     unsigned char mat_id = 1;
     bool particleMode = false;
@@ -103,7 +86,7 @@ int main() {
     auto nextFrameTime = clock::now();
 
     bsk::Shader* sandShader = new bsk::Shader("shaders/sand.vert", "shaders/sand.frag");
-    bsk::Frame* sandFrame = new bsk::Frame(engine, sandShader, cellBuffer.getWidth(), cellBuffer.getHeight());
+    bsk::Frame* sandFrame = new bsk::Frame(engine, sandShader, cellBuffer->getWidth(), cellBuffer->getHeight());
     
     int enabled = glfwGetWindowAttrib(engine->getWindow()->getWindow(), GLFW_COCOA_RETINA_FRAMEBUFFER);
     std::cout << "Retina enabled: " << enabled << std::endl;
@@ -138,16 +121,16 @@ int main() {
         glm::vec2 bl, tr;
         int br_x, br_y, tr_x, tr_y;
         node->getRigid()->getAABB(bl, tr);
-        cellBuffer.worldToPixel(bl, br_x, br_y);
-        cellBuffer.worldToPixel(tr, tr_x, tr_y);
+        cellBuffer->worldToPixel(bl, br_x, br_y);
+        cellBuffer->worldToPixel(tr, tr_x, tr_y);
 
         Color aabbColor = Color::White();
         aabbColor.mat_id = static_cast<unsigned char>((aabbColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
 
-        cellBuffer.applyBrush(br_x, br_y, 1, aabbColor);
-        cellBuffer.applyBrush(tr_x, tr_y, 1, aabbColor);
-        cellBuffer.applyBrush(br_x, tr_y, 1, aabbColor);
-        cellBuffer.applyBrush(tr_x, br_y, 1, aabbColor);
+        cellBuffer->applyBrush(br_x, br_y, 1, aabbColor);
+        cellBuffer->applyBrush(tr_x, tr_y, 1, aabbColor);
+        cellBuffer->applyBrush(br_x, tr_y, 1, aabbColor);
+        cellBuffer->applyBrush(tr_x, br_y, 1, aabbColor);
 
         // Left mouse draws sand or spawns particles
         if (engine->getMouse()->getLeftDown()) {
@@ -157,13 +140,13 @@ int main() {
             );
 
             int pixelX, pixelY;
-            cellBuffer.worldToPixel(mouseWorld, pixelX, pixelY);
+            cellBuffer->worldToPixel(mouseWorld, pixelX, pixelY);
             
-            if (pixelX >= 0 && pixelX < BUFFER_WIDTH && pixelY >= 0 && pixelY < BUFFER_HEIGHT) {
+            if (pixelX >= 0 && pixelX < bufferWidth && pixelY >= 0 && pixelY < bufferHeight) {
                 Color brushColor = rainbowBrushColor(mat_id, fireMode);
                 brushColor.mat_id = static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
-                if (particleMode) cellBuffer.applyParticleBrush(pixelX, pixelY, BRUSH_RADIUS, 64, brushColor);
-                else cellBuffer.applyBrush(pixelX, pixelY, BRUSH_RADIUS, brushColor);
+                if (particleMode) cellBuffer->applyParticleBrush(pixelX, pixelY, bufferHeight / 50, 64, brushColor);
+                else cellBuffer->applyBrush(pixelX, pixelY, bufferHeight / 50, brushColor);
             }
         }
 
@@ -171,21 +154,20 @@ int main() {
         cameraPos = scene->getCamera()->getPosition();
 
         // upadte buffer
-        cellBuffer.simulate();
-        cellBuffer.updateTexture();
+        cellBuffer->simulate();
+        cellBuffer->updateTexture();
 
         // render everything
         scene->render();
-        int scaleX = (int)((BUFFER_WIDTH * WINDOW_WIDTH   * CELL_SCALE) / cameraScale.x);
-        int scaleY = (int)((BUFFER_HEIGHT * WINDOW_HEIGHT * CELL_SCALE) / cameraScale.y);
+        int scaleX = (int)((bufferWidth * WINDOW_WIDTH   * CELL_SCALE) / cameraScale.x);
+        int scaleY = (int)((bufferHeight * WINDOW_HEIGHT * CELL_SCALE) / cameraScale.y);
         sandFrame->render(
-            cellBuffer.getRenderTexture(), 
+            cellBuffer->getRenderTexture(), 
             -scaleX / 2.0f + WINDOW_WIDTH  / 2.0f - cameraPos.x * (WINDOW_WIDTH / cameraScale.x ), 
             -scaleY / 2.0f + WINDOW_HEIGHT / 2.0f - cameraPos.y * (WINDOW_HEIGHT / cameraScale.y), 
             scaleX, 
             scaleY);
         engine->render();
-
     }
 
     delete scene;
