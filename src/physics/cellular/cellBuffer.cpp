@@ -264,8 +264,16 @@ void CellBuffer::setBackPixel(int x, int y, const Color& color) {
         getBackBuffer()[y * width + x] = color;
 }
 Color CellBuffer::getActivePixel(int x, int y) const {
-    if (x >= 0 && x < width && y >= 0 && y < height)
-        return getActiveBuffer()[y * width + x];
+    if (x >= 0 && x < width && y >= 0 && y < height) {
+        const size_t idx = static_cast<size_t>(y) * static_cast<size_t>(width) + static_cast<size_t>(x);
+
+        // In compute mode, simulation state lives on GPU and is mirrored into gpuCellScratch via staging readback.
+        if (computeInitialized && idx < gpuCellScratch.size()) {
+            return unpackCell(gpuCellScratch[idx]);
+        }
+
+        return getActiveBuffer()[idx];
+    }
     return Color::Empty();
 }
 Color CellBuffer::getBackPixel(int x, int y) const {

@@ -64,9 +64,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 int main() {
     bsk::Engine* engine = new bsk::Engine(WINDOW_WIDTH, WINDOW_HEIGHT, "Sand Simulation", false, false);
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
-    scene->setCamera(new bsk::Camera2D(engine, glm::vec2(0.0f), 50.0f));
+    scene->setCamera(new bsk::Camera2D(engine, glm::vec2(0.0f), 20.0f));
     bsk::Collider* collider = new bsk::Collider({{0.5f, 0.5f}, {-0.5f, 0.5f}, {-0.5f, -0.5f}, {0.5f, -0.5f}});
-    bsk::Node2D* node = new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f), 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider, 1.0f, 0.5f);
+    // bsk::Node2D* node = new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f), 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider, 1.0f, 0.5f);
     ((bsk::Camera2D*)scene->getCamera())->setSpeed(30.0f);
 
     bsk::CellBuffer* cellBuffer = scene->getSolver()->getCellBuffer();
@@ -98,39 +98,39 @@ int main() {
     while (engine->isRunning()) {
         engine->update();
         scene->update();
-        
 
-        if (engine->getKeyboard()->getPressed(bsk::Key::K_SPACE)) {
+        bsk::Mouse*         mouse    = engine->getMouse();
+        bsk::Keyboard*      keyboard = engine->getKeyboard();
+
+        glm::vec2 mousePos = {
+            static_cast<float>(mouse->getWorldX(scene->getCamera())),
+            static_cast<float>(mouse->getWorldY(scene->getCamera()))
+        };
+
+        if (keyboard->getPressed(bsk::Key::K_SPACE)) {
             particleMode = !particleMode;
             std::cout << "Brush mode: " << (particleMode ? "particles" : "cells") << std::endl;
         }
 
         // F key toggles fire mode — newly spawned cells will have on_fire bit set
-        if (engine->getKeyboard()->getPressed(bsk::Key::K_F)) {
+        if (keyboard->getPressed(bsk::Key::K_F)) {
             fireMode = !fireMode;
             std::cout << "Fire mode: " << (fireMode ? "ON" : "OFF") << std::endl;
         }
 
         // S key toggles static mode — newly spawned cells will have static material bit set
-        if (engine->getKeyboard()->getPressed(bsk::Key::K_S)) {
+        if (keyboard->getPressed(bsk::Key::K_Z)) {
             staticMode = !staticMode;
             std::cout << "Static mode: " << (staticMode ? "ON" : "OFF") << std::endl;
         }
 
-        // plot node aabb
-        glm::vec2 bl, tr;
-        int br_x, br_y, tr_x, tr_y;
-        node->getRigid()->getAABB(bl, tr);
-        cellBuffer->worldToPixel(bl, br_x, br_y);
-        cellBuffer->worldToPixel(tr, tr_x, tr_y);
-
-        Color aabbColor = Color::White();
-        aabbColor.mat_id = static_cast<unsigned char>((aabbColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
-
-        cellBuffer->applyBrush(br_x, br_y, 1, aabbColor);
-        cellBuffer->applyBrush(tr_x, tr_y, 1, aabbColor);
-        cellBuffer->applyBrush(br_x, tr_y, 1, aabbColor);
-        cellBuffer->applyBrush(tr_x, br_y, 1, aabbColor);
+        // --- Spawn / Delete ---
+        if (keyboard->getPressed(bsk::Key::K_B)) {
+            bsk::Node2D* node = new bsk::Node2D(nullptr, nullptr,
+                mousePos, 0.0f, glm::vec2(1.0f, 1.0f),
+                glm::vec3(0.0f), collider);
+            scene->add(node);
+        }
 
         // Left mouse draws sand or spawns particles
         if (engine->getMouse()->getLeftDown()) {
@@ -146,7 +146,7 @@ int main() {
                 Color brushColor = rainbowBrushColor(mat_id, fireMode);
                 brushColor.mat_id = static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
                 if (particleMode) cellBuffer->applyParticleBrush(pixelX, pixelY, bufferHeight / 50, 64, brushColor);
-                else cellBuffer->applyBrush(pixelX, pixelY, bufferHeight / 50, brushColor);
+                else cellBuffer->applyBrush(pixelX, pixelY, bufferHeight / 100, brushColor);
             }
         }
 

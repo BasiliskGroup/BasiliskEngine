@@ -33,6 +33,7 @@ public:
 
     uint32_t getForceIndex(uint32_t typeTableIndex) const { return indexMap[typeTableIndex]; }
     Force* getForce(uint32_t typeTableIndex) const { return forces[typeTableIndex]; }
+    bool isDeleted(uint32_t typeTableIndex) const { return toDelete[typeTableIndex]; }
     T& getData(uint32_t typeTableIndex) { return data[typeTableIndex]; }
 
     uint32_t getSize() const { return size; }

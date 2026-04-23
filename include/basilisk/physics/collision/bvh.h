@@ -2,7 +2,7 @@
 #define BSK_BVH_H
 
 #include <basilisk/util/includes.h>
-#include <basilisk/physics/collision/primative.h>
+#include <basilisk/physics/collision/primitive.h>
 
 namespace bsk::internal {
 
@@ -10,9 +10,9 @@ class Rigid;
 
 class BVH {
 private: 
-    Primative* root;
+    Primitive* root;
     uint32_t size;
-    std::unordered_map<Rigid*, Primative*> primatives;
+    std::unordered_map<Rigid*, Primitive*> primitives;
     int rebuildTimer;
 
 public:
@@ -41,7 +41,8 @@ public:
     glm::vec2 computeGravity(Rigid* rigid);
     
     // Debug/visualization
-    std::vector<PrimativeInfo> getAllPrimatives() const;
+    std::vector<PrimitiveInfo> getAllPrimitives() const;
+    void getSandAABB(Rigid* rigid, glm::vec2& bl, glm::vec2& tr) const;
 };
 
 }

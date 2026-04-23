@@ -1,11 +1,11 @@
-#include <basilisk/physics/collision/primative.h>
+#include <basilisk/physics/collision/primitive.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/util/maths.h>
 #include <basilisk/util/constants.h>
 
 namespace bsk::internal {
 
-Primative::Primative(glm::vec2 bl, glm::vec2 tr, Rigid* rigid) :
+Primitive::Primitive(glm::vec2 bl, glm::vec2 tr, Rigid* rigid) :
     bl(bl - BVH_MARGIN), 
     tr(tr + BVH_MARGIN),
     parent(nullptr), 
@@ -19,7 +19,7 @@ Primative::Primative(glm::vec2 bl, glm::vec2 tr, Rigid* rigid) :
     updateArea();
 }
 
-Primative::Primative(Primative* left, Primative* right) :
+Primitive::Primitive(Primitive* left, Primitive* right) :
     left(left), 
     right(right), 
     parent(nullptr), 
@@ -35,7 +35,7 @@ Primative::Primative(Primative* left, Primative* right) :
     right->setParent(this);
 }
 
-Primative::~Primative() {
+Primitive::~Primitive() {
     // Only delete children if this node owns them (they're still attached)
     if (left != nullptr) { 
         delete left; 
@@ -50,56 +50,56 @@ Primative::~Primative() {
     rigid = nullptr;
 }
 
-void Primative::updateArea() {
+void Primitive::updateArea() {
     area = AABBArea(bl, tr);
 }
 
-void Primative::updateBound() {
+void Primitive::updateBound() {
     bl = glm::min(left->bl, right->bl);
     tr = glm::max(left->tr, right->tr);
 }
 
-Primative* Primative::getSibling() const {
+Primitive* Primitive::getSibling() const {
     if (parent == nullptr) return nullptr;
     return parent->getSibling(this);
 }
 
-Primative* Primative::getSibling(const Primative* primative) const {
-    if (left == primative) return right;
-    if (right == primative) return left;
-    return nullptr;  // primative is not a child
+Primitive* Primitive::getSibling(const Primitive* primitive) const {
+    if (left == primitive) return right;
+    if (right == primitive) return left;
+    return nullptr;  // primitive is not a child
 }
 
-bool Primative::intersects(const Primative& other) const {
+bool Primitive::intersects(const Primitive& other) const {
     return AABBIntersect(bl, tr, other.bl, other.tr);
 }
 
-bool Primative::contains(const glm::vec2& point) const {
+bool Primitive::contains(const glm::vec2& point) const {
     return AABBContains(bl, tr, point);
 }
 
-std::pair<float, Primative*> Primative::findbestSibling(Primative* primative, float inherited) {
+std::pair<float, Primitive*> Primitive::findbestSibling(Primitive* primitive, float inherited) {
     // compute lowest cost and determine if children are a viable option
-    float unionArea = AABBArea(bl, tr, primative->bl, primative->tr);
+    float unionArea = AABBArea(bl, tr, primitive->bl, primitive->tr);
     float cBest = unionArea + inherited;
     float dArea = unionArea - area;
-    float cLow = primative->area + dArea + inherited;
+    float cLow = primitive->area + dArea + inherited;
 
     // dense tree, only check one side
-    Primative* bestSibling = this;
+    Primitive* bestSibling = this;
     if (left == nullptr || cLow > cBest) return { cBest, bestSibling };
 
     // investigate children
-    auto [cLeft, leftSibling] = left->findbestSibling(primative, inherited + dArea);
+    auto [cLeft, leftSibling] = left->findbestSibling(primitive, inherited + dArea);
     if (cLeft < cBest) { cBest = cLeft; bestSibling = leftSibling; }
 
-    auto [cRight, rightSibling] = right->findbestSibling(primative, inherited + dArea);
+    auto [cRight, rightSibling] = right->findbestSibling(primitive, inherited + dArea);
     if (cRight < cBest) { cBest = cRight; bestSibling = rightSibling; }
 
     return { cBest, bestSibling };
 }
 
-void Primative::query(const glm::vec2& bl, const glm::vec2& tr, std::vector<Rigid*>& results) const {
+void Primitive::query(const glm::vec2& bl, const glm::vec2& tr, std::vector<Rigid*>& results) const {
     if (left == nullptr) {
         results.push_back(rigid);
         return;
@@ -114,7 +114,7 @@ void Primative::query(const glm::vec2& bl, const glm::vec2& tr, std::vector<Rigi
     }
 }
 
-void Primative::query(const glm::vec2& point, std::vector<Rigid*>& results) const {
+void Primitive::query(const glm::vec2& point, std::vector<Rigid*>& results) const {
     if (left == nullptr) {
         results.push_back(rigid);
         return;
@@ -129,7 +129,7 @@ void Primative::query(const glm::vec2& point, std::vector<Rigid*>& results) cons
     }
 }
 
-void Primative::swapChild(Primative* child, Primative* newChild) {
+void Primitive::swapChild(Primitive* child, Primitive* newChild) {
     if (left == child) {
         left = newChild;
     } else {
@@ -139,7 +139,7 @@ void Primative::swapChild(Primative* child, Primative* newChild) {
     // Note: old child's parent is not nullified - caller should handle if needed
 }
 
-void Primative::refitUpward() {
+void Primitive::refitUpward() {
     // For leaf nodes, bounds are already set, just update area
     // For internal nodes, update bounds from children
     if (isLeaf()) {
@@ -155,20 +155,20 @@ void Primative::refitUpward() {
     }
 }
 
-void Primative::getAllPrimatives(std::vector<PrimativeInfo>& results, int level) const {
-    // Add this primative
+void Primitive::getAllPrimitives(std::vector<PrimitiveInfo>& results, int level) const {
+    // Add this primitive
     results.push_back({bl, tr, level});
     
     // Recursively add children
     if (left != nullptr) {
-        left->getAllPrimatives(results, level + 1);
+        left->getAllPrimitives(results, level + 1);
     }
     if (right != nullptr) {
-        right->getAllPrimatives(results, level + 1);
+        right->getAllPrimitives(results, level + 1);
     }
 }
 
-void Primative::computeMassProperties() {
+void Primitive::computeMassProperties() {
     if (isLeaf()) {
         mass = rigid->getMass();
         com = rigid->getPosition();
@@ -182,7 +182,7 @@ void Primative::computeMassProperties() {
     radius = 0.5f * glm::length(tr - bl);
 }
 
-glm::vec2 Primative::computeGravity(Rigid* rigid) {
+glm::vec2 Primitive::computeGravity(Rigid* rigid) {
     if (isLeaf() && this->rigid == rigid) {
         return glm::vec2(0.0f);
     }

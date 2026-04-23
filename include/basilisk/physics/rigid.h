@@ -16,6 +16,8 @@ class Manifold;
 struct CollisionPair;
 struct CollisionData;
 
+// constexpr float SAND_MARGIN = 0.25;
+
 // Holds all the state for a single rigid body that is needed by AVBD
 class Rigid {
 private:
@@ -37,6 +39,13 @@ private:
     std::vector<bool> usedColors;
     bool resolvesCollisions = true;
     int collisionGroup = 0;
+
+    // sand nonsense
+    std::vector<glm::vec2> staticWorldVerticesB;
+    // struct SandAABB {
+    //     glm::vec2 bl;
+    //     glm::vec2 tr;
+    // } sandAABB;
 
 public:
     Rigid(Solver* solver, Node2D* node, Collider* collider, glm::vec3 position, glm::vec2 size, float density, float friction, glm::vec3 velocity);

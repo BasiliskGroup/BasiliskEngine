@@ -14,6 +14,7 @@
 #include <basilisk/util/fileHandling.h>
 #include <basilisk/compute/uniforms.hpp>
 #include <basilisk/physics/cellular/cellBuffer.h>
+#include <basilisk/physics/cellular/marching.h>
 
 
 namespace bsk::internal {
@@ -223,6 +224,71 @@ void Solver::step(float dtIncoming) {
     }
 
     // sand collision
+    // 1. iterate through all bodies
+    // 2. collect sand from AABB
+    // 3. turn sand into world vertices
+    // 4. create manifold with rigid and all convex comps
+    std::vector<uint32_t> sandManifoldIndices;
+    const float cellScale = cellBuffer->getCellScale();
+    const float halfWidth = static_cast<float>(cellBuffer->getWidth()) * 0.5f;
+    const float halfHeight = static_cast<float>(cellBuffer->getHeight()) * 0.5f;
+
+    for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
+        if (body->getMass() <= 0.0f) continue;
+
+        // get pixel-space AABB
+        glm::vec2 bl, tr;
+        bodyTable->getBVH()->getSandAABB(body, bl, tr);
+
+        int bl_x, bl_y, tr_x, tr_y;
+        cellBuffer->worldToPixel(bl, bl_x, bl_y);
+        cellBuffer->worldToPixel(tr, tr_x, tr_y);
+
+        if (bl_x > tr_x) std::swap(bl_x, tr_x);
+        if (bl_y > tr_y) std::swap(bl_y, tr_y);
+
+        bl_x = glm::clamp(bl_x, 0, cellBuffer->getWidth() - 1);
+        tr_x = glm::clamp(tr_x, 0, cellBuffer->getWidth() - 1);
+        bl_y = glm::clamp(bl_y, 0, cellBuffer->getHeight() - 1);
+        tr_y = glm::clamp(tr_y, 0, cellBuffer->getHeight() - 1);
+
+        if (bl_x > tr_x || bl_y > tr_y) continue;
+
+        // collect sand from AABB
+        std::vector<std::vector<int>> sand(tr_x - bl_x + 1, std::vector<int>(tr_y - bl_y + 1, 0));
+        for (int x = bl_x; x <= tr_x; x++) {
+            for (int y = bl_y; y <= tr_y; y++) {
+                Color color = cellBuffer->getActivePixel(x, y);
+                if (color.mat_id != 0) {
+                    sand[x - bl_x][y - bl_y] = 1;
+                }
+            }
+        }
+
+        MarchingGrid grid(std::move(sand));
+        grid.bfs();
+        std::vector<MarchComponentGeometry> marchGeom = grid.genMarch();
+
+        // create manifold with rigid and all convex comps
+        for (const MarchComponentGeometry& geom : marchGeom) {
+            for (const BayazitConvex& convex : geom.convexPieces) {
+                if (convex.vertices.size() < 3) continue;
+
+                std::vector<glm::vec2> worldVertices;
+                worldVertices.reserve(convex.vertices.size());
+
+                for (const glm::vec2& v : convex.vertices) {
+                    // Marching output is local-to-AABB in pixel units.
+                    const float px = static_cast<float>(bl_x) + v.x;
+                    const float py = static_cast<float>(bl_y) + v.y;
+                    worldVertices.emplace_back((px - halfWidth) * cellScale, (py - halfHeight) * cellScale);
+                }
+
+                Manifold* manifold = new Manifold(this, body, worldVertices);
+                sandManifoldIndices.push_back(manifold->getSpecialIndex());
+            }
+        }
+    }
 
     // Initialize and warmstart forces
     for (Force* force = forces; force != nullptr;) {
@@ -309,6 +375,22 @@ void Solver::step(float dtIncoming) {
             bodyTable->updateVelocities(dt);
         }
     }
+
+    // 5. delete all sand manifolds
+    ForceTypeTable<ManifoldData>* manifoldTable = forceTable->getManifoldTable();
+    for (uint32_t specialIndex : sandManifoldIndices) {
+        if (specialIndex >= manifoldTable->getSize()) continue;
+        if (manifoldTable->isDeleted(specialIndex)) continue;
+
+        Force* force = manifoldTable->getForce(specialIndex);
+        Manifold* manifold = dynamic_cast<Manifold*>(force);
+        if (manifold == nullptr) continue;
+
+        // Only clean up transient static-world manifolds created for sand.
+        if (manifold->getBodyB() != nullptr) continue;
+        delete manifold;
+    }
+    sandManifoldIndices.clear();
 }
 
 // Coloring

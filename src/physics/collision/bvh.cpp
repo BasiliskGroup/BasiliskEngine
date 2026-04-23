@@ -26,26 +26,26 @@ void BVH::update() {
 void BVH::insert(Rigid* rigid) {
     if (rigid == nullptr) return;
 
-    // create primative for the rigid
+    // create primitive for the rigid
     glm::vec2 bl, tr;
     rigid->getAABB(bl, tr);
-    Primative* primative = new Primative(bl, tr, rigid);
-    primatives[rigid] = primative;
+    Primitive* primitive = new Primitive(bl, tr, rigid);
+    primitives[rigid] = primitive;
 
-    // if the tree is empty, set the root to the primative
+    // if the tree is empty, set the root to the primitive
     if (root == nullptr) {
-        root = primative;
+        root = primitive;
         size = 1;
         return;
     }
 
-    // Find the best sibling to attach the new primative to
-    auto [cost, sibling] = root->findbestSibling(primative, 0.0f);
-    Primative* oldParent = sibling->getParent();
+    // Find the best sibling to attach the new primitive to
+    auto [cost, sibling] = root->findbestSibling(primitive, 0.0f);
+    Primitive* oldParent = sibling->getParent();
     
-    // Create new parent node containing sibling and the new primative
+    // Create new parent node containing sibling and the new primitive
     // This constructor sets sibling->parent = newParent
-    Primative* newParent = new Primative(sibling, primative);
+    Primitive* newParent = new Primitive(sibling, primitive);
     
     if (sibling == root) {
         // Sibling is root, so newParent becomes the new root
@@ -63,23 +63,23 @@ void BVH::insert(Rigid* rigid) {
 void BVH::remove(Rigid* rigid) {
     if (rigid == nullptr) return;
 
-    auto it = primatives.find(rigid);
-    if (it == primatives.end()) return;
+    auto it = primitives.find(rigid);
+    if (it == primitives.end()) return;
     
-    Primative* primative = it->second;
-    primatives.erase(it);
+    Primitive* primitive = it->second;
+    primitives.erase(it);
 
     // If root, remove the root
-    if (root == primative) {
+    if (root == primitive) {
         root = nullptr;
         size = 0;
-        delete primative;
+        delete primitive;
         return;
     }
 
-    Primative* parent = primative->getParent();
-    Primative* sibling = primative->getSibling();    
-    Primative* grand = parent->getParent();
+    Primitive* parent = primitive->getParent();
+    Primitive* sibling = primitive->getSibling();    
+    Primitive* grand = parent->getParent();
 
     // If parent was the root, set the root to the sibling
     if (parent == root) {
@@ -88,7 +88,7 @@ void BVH::remove(Rigid* rigid) {
         parent->setLeft(nullptr);
         parent->setRight(nullptr);
         delete parent;
-        delete primative;
+        delete primitive;
         size--;
         return;
     }
@@ -99,44 +99,44 @@ void BVH::remove(Rigid* rigid) {
     parent->setRight(nullptr);
     parent->setParent(nullptr);  // Clear parent pointer before deletion
     delete parent;
-    delete primative;
+    delete primitive;
     size--;
 }
 
 void BVH::refit(Rigid* rigid) {
     if (rigid == nullptr) return;
     
-    auto it = primatives.find(rigid);
-    if (it == primatives.end()) return;
+    auto it = primitives.find(rigid);
+    if (it == primitives.end()) return;
     
-    Primative* primative = it->second;
+    Primitive* primitive = it->second;
     glm::vec2 bl, tr;
     rigid->getAABB(bl, tr);
     
     // Check if new AABB (without margin) still fits within old fatted AABB
-    if (bl.x >= primative->getBL().x && bl.y >= primative->getBL().y &&
-        tr.x <= primative->getTR().x && tr.y <= primative->getTR().y) {
+    if (bl.x >= primitive->getBL().x && bl.y >= primitive->getBL().y &&
+        tr.x <= primitive->getTR().x && tr.y <= primitive->getTR().y) {
         // Still fits, just refit the hierarchy upward
-        primative->refitUpward();
+        primitive->refitUpward();
         return;
     }
     
     // Doesn't fit, need to remove and reinsert with new margin
-    primative->setBL(bl - BVH_MARGIN);
-    primative->setTR(tr + BVH_MARGIN);
-    primative->refitUpward();
+    primitive->setBL(bl - BVH_MARGIN);
+    primitive->setTR(tr + BVH_MARGIN);
+    primitive->refitUpward();
 }
 
 void BVH::rebuild() {
     std::vector<Rigid*> allRigids;
-    for (auto& [rigid, _] : primatives) {
+    for (auto& [rigid, _] : primitives) {
         allRigids.push_back(rigid);
     }
     
     // Clear tree
     delete root;
     root = nullptr;
-    primatives.clear();
+    primitives.clear();
     size = 0;
     
     // Reinsert all
@@ -149,15 +149,15 @@ void BVH::refitAll() {
     // Collect all rigids first to avoid iterator invalidation
     // (refit() may call remove/insert which modifies the map)
     std::vector<Rigid*> rigidsToRefit;
-    rigidsToRefit.reserve(primatives.size());
-    for (auto& [rigid, primative] : primatives) {
+    rigidsToRefit.reserve(primitives.size());
+    for (auto& [rigid, primitive] : primitives) {
         rigidsToRefit.push_back(rigid);
     }
     
     // Now refit each rigid (safe to modify map during this iteration)
     for (Rigid* rigid : rigidsToRefit) {
         // Check if still in map (might have been removed by previous refit)
-        if (primatives.find(rigid) != primatives.end()) {
+        if (primitives.find(rigid) != primitives.end()) {
             refit(rigid);
         }
     }
@@ -184,10 +184,10 @@ std::vector<Rigid*> BVH::query(Rigid* rigid) const {
     return query(bl, tr);
 }
 
-std::vector<PrimativeInfo> BVH::getAllPrimatives() const {
-    std::vector<PrimativeInfo> results;
+std::vector<PrimitiveInfo> BVH::getAllPrimitives() const {
+    std::vector<PrimitiveInfo> results;
     if (root != nullptr) {
-        root->getAllPrimatives(results, 0);
+        root->getAllPrimitives(results, 0);
     }
     return results;
 }
@@ -203,6 +203,13 @@ glm::vec2 BVH::computeGravity(Rigid* rigid) {
         return root->computeGravity(rigid);
     }
     return glm::vec2(0.0f, 0.0f);
+}
+
+void BVH::getSandAABB(Rigid* rigid, glm::vec2& bl, glm::vec2& tr) const {
+    if (rigid == nullptr) return;
+    Primitive* p = primitives.at(rigid);
+    bl = p->getBL();
+    tr = p->getTR();
 }
 
 }
