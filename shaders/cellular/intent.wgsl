@@ -9,6 +9,13 @@ struct Uniforms {
     _pad1: u32,
 };
 
+struct Particle {
+    pos: vec2<f32>,
+    vel: vec2<f32>,
+    color: u32,
+    _pad: u32,
+};
+
 // cell layout:
 // | momentum (2bit) | onFire (1bit) | static (1bit) | material (4bit) | red (8bit) | green (8bit) | blue (8bit) |
 // material id (bits 27-24), 0-15:
@@ -22,6 +29,10 @@ struct Uniforms {
 @group(0) @binding(2) var<storage, read_write> intent:            array<i32>;
 @group(0) @binding(3) var<storage, read>       active_chunk_list: array<u32>;
 @group(0) @binding(4) var<storage, read_write> chunk_intent:      array<u32>;
+
+// @group(0) @binding(5) var<storage, read_write> particles: array<Particle>;
+// @group(0) @binding(6) var<storage, read_write> free_stack: array<u32>;
+// @group(0) @binding(7) var<storage, read_write> free_count: array<atomic<u32>>;
 
 const FIRE_BIT: u32 = 29u;
 const STATIC_BIT: u32 = 28u;

@@ -218,6 +218,22 @@ void Solver::remapSandManifoldForceIndices(const std::vector<uint32_t>& forceInd
 void Solver::step(float dtIncoming) {    
     this->dt = glm::min(dtIncoming, 1.0f / 20.0f);
 
+    // this is at the top so that the user can see the forces from the previous frame
+    // 5. delete all sand manifolds at end of step
+    for (uint32_t forceIndex : sandManifoldForceIndices) {
+        if (forceIndex >= forceTable->getSize()) continue;
+        if (forceTable->getToDelete(forceIndex)) continue;
+
+        Force* force = forceTable->getForce(forceIndex);
+        Manifold* manifold = dynamic_cast<Manifold*>(force);
+        if (manifold == nullptr) continue;
+
+        // Only clean up transient static-world manifolds created for sand.
+        if (manifold->getBodyB() != nullptr) continue;
+        delete manifold;
+    }
+    clearSandManifoldForceIndices();
+
     // compact body table
     bodyTable->compact();
 
@@ -397,21 +413,6 @@ void Solver::step(float dtIncoming) {
             bodyTable->updateVelocities(dt);
         }
     }
-
-    // 5. delete all sand manifolds at end of step
-    for (uint32_t forceIndex : sandManifoldForceIndices) {
-        if (forceIndex >= forceTable->getSize()) continue;
-        if (forceTable->getToDelete(forceIndex)) continue;
-
-        Force* force = forceTable->getForce(forceIndex);
-        Manifold* manifold = dynamic_cast<Manifold*>(force);
-        if (manifold == nullptr) continue;
-
-        // Only clean up transient static-world manifolds created for sand.
-        if (manifold->getBodyB() != nullptr) continue;
-        delete manifold;
-    }
-    clearSandManifoldForceIndices();
 }
 
 // Coloring

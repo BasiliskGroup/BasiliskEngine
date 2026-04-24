@@ -20,8 +20,7 @@ void main(){
     uint mat = (cell >> 24u) & 0x1Fu;
     uint fire = (cell >> 29u) & 1u;
     if (mat == 0u) {
-        fragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        return;
+        discard;
     }
 
     float r = float((cell >> 16u) & 0xFFu) / 255.0;
