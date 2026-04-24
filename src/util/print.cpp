@@ -18,7 +18,7 @@ void print(long l) {
     std::cout << l << std::endl;
 }
 
-void print(uint n) {
+void print(std::uint32_t n) {
     std::cout << n << std::endl;
 }
 

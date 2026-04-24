@@ -9,7 +9,7 @@ void print(std::string str);
 void print(char* str);
 void print(int n);
 void print(long l);
-void print(uint n);
+void print(std::uint32_t n);
 void print(float f);
 void print(const glm::vec2& vec);
 void print(const glm::vec3& vec);

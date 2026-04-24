@@ -27,16 +27,16 @@ using Simplex = std::array<glm::vec2, 3>;
 struct PolytopeFace {
     glm::vec2 normal;
     float distance;
-    ushort va;
-    ushort vb;
+    std::uint16_t va;
+    std::uint16_t vb;
 
     PolytopeFace() = default;
-    PolytopeFace(ushort va, ushort vb, glm::vec2 normal, float distance)
+    PolytopeFace(std::uint16_t va, std::uint16_t vb, glm::vec2 normal, float distance)
         : normal(normal), distance(distance), va(va), vb(vb) {}
 };
 
 // add 3 since the simplex starts with 3 vertices
-using SupportSet = std::array<ushort, EPA_ITERATIONS + 3>;
+using SupportSet = std::array<std::uint16_t, EPA_ITERATIONS + 3>;
 using SpArray = std::array<glm::vec2, EPA_ITERATIONS + 3>;
 using Polytope = std::array<PolytopeFace, EPA_ITERATIONS + 3>;
 
@@ -87,11 +87,11 @@ uint32_t handle3(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
 // ------------------------------------------------------------
 
 bool epa(const ConvexShape& shapeA, const ConvexShape& shapeB, CollisionPair& pair);
-void buildFace(CollisionPair& pair, glm::vec2 interior, ushort indexA, ushort indexB, ushort indexL);
-ushort polytopeFront(const Polytope& polytope, ushort numFaces);
-ushort insertHorizon(SupportSet& supportSet, ushort spIndex, ushort setSize);
-bool discardHorizon(SupportSet& supportSet, ushort spIndex, ushort setSize);
-void removeFace(Polytope& polytope, ushort index, ushort numFaces);
+void buildFace(CollisionPair& pair, glm::vec2 interior, std::uint16_t indexA, std::uint16_t indexB, std::uint16_t indexL);
+std::uint16_t polytopeFront(const Polytope& polytope, std::uint16_t numFaces);
+std::uint16_t insertHorizon(SupportSet& supportSet, std::uint16_t spIndex, std::uint16_t setSize);
+bool discardHorizon(SupportSet& supportSet, std::uint16_t spIndex, std::uint16_t setSize);
+void removeFace(Polytope& polytope, std::uint16_t index, std::uint16_t numFaces);
 
 // ------------------------------------------------------------
 // SAT

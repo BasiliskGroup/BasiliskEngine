@@ -18,13 +18,13 @@ bool epaInternal(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
     buildFace(pair, centroid, 1, 2, 1);
     buildFace(pair, centroid, 2, 0, 2);
 
-    ushort cloudSize = 3;
-    ushort numFaces = 3;
-    ushort setSize = 0;
+    std::uint16_t cloudSize = 3;
+    std::uint16_t numFaces = 3;
+    std::uint16_t setSize = 0;
 
-    ushort frontIndex;
+    std::uint16_t frontIndex;
     float frontDistance;
-    for (ushort _ = 0; _ < EPA_ITERATIONS; _++) {
+    for (std::uint16_t _ = 0; _ < EPA_ITERATIONS; _++) {
         // quick access front data
         frontIndex = polytopeFront(pair.polytope, numFaces);
         frontDistance = pair.polytope[frontIndex].distance;
@@ -34,7 +34,7 @@ bool epaInternal(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
 
         // check if newly added point is not in the cloud
         // if so, we have found the edge and can stop
-        for (ushort i = 0; i < cloudSize; i++) {
+        for (std::uint16_t i = 0; i < cloudSize; i++) {
             if (glm::length2(pair.sps[cloudSize] - pair.sps[i]) < COLLISION_MARGIN * COLLISION_MARGIN) {
                 pair.normal = pair.polytope[frontIndex].normal;
                 return true;
@@ -50,7 +50,7 @@ bool epaInternal(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
 
         // collect horizon edges
         setSize = 0;
-        ushort i = 0;
+        std::uint16_t i = 0;
         while (i < numFaces) {
             if (glm::dot(pair.polytope[i].normal, pair.sps[cloudSize]) > COLLISION_MARGIN * COLLISION_MARGIN) {
                 setSize = insertHorizon(pair.supportSet, pair.polytope[i].va, setSize);
@@ -64,7 +64,7 @@ bool epaInternal(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
 
         if (setSize != 2) {
             std::cerr << "Polytope horizon error" << std::endl;
-            ushort failFront = polytopeFront(pair.polytope, numFaces);
+            std::uint16_t failFront = polytopeFront(pair.polytope, numFaces);
             pair.normal = pair.polytope[failFront].normal;
             return false;
         }
@@ -94,7 +94,7 @@ bool epaInternal(const ConvexShape& shapeA, const ConvexShape& shapeB, Collision
 
     // we timed out
     std::cout << "EPA timed out" << std::endl;
-    ushort timeoutFront = polytopeFront(pair.polytope, numFaces);
+    std::uint16_t timeoutFront = polytopeFront(pair.polytope, numFaces);
     pair.normal = pair.polytope[timeoutFront].normal;
     return true;
 }
@@ -108,7 +108,7 @@ bool epa(const ConvexShape& shapeA, const ConvexShape& shapeB, CollisionPair& pa
     return success;
 }
 
-ushort insertHorizon(SupportSet& supportSet, ushort spIndex, ushort setSize) {
+std::uint16_t insertHorizon(SupportSet& supportSet, std::uint16_t spIndex, std::uint16_t setSize) {
     if (discardHorizon(supportSet, spIndex, setSize)) {
         return --setSize;
     }
@@ -119,13 +119,13 @@ ushort insertHorizon(SupportSet& supportSet, ushort spIndex, ushort setSize) {
     return setSize;
 }
 
-bool discardHorizon(SupportSet& supportSet, ushort spIndex, ushort setSize) {
+bool discardHorizon(SupportSet& supportSet, std::uint16_t spIndex, std::uint16_t setSize) {
     if (setSize == 0) {
         return false;
     }
 
     // uses setSize - 1 since swapping last index wouldn't move it
-    for (ushort i = 0; i < setSize - 1; i++) {
+    for (std::uint16_t i = 0; i < setSize - 1; i++) {
         if (supportSet[i] == spIndex) {
             std::swap(supportSet[i], supportSet[setSize - 1]);
             break;
@@ -137,12 +137,12 @@ bool discardHorizon(SupportSet& supportSet, ushort spIndex, ushort setSize) {
 }
 
 // returns the index of the face with the smallest distance
-ushort polytopeFront(const Polytope& polytope, ushort numFaces) {
-    ushort closeIndex = 0;
+std::uint16_t polytopeFront(const Polytope& polytope, std::uint16_t numFaces) {
+    std::uint16_t closeIndex = 0;
     float closeValue = polytope[0].distance;
     float value;
 
-    for (ushort i = 1; i < numFaces; i++) {
+    for (std::uint16_t i = 1; i < numFaces; i++) {
         value = polytope[i].distance;
         if (value < closeValue) {
             closeValue = value;
@@ -153,11 +153,11 @@ ushort polytopeFront(const Polytope& polytope, ushort numFaces) {
     return closeIndex;
 }
 
-void removeFace(Polytope& polytope, ushort index, ushort numFaces) {
+void removeFace(Polytope& polytope, std::uint16_t index, std::uint16_t numFaces) {
     polytope[index] = polytope[numFaces - 1];
 }
 
-void buildFace(CollisionPair& pair, glm::vec2 interior, ushort indexA, ushort indexB, ushort indexL) {
+void buildFace(CollisionPair& pair, glm::vec2 interior, std::uint16_t indexA, std::uint16_t indexB, std::uint16_t indexL) {
     PolytopeFace& face = pair.polytope[indexL];
     face.va = indexA;
     face.vb = indexB;

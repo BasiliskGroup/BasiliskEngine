@@ -58,7 +58,7 @@ void ForceTable::resize(uint32_t newCapacity) {
 
 void ForceTable::compact() {
     // do a quick check to see if we need to run more complex compact function
-    uint active = numValid(toDelete, size);
+    std::uint32_t active = numValid(toDelete, size);
     if (active == size) {
         return;
     }
@@ -80,7 +80,7 @@ void ForceTable::compact() {
     size = active;
 
     // remap forces
-    for (uint i = 0; i < size; i++) {
+    for (std::uint32_t i = 0; i < size; i++) {
         toDelete[i] = false;
         forces[i]->setIndex(i);
     }
@@ -183,7 +183,7 @@ void ForceTable::setInitialB(uint32_t index, const glm::vec3& value) {
 }
 
 void ForceTable::remapBodyIndices() {
-    for (uint i = 0; i < size; i++) {
+    for (std::uint32_t i = 0; i < size; i++) {
         if (bodies[i].a != -1) {
             bodies[i].a = solver->getBodyTable()->getMappedIndex(bodies[i].a);
         }

@@ -12,7 +12,7 @@ ColliderTable::ColliderTable(uint32_t capacity)
 
 ColliderTable::~ColliderTable() {
     // TODO: Don't delete colliders and allow them to be used in multiple scenes/solvers
-    for (uint i = 0; i < size; i++) {
+    for (std::uint32_t i = 0; i < size; i++) {
         if (colliders[i]) {
             delete colliders[i];
             colliders[i] = nullptr;
