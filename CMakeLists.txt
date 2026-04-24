@@ -118,15 +118,32 @@ set(ASSIMP_EARCUT_INCLUDE_DIR "${CMAKE_BINARY_DIR}/_deps/assimp-src/contrib/earc
 # PyBind11
 # ======================================================
 # Find Python before pybind11 to ensure correct Python is used
-# Users can override with: -DPYTHON_EXECUTABLE=/path/to/python3
+# Users can still override with: -DPython3_EXECUTABLE=/path/to/python3
+# Preference order:
+#   1) ./ .venv interpreter (if present)
+#   2) whatever Python CMake finds on the system/PATH
+set(BASILISK_VENV_PYTHON "")
+if(WIN32)
+    set(BASILISK_VENV_CANDIDATE "${CMAKE_CURRENT_SOURCE_DIR}/.venv/Scripts/python.exe")
+else()
+    set(BASILISK_VENV_CANDIDATE "${CMAKE_CURRENT_SOURCE_DIR}/.venv/bin/python3")
+endif()
 
-# Find Python3 package (will use PYTHON_EXECUTABLE if set)
+if(EXISTS "${BASILISK_VENV_CANDIDATE}")
+    set(BASILISK_VENV_PYTHON "${BASILISK_VENV_CANDIDATE}")
+    message(STATUS "Using project virtualenv Python: ${BASILISK_VENV_PYTHON}")
+endif()
+
+if(BASILISK_VENV_PYTHON)
+    set(Python3_EXECUTABLE "${BASILISK_VENV_PYTHON}" CACHE FILEPATH "Preferred Python 3 executable")
+endif()
+
 find_package(Python3 COMPONENTS Interpreter Development QUIET)
 if(Python3_FOUND)
     message(STATUS "Found Python ${Python3_VERSION}: ${Python3_EXECUTABLE}")
     message(STATUS "  Python include dirs: ${Python3_INCLUDE_DIRS}")
-    # Ensure pybind11 uses the same Python
-    set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE} CACHE PATH "Python executable" FORCE)
+    # Keep pybind11 aligned with the interpreter CMake selected.
+    set(PYTHON_EXECUTABLE "${Python3_EXECUTABLE}" CACHE PATH "Python executable")
 else()
     message(WARNING "Python3 not found - pybind11 will attempt to find it automatically")
 endif()

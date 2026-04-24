@@ -162,7 +162,9 @@ int main() {
         sandShader->setUniform("cameraScale", cameraScale);
         sandShader->setUniform("bufferSize", glm::vec2(bufferWidth, bufferHeight));
         sandShader->setUniform("cellScale", cellBuffer->getCellScale());
-        sandFrame->render(cellBuffer->getRenderTexture());
+
+        // TODO check if this works on all OS
+        sandFrame->render(cellBuffer->getRenderTexture(), 0, 0, engine->getWindow()->getWidth(), engine->getWindow()->getHeight());
         engine->render();
     }
 

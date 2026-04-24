@@ -37,6 +37,7 @@ void bind_collider(py::module_&);
 void bind_force(py::module_&);
 void bind_key(py::module_&);
 void bind_compute(py::module_&);
+void bind_cellular(py::module_&);
 
 PYBIND11_MODULE(basilisk, m) { // , py::mod_gil_not_used()
     m.doc() = "pybind11 example plugin"; // optional module docstring
@@ -86,6 +87,7 @@ PYBIND11_MODULE(basilisk, m) { // , py::mod_gil_not_used()
     bind_pointLight(m);
 
     // Physics bindings - order matters: base classes before derived
+    bind_cellular(m);
     bind_solver(m);
     bind_collider(m);  // Collider is used by Rigid, so bind it before Rigid
     bind_rigid(m);  

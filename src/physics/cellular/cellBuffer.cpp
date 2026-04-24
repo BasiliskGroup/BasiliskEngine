@@ -1,5 +1,6 @@
 #include <basilisk/physics/cellular/cellBuffer.h>
 #include <basilisk/compute/gpuWrapper.hpp>
+#include <basilisk/util/resolvePath.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -591,8 +592,12 @@ void CellBuffer::simulate() {
 // ---------------------------------------------------------------------------
 
 std::string CellBuffer::loadShaderSource(const char* filepath) {
-    std::ifstream file(filepath);
-    if (!file.is_open()) { std::cerr << "Failed to open: " << filepath << "\n"; return ""; }
+    const std::string resolvedPath = externalPath(filepath);
+    std::ifstream file(resolvedPath);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open: " << filepath << " (resolved: " << resolvedPath << ")\n";
+        return "";
+    }
     std::stringstream ss; ss << file.rdbuf(); return ss.str();
 }
 

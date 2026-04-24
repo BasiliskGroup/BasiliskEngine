@@ -3,6 +3,7 @@
 #include <basilisk/physics/solver.h>
 #include <basilisk/physics/rigid.h>
 #include <basilisk/physics/forces/force.h>
+#include <basilisk/physics/cellular/cellBuffer.h>
 
 // IMPORTANT: include GLM casters
 #include "glm/glmCasters.hpp" // DO NOT REMOVE THIS LINE
@@ -32,6 +33,7 @@ void bind_solver(py::module_& m) {
         .def("getBeta", &Solver::getBeta)
         .def("getGamma", &Solver::getGamma)
         .def("getPostStabilize", &Solver::getPostStabilize)
+        .def("get_cell_buffer", &Solver::getCellBuffer, py::return_value_policy::reference_internal)
 
         // Setters
         .def("setGravity", &Solver::setGravity)

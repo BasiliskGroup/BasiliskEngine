@@ -13,6 +13,9 @@ void bind_frame(py::module_& m) {
         .def("clear", &Frame::clear, py::arg("r") = 0.0f, py::arg("g") = 0.0f, py::arg("b") = 0.0f, py::arg("a") = 1.0f)
         .def("render", py::overload_cast<>(&Frame::render))
         .def("render", py::overload_cast<int, int, int, int>(&Frame::render), py::arg("x"), py::arg("y"), py::arg("width"), py::arg("height"))
+        .def("render", py::overload_cast<unsigned int>(&Frame::render), py::arg("texture_id"))
+        .def("render", py::overload_cast<unsigned int, int, int, int, int>(&Frame::render),
+             py::arg("texture_id"), py::arg("x"), py::arg("y"), py::arg("width"), py::arg("height"))
         .def("get_shader", &Frame::getShader, py::return_value_policy::reference_internal)
         .def("get_vbo", &Frame::getVBO, py::return_value_policy::reference_internal)
         .def("get_ebo", &Frame::getEBO, py::return_value_policy::reference_internal)
