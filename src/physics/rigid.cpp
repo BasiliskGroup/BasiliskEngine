@@ -366,24 +366,54 @@ std::vector<CollisionData> Rigid::getCollisions() {
         }
 
         Rigid* other = (force->getBodyA() == this) ? force->getBodyB() : force->getBodyA();
-        if (other == nullptr) {
-            continue; // should never happen
-        }
 
         Manifold* manifold = dynamic_cast<Manifold*>(force);
+        if (manifold == nullptr || manifold->getNumContacts() <= 0) {
+            continue;
+        }
+
         const Contact& contactA = manifold->getContact(0);
-        const Contact& contactB = manifold->getContact(1);
+        const Contact& contactB = (manifold->getNumContacts() > 1) ? manifold->getContact(1) : contactA;
+        const int usedContacts = std::min(manifold->getNumContacts(), 2);
 
-        glm::vec2 normal = (contactA.normal + contactB.normal) / 2.0f;
+        glm::vec2 normal = glm::vec2(0.0f);
+        if (usedContacts == 1) {
+            normal = contactA.normal;
+        } else {
+            normal = glm::normalize(contactA.normal + contactB.normal);
+            if (glm::length2(normal) < 1e-8f) {
+                normal = contactA.normal;
+            }
+        }
 
-        // point the normal towards ourselves
-        if (glm::dot(normal, glm::vec2(other->getPosition() - getPosition())) > 0.0f) {
+        // Build world-space contact anchors and orient normal toward this body.
+        const glm::vec2 thisPos = glm::vec2(getPosition().x, getPosition().y);
+        const glm::vec2 worldA0 = thisPos + rotate(getPosition().z, contactA.rA);
+        glm::vec2 worldB0 = contactA.rB;
+        if (other != nullptr) {
+            const glm::vec2 otherPos = glm::vec2(other->getPosition().x, other->getPosition().y);
+            worldB0 = otherPos + rotate(other->getPosition().z, contactA.rB);
+        }
+        if (glm::dot(normal, worldA0 - worldB0) > 0.0f) {
             normal = -normal;
         }
 
-        float depth = glm::max(glm::abs(contactA.C0.y), glm::abs(contactB.C0.y));
+        // Prefer depth from world-space anchors projected onto contact normal.
+        // If anchors are invalid/degenerate, fall back to 0.
+        float depth = 0.0f;
+        auto contactDepth = [&](const Contact& c) -> float {
+            const glm::vec2 wa = thisPos + rotate(getPosition().z, c.rA);
+            glm::vec2 wb = c.rB;
+            if (other != nullptr) {
+                const glm::vec2 otherPos = glm::vec2(other->getPosition().x, other->getPosition().y);
+                wb = otherPos + rotate(other->getPosition().z, c.rB);
+            }
+            return glm::max(0.0f, glm::dot(normal, wa - wb));
+        };
+        if (usedContacts >= 1) depth = contactDepth(contactA);
+        if (usedContacts >= 2) depth = glm::max(depth, contactDepth(contactB));
 
-        collisions.push_back({other->getNode(), normal, depth});
+        collisions.push_back({other ? other->getNode() : nullptr, normal, depth});
     }
     return collisions;
 }

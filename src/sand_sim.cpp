@@ -100,6 +100,14 @@ int main() {
         bsk::Mouse*         mouse    = engine->getMouse();
         bsk::Keyboard*      keyboard = engine->getKeyboard();
 
+        // get collisions for every rigid body
+        for (bsk::Rigid* body = scene->getSolver()->getBodies(); body != nullptr; body = body->getNext()) {
+            std::vector<bsk::internal::CollisionData> collisions = body->getCollisions();
+            for (const bsk::internal::CollisionData& collision : collisions) {
+                std::cout << "Collision: " << collision.normal.x << ", " << collision.normal.y << std::endl;
+            }
+        }
+
         glm::vec2 mousePos = {
             static_cast<float>(mouse->getWorldX(scene->getCamera())),
             static_cast<float>(mouse->getWorldY(scene->getCamera()))
