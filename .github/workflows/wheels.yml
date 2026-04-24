@@ -28,6 +28,11 @@ jobs:
         run: pip install cibuildwheel
 
       - name: Build wheels
+        env:
+          CIBW_BUILD_VERBOSITY: "3"
+          CIBW_ENVIRONMENT_WINDOWS: >-
+            SKBUILD_CMAKE_ARGS="-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+            CMAKE_BUILD_PARALLEL_LEVEL=1
         run: cibuildwheel --output-dir dist
 
       - name: Upload artifacts
