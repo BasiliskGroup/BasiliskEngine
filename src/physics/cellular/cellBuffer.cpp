@@ -353,13 +353,22 @@ void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t
 // GPU simulation — pipelined
 // ---------------------------------------------------------------------------
 
-void CellBuffer::simulate() {
+void CellBuffer::simulate(float deltaTime) {
     if (!computeInitialized) return;
+    const float frameDt = std::clamp(std::max(0.0f, deltaTime), 1.0f / 240.0f, 1.0f / 15.0f);
+    const float fixedStep = 1.0f / std::max(cellUpdatesPerSecond, 1.0f);
+    cellUpdateAccumulator += frameDt;
+    // Avoid huge catch-up bursts after pauses.
+    cellUpdateAccumulator = std::min(cellUpdateAccumulator, fixedStep * 4.0f);
+    const bool runSandStep = cellUpdateAccumulator >= fixedStep;
+    if (runSandStep) {
+        cellUpdateAccumulator -= fixedStep;
+    }
 
     // ------------------------------------------------------------------
     // STEP 1 — Collect last frame's cell readback, merge brush pixels
     // ------------------------------------------------------------------
-    if (pendingCellsReadback) {
+    if (runSandStep && pendingCellsReadback) {
         gpuCellScratch.resize(static_cast<size_t>(width * height));
         cellsStaging->collect(gpuCellScratch.data(), gpuCellScratch.size());
         pendingCellsReadback = false;
@@ -384,7 +393,7 @@ void CellBuffer::simulate() {
     // ------------------------------------------------------------------
     // STEP 2 — Collect chunk readback, rebuild chunkActive cleanly
     // ------------------------------------------------------------------
-    if (pendingChunkReadback) {
+    if (runSandStep && pendingChunkReadback) {
         chunkStaging->collect(chunkActiveOut.data(), chunkActiveOut.size());
         pendingChunkReadback = false;
 
@@ -405,7 +414,7 @@ void CellBuffer::simulate() {
     // STEP 3 — If brush happened before the first chunk readback,
     // integrate brush chunk marks now. (Later frames: step 2 already did.)
     // ------------------------------------------------------------------
-    if (!pendingBrushChunks.empty()) {
+    if (runSandStep && !pendingBrushChunks.empty()) {
         for (int idx : pendingBrushChunks)
             chunkActive[idx] = 1u;
         pendingBrushChunks.clear();
@@ -415,7 +424,7 @@ void CellBuffer::simulate() {
     // STEP 4 — Upload pending brush pixels to GPU cellsA only.
     // (No full-grid CPU->GPU upload; simulation state stays on GPU.)
     // ------------------------------------------------------------------
-    if (!pendingBrushPixels.empty()) {
+    if (runSandStep && !pendingBrushPixels.empty()) {
 
         std::sort(pendingBrushPixels.begin(), pendingBrushPixels.end(),
                   [](const BrushPixel& a, const BrushPixel& b) { return a.idx < b.idx; });
@@ -446,7 +455,9 @@ void CellBuffer::simulate() {
     // ------------------------------------------------------------------
     // STEP 5 — Advance frame parity
     // ------------------------------------------------------------------
-    isLeftFrame = !isLeftFrame;
+    if (runSandStep) {
+        isLeftFrame = !isLeftFrame;
+    }
 
     // ------------------------------------------------------------------
     // STEP 6 — Upload chunk flags, zero transient GPU buffers
@@ -455,13 +466,15 @@ void CellBuffer::simulate() {
     // dispatched sparsely (one workgroup per active chunk).
     std::vector<uint32_t> activeChunkListIndices(numChunks, 0u);
     uint32_t activeChunkCount = 0u;
-    for (uint32_t ci = 0; ci < chunkActive.size(); ++ci) {
-        if (chunkActive[ci] != 0u) {
-            activeChunkListIndices[activeChunkCount++] = ci;
+    if (runSandStep) {
+        for (uint32_t ci = 0; ci < chunkActive.size(); ++ci) {
+            if (chunkActive[ci] != 0u) {
+                activeChunkListIndices[activeChunkCount++] = ci;
+            }
         }
     }
 
-    {
+    if (runSandStep) {
         gpuChunkActive->write(chunkActive.data(), chunkActive.size());
         gpuActiveChunkList->write(activeChunkListIndices.data(), activeChunkListIndices.size());
         gpuChunkIntent   ->zero();
@@ -499,9 +512,9 @@ void CellBuffer::simulate() {
     intentShader ->setUniform(u);
     resolveShader->setUniform(u);
     applyShader  ->setUniform(u);
-    pU.dt = 1.0f / 60.0f;
+    pU.dt = frameDt;
     pU.num_particles = nextParticleIndex;
-    pU.gravity = GRAVITY * cellScale;
+    pU.gravity = GRAVITY;
     pU.cell_width = cellScale;
     pU.grid_width = static_cast<uint32_t>(width);
     pU.grid_height = static_cast<uint32_t>(height);
@@ -514,11 +527,17 @@ void CellBuffer::simulate() {
 
     {
         GpuEncoder enc;
-        if (activeChunkCount > 0u) {
-            enc.dispatch(intentShader->handle(), activeChunkCount, 1u, 1u);
+        if (runSandStep) {
+            if (activeChunkCount > 0u) {
+                enc.dispatch(intentShader->handle(), activeChunkCount, 1u, 1u);
+            }
+            enc.dispatch(resolveShader->handle(), gx, gy);
+            enc.dispatch(applyShader  ->handle(), gx, gy);
+        } else if (nextParticleIndex > 0u) {
+            // Keep particle updates smooth between fixed sand ticks:
+            // seed cellsB from authoritative cellsA for particle collision/deposit.
+            enc.copyBuffer(*cellsA, *cellsB);
         }
-        enc.dispatch(resolveShader->handle(), gx, gy);
-        enc.dispatch(applyShader  ->handle(), gx, gy);
         if (nextParticleIndex > 0u) {
             const uint32_t particleGroups = (nextParticleIndex + 255u) / 256u;
             enc.dispatch(particleShader->handle(), particleGroups, 1u, 1u);
@@ -526,65 +545,71 @@ void CellBuffer::simulate() {
             enc.copyToStaging(*particleFreeCount, *particleFreeCountStaging);
             enc.copyToStaging(*particleFreeStack, *particleFreeStackStaging);
         }
-        // Keep simulation state on GPU: cellsA will be the next frame's input.
-        enc.copyBuffer(*cellsB, *cellsA);
-        // Lazy readback: copy only active chunk squares into staging.
-        // Memory layout is row-major, so each 16x16 chunk is uploaded as
-        // CHUNK_SIZE contiguous row segments.
-        const uint64_t sparseRowCopyOpsLimit = 4096ull; // avoid thousands of tiny copies
-        const bool forceFullReadbackForParticles = activeParticleCount > 0u;
-        if (forceFullReadbackForParticles ||
-            activeChunkCount == static_cast<uint32_t>(numChunks) ||
-            (static_cast<uint64_t>(activeChunkCount) * static_cast<uint64_t>(CHUNK_SIZE)) > sparseRowCopyOpsLimit) {
-            // Too large/sparse not beneficial: just read back the full buffer.
-            enc.copyToStaging(*cellsB, *cellsStaging);
-        } else if (activeChunkCount > 0u) {
-            // Sparse readback: one 16-element copy per chunk row.
-            for (uint32_t ai = 0; ai < activeChunkCount; ++ai) {
-                const uint32_t chunkIndex = activeChunkListIndices[ai];
-                const uint32_t cx = chunkIndex % static_cast<uint32_t>(chunksWide);
-                const uint32_t cy = chunkIndex / static_cast<uint32_t>(chunksWide);
+        if (runSandStep || nextParticleIndex > 0u) {
+            // Keep simulation state on GPU: cellsA remains authoritative.
+            enc.copyBuffer(*cellsB, *cellsA);
+        }
+        if (runSandStep) {
+            // Lazy readback: copy only active chunk squares into staging.
+            // Memory layout is row-major, so each 16x16 chunk is uploaded as
+            // CHUNK_SIZE contiguous row segments.
+            const uint64_t sparseRowCopyOpsLimit = 4096ull; // avoid thousands of tiny copies
+            const bool forceFullReadbackForParticles = activeParticleCount > 0u;
+            if (forceFullReadbackForParticles ||
+                activeChunkCount == static_cast<uint32_t>(numChunks) ||
+                (static_cast<uint64_t>(activeChunkCount) * static_cast<uint64_t>(CHUNK_SIZE)) > sparseRowCopyOpsLimit) {
+                // Too large/sparse not beneficial: just read back the full buffer.
+                enc.copyToStaging(*cellsB, *cellsStaging);
+            } else if (activeChunkCount > 0u) {
+                // Sparse readback: one 16-element copy per chunk row.
+                for (uint32_t ai = 0; ai < activeChunkCount; ++ai) {
+                    const uint32_t chunkIndex = activeChunkListIndices[ai];
+                    const uint32_t cx = chunkIndex % static_cast<uint32_t>(chunksWide);
+                    const uint32_t cy = chunkIndex / static_cast<uint32_t>(chunksWide);
 
-                const uint32_t originX = cx * static_cast<uint32_t>(CHUNK_SIZE);
-                const uint32_t originY = cy * static_cast<uint32_t>(CHUNK_SIZE);
+                    const uint32_t originX = cx * static_cast<uint32_t>(CHUNK_SIZE);
+                    const uint32_t originY = cy * static_cast<uint32_t>(CHUNK_SIZE);
 
-                if (originX >= static_cast<uint32_t>(width)) continue;
+                    if (originX >= static_cast<uint32_t>(width)) continue;
 
-                const uint32_t rowCopyLen =
-                    std::min<uint32_t>(static_cast<uint32_t>(CHUNK_SIZE),
-                                        static_cast<uint32_t>(width) - originX);
+                    const uint32_t rowCopyLen =
+                        std::min<uint32_t>(static_cast<uint32_t>(CHUNK_SIZE),
+                                           static_cast<uint32_t>(width) - originX);
 
-                for (uint32_t ly = 0; ly < static_cast<uint32_t>(CHUNK_SIZE); ++ly) {
-                    const uint32_t y = originY + ly;
-                    if (y >= static_cast<uint32_t>(height)) break;
+                    for (uint32_t ly = 0; ly < static_cast<uint32_t>(CHUNK_SIZE); ++ly) {
+                        const uint32_t y = originY + ly;
+                        if (y >= static_cast<uint32_t>(height)) break;
 
-                    const size_t srcOffset =
-                        static_cast<size_t>(y) * static_cast<size_t>(width) +
-                        static_cast<size_t>(originX);
+                        const size_t srcOffset =
+                            static_cast<size_t>(y) * static_cast<size_t>(width) +
+                            static_cast<size_t>(originX);
 
-                    enc.copyRegionToStagingAtOffset(*cellsB, *cellsStaging,
-                                                     srcOffset, srcOffset,
-                                                     rowCopyLen);
+                        enc.copyRegionToStagingAtOffset(*cellsB, *cellsStaging,
+                                                        srcOffset, srcOffset,
+                                                        rowCopyLen);
+                    }
                 }
             }
+            enc.copyToStaging(*gpuChunkActiveOut, *chunkStaging);
         }
-        enc.copyToStaging(*gpuChunkActiveOut, *chunkStaging);
         enc.submit();
     }
 
     // ------------------------------------------------------------------
     // STEP 7 — Kick async maps (non-blocking)
     // ------------------------------------------------------------------
-    cellsStaging->mapAsync();
-    chunkStaging->mapAsync();
+    if (runSandStep) {
+        cellsStaging->mapAsync();
+        chunkStaging->mapAsync();
+        pendingCellsReadback = true;
+        pendingChunkReadback = true;
+    }
     if (nextParticleIndex > 0u) {
         particlesStaging->mapAsync();
         particleFreeCountStaging->mapAsync();
         particleFreeStackStaging->mapAsync();
         pendingParticleReadback = true;
     }
-    pendingCellsReadback = true;
-    pendingChunkReadback = true;
 }
 
 // ---------------------------------------------------------------------------

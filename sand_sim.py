@@ -93,7 +93,7 @@ def main() -> None:
 
         camera_pos = scene.get_camera().get_position()
 
-        cell_buffer.simulate()
+        cell_buffer.simulate(float(engine.get_delta_time()))
         cell_buffer.update_texture()
         scene.render()
 

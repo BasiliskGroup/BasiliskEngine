@@ -152,7 +152,7 @@ int main() {
         cameraPos = scene->getCamera()->getPosition();
 
         // upadte buffer
-        cellBuffer->simulate();
+        cellBuffer->simulate(static_cast<float>(engine->getDeltaTime()));
         cellBuffer->updateTexture();
 
         // render everything

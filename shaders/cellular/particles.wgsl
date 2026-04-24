@@ -24,9 +24,11 @@ struct Particle {
 @group(0) @binding(5) var<storage, read_write> free_count: array<atomic<u32>>;
 
 fn cell_coords_from_pos(pos: vec2<f32>) -> vec2<i32> {
+    // Particle positions are tracked in grid pixel coordinates on CPU and GPU.
+    // Do not scale by cell_width here or collision probes drift from terrain cells.
     return vec2<i32>(
-        i32(floor(pos.x / uniforms.cell_width)),
-        i32(floor(pos.y / uniforms.cell_width))
+        i32(floor(pos.x)),
+        i32(floor(pos.y))
     );
 }
 
@@ -117,8 +119,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         p._pad = 0u;
     }
 
+    // Velocity/gravity are in world units per second; positions are in cell units.
+    // Convert world displacement to cell displacement via cell_width.
     p.vel.y -= uniforms.gravity * uniforms.dt;
-    p.pos += p.vel * uniforms.dt;
+    p.pos += (p.vel * uniforms.dt) / uniforms.cell_width;
 
     // Simple robust prototype: attempt deposit at post-integrated cell,
     // then also try the previous cell to reduce missed landings.

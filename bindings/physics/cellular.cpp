@@ -32,7 +32,7 @@ void bind_cellular(py::module_& m) {
         .def("set_back_pixel", &CellBuffer::setBackPixel, py::arg("x"), py::arg("y"), py::arg("color"))
         .def("get_back_pixel", &CellBuffer::getBackPixel, py::arg("x"), py::arg("y"))
         .def("clear", &CellBuffer::clear, py::arg("color"))
-        .def("simulate", &CellBuffer::simulate)
+        .def("simulate", &CellBuffer::simulate, py::arg("delta_time"))
         .def("window_to_pixel", [](const CellBuffer& cb, int windowX, int windowY, int windowWidth, int windowHeight) {
             int pixelX = -1;
             int pixelY = -1;

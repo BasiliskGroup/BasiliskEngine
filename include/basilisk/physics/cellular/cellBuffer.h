@@ -11,7 +11,7 @@ namespace bsk::internal {
 
 // Must match @workgroup_size in WGSL shaders
 static constexpr int CHUNK_SIZE = 16;
-static constexpr float GRAVITY = 9.8f; // for particle system
+static constexpr float GRAVITY = 32.0f; // for particle system
 
 class CellBuffer {
 private:
@@ -80,6 +80,8 @@ private:
     uint32_t nextParticleIndex = 0;
     uint32_t activeParticleCount = 0;
     static constexpr uint32_t MAX_PARTICLES = 100'000;
+    float cellUpdatesPerSecond = 40.0f;
+    float cellUpdateAccumulator = 0.0f;
 
     // Staging buffers (CPU-readable, written by encoder copy commands)
     StagingBuffer<uint32_t>* cellsStaging = nullptr; // full cell readback
@@ -131,7 +133,7 @@ public:
 
     std::vector<Color>& getData() { return getActiveBuffer(); }
 
-    void simulate();
+    void simulate(float deltaTime);
 
     bool windowToPixel(int windowX, int windowY, int windowWidth, int windowHeight, int& pixelX, int& pixelY) const;
     bool worldToPixel(const glm::vec2& worldPos, int& pixelX, int& pixelY) const;
