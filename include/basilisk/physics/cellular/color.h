@@ -3,6 +3,24 @@
 
 #include <array>
 
+// NOTE these values are copied from intent.wgsl, you must update both at the same time
+enum class MaterialIDs {
+    EMPTY = 0,
+    SOLID = 1,
+    WATER = 2,
+    GAS = 3,
+    WOOD = 4,
+    OBSIDIAN = 5,
+    FUSE = 6,
+    MUD = 7,
+    CLAY = 8,
+    GLASS = 9,
+    METAL = 10,
+    PLASTIC = 11,
+    SNOW = 12,
+    VAPOR = 13,
+};
+
 struct Color {
     static constexpr unsigned char STATIC_MAT_BIT = 1u << 4u;
     unsigned char r;
@@ -53,5 +71,19 @@ struct Color {
                on_fire == other.on_fire;
     }
 };
+
+// NOTE these values are copied from intent.wgsl, you must update both at the same time
+inline bool is_fluid(const Color& color) {
+    MaterialIDs mat_id = static_cast<MaterialIDs>(color.getMatId());
+    switch (mat_id) {
+        case MaterialIDs::WATER:
+        case MaterialIDs::GAS:
+        case MaterialIDs::VAPOR:
+            return true;
+            
+        default:
+            return false;
+    }
+}
 
 #endif

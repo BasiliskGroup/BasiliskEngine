@@ -297,7 +297,7 @@ void Solver::step(float dtIncoming) {
         for (int x = bl_x; x <= tr_x; x++) {
             for (int y = bl_y; y <= tr_y; y++) {
                 Color color = cellBuffer->getActivePixel(x, y);
-                if (color.mat_id != 0) {
+                if (color.mat_id != 0 && is_fluid(color) == false) {
                     sand[x - bl_x][y - bl_y] = 1;
                 }
             }

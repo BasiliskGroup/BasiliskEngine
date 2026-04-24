@@ -130,6 +130,22 @@ int main() {
             std::cout << "Static mode: " << (staticMode ? "ON" : "OFF") << std::endl;
         }
 
+        // change material id
+        if (keyboard->getPressed(bsk::Key::K_UP)) {
+            mat_id++;
+            if (mat_id > MAX_MATERIAL_ID) {
+                mat_id = 0;
+            }
+            std::cout << "Material id: " << static_cast<int>(mat_id) << std::endl;
+        }
+        if (keyboard->getPressed(bsk::Key::K_DOWN)) {
+            mat_id--;
+            if (mat_id < 0) {
+                mat_id = MAX_MATERIAL_ID;
+            }
+            std::cout << "Material id: " << static_cast<int>(mat_id) << std::endl;
+        }
+
         // --- Spawn / Delete ---
         if (keyboard->getPressed(bsk::Key::K_B)) {
             bsk::Node2D* node = new bsk::Node2D(nullptr, nullptr,
