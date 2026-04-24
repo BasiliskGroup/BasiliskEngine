@@ -124,6 +124,9 @@ public:
 
     std::vector<CollisionData> getCollisions();
     glm::vec3 getJacobianMask() const;
+
+    /** True if @p worldPoint lies inside the collider polygon (after inverse pose and scale). On success, @p local is R^-1 (world - position.xy) in body axes, matching @c transform usage for joints. */
+    bool pointCollision(const glm::vec2& worldPoint, glm::vec2& local);
 };
 
 }

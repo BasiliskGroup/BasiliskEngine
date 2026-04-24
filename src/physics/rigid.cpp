@@ -4,6 +4,7 @@
 #include <basilisk/nodes/node2d.h>
 #include <basilisk/physics/tables/bodyTable.h>
 #include <basilisk/physics/collision/bvh.h>
+#include <basilisk/physics/collision/collider.h>
 #include <basilisk/util/maths.h>
 #include <basilisk/nodes/node2d.h>
 
@@ -424,6 +425,25 @@ void Rigid::setJacobianMask(const glm::vec3& jacobianMask) {
 
 glm::vec3 Rigid::getJacobianMask() const {
     return this->solver->getBodyTable()->getJacobianMask(this->index);
+}
+
+// point collision detection
+bool Rigid::pointCollision(const glm::vec2& worldPoint, glm::vec2& local) {
+    if (collider == nullptr) {
+        return false;
+    }
+    const glm::vec2 bodyPos = glm::vec2(getPosition().x, getPosition().y);
+    const glm::vec2 rotated = rotation(-getPosition().z) * (worldPoint - bodyPos);
+    const glm::vec2 size = getSize();
+    if (size.x <= 0.0f || size.y <= 0.0f) {
+        return false;
+    }
+    const glm::vec2 model = glm::vec2(rotated.x / size.x, rotated.y / size.y);
+    if (!collider->containsPoint(model)) {
+        return false;
+    }
+    local = rotated;
+    return true;
 }
 
 }

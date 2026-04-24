@@ -23,6 +23,29 @@ std::vector<glm::vec2>& Collider::getVertices() const {
     return this->table->getVertices(this->index);
 }
 
+bool Collider::containsPoint(const glm::vec2& point) const {
+    const std::vector<glm::vec2>& verts = getVertices();
+    const std::size_t n = verts.size();
+    if (n < 3) {
+        return false;
+    }
+
+    bool inside = false;
+    for (std::size_t i = 0, j = n - 1; i < n; j = i++) {
+        const glm::vec2& a = verts[j];
+        const glm::vec2& b = verts[i];
+        const bool straddle = (a.y > point.y) != (b.y > point.y);
+        if (straddle) {
+            const float t = (point.y - a.y) / (b.y - a.y);
+            const float xInt = a.x + t * (b.x - a.x);
+            if (point.x < xInt) {
+                inside = !inside;
+            }
+        }
+    }
+    return inside;
+}
+
 float Collider::getMass(glm::vec2 scale, float density) const {
     return getArea() * scale.x * scale.y * density;
 }

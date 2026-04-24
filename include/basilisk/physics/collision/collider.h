@@ -23,6 +23,10 @@ public:
     uint32_t getIndex() const { return index; }
     ColliderTable* getTable() const { return table; }
     std::vector<glm::vec2>& getVertices() const;
+
+    /** @return true if @p point (model space, same frame as vertices) lies inside the polygon; vertices CCW. */
+    bool containsPoint(const glm::vec2& point) const;
+
     float getMass(glm::vec2 scale, float density) const;
     float getMoment(glm::vec2 scale, float density) const;
     float getRadius(glm::vec2 scale) const;

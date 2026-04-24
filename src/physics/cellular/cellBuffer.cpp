@@ -407,6 +407,7 @@ void CellBuffer::simulate(float deltaTime) {
         cellsStaging->collect(gpuCellScratch.data(), gpuCellScratch.size());
         pendingCellsReadback = false;
     }
+    
     if (pendingParticleReadback && nextParticleIndex > 0u) {
         particlesStaging->collectRegion(particleCpu.data(), 0, nextParticleIndex);
         uint32_t freeCountTmp = 0u;

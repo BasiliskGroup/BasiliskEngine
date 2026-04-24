@@ -520,13 +520,9 @@ void Solver::dsatur() {
 Rigid* Solver::pick(glm::vec2 at, glm::vec2& local) {
     // Find which body is at the given point
     for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
-        glm::mat2 Rt = rotation(-body->getPosition().z);
-        glm::vec2 bodyPos = glm::vec2(body->getPosition().x, body->getPosition().y);
-        local = Rt * (at - bodyPos);
-        glm::vec2 bodySize = body->getSize();
-        if (local.x >= -bodySize.x * 0.5f && local.x <= bodySize.x * 0.5f &&
-            local.y >= -bodySize.y * 0.5f && local.y <= bodySize.y * 0.5f)
+        if (body->pointCollision(at, local)) {
             return body;
+        }
     }
     return nullptr;
 }
