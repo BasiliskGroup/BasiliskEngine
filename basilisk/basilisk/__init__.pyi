@@ -8,7 +8,7 @@ import typing
 import typing_extensions
 from . import forces
 from . import key
-__all__: list[str] = ['AmbientLight', 'Camera', 'Camera2D', 'CellBuffer', 'Collider', 'CollisionData', 'Color', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'RayCastResult', 'RayCastResult2D', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera', 'StaticCamera2D', 'Texture', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
+__all__: list[str] = ['AmbientLight', 'Camera', 'Camera2D', 'CellBuffer', 'Collider', 'CollisionData', 'Color', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GL_LINEAR', 'GL_NEAREST', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'RayCastResult', 'RayCastResult2D', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera', 'StaticCamera2D', 'Texture', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
 class AmbientLight(Light):
     def __init__(self, color: glm.vec3 = (1.0, 1.0, 1.0), intensity: typing.SupportsFloat = 1.0) -> None:
         ...
@@ -61,7 +61,7 @@ class CellBuffer:
         ...
     def set_back_pixel(self, x: typing.SupportsInt, y: typing.SupportsInt, color: Color) -> None:
         ...
-    def simulate(self) -> None:
+    def simulate(self, delta_time: typing.SupportsFloat) -> None:
         ...
     def update_texture(self) -> None:
         ...
@@ -205,7 +205,7 @@ class Engine:
     @staticmethod
     def get_resource_server() -> ...:
         ...
-    def __init__(self, width: typing.SupportsInt = 800, height: typing.SupportsInt = 800, title: str = 'Basilisk', auto_mouse_grab: bool = True, show_splash: bool = False) -> None:
+    def __init__(self, width: typing.SupportsInt = 800, height: typing.SupportsInt = 800, title: str = 'Basilisk', auto_mouse_grab: bool = True, show_splash: bool = False, texture_size_buckets: collections.abc.Sequence[typing.SupportsInt] = [256, 1024, 2048, 2200], texture_filter: typing.SupportsInt = 9729) -> None:
         ...
     def disable_blend(self) -> None:
         ...
@@ -1653,5 +1653,7 @@ def init_gpu() -> None:
     Initialize the GPU compute backend (call once at startup).
     """
 F32: GpuBufferDtype  # value = <GpuBufferDtype.F32: 1>
+GL_LINEAR: int = 9729
+GL_NEAREST: int = 9728
 I32: GpuBufferDtype  # value = <GpuBufferDtype.I32: 2>
 U32: GpuBufferDtype  # value = <GpuBufferDtype.U32: 0>

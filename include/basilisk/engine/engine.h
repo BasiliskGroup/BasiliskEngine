@@ -22,7 +22,7 @@ class Engine {
         bool autoMouseGrab;
 
     public:
-        Engine(int width=800, int height=800, const char* title="Basilisk", bool autoMouseGrab=true, bool showSplash=false);
+        Engine(int width=800, int height=800, const char* title="Basilisk", bool autoMouseGrab=true, bool showSplash=false, std::vector<unsigned int> textureSizeBuckets={256, 1024, 2048, 2200}, unsigned int textureFilter=GL_LINEAR);
         ~Engine();
 
         bool isRunning() { return window->isRunning(); }

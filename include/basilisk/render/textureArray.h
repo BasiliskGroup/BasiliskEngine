@@ -14,12 +14,13 @@ class TextureArray {
         unsigned int width;
         unsigned int height;
         std::vector<Image*> images;
+        unsigned int samplerFilter;
 
         void generate();
         void uploadImage(Image* image, unsigned int position);
         
     public:
-        TextureArray(unsigned int width, unsigned int height, std::vector<Image*> images={}, unsigned int capacity=1);
+        TextureArray(unsigned int width, unsigned int height, std::vector<Image*> images={}, unsigned int capacity=1, unsigned int filter = GL_LINEAR);
         ~TextureArray();
 
         void bind();
