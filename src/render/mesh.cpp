@@ -12,7 +12,12 @@ Mesh::Mesh(const std::string modelPath, bool generateUV, bool generateNormals) {
     Assimp::Importer importer;
 
     std::string resolvedPath = externalPath(modelPath);
-    const aiScene* scene = importer.ReadFile(resolvedPath.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | (aiProcess_GenSmoothNormals & generateNormals) | (aiProcess_GenUVCoords & generateUV));
+    const unsigned int postprocessFlags =
+        aiProcess_Triangulate |
+        aiProcess_FlipUVs |
+        (generateNormals ? aiProcess_GenSmoothNormals : 0u) |
+        (generateUV ? aiProcess_GenUVCoords : 0u);
+    const aiScene* scene = importer.ReadFile(resolvedPath.c_str(), postprocessFlags);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cout << "Failed to load mesh from path: " << resolvedPath << std::endl;
