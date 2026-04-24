@@ -7,8 +7,6 @@
 #include <chrono>
 #include <basilisk/basilisk.h>
 
-float CELL_SCALE(0.1f);
-
 // Rainbow color with uneven sine curves, full cycle every 10 seconds
 static std::array<unsigned char, 3> baseBrushColorForMaterial(unsigned char mat_id) {
     switch (mat_id) {
@@ -64,7 +62,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 int main() {
     bsk::Engine* engine = new bsk::Engine(WINDOW_WIDTH, WINDOW_HEIGHT, "Sand Simulation", false, false);
     bsk::Scene2D* scene = new bsk::Scene2D(engine);
-    scene->setCamera(new bsk::Camera2D(engine, glm::vec2(0.0f), 20.0f));
+    scene->setCamera(new bsk::Camera2D(engine, glm::vec2(0.0f), 30.0f));
     bsk::Collider* collider = new bsk::Collider({{0.5f, 0.5f}, {-0.5f, 0.5f}, {-0.5f, -0.5f}, {0.5f, -0.5f}});
     // bsk::Node2D* node = new bsk::Node2D(scene, nullptr, nullptr, glm::vec2(0.0f), 0.0f, glm::vec2(1.0f, 1.0f), glm::vec3(0.0f), collider, 1.0f, 0.5f);
     ((bsk::Camera2D*)scene->getCamera())->setSpeed(30.0f);
@@ -159,14 +157,12 @@ int main() {
 
         // render everything
         scene->render();
-        int scaleX = (int)((bufferWidth * WINDOW_WIDTH   * CELL_SCALE) / cameraScale.x);
-        int scaleY = (int)((bufferHeight * WINDOW_HEIGHT * CELL_SCALE) / cameraScale.y);
-        sandFrame->render(
-            cellBuffer->getRenderTexture(), 
-            -scaleX / 2.0f + WINDOW_WIDTH  / 2.0f - cameraPos.x * (WINDOW_WIDTH / cameraScale.x ), 
-            -scaleY / 2.0f + WINDOW_HEIGHT / 2.0f - cameraPos.y * (WINDOW_HEIGHT / cameraScale.y), 
-            scaleX, 
-            scaleY);
+
+        sandShader->setUniform("location", cameraPos);
+        sandShader->setUniform("cameraScale", cameraScale);
+        sandShader->setUniform("bufferSize", glm::vec2(bufferWidth, bufferHeight));
+        sandShader->setUniform("cellScale", cellBuffer->getCellScale());
+        sandFrame->render(cellBuffer->getRenderTexture());
         engine->render();
     }
 

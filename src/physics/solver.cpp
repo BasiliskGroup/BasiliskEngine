@@ -43,7 +43,7 @@ Solver::Solver() :
     this->forceTable = new ForceTable(128);
     this->forceTable->setSolver(this);
 
-    this->cellBuffer = new CellBuffer(800, 800, 0.1f);
+    this->cellBuffer = new CellBuffer(800, 800, 0.2f);
     this->cellBuffer->initialize("shaders/physics/vertex.glsl", "shaders/physics/fragment.glsl");
     this->cellBuffer->initializeCompute();
 
