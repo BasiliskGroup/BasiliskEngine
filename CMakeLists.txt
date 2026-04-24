@@ -68,6 +68,11 @@ target_include_directories(glm_h INTERFACE ${glm_SOURCE_DIR})
 # ======================================================
 if(NOT TARGET glfw)
     message(STATUS "Fetching GLFW...")
+    # Keep third-party GLFW builds minimal and deterministic in CI/wheels.
+    # Building GLFW docs can fail on Windows runners when Doxygen settings drift.
+    set(GLFW_BUILD_DOCS OFF CACHE BOOL "Disable GLFW docs" FORCE)
+    set(GLFW_BUILD_TESTS OFF CACHE BOOL "Disable GLFW tests" FORCE)
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Disable GLFW examples" FORCE)
     FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
