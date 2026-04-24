@@ -58,6 +58,7 @@ def main() -> None:
     sand_shader = bsk.Shader("shaders/sand.vert", "shaders/sand.frag")
     sand_frame = bsk.Frame(engine, sand_shader, buffer_width, buffer_height)
     camera_scale = scene.get_camera().get_view_scale()
+    collider = bsk.Collider([(0.5, 0.5), (-0.5, 0.5), (-0.5, -0.5), (0.5, -0.5)]);
 
     while engine.is_running():
         engine.update()
@@ -91,16 +92,19 @@ def main() -> None:
                 else:
                     cell_buffer.apply_brush(pixel_x, pixel_y, buffer_height // 100, brush)
 
+        if keyboard.get_pressed(bsk.key.K_B):
+            bsk.Node2D(scene, None, None, mouse_pos, collider=collider)
+
         camera_pos = scene.get_camera().get_position()
 
         cell_buffer.simulate()
         cell_buffer.update_texture()
         scene.render()
 
-        sand_shader.setUniform("location", camera_pos)
-        sand_shader.setUniform("cameraScale", camera_scale)
-        sand_shader.setUniform("bufferSize", glm.vec2(buffer_width, buffer_height))
-        sand_shader.setUniform("cellScale", cell_buffer.get_cell_scale())
+        sand_shader.set_uniform("location", camera_pos)
+        sand_shader.set_uniform("cameraScale", camera_scale)
+        sand_shader.set_uniform("bufferSize", glm.vec2(buffer_width, buffer_height))
+        sand_shader.set_uniform("cellScale", cell_buffer.get_cell_scale())
         sand_frame.render(
             cell_buffer.get_render_texture(),
             0,
