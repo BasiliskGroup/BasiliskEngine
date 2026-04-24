@@ -7,10 +7,11 @@
 namespace bsk::internal {
 
 inline constexpr float EDGE_KEY_EPS = 1e-3f;
+inline constexpr float BSK_PI = 3.14159265358979323846f;
 
 // TODO, remove this once testing is done
 inline Material getCircularColor(int i, int i_max, int j = 1, int j_max = 1) {
-    const float pi = static_cast<float>(M_PI);
+    const float pi = BSK_PI;
     const float t = static_cast<float>(i) / static_cast<float>(std::max(i_max, 1));
     const float u = static_cast<float>(j) / static_cast<float>(std::max(j_max, 1));
     return Material(glm::vec3(
