@@ -121,8 +121,15 @@ public:
 
     void updateTexture();
 
-    void setActivePixel(int x, int y, const Color& color);
     Color getActivePixel(int x, int y) const;
+
+    // all overrides of the same function
+    void setActivePixel(int x, int y, const Color& color);
+    void setActivePixel(int x, int y, char r, char g, char b, int mat_id, bool on_fire=false, bool is_static=false);
+    void setActivePixel(glm::vec2 pos, char color[3], int mat_id, bool on_fire=false, bool is_static=false);
+    void setPixel(int x, int y, char r, char g, char b, int mat_id, bool on_fire=false, bool is_static=false);
+    void setPixel(glm::vec2 pos, char color[3], int mat_id, bool on_fire=false, bool is_static=false);
+
     void setBackPixel(int x, int y, const Color& color);
     Color getBackPixel(int x, int y) const;
     void clear(const Color& color);
@@ -141,6 +148,10 @@ public:
 
     void applyBrush(int pixelX, int pixelY, int radius, const Color& color);
     void applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t spawnCount, const Color& color);
+
+    // basically what we're gonna do is dance
+    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color);
+    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire=false, bool is_static=false);
 
     unsigned int getRenderTexture() { return renderTexture; }
 };

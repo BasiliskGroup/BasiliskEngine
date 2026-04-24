@@ -260,6 +260,27 @@ void CellBuffer::setActivePixel(int x, int y, const Color& color) {
     if (x >= 0 && x < width && y >= 0 && y < height)
         getActiveBuffer()[y * width + x] = color;
 }
+
+void CellBuffer::setActivePixel(int x, int y, char r, char g, char b, int mat_id, bool on_fire, bool is_static) {
+    Color color(r, g, b, mat_id, on_fire, is_static);
+    setActivePixel(x, y, color);
+}
+
+void CellBuffer::setActivePixel(glm::vec2 pos, char color[3], int mat_id, bool on_fire, bool is_static) {
+    int x = (int)pos.x;
+    int y = (int)pos.y;
+    Color colorObj(color[0], color[1], color[2], mat_id, on_fire, is_static);
+    setActivePixel(x, y, colorObj);
+}
+
+void CellBuffer::setPixel(int x, int y, char r, char g, char b, int mat_id, bool on_fire, bool is_static) {
+    setActivePixel(x, y, r, g, b, mat_id, on_fire, is_static);
+}
+
+void CellBuffer::setPixel(glm::vec2 pos, char color[3], int mat_id, bool on_fire, bool is_static) {
+    setActivePixel(pos, color, mat_id, on_fire, is_static);
+}
+
 void CellBuffer::setBackPixel(int x, int y, const Color& color) {
     if (x >= 0 && x < width && y >= 0 && y < height)
         getBackBuffer()[y * width + x] = color;
@@ -312,23 +333,7 @@ void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t
     std::uniform_real_distribution<float> speedDist(5.0f, 25.0f);
     std::uniform_real_distribution<float> radiusDist(0.0f, static_cast<float>(radius));
 
-    Color particleColor = color;
-    if (particleColor.mat_id == 0) {
-        particleColor.mat_id = 2;
-    }
-
-    uint32_t spawned = 0;
-    while (spawned < spawnCount) {
-        uint32_t idx = 0u;
-        if (particleFreeCountCpu > 0u) {
-            idx = particleFreeStackCpu[particleFreeCountCpu - 1u];
-            particleFreeCountCpu--;
-        } else if (nextParticleIndex < MAX_PARTICLES) {
-            idx = nextParticleIndex++;
-        } else {
-            break;
-        }
-
+    for (uint32_t n = 0; n < spawnCount; ++n) {
         const float angle = angleDist(rng);
         const float r = radiusDist(rng);
         const float sx = pixelX + std::cos(angle) * r;
@@ -336,17 +341,46 @@ void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t
         const float speed = speedDist(rng);
         const float vx = std::cos(angle) * speed;
         const float vy = std::sin(angle) * speed;
-        particleCpu[idx] =
-            Particle{glm::vec2(sx, sy), glm::vec2(vx, vy), packCell(particleColor, 0u), 1u};
-        particlesA->writeRegion(idx, &particleCpu[idx], 1);
-        activeParticleCount++;
-        spawned++;
+        if (!addParticle(glm::vec2(sx, sy), glm::vec2(vx, vy), color)) {
+            break;
+        }
+    }
+}
+
+bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color) {
+    if (!computeInitialized || !particlesA) {
+        return false;
     }
 
-    if (spawned > 0) {
-        // Keep GPU free-count coherent with CPU-side stack pops.
+    bool poppedFromFree = false;
+    uint32_t idx = 0u;
+    if (particleFreeCountCpu > 0u) {
+        idx = particleFreeStackCpu[particleFreeCountCpu - 1u];
+        particleFreeCountCpu--;
+        poppedFromFree = true;
+    } else if (nextParticleIndex < MAX_PARTICLES) {
+        idx = nextParticleIndex++;
+    } else {
+        return false;
+    }
+
+    Color particleColor = color;
+    if (particleColor.mat_id == 0) {
+        particleColor.mat_id = 2;
+    }
+
+    particleCpu[idx] = Particle{pos, vel, packCell(particleColor, 0u), 1u};
+    particlesA->writeRegion(idx, &particleCpu[idx], 1);
+    activeParticleCount++;
+    if (poppedFromFree) {
         particleFreeCount->write(&particleFreeCountCpu, 1);
     }
+    return true;
+}
+
+bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire, bool is_static) {
+    Color particleColor(color[0], color[1], color[2], mat_id, on_fire, is_static);
+    return addParticle(pos, vel, particleColor);
 }
 
 // ---------------------------------------------------------------------------
