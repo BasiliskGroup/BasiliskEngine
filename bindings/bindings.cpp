@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <glad/glad.h>
 #include <basilisk/util/resolvePath.h>
 #include <filesystem>
 
@@ -41,6 +42,9 @@ void bind_cellular(py::module_&);
 
 PYBIND11_MODULE(basilisk, m) { // , py::mod_gil_not_used()
     m.doc() = "pybind11 example plugin"; // optional module docstring
+
+    m.attr("GL_LINEAR") = py::int_(GL_LINEAR);
+    m.attr("GL_NEAREST") = py::int_(GL_NEAREST);
 
     // Initialize the working directory from Python's perspective
     // This is more reliable than getcwd() on macOS when Python is a framework

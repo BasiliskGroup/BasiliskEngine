@@ -11,7 +11,8 @@ namespace bsk::internal {
  * @param images A vector of image pointers
  * @param capacity The inital capacity of the array for preallocation. Will use size of images if not given.
  */
-TextureArray::TextureArray(unsigned int width, unsigned int height, std::vector<Image*> images, unsigned int capacity): width(width), height(height), images(images) {
+TextureArray::TextureArray(unsigned int width, unsigned int height, std::vector<Image*> images, unsigned int capacity, unsigned int filter)
+    : width(width), height(height), images(images), samplerFilter(filter) {
     this->capacity = glm::max((unsigned int)images.size(), capacity);
     glGenTextures(1, &id);
     bind();
@@ -33,9 +34,8 @@ TextureArray::~TextureArray() {
  */
 void TextureArray::generate() {
 
-    // Set the filter to liear by default
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, samplerFilter);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, samplerFilter);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
@@ -54,9 +54,26 @@ void TextureArray::generate() {
  */
 void TextureArray::uploadImage(Image* image, unsigned int position) {
 
-    // Resize the image
     unsigned char* data = new unsigned char[width * height * 4];
-    stbir_resize_uint8_linear(image->getData(), image->getWidth(), image->getHeight(), 0, data, width, height, 0, STBIR_RGBA);
+    if (samplerFilter == GL_NEAREST) {
+        stbir_resize(
+            image->getData(),
+            image->getWidth(),
+            image->getHeight(),
+            0,
+            data,
+            static_cast<int>(width),
+            static_cast<int>(height),
+            0,
+            STBIR_RGBA,
+            STBIR_TYPE_UINT8,
+            STBIR_EDGE_CLAMP,
+            STBIR_FILTER_POINT_SAMPLE);
+    } else {
+        stbir_resize_uint8_linear(
+            image->getData(), image->getWidth(), image->getHeight(), 0, data,
+            static_cast<int>(width), static_cast<int>(height), 0, STBIR_RGBA);
+    }
 
     // Add the resized image data to the texture array
     glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, position, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);

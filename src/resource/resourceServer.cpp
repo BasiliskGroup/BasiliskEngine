@@ -17,8 +17,8 @@ Mesh*     ResourceServer::defaultQuad = nullptr;
 Skybox*   ResourceServer::defaultSkybox = nullptr;
 
 
-ResourceServer::ResourceServer() {
-    textureServer = new TextureServer();
+ResourceServer::ResourceServer(std::vector<unsigned int> textureSizeBuckets, unsigned int textureFilter) {
+    textureServer = new TextureServer(textureSizeBuckets, textureFilter);
     materialServer = new MaterialServer(textureServer);
     
     // Initialize static resources that require Assimp (deferred to avoid static init order issues)

@@ -5,14 +5,14 @@ namespace bsk::internal {
 
 std::unique_ptr<ResourceServer> Engine::resourceServer(nullptr);
 
-Engine::Engine(int width, int height, const char* title, bool autoMouseGrab, bool showSplash) {
+Engine::Engine(int width, int height, const char* title, bool autoMouseGrab, bool showSplash, std::vector<unsigned int> textureSizeBuckets, unsigned int textureFilter) {
     window = new Window(width, height, title);
     mouse = new Mouse(this);
     keyboard = new Keyboard(window);
     frame = new Frame(this, width, height);
 
     if (!resourceServer) {
-        resourceServer = std::make_unique<ResourceServer>();
+        resourceServer = std::make_unique<ResourceServer>(textureSizeBuckets, textureFilter);
 
         // only initialize the GPU once, we'll use the fact that resourceServer is a singleton to ensure this
         initGpu();

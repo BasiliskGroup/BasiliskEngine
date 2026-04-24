@@ -20,7 +20,7 @@ class ResourceServer {
         MaterialServer* materialServer;
 
     public:
-        ResourceServer();
+        ResourceServer(std::vector<unsigned int> textureSizeBuckets = {256, 1024, 2048, 2200}, unsigned int textureFilter = GL_LINEAR);
         ~ResourceServer();
 
         void write(Shader* shader, std::string textureUniform, std::string materialUniform, unsigned int startingSlot=8);

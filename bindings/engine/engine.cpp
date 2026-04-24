@@ -1,4 +1,6 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <vector>
 #include <basilisk/engine/engine.h>
 #include <basilisk/IO/keyboard.h>
 #include <basilisk/IO/mouse.h>
@@ -10,12 +12,14 @@ void bind_engine(py::module_& m) {
     using namespace bsk::internal;
 
     py::class_<Engine>(m, "Engine")
-        .def(py::init<int, int, const char*, bool, bool>(),
+        .def(py::init<int, int, const char*, bool, bool, std::vector<unsigned int>, unsigned int>(),
              py::arg("width") = 800,
              py::arg("height") = 800,
              py::arg("title") = "Basilisk",
              py::arg("auto_mouse_grab") = true,
-             py::arg("show_splash") = false)
+             py::arg("show_splash") = false,
+             py::arg("texture_size_buckets") = std::vector<unsigned int>{256, 1024, 2048, 2200},
+             py::arg("texture_filter") = GL_LINEAR)
              
         .def("is_running", &Engine::isRunning)
         .def("update", &Engine::update)

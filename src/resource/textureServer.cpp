@@ -7,9 +7,9 @@ namespace bsk::internal {
  * 
  * @param sizeBuckets Vector of sizes for the texture arrays. All images will be clamped to these values. 
  */
-TextureServer::TextureServer(std::vector<unsigned int> sizeBuckets): sizeBuckets(sizeBuckets) {
+TextureServer::TextureServer(std::vector<unsigned int> sizeBuckets, unsigned int filter): sizeBuckets(sizeBuckets) {
     for (unsigned int size : sizeBuckets) {
-        TextureArray* array = new TextureArray(size, size);
+        TextureArray* array = new TextureArray(size, size, {}, 1, filter);
         textureArrays.push_back(array);
     }
 }

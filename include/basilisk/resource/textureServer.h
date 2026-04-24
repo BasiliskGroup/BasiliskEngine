@@ -17,7 +17,7 @@ class TextureServer {
         unsigned int getClosestSize(unsigned int x);
 
     public:
-        TextureServer(std::vector<unsigned int> sizeBuckets = {256, 1024, 2048, 2200});
+        TextureServer(std::vector<unsigned int> sizeBuckets = {256, 1024, 2048, 2200}, unsigned int filter = GL_LINEAR);
         ~TextureServer();
 
         std::pair<unsigned int, unsigned int> add(Image* image);
