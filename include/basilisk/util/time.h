@@ -12,9 +12,9 @@ std::chrono::time_point<std::chrono::high_resolution_clock> timeNow();
 
 void printTimeNow();
 
-void sleepS(uint seconds);
-void sleepMS(uint milliseconds);
-void sleepUS(uint microseconds);
+void sleepS(std::uint32_t seconds);
+void sleepMS(std::uint32_t milliseconds);
+void sleepUS(std::uint32_t microseconds);
 
 void printDurationUS(std::chrono::time_point<std::chrono::high_resolution_clock> t1, std::chrono::time_point<std::chrono::high_resolution_clock> t2, std::string title);
 void printPrimalDuration(std::chrono::time_point<std::chrono::high_resolution_clock> t1, std::chrono::time_point<std::chrono::high_resolution_clock> t2);
