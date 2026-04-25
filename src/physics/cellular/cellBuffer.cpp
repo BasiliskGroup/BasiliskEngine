@@ -356,8 +356,8 @@ void CellBuffer::explode(int pixelX, int pixelY, int radius, float fireChance) {
     }
 
     const float radiusF = std::max(1.0f, static_cast<float>(radius));
-    const float minSpeed = 8.0f;
-    const float maxSpeed = 36.0f;
+    const float minSpeed = 1.0f;
+    const float maxSpeed = 16.0f;
     const Color empty = Color::Empty();
     const float clampedFireChance = glm::clamp(fireChance, 0.0f, 1.0f);
     static thread_local std::mt19937 rng(std::random_device{}());

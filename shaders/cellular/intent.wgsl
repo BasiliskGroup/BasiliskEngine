@@ -190,7 +190,7 @@ fn extinguishability(c: u32) -> f32 {
         case MUD: { return 0.0; }
         case CLAY: { return 0.0; }
         case GLASS: { return 0.0; } // TODO make this melt
-        case METAL: { return 0.02; }
+        case METAL: { return 0.035; }
         case PLASTIC: { return 0.2; }
         case SNOW: { return 0.0; } // melt into water
         case VAPOR: { return 0.0; }
