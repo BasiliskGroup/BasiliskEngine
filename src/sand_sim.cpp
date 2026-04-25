@@ -87,9 +87,11 @@ int main() {
 
     bsk::Shader* sandShader = new bsk::Shader("shaders/sand.vert", "shaders/sand.frag");
     bsk::Frame* sandFrame = new bsk::Frame(engine, sandShader, cellBuffer->getWidth(), cellBuffer->getHeight());
-    
+
+#if defined(__APPLE__)
     int enabled = glfwGetWindowAttrib(engine->getWindow()->getWindow(), GLFW_COCOA_RETINA_FRAMEBUFFER);
     std::cout << "Retina enabled: " << enabled << std::endl;
+#endif
 
     // scaling for the buffer to match the scene scale
     glm::vec2 cameraPos = scene->getCamera()->getPosition();

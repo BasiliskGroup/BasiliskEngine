@@ -198,8 +198,21 @@ if(RUST_GPU_LIB_NAME AND CARGO AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/C
     )
     add_dependencies(rust_gpu_imported rust_gpu_lib)
     
-    # On Windows, we need to link additional system libraries that wgpu depends on
+    # On Windows, copy the rust_gpu.dll to build directories for runtime loading
+    # MSVC uses Debug/Release subdirectories, so copy to both root and config-specific dirs
     if(WIN32)
+        add_custom_command(TARGET rust_gpu_lib POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
+                "${CMAKE_BINARY_DIR}/rust_gpu.dll"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
+                "${CMAKE_BINARY_DIR}/Debug/rust_gpu.dll"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_CURRENT_SOURCE_DIR}/rust_gpu/target/release/rust_gpu.dll"
+                "${CMAKE_BINARY_DIR}/Release/rust_gpu.dll"
+            COMMENT "Copying rust_gpu.dll to build directories for runtime loading"
+        )
         target_link_libraries(rust_gpu_imported INTERFACE 
             ws2_32 userenv advapi32 ntdll bcrypt d3dcompiler
         )
@@ -369,6 +382,25 @@ add_custom_target(copy_resources ALL
         ${CMAKE_CURRENT_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/models
     COMMENT "Copying resources to build directory"
 )
+
+# On Windows with MSVC, also copy resources to Debug/Release subdirectories
+if(WIN32 AND MSVC)
+    add_custom_command(TARGET copy_resources POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/Debug/shaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/textures ${CMAKE_BINARY_DIR}/Debug/textures
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/Debug/models
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${CMAKE_BINARY_DIR}/Release/shaders
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/textures ${CMAKE_BINARY_DIR}/Release/textures
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/models ${CMAKE_BINARY_DIR}/Release/models
+        COMMENT "Copying resources to MSVC config subdirectories"
+    )
+endif()
 
 # ======================================================
 # Executables (one target per top-level src/*.cpp)

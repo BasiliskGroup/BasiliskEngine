@@ -16,11 +16,15 @@ impl GpuContext {
             Some("gl") | Some("gles") => Backends::GL,
             Some("all") => Backends::all(),
             Some(_) | None => {
-                #[cfg(target_os = "linux")]
+                // Linux: avoid GLES/EGL stacks that can fail with EGL_BAD_ACCESS.
+                // Windows: default wgpu backend order can pick D3D12 while GLFW uses OpenGL;
+                // some drivers deadlock or hang indefinitely in compute pipeline creation
+                // when both APIs are active in one process — Vulkan is reliable here.
+                #[cfg(any(target_os = "linux", target_os = "windows"))]
                 {
                     Backends::VULKAN
                 }
-                #[cfg(not(target_os = "linux"))]
+                #[cfg(not(any(target_os = "linux", target_os = "windows")))]
                 {
                     Backends::all()
                 }
