@@ -34,13 +34,24 @@ static constexpr float GRAVITY = 32.0f; // for particle system
 
 // All particles are read each frame but only written when created.
 // Layout must match shaders/particles.wgsl (vec2, vec2, u32 color, u32 flags).
+
 struct Particle {
     glm::vec2 pos;
     glm::vec2 vel;
     uint32_t color = 0; // same packing as GPU cells: packCell(unpack, 0)
-    float _pad = -1.0f; // forced lifetime/immunity timer; negative means inactive
+    float _pad = 0.0f;  // forced lifetime/immunity timer (seconds)
+    uint32_t explodeRadius = 0u;
+    float explodeFireChance = 0.0f;
 };
-static_assert(sizeof(Particle) == 24, "Particle must match WGSL struct layout");
+static_assert(sizeof(Particle) == 32, "Particle must match WGSL struct layout");
+
+struct ExplosionEvent {
+    glm::vec2 pos;
+    glm::vec2 vel;
+    uint32_t radius = 0u;
+    float fireChance = 0.0f;
+};
+static_assert(sizeof(ExplosionEvent) == 24, "ExplosionEvent must match WGSL struct layout");
 
 class CellBuffer {
 private:
@@ -73,6 +84,7 @@ private:
     bool pendingCellsReadback = false;
     bool pendingChunkReadback = false;
     bool pendingParticleReadback = false;
+    bool pendingExplosionReadback = false;
 
     // OpenGL
     GLuint renderTexture = 0;
@@ -97,12 +109,18 @@ private:
     GpuBuffer<uint32_t>* particleFreeCount = nullptr;
     StagingBuffer<uint32_t>* particleFreeStackStaging = nullptr;
     StagingBuffer<uint32_t>* particleFreeCountStaging = nullptr;
+    GpuBuffer<ExplosionEvent>* explosionStack = nullptr;
+    GpuBuffer<uint32_t>* explosionCount = nullptr;
+    StagingBuffer<ExplosionEvent>* explosionStackStaging = nullptr;
+    StagingBuffer<uint32_t>* explosionCountStaging = nullptr;
     std::vector<Particle> particleCpu;
+    std::vector<ExplosionEvent> explosionCpu;
     std::vector<uint32_t> particleFreeStackCpu;
     uint32_t particleFreeCountCpu = 0;
     uint32_t nextParticleIndex = 0;
     uint32_t activeParticleCount = 0;
     static constexpr uint32_t MAX_PARTICLES = 100'000;
+    static constexpr uint32_t MAX_EXPLOSIONS_PER_FRAME = 100;
     float cellUpdatesPerSecond = 40.0f;
     float cellUpdateAccumulator = 0.0f;
 
@@ -162,6 +180,7 @@ public:
 
     float getCellScale() const { return cellScale; }
     void setCellScale(float value) { cellScale = value; }
+    void setCellUpdatesPerSecond(float value) { cellUpdatesPerSecond = value; }
 
     std::vector<Color>& getData() { return getActiveBuffer(); }
 
@@ -176,8 +195,8 @@ public:
     void explode(int pixelX, int pixelY, int radius, float fireChance);
 
     // basically what we're gonna do is dance
-    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime = 0.0f);
-    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire=false, bool is_static=false, float forcedLifetime = 0.0f);
+    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime = 0.0f, uint32_t explodeRadius = 0u, float explodeFireChance = 0.0f);
+    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire=false, bool is_static=false, float forcedLifetime = 0.0f, uint32_t explodeRadius = 0u, float explodeFireChance = 0.0f);
 
     unsigned int getRenderTexture() { return renderTexture; }
 

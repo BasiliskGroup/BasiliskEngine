@@ -14,6 +14,8 @@ struct Particle {
     vel: vec2<f32>,
     color: u32,
     _pad: f32,
+    explode_radius: u32,
+    explode_fire_chance: f32,
 };
 
 // cell layout:
@@ -29,7 +31,6 @@ struct Particle {
 @group(0) @binding(2) var<storage, read_write> intent:            array<i32>;
 @group(0) @binding(3) var<storage, read>       active_chunk_list: array<u32>;
 @group(0) @binding(4) var<storage, read_write> chunk_intent:      array<u32>;
-
 // @group(0) @binding(5) var<storage, read_write> particles: array<Particle>;
 // @group(0) @binding(6) var<storage, read_write> free_stack: array<u32>;
 // @group(0) @binding(7) var<storage, read_write> free_count: array<atomic<u32>>;
@@ -296,7 +297,6 @@ fn main(
     intent[src] = -1;
 
     let mat = material(cell);
-
     // fire
     let is_fire = on_fire(cell);
     if (is_fire == 1u) {

@@ -657,7 +657,7 @@ bool Solver::isTouchingParticle(Rigid* rigid, int materialId) {
     }
     const std::vector<Particle>& particles = cellBuffer->getParticles();
     for (const Particle& particle : particles) {
-        if (particle._pad < 0.0f) {
+        if (particle.color == 0u) {
             continue;
         }
         const Color pColor = unpackCell(particle.color);
@@ -688,7 +688,7 @@ std::vector<CellParticle> Solver::getTouchedParticles(Rigid* rigid, int material
     }
     const std::vector<Particle>& particles = cellBuffer->getParticles();
     for (const Particle& particle : particles) {
-        if (particle._pad < 0.0f) {
+        if (particle.color == 0u) {
             continue;
         }
         const Color pColor = unpackCell(particle.color);

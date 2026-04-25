@@ -14,6 +14,15 @@ struct Particle {
     vel: vec2<f32>,
     color: u32,
     _pad: f32,
+    explode_radius: u32,
+    explode_fire_chance: f32,
+};
+
+struct ExplosionEvent {
+    pos: vec2<f32>,
+    vel: vec2<f32>,
+    radius: u32,
+    fire_chance: f32,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
@@ -22,6 +31,8 @@ struct Particle {
 @group(0) @binding(3) var<storage, read_write> chunk_active_out: array<u32>;
 @group(0) @binding(4) var<storage, read_write> free_stack: array<u32>;
 @group(0) @binding(5) var<storage, read_write> free_count: array<atomic<u32>>;
+@group(0) @binding(6) var<storage, read_write> explosion_stack: array<ExplosionEvent>;
+@group(0) @binding(7) var<storage, read_write> explosion_count: array<atomic<u32>>;
 
 fn cell_coords_from_pos(pos: vec2<f32>) -> vec2<i32> {
     // Particle positions are tracked in grid pixel coordinates on CPU and GPU.
@@ -48,6 +59,34 @@ fn material(c: u32) -> u32 {
 
 fn is_empty(c: u32) -> bool {
     return material(c) == 0u;
+}
+
+fn queue_explosion_if_needed(p: ptr<function, Particle>) {
+    if ((*p).explode_radius == 0u) {
+        return;
+    }
+    let event_slot = atomicAdd(&explosion_count[0], 1u);
+    if (event_slot < uniforms.num_particles) {
+        // GPU-origin particle explosions are queued for CPU handling.
+        explosion_stack[event_slot] = ExplosionEvent(
+            (*p).pos,
+            (*p).vel,
+            (*p).explode_radius,
+            (*p).explode_fire_chance
+        );
+    } else {
+        _ = atomicSub(&explosion_count[0], 1u);
+    }
+}
+
+fn deactivate_particle(p: ptr<function, Particle>) {
+    queue_explosion_if_needed(p);
+    (*p)._pad = 0.0;
+    (*p).explode_radius = 0u;
+    (*p).explode_fire_chance = 0.0;
+    (*p).color = 0u;
+    (*p).pos = vec2<f32>(-1000.0, -1000.0);
+    (*p).vel = vec2<f32>(0.0, 0.0);
 }
 
 fn particle_color_to_deposited_cell(packed: u32) -> u32 {
@@ -97,9 +136,7 @@ fn try_deposit_particle_cell(p: ptr<function, Particle>, x: i32, y: i32) -> bool
         chunk_active_out[ci] = 1u;
     }
     // Deactivate and push index to free stack.
-    (*p)._pad = -1.0;
-    (*p).pos = vec2<f32>(-1000.0, -1000.0);
-    (*p).vel = vec2<f32>(0.0, 0.0);
+    deactivate_particle(p);
     return true;
 }
 
@@ -112,7 +149,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     var p = particles[index];
-    if (p._pad < 0.0) {
+    if (material(p.color) == 0u) {
         return;
     }
     let was_forced_active = p._pad > 0.0;
@@ -138,12 +175,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let border_x = clamp(after_cell.x, 0, i32(uniforms.grid_width) - 1);
         let border_y = clamp(after_cell.y, 0, i32(uniforms.grid_height) - 1);
         let _landed_border = try_deposit_particle_cell(&p, border_x, border_y);
-        if (p._pad >= 0.0) {
-            p.pos = vec2<f32>(-1000.0, -1000.0);
-            p.vel = vec2<f32>(0.0, 0.0);
-            p._pad = -1.0;
+        if (material(p.color) != 0u) {
+            deactivate_particle(&p);
         }
-        if (p._pad < 0.0) {
+        if (material(p.color) == 0u) {
             let slot = atomicAdd(&free_count[0], 1u);
             if (slot < uniforms.num_particles) {
                 free_stack[slot] = index;
@@ -162,10 +197,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // Try to place sand where the particle was before moving.
         let _landed_before = try_deposit_particle_cell(&p, before_cell.x, before_cell.y);
         // If that also failed (e.g. before_cell is occupied too), just deactivate.
-        if (p._pad >= 0.0) {
-            p.pos = vec2<f32>(-1000.0, -1000.0);
-            p.vel = vec2<f32>(0.0, 0.0);
-            p._pad = -1.0;
+        if (material(p.color) != 0u) {
+            deactivate_particle(&p);
         }
     } else {
         // Normal landing: attempt deposit at post-integrated cell,
@@ -177,7 +210,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // If particle became inactive this step, publish index to free stack.
-    if (p._pad < 0.0) {
+    if (material(p.color) == 0u) {
         let slot = atomicAdd(&free_count[0], 1u);
         if (slot < uniforms.num_particles) {
             free_stack[slot] = index;

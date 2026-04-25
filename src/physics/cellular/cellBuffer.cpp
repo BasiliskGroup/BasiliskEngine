@@ -58,6 +58,10 @@ CellBuffer::~CellBuffer() {
         delete particleFreeCount;
         delete particleFreeStackStaging;
         delete particleFreeCountStaging;
+        delete explosionStack;
+        delete explosionCount;
+        delete explosionStackStaging;
+        delete explosionCountStaging;
         delete particleShader;
     }
 }
@@ -105,16 +109,22 @@ void CellBuffer::initializeCompute() {
     particleFreeCount = new GpuBufferU32(1);
     particleFreeStackStaging = new StagingBufferU32(MAX_PARTICLES);
     particleFreeCountStaging = new StagingBufferU32(1);
+    explosionStack = new GpuBuffer<ExplosionEvent>(MAX_PARTICLES);
+    explosionCount = new GpuBufferU32(1);
+    explosionStackStaging = new StagingBuffer<ExplosionEvent>(MAX_PARTICLES);
+    explosionCountStaging = new StagingBufferU32(1);
     particleCpu.resize(MAX_PARTICLES);
+    explosionCpu.resize(MAX_PARTICLES);
     particleFreeStackCpu.resize(MAX_PARTICLES, 0u);
     particleFreeCountCpu = 0u;
     nextParticleIndex = 0u;
     std::fill(particleCpu.begin(), particleCpu.end(),
-              Particle{glm::vec2(-1000.0f), glm::vec2(0.0f), packCell(Color::Sand(), 0u), -1.0f});
+              Particle{glm::vec2(-1000.0f), glm::vec2(0.0f), 0u, 0.0f, 0u, 0.0f});
     particlesA->write(particleCpu.data(), particleCpu.size());
     {
         const uint32_t zero = 0u;
         particleFreeCount->write(&zero, 1);
+        explosionCount->write(&zero, 1);
     }
 
     // Staging buffers — sized to match what they'll receive
@@ -168,7 +178,8 @@ void CellBuffer::initializeCompute() {
     particleShader = new ComputeShader(
         loadShaderSource("shaders/cellular/particles.wgsl"),
         { particlesA->handle(), cellsB->handle(), gpuChunkActiveOut->handle(),
-          particleFreeStack->handle(), particleFreeCount->handle() },
+          particleFreeStack->handle(), particleFreeCount->handle(),
+          explosionStack->handle(), explosionCount->handle() },
         pUSize
     );
 
@@ -222,7 +233,7 @@ void CellBuffer::updateTexture() {
     // Add particles only to the render copy.
     for (uint32_t i = 0; i < nextParticleIndex; ++i) {
         // Skip inactive particles
-        if (particleCpu[i]._pad < 0.0f) { continue; }
+        if (particleCpu[i].color == 0u) { continue; }
 
         // Check if the particle is within the bounds of the buffer
         int x = (int)(particleCpu[i].pos.x);
@@ -382,7 +393,9 @@ void CellBuffer::explode(int pixelX, int pixelY, int radius, float fireChance) {
                             glm::vec2(static_cast<float>(x), static_cast<float>(y)),
                             vel,
                             particleColor,
-                            0.05f
+                            0.1f,
+                            0u,
+                            0.0f
                         );
                     }
                     if (!converted) {
@@ -417,13 +430,13 @@ void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t
         const float speed = speedDist(rng);
         const float vx = std::cos(angle) * speed;
         const float vy = std::sin(angle) * speed;
-        if (!addParticle(glm::vec2(sx, sy), glm::vec2(vx, vy), color)) {
+        if (!addParticle(glm::vec2(sx, sy), glm::vec2(vx, vy), color, 0.1f, 5u, 0.0f)) {
             break;
         }
     }
 }
 
-bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime) {
+bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime, uint32_t explodeRadius, float explodeFireChance) {
     if (!computeInitialized || !particlesA) {
         return false;
     }
@@ -435,7 +448,7 @@ bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const C
         particleFreeCountCpu--;
         // Validate free-list entries read back from GPU before using them.
         // Corrupt/stale entries can otherwise poison spawning permanently.
-        if (candidate < nextParticleIndex && particleCpu[candidate]._pad < 0.0f) {
+        if (candidate < nextParticleIndex && particleCpu[candidate].color == 0u) {
             idx = candidate;
             poppedFromFree = true;
             break;
@@ -454,7 +467,14 @@ bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const C
     }
     particleColor.setIsStatic(false);
 
-    particleCpu[idx] = Particle{pos, vel, packCell(particleColor, 0u), std::max(0.0f, forcedLifetime)};
+    particleCpu[idx] = Particle{
+        pos,
+        vel,
+        packCell(particleColor, 0u),
+        std::max(0.0f, forcedLifetime),
+        explodeRadius,
+        glm::clamp(explodeFireChance, 0.0f, 1.0f)
+    };
     particlesA->writeRegion(idx, &particleCpu[idx], 1);
     activeParticleCount++;
     if (poppedFromFree) {
@@ -463,9 +483,9 @@ bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const C
     return true;
 }
 
-bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire, bool is_static, float forcedLifetime) {
+bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire, bool is_static, float forcedLifetime, uint32_t explodeRadius, float explodeFireChance) {
     Color particleColor(color[0], color[1], color[2], mat_id, on_fire, is_static);
-    return addParticle(pos, vel, particleColor, forcedLifetime);
+    return addParticle(pos, vel, particleColor, forcedLifetime, explodeRadius, explodeFireChance);
 }
 
 // ---------------------------------------------------------------------------
@@ -508,11 +528,35 @@ void CellBuffer::simulate(float deltaTime) {
         particleFreeStackStaging->collect(particleFreeStackCpu.data(), particleFreeStackCpu.size());
         activeParticleCount = 0u;
         for (uint32_t i = 0; i < nextParticleIndex; ++i) {
-            if (particleCpu[i]._pad >= 0.0f) {
+            if (particleCpu[i].color != 0u) {
                 activeParticleCount++;
             }
         }
         pendingParticleReadback = false;
+    }
+
+    if (pendingExplosionReadback) {
+        uint32_t explosionCountCpu = 0u;
+        explosionCountStaging->collect(&explosionCountCpu, 1);
+        explosionCountCpu = std::min<uint32_t>(explosionCountCpu, MAX_PARTICLES);
+        explosionStackStaging->collect(explosionCpu.data(), explosionCpu.size());
+        pendingExplosionReadback = false;
+
+        const uint32_t maxProcess = std::min<uint32_t>(explosionCountCpu, MAX_EXPLOSIONS_PER_FRAME);
+        for (uint32_t i = 0u; i < maxProcess; ++i) {
+            const ExplosionEvent& ev = explosionCpu[i];
+            if (ev.radius == 0u) {
+                continue;
+            }
+            const glm::vec2 explosionPos = ev.pos;
+            const int ex = static_cast<int>(std::floor(explosionPos.x));
+            const int ey = static_cast<int>(std::floor(explosionPos.y));
+            if (ex < 0 || ex >= width || ey < 0 || ey >= height) {
+                continue;
+            }
+            // GPU-origin explosion processing always uses zero ignition chance.
+            explode(ex, ey, static_cast<int>(ev.radius), 0.0f);
+        }
     }
 
     // ------------------------------------------------------------------
@@ -605,6 +649,10 @@ void CellBuffer::simulate(float deltaTime) {
         gpuChunkIntent   ->zero();
         gpuChunkActiveOut->zero();
     }
+    {
+        const uint32_t zero = 0u;
+        explosionCount->write(&zero, 1);
+    }
 
     // ------------------------------------------------------------------
     // STEP 7 — Build encoder, submit ONE batch
@@ -669,6 +717,8 @@ void CellBuffer::simulate(float deltaTime) {
             enc.copyToStaging(*particlesA, *particlesStaging);
             enc.copyToStaging(*particleFreeCount, *particleFreeCountStaging);
             enc.copyToStaging(*particleFreeStack, *particleFreeStackStaging);
+            enc.copyToStaging(*explosionCount, *explosionCountStaging);
+            enc.copyToStaging(*explosionStack, *explosionStackStaging);
         }
         if (runSandStep || nextParticleIndex > 0u) {
             // Keep simulation state on GPU: cellsA remains authoritative.
@@ -733,7 +783,10 @@ void CellBuffer::simulate(float deltaTime) {
         particlesStaging->mapAsync();
         particleFreeCountStaging->mapAsync();
         particleFreeStackStaging->mapAsync();
+        explosionCountStaging->mapAsync();
+        explosionStackStaging->mapAsync();
         pendingParticleReadback = true;
+        pendingExplosionReadback = true;
     }
 }
 

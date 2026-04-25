@@ -10,7 +10,7 @@ namespace {
 
 using SetActivePixelColor = void (CellBuffer::*)(int, int, const Color&);
 using SetActivePixelComponents = void (CellBuffer::*)(int, int, char, char, char, int, bool, bool);
-using AddParticleColor = bool (CellBuffer::*)(const glm::vec2&, const glm::vec2&, const Color&, float);
+using AddParticleColor = bool (CellBuffer::*)(const glm::vec2&, const glm::vec2&, const Color&, float, uint32_t, float);
 
 } // namespace
 
@@ -79,14 +79,15 @@ void bind_cellular(py::module_& m) {
         .def("apply_particle_brush", &CellBuffer::applyParticleBrush, py::arg("pixel_x"), py::arg("pixel_y"), py::arg("radius"), py::arg("spawn_count"), py::arg("color"))
         .def("explode", &CellBuffer::explode, py::arg("pixel_x"), py::arg("pixel_y"), py::arg("radius"), py::arg("fire_chance"))
         .def("add_particle", static_cast<AddParticleColor>(&CellBuffer::addParticle),
-            py::arg("pos"), py::arg("vel"), py::arg("color"), py::arg("forced_lifetime") = 0.0f)
-        .def("add_particle", [](CellBuffer& self, const glm::vec2& pos, const glm::vec2& vel, unsigned char r, unsigned char g, unsigned char b, int mat_id, bool on_fire, bool is_static, float forced_lifetime) {
+            py::arg("pos"), py::arg("vel"), py::arg("color"), py::arg("forced_lifetime") = 0.0f, py::arg("explode_radius") = 0u, py::arg("explode_fire_chance") = 0.0f)
+        .def("add_particle", [](CellBuffer& self, const glm::vec2& pos, const glm::vec2& vel, unsigned char r, unsigned char g, unsigned char b, int mat_id, bool on_fire, bool is_static, float forced_lifetime, uint32_t explode_radius, float explode_fire_chance) {
             char c[3] = { static_cast<char>(r), static_cast<char>(g), static_cast<char>(b) };
-            return self.addParticle(pos, vel, c, mat_id, on_fire, is_static, forced_lifetime);
-        }, py::arg("pos"), py::arg("vel"), py::arg("r"), py::arg("g"), py::arg("b"), py::arg("mat_id"), py::arg("on_fire") = false, py::arg("is_static") = false, py::arg("forced_lifetime") = 0.0f)
+            return self.addParticle(pos, vel, c, mat_id, on_fire, is_static, forced_lifetime, explode_radius, explode_fire_chance);
+        }, py::arg("pos"), py::arg("vel"), py::arg("r"), py::arg("g"), py::arg("b"), py::arg("mat_id"), py::arg("on_fire") = false, py::arg("is_static") = false, py::arg("forced_lifetime") = 0.0f, py::arg("explode_radius") = 0u, py::arg("explode_fire_chance") = 0.0f)
         .def("get_width", &CellBuffer::getWidth)
         .def("get_height", &CellBuffer::getHeight)
         .def("get_cell_scale", &CellBuffer::getCellScale)
         .def("set_cell_scale", &CellBuffer::setCellScale, py::arg("value"))
+        .def("set_cell_updates_per_second", &CellBuffer::setCellUpdatesPerSecond, py::arg("value"))
         .def("get_render_texture", &CellBuffer::getRenderTexture);
 }
