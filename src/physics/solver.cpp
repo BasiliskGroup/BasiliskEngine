@@ -33,7 +33,12 @@ static glm::vec2 sandCellCenterWorld(const CellBuffer* cellBuffer, int px, int p
     return gridPixelToWorld(cellBuffer, static_cast<float>(px) + 0.5f, static_cast<float>(py) + 0.5f);
 }
 
-std::optional<glm::ivec2> Solver::fillSandGridFromRigidAABB(Rigid* body, std::vector<std::vector<int>>& sand, bool includeFluid) const {
+std::optional<glm::ivec2> Solver::fillSandGridFromRigidAABB(
+    Rigid* body,
+    std::vector<std::vector<int>>& sand,
+    bool includeFluid,
+    bool skipSparseNonStatic
+) const {
     sand.clear();
     if (body == nullptr || cellBuffer == nullptr || bodyTable == nullptr) {
         return std::nullopt;
@@ -62,13 +67,37 @@ std::optional<glm::ivec2> Solver::fillSandGridFromRigidAABB(Rigid* body, std::ve
         return std::nullopt;
     }
 
+    auto is_occupied_for_mask = [&](int px, int py) -> bool {
+        const Color c = cellBuffer->getActivePixel(px, py);
+        if (c.getMatId() == 0) {
+            return false;
+        }
+        if (!includeFluid && is_fluid(c)) {
+            return false;
+        }
+        return true;
+    };
+
     sand.assign(static_cast<std::size_t>(tr_x - bl_x + 1), std::vector<int>(static_cast<std::size_t>(tr_y - bl_y + 1), 0));
     for (int x = bl_x; x <= tr_x; x++) {
         for (int y = bl_y; y <= tr_y; y++) {
             const Color color = cellBuffer->getActivePixel(x, y);
-            if (color.mat_id != 0 && (includeFluid || is_fluid(color) == false)) {
-                sand[static_cast<std::size_t>(x - bl_x)][static_cast<std::size_t>(y - bl_y)] = 1;
+            if (color.getMatId() == 0 || (!includeFluid && is_fluid(color))) {
+                continue;
             }
+
+            if (skipSparseNonStatic && !color.getIsStatic()) {
+                int neighbors = 0;
+                if (x > bl_x && is_occupied_for_mask(x - 1, y)) { neighbors++; }
+                if (x < tr_x && is_occupied_for_mask(x + 1, y)) { neighbors++; }
+                if (y > bl_y && is_occupied_for_mask(x, y - 1)) { neighbors++; }
+                if (y < tr_y && is_occupied_for_mask(x, y + 1)) { neighbors++; }
+                if (neighbors <= 2) {
+                    continue;
+                }
+            }
+
+            sand[static_cast<std::size_t>(x - bl_x)][static_cast<std::size_t>(y - bl_y)] = 1;
         }
     }
     return glm::ivec2(bl_x, bl_y);
@@ -330,7 +359,7 @@ void Solver::step(float dtIncoming) {
         if (body->getMass() <= 0.0f) continue;
 
         std::vector<std::vector<int>> sand;
-        const std::optional<glm::ivec2> aabbOrigin = fillSandGridFromRigidAABB(body, sand, false);
+        const std::optional<glm::ivec2> aabbOrigin = fillSandGridFromRigidAABB(body, sand, false, true);
         if (!aabbOrigin) {
             continue;
         }
@@ -628,7 +657,7 @@ bool Solver::isTouchingParticle(Rigid* rigid, int materialId) {
     }
     const std::vector<Particle>& particles = cellBuffer->getParticles();
     for (const Particle& particle : particles) {
-        if ((particle._pad & 1u) == 0u) {
+        if (particle._pad < 0.0f) {
             continue;
         }
         const Color pColor = unpackCell(particle.color);
@@ -659,7 +688,7 @@ std::vector<CellParticle> Solver::getTouchedParticles(Rigid* rigid, int material
     }
     const std::vector<Particle>& particles = cellBuffer->getParticles();
     for (const Particle& particle : particles) {
-        if ((particle._pad & 1u) == 0u) {
+        if (particle._pad < 0.0f) {
             continue;
         }
         const Color pColor = unpackCell(particle.color);

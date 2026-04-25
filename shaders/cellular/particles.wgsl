@@ -13,7 +13,7 @@ struct Particle {
     pos: vec2<f32>,
     vel: vec2<f32>,
     color: u32,
-    _pad: u32,
+    _pad: f32,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: Uniforms;
@@ -97,7 +97,7 @@ fn try_deposit_particle_cell(p: ptr<function, Particle>, x: i32, y: i32) -> bool
         chunk_active_out[ci] = 1u;
     }
     // Deactivate and push index to free stack.
-    (*p)._pad = 0u;
+    (*p)._pad = -1.0;
     (*p).pos = vec2<f32>(-1000.0, -1000.0);
     (*p).vel = vec2<f32>(0.0, 0.0);
     return true;
@@ -112,8 +112,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     var p = particles[index];
-    if ((p._pad & 1u) == 0u) {
+    if (p._pad < 0.0) {
         return;
+    }
+    let was_forced_active = p._pad > 0.0;
+    if (p._pad > 0.0) {
+        p._pad = max(0.0, p._pad - uniforms.dt);
     }
     let before_cell = cell_coords_from_pos(p.pos);
 
@@ -123,19 +127,45 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     p.pos += (p.vel * uniforms.dt) / uniforms.cell_width;
 
     let after_cell = cell_coords_from_pos(p.pos);
+    let after_in_bounds = in_bounds(after_cell.x, after_cell.y);
+
+    if (was_forced_active && after_in_bounds) {
+        particles[index] = p;
+        return;
+    }
+
+    if (!after_in_bounds) {
+        let border_x = clamp(after_cell.x, 0, i32(uniforms.grid_width) - 1);
+        let border_y = clamp(after_cell.y, 0, i32(uniforms.grid_height) - 1);
+        let _landed_border = try_deposit_particle_cell(&p, border_x, border_y);
+        if (p._pad >= 0.0) {
+            p.pos = vec2<f32>(-1000.0, -1000.0);
+            p.vel = vec2<f32>(0.0, 0.0);
+            p._pad = -1.0;
+        }
+        if (p._pad < 0.0) {
+            let slot = atomicAdd(&free_count[0], 1u);
+            if (slot < uniforms.num_particles) {
+                free_stack[slot] = index;
+            } else {
+                _ = atomicSub(&free_count[0], 1u);
+            }
+        }
+        particles[index] = p;
+        return;
+    }
 
     // End-of-frame overlap check: if the new position is inside a filled cell,
     // deposit sand at the previous cell position instead of the new one.
-    let after_in_sand = in_bounds(after_cell.x, after_cell.y) &&
-        material(cells[cell_idx(after_cell.x, after_cell.y)]) != 0u;
+    let after_in_sand = material(cells[cell_idx(after_cell.x, after_cell.y)]) != 0u;
     if (after_in_sand) {
         // Try to place sand where the particle was before moving.
         let _landed_before = try_deposit_particle_cell(&p, before_cell.x, before_cell.y);
         // If that also failed (e.g. before_cell is occupied too), just deactivate.
-        if ((p._pad & 1u) != 0u) {
+        if (p._pad >= 0.0) {
             p.pos = vec2<f32>(-1000.0, -1000.0);
             p.vel = vec2<f32>(0.0, 0.0);
-            p._pad = 0u;
+            p._pad = -1.0;
         }
     } else {
         // Normal landing: attempt deposit at post-integrated cell,
@@ -147,7 +177,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // If particle became inactive this step, publish index to free stack.
-    if ((p._pad & 1u) == 0u) {
+    if (p._pad < 0.0) {
         let slot = atomicAdd(&free_count[0], 1u);
         if (slot < uniforms.num_particles) {
             free_stack[slot] = index;

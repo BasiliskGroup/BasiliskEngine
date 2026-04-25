@@ -110,7 +110,7 @@ void CellBuffer::initializeCompute() {
     particleFreeCountCpu = 0u;
     nextParticleIndex = 0u;
     std::fill(particleCpu.begin(), particleCpu.end(),
-              Particle{glm::vec2(-1000.0f), glm::vec2(0.0f), packCell(Color::Sand(), 0u), 0u});
+              Particle{glm::vec2(-1000.0f), glm::vec2(0.0f), packCell(Color::Sand(), 0u), -1.0f});
     particlesA->write(particleCpu.data(), particleCpu.size());
     {
         const uint32_t zero = 0u;
@@ -222,7 +222,7 @@ void CellBuffer::updateTexture() {
     // Add particles only to the render copy.
     for (uint32_t i = 0; i < nextParticleIndex; ++i) {
         // Skip inactive particles
-        if ((particleCpu[i]._pad & 1u) == 0u) { continue; }
+        if (particleCpu[i]._pad < 0.0f) { continue; }
 
         // Check if the particle is within the bounds of the buffer
         int x = (int)(particleCpu[i].pos.x);
@@ -339,6 +339,68 @@ void CellBuffer::applyBrush(int pixelX, int pixelY, int radius, const Color& col
     }
 }
 
+void CellBuffer::explode(int pixelX, int pixelY, int radius, float fireChance) {
+    if (radius < 0) {
+        return;
+    }
+
+    const float radiusF = std::max(1.0f, static_cast<float>(radius));
+    const float minSpeed = 8.0f;
+    const float maxSpeed = 36.0f;
+    const Color empty = Color::Empty();
+    const float clampedFireChance = glm::clamp(fireChance, 0.0f, 1.0f);
+    static thread_local std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<float> fireDist(0.0f, 1.0f);
+    std::uniform_real_distribution<float> angleJitterDist(-0.35f, 0.35f);
+    std::uniform_real_distribution<float> speedJitterDist(0.85f, 1.15f);
+
+    for (int dy = -radius; dy <= radius; ++dy) {
+        for (int dx = -radius; dx <= radius; ++dx) {
+            if (dx*dx + dy*dy <= radius*radius) {
+                int x = pixelX + dx, y = pixelY + dy;
+                if (x >= 0 && x < width && y >= 0 && y < height) {
+                    const Color source = getActivePixel(x, y);
+                    if (source.getMatId() == 0u) {
+                        continue;
+                    }
+
+                    const glm::vec2 delta(static_cast<float>(dx), static_cast<float>(dy));
+                    const float dist = glm::length(delta);
+                    const glm::vec2 dir = (dist > 0.0001f) ? (delta / dist) : glm::vec2(0.0f, 1.0f);
+                    const float distNorm = glm::clamp(dist / radiusF, 0.0f, 1.0f);
+                    const float baseSpeed = minSpeed + (maxSpeed - minSpeed) * (1.0f - distNorm);
+                    const float dirAngle = std::atan2(dir.y, dir.x) + angleJitterDist(rng);
+                    const glm::vec2 jitteredDir(std::cos(dirAngle), std::sin(dirAngle));
+                    const float speed = baseSpeed * speedJitterDist(rng);
+                    const glm::vec2 vel = jitteredDir * speed;
+                    Color particleColor = source;
+                    particleColor.setOnFire(fireDist(rng) < clampedFireChance ? 1u : 0u);
+
+                    bool converted = true;
+                    if (computeInitialized) {
+                        converted = addParticle(
+                            glm::vec2(static_cast<float>(x), static_cast<float>(y)),
+                            vel,
+                            particleColor,
+                            0.05f
+                        );
+                    }
+                    if (!converted) {
+                        continue;
+                    }
+
+                    markChunkDirty(x, y);
+                    if (computeInitialized) {
+                        pendingBrushPixels.push_back({y * width + x, empty});
+                    } else {
+                        setActivePixel(x, y, empty);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t spawnCount, const Color& color) {
     if (!computeInitialized || !particlesA || spawnCount == 0) return;
 
@@ -361,20 +423,28 @@ void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t
     }
 }
 
-bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color) {
+bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime) {
     if (!computeInitialized || !particlesA) {
         return false;
     }
 
     bool poppedFromFree = false;
     uint32_t idx = 0u;
-    if (particleFreeCountCpu > 0u) {
-        idx = particleFreeStackCpu[particleFreeCountCpu - 1u];
+    while (particleFreeCountCpu > 0u) {
+        const uint32_t candidate = particleFreeStackCpu[particleFreeCountCpu - 1u];
         particleFreeCountCpu--;
-        poppedFromFree = true;
-    } else if (nextParticleIndex < MAX_PARTICLES) {
+        // Validate free-list entries read back from GPU before using them.
+        // Corrupt/stale entries can otherwise poison spawning permanently.
+        if (candidate < nextParticleIndex && particleCpu[candidate]._pad < 0.0f) {
+            idx = candidate;
+            poppedFromFree = true;
+            break;
+        }
+    }
+
+    if (!poppedFromFree && nextParticleIndex < MAX_PARTICLES) {
         idx = nextParticleIndex++;
-    } else {
+    } else if (!poppedFromFree) {
         return false;
     }
 
@@ -382,8 +452,9 @@ bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const C
     if (particleColor.mat_id == 0) {
         particleColor.mat_id = 2;
     }
+    particleColor.setIsStatic(false);
 
-    particleCpu[idx] = Particle{pos, vel, packCell(particleColor, 0u), 1u};
+    particleCpu[idx] = Particle{pos, vel, packCell(particleColor, 0u), std::max(0.0f, forcedLifetime)};
     particlesA->writeRegion(idx, &particleCpu[idx], 1);
     activeParticleCount++;
     if (poppedFromFree) {
@@ -392,9 +463,9 @@ bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const C
     return true;
 }
 
-bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire, bool is_static) {
+bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire, bool is_static, float forcedLifetime) {
     Color particleColor(color[0], color[1], color[2], mat_id, on_fire, is_static);
-    return addParticle(pos, vel, particleColor);
+    return addParticle(pos, vel, particleColor, forcedLifetime);
 }
 
 // ---------------------------------------------------------------------------
@@ -426,13 +497,18 @@ void CellBuffer::simulate(float deltaTime) {
         particlesStaging->collectRegion(particleCpu.data(), 0, nextParticleIndex);
         uint32_t freeCountTmp = 0u;
         particleFreeCountStaging->collect(&freeCountTmp, 1);
-        particleFreeCountCpu = std::min<uint32_t>(freeCountTmp, MAX_PARTICLES);
+        if (freeCountTmp > nextParticleIndex || freeCountTmp > MAX_PARTICLES) {
+            // Recover from invalid counter states instead of consuming garbage stack entries.
+            freeCountTmp = 0u;
+            particleFreeCount->write(&freeCountTmp, 1);
+        }
+        particleFreeCountCpu = freeCountTmp;
         // Always collect the mapped free-stack staging buffer so it gets unmapped.
         // We only consume the first `particleFreeCountCpu` entries below.
         particleFreeStackStaging->collect(particleFreeStackCpu.data(), particleFreeStackCpu.size());
         activeParticleCount = 0u;
         for (uint32_t i = 0; i < nextParticleIndex; ++i) {
-            if ((particleCpu[i]._pad & 1u) != 0u) {
+            if (particleCpu[i]._pad >= 0.0f) {
                 activeParticleCount++;
             }
         }

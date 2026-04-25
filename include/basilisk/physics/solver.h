@@ -88,7 +88,12 @@ private:
     CellBuffer* cellBuffer;
     std::vector<uint32_t> sandManifoldForceIndices;
 
-    std::optional<glm::ivec2> fillSandGridFromRigidAABB(Rigid* body, std::vector<std::vector<int>>& sand, bool includeFluid=true) const;
+    std::optional<glm::ivec2> fillSandGridFromRigidAABB(
+        Rigid* body,
+        std::vector<std::vector<int>>& sand,
+        bool includeFluid = true,
+        bool skipSparseNonStatic = false
+    ) const;
 
 public:
     Solver(int cellWidth=800, int cellHeight=800, float cellScale=0.2f);

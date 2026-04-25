@@ -13,7 +13,7 @@ struct Particle {
     pos: vec2<f32>,
     vel: vec2<f32>,
     color: u32,
-    _pad: u32,
+    _pad: f32,
 };
 
 // cell layout:

@@ -38,7 +38,7 @@ struct Particle {
     glm::vec2 pos;
     glm::vec2 vel;
     uint32_t color = 0; // same packing as GPU cells: packCell(unpack, 0)
-    uint32_t _pad = 0;  // bit0: active flag
+    float _pad = -1.0f; // forced lifetime/immunity timer; negative means inactive
 };
 static_assert(sizeof(Particle) == 24, "Particle must match WGSL struct layout");
 
@@ -173,10 +173,11 @@ public:
 
     void applyBrush(int pixelX, int pixelY, int radius, const Color& color);
     void applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t spawnCount, const Color& color);
+    void explode(int pixelX, int pixelY, int radius, float fireChance);
 
     // basically what we're gonna do is dance
-    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color);
-    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire=false, bool is_static=false);
+    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime = 0.0f);
+    bool addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire=false, bool is_static=false, float forcedLifetime = 0.0f);
 
     unsigned int getRenderTexture() { return renderTexture; }
 
