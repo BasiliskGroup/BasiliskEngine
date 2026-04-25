@@ -142,7 +142,11 @@ class Color:
     @staticmethod
     def white() -> Color:
         ...
+    @typing.overload
     def __init__(self, r: typing.SupportsInt = 0, g: typing.SupportsInt = 0, b: typing.SupportsInt = 0, mat_id: typing.SupportsInt = 0, on_fire: typing.SupportsInt = 0) -> None:
+        ...
+    @typing.overload
+    def __init__(self, r: typing.SupportsInt, g: typing.SupportsInt, b: typing.SupportsInt, mat_id: typing.SupportsInt, on_fire: typing.SupportsInt, is_static: bool) -> None:
         ...
     @property
     def b(self) -> int:

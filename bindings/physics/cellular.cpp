@@ -22,6 +22,13 @@ void bind_cellular(py::module_& m) {
              py::arg("b") = 0,
              py::arg("mat_id") = 0,
              py::arg("on_fire") = 0)
+        .def(py::init<unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, bool>(),
+             py::arg("r") = 0,
+             py::arg("g") = 0,
+             py::arg("b") = 0,
+             py::arg("mat_id") = 0,
+             py::arg("on_fire") = 0,
+             py::arg("is_static") = false)
         .def_readwrite("r", &Color::r)
         .def_readwrite("g", &Color::g)
         .def_readwrite("b", &Color::b)
