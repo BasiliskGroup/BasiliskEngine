@@ -76,6 +76,9 @@ private:
 
     // OpenGL
     GLuint renderTexture = 0;
+    static constexpr int UPLOAD_PBO_COUNT = 3;
+    GLuint uploadPbos[UPLOAD_PBO_COUNT] = {0, 0, 0};
+    int uploadPboIndex = 0;
     bool initialized = false;
 
     // GPU storage buffers

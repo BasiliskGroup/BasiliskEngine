@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstddef>
+#include <cstring>
 #include <cmath>
 #include <random>
 
@@ -30,6 +31,7 @@ CellBuffer::CellBuffer(int width, int height, float cellScale)
 
 CellBuffer::~CellBuffer() {
     if (initialized) {
+        glDeleteBuffers(UPLOAD_PBO_COUNT, uploadPbos);
         glDeleteTextures(1, &renderTexture);
     }
 
@@ -232,9 +234,31 @@ void CellBuffer::updateTexture() {
         gpuRenderScratch[index] = particleCpu[i].color;
     }
 
+    // Upload via a small PBO ring to reduce CPU/GPU sync stalls.
+    // This keeps texture updates in OpenGL while pipelining transfers.
+    const size_t uploadBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * sizeof(uint32_t);
+    GLuint pbo = uploadPbos[uploadPboIndex];
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, static_cast<GLsizeiptr>(uploadBytes), nullptr, GL_STREAM_DRAW);
+    void* mapped = glMapBufferRange(
+        GL_PIXEL_UNPACK_BUFFER, 0, static_cast<GLsizeiptr>(uploadBytes),
+        GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT
+    );
+    if (mapped) {
+        std::memcpy(mapped, gpuRenderScratch.data(), uploadBytes);
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    }
+
     // Write buffer data to texture
     glBindTexture(GL_TEXTURE_2D, renderTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED_INTEGER, GL_UNSIGNED_INT, gpuRenderScratch.data());
+    if (mapped) {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+    } else {
+        // Fallback if map fails on a given driver/frame.
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED_INTEGER, GL_UNSIGNED_INT, gpuRenderScratch.data());
+    }
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    uploadPboIndex = (uploadPboIndex + 1) % UPLOAD_PBO_COUNT;
 }
 
 void CellBuffer::setActivePixel(int x, int y, const Color& color) {
@@ -661,6 +685,14 @@ void CellBuffer::setupTexture() {
     float borderColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);  
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+
+    const size_t uploadBytes = static_cast<size_t>(width) * static_cast<size_t>(height) * sizeof(uint32_t);
+    glGenBuffers(UPLOAD_PBO_COUNT, uploadPbos);
+    for (int i = 0; i < UPLOAD_PBO_COUNT; ++i) {
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, uploadPbos[i]);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, static_cast<GLsizeiptr>(uploadBytes), nullptr, GL_STREAM_DRAW);
+    }
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
 bool CellBuffer::windowToPixel(int wx, int wy, int ww, int wh, int& px, int& py) const {

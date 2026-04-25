@@ -73,12 +73,19 @@ fn try_deposit_particle_cell(p: ptr<function, Particle>, x: i32, y: i32) -> bool
         return false;
     }
 
-    // Prototype support check: bottom boundary counts as support,
-    // otherwise require a filled cell directly below.
+    // Support check: bottom boundary counts as support,
+    // otherwise require at least one filled cell among all 8 neighbors.
     var supported = (y == 0);
     if (!supported) {
-        let below_idx = cell_idx(x, y - 1);
-        supported = !is_empty(cells[below_idx]);
+        // Unrolled neighbor checks avoid dynamic indexing limitations on some backends.
+        if (in_bounds(x - 1, y - 1) && !is_empty(cells[cell_idx(x - 1, y - 1)])) { supported = true; }
+        if (!supported && in_bounds(x, y - 1) && !is_empty(cells[cell_idx(x, y - 1)])) { supported = true; }
+        if (!supported && in_bounds(x + 1, y - 1) && !is_empty(cells[cell_idx(x + 1, y - 1)])) { supported = true; }
+        if (!supported && in_bounds(x - 1, y) && !is_empty(cells[cell_idx(x - 1, y)])) { supported = true; }
+        if (!supported && in_bounds(x + 1, y) && !is_empty(cells[cell_idx(x + 1, y)])) { supported = true; }
+        if (!supported && in_bounds(x - 1, y + 1) && !is_empty(cells[cell_idx(x - 1, y + 1)])) { supported = true; }
+        if (!supported && in_bounds(x, y + 1) && !is_empty(cells[cell_idx(x, y + 1)])) { supported = true; }
+        if (!supported && in_bounds(x + 1, y + 1) && !is_empty(cells[cell_idx(x + 1, y + 1)])) { supported = true; }
     }
     if (!supported) {
         return false;
@@ -96,7 +103,6 @@ fn try_deposit_particle_cell(p: ptr<function, Particle>, x: i32, y: i32) -> bool
     return true;
 }
 
-// TODO allow particles to collide in any direction
 
 @compute @workgroup_size(256)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
