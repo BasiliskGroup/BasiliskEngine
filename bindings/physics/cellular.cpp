@@ -32,6 +32,11 @@ void bind_cellular(py::module_& m) {
         .def_static("sand", &Color::Sand)
         .def_static("water", &Color::Water);
 
+    py::class_<CellParticle>(m, "CellParticle")
+        .def_readonly("pos", &CellParticle::pos)
+        .def_readonly("vel", &CellParticle::vel)
+        .def_readonly("color", &CellParticle::color);
+
     py::class_<CellBuffer>(m, "CellBuffer")
         .def("initialize_compute", &CellBuffer::initializeCompute)
         .def("update_texture", &CellBuffer::updateTexture)

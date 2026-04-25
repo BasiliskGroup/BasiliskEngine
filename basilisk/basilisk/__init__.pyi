@@ -8,7 +8,7 @@ import typing
 import typing_extensions
 from . import forces
 from . import key
-__all__: list[str] = ['AmbientLight', 'Camera', 'Camera2D', 'CellBuffer', 'Collider', 'CollisionData', 'Color', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GL_LINEAR', 'GL_NEAREST', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'RayCastResult', 'RayCastResult2D', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera', 'StaticCamera2D', 'Texture', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
+__all__: list[str] = ['AmbientLight', 'Camera', 'Camera2D', 'CellBuffer', 'CellParticle', 'Collider', 'CollisionData', 'Color', 'ComputeShader', 'Cubemap', 'DirectionalLight', 'EBO', 'Engine', 'F32', 'FBO', 'Frame', 'GL_LINEAR', 'GL_NEAREST', 'GpuBuffer', 'GpuBufferDtype', 'I32', 'Image', 'Keyboard', 'Light', 'Material', 'Mesh', 'Mouse', 'Node', 'Node2D', 'PointLight', 'RayCastResult', 'RayCastResult2D', 'Rigid', 'Scene', 'Scene2D', 'Shader', 'Skybox', 'Solver', 'StaticCamera', 'StaticCamera2D', 'Texture', 'U32', 'UBO', 'VAO', 'VBO', 'Window', 'forces', 'init_gpu', 'key']
 class AmbientLight(Light):
     def __init__(self, color: glm.vec3 = (1.0, 1.0, 1.0), intensity: typing.SupportsFloat = 1.0) -> None:
         ...
@@ -173,6 +173,16 @@ class Color:
         ...
     @r.setter
     def r(self, arg0: typing.SupportsInt) -> None:
+        ...
+class CellParticle:
+    @property
+    def color(self) -> Color:
+        ...
+    @property
+    def pos(self) -> glm.vec2:
+        ...
+    @property
+    def vel(self) -> glm.vec2:
         ...
 class ComputeShader:
     def __init__(self, wgsl: str, buffer_handles: list, uniform_size: typing.SupportsInt = 0) -> None:
@@ -1162,6 +1172,14 @@ class Solver:
     def getPostStabilize(self) -> bool:
         ...
     def get_cell_buffer(self) -> CellBuffer:
+        ...
+    def get_touched_particles(self, rigid: Rigid, material_id: typing.SupportsInt = -1) -> list[CellParticle]:
+        ...
+    def is_touching(self, rigid: Rigid, material_id: typing.SupportsInt = -1) -> bool:
+        ...
+    def is_touching_particle(self, rigid: Rigid, material_id: typing.SupportsInt = -1) -> bool:
+        ...
+    def is_touching_sand(self, rigid: Rigid, material_id: typing.SupportsInt = -1) -> bool:
         ...
     @typing.overload
     def insert(self, arg0: ...) -> None:

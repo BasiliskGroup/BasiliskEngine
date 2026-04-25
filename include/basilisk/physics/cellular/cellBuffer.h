@@ -9,9 +9,38 @@
 
 namespace bsk::internal {
 
+inline uint32_t packCell(const Color& c, uint32_t momentum = 0u) {
+    const uint32_t mat = static_cast<uint32_t>(c.mat_id) & 0x1Fu;
+    const uint32_t fire = static_cast<uint32_t>(c.on_fire) & 1u;
+    const uint32_t r = static_cast<uint32_t>(c.r);
+    const uint32_t g = static_cast<uint32_t>(c.g);
+    const uint32_t b = static_cast<uint32_t>(c.b);
+    const uint32_t mom = momentum & 0x3u;
+    return (mom << 30u) | (fire << 29u) | (mat << 24u) | (r << 16u) | (g << 8u) | b;
+}
+
+inline Color unpackCell(uint32_t v) {
+    const uint8_t mat = static_cast<uint8_t>((v >> 24u) & 0x1Fu);
+    const uint8_t fire = static_cast<uint8_t>((v >> 29u) & 1u);
+    const uint8_t r = static_cast<uint8_t>((v >> 16u) & 0xFFu);
+    const uint8_t g = static_cast<uint8_t>((v >> 8u) & 0xFFu);
+    const uint8_t b = static_cast<uint8_t>(v & 0xFFu);
+    return Color(r, g, b, mat, fire);
+}
+
 // Must match @workgroup_size in WGSL shaders
 static constexpr int CHUNK_SIZE = 16;
 static constexpr float GRAVITY = 32.0f; // for particle system
+
+// All particles are read each frame but only written when created.
+// Layout must match shaders/particles.wgsl (vec2, vec2, u32 color, u32 flags).
+struct Particle {
+    glm::vec2 pos;
+    glm::vec2 vel;
+    uint32_t color = 0; // same packing as GPU cells: packCell(unpack, 0)
+    uint32_t _pad = 0;  // bit0: active flag
+};
+static_assert(sizeof(Particle) == 24, "Particle must match WGSL struct layout");
 
 class CellBuffer {
 private:
@@ -57,16 +86,6 @@ private:
     GpuBuffer<uint32_t>* gpuActiveChunkList = nullptr; // compact list of active chunk indices for intent dispatch
     GpuBuffer<uint32_t>* gpuChunkIntent    = nullptr;
     GpuBuffer<uint32_t>* gpuChunkActiveOut = nullptr;
-
-    // All particles are read each frame but only written when created.
-    // Layout must match shaders/particles.wgsl (vec2, vec2, u32 color, u32 flags).
-    struct Particle {
-        glm::vec2 pos;
-        glm::vec2 vel;
-        uint32_t color = 0; // same packing as GPU cells: packCell(unpack, 0)
-        uint32_t _pad = 0;  // bit0: active flag
-    };
-    static_assert(sizeof(Particle) == 24, "Particle must match WGSL struct layout");
 
     GpuBuffer<Particle>* particlesA = nullptr;
     StagingBuffer<Particle>* particlesStaging = nullptr;
@@ -156,6 +175,9 @@ public:
     bool addParticle(const glm::vec2& pos, const glm::vec2& vel, char color[3], int mat_id, bool on_fire=false, bool is_static=false);
 
     unsigned int getRenderTexture() { return renderTexture; }
+
+    // particle getter
+    const std::vector<Particle>& getParticles() const { return particleCpu; }
 };
 
 }

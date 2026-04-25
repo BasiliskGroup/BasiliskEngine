@@ -13,27 +13,6 @@
 
 using namespace bsk::internal;
 
-namespace {
-inline uint32_t packCell(const Color& c, uint32_t momentum = 0u) {
-    const uint32_t mat = static_cast<uint32_t>(c.mat_id) & 0x1Fu;
-    const uint32_t fire = static_cast<uint32_t>(c.on_fire) & 1u;
-    const uint32_t r = static_cast<uint32_t>(c.r);
-    const uint32_t g = static_cast<uint32_t>(c.g);
-    const uint32_t b = static_cast<uint32_t>(c.b);
-    const uint32_t mom = momentum & 0x3u;
-    return (mom << 30u) | (fire << 29u) | (mat << 24u) | (r << 16u) | (g << 8u) | b;
-}
-
-inline Color unpackCell(uint32_t v) {
-    const uint8_t mat = static_cast<uint8_t>((v >> 24u) & 0x1Fu);
-    const uint8_t fire = static_cast<uint8_t>((v >> 29u) & 1u);
-    const uint8_t r = static_cast<uint8_t>((v >> 16u) & 0xFFu);
-    const uint8_t g = static_cast<uint8_t>((v >> 8u) & 0xFFu);
-    const uint8_t b = static_cast<uint8_t>(v & 0xFFu);
-    return Color(r, g, b, mat, fire);
-}
-}
-
 // ---------------------------------------------------------------------------
 // Construction / destruction
 // ---------------------------------------------------------------------------

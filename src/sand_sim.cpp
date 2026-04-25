@@ -103,12 +103,11 @@ int main() {
         bsk::Keyboard*      keyboard = engine->getKeyboard();
 
         // get collisions for every rigid body
-        for (bsk::Rigid* body = scene->getSolver()->getBodies(); body != nullptr; body = body->getNext()) {
-            std::vector<bsk::internal::CollisionData> collisions = body->getCollisions();
-            for (const bsk::internal::CollisionData& collision : collisions) {
-                std::cout << "Collision: " << collision.normal.x << ", " << collision.normal.y << std::endl;
+        for (bsk::Rigid* body = scene->getSolver()->getBodies(); body; body = body->getNext()) {
+            if (scene->getSolver()->isTouching(body, 5)) {
+                std::cout << "Touching material" << std::endl;
             }
-        }
+         }
 
         glm::vec2 mousePos = {
             static_cast<float>(mouse->getWorldX(scene->getCamera())),

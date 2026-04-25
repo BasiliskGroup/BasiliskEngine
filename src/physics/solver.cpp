@@ -15,9 +15,64 @@
 #include <basilisk/compute/uniforms.hpp>
 #include <basilisk/physics/cellular/cellBuffer.h>
 #include <basilisk/physics/cellular/marching.h>
+#include <basilisk/physics/cellular/color.h>
 
 
 namespace bsk::internal {
+
+// Continuous grid coordinates (same convention as marching / particles.wgsl) -> world space.
+static glm::vec2 gridPixelToWorld(const CellBuffer* cellBuffer, float px, float py) {
+    const float cs = cellBuffer->getCellScale();
+    const float hw = static_cast<float>(cellBuffer->getWidth()) * 0.5f;
+    const float hh = static_cast<float>(cellBuffer->getHeight()) * 0.5f;
+    return glm::vec2((px - hw) * cs, (py - hh) * cs);
+}
+
+// Integer sand cell (px, py) -> world position at cell center (stable overlap probe vs corners).
+static glm::vec2 sandCellCenterWorld(const CellBuffer* cellBuffer, int px, int py) {
+    return gridPixelToWorld(cellBuffer, static_cast<float>(px) + 0.5f, static_cast<float>(py) + 0.5f);
+}
+
+std::optional<glm::ivec2> Solver::fillSandGridFromRigidAABB(Rigid* body, std::vector<std::vector<int>>& sand, bool includeFluid) const {
+    sand.clear();
+    if (body == nullptr || cellBuffer == nullptr || bodyTable == nullptr) {
+        return std::nullopt;
+    }
+    BVH* bvh = bodyTable->getBVH();
+    if (bvh == nullptr) {
+        return std::nullopt;
+    }
+
+    glm::vec2 bl, tr;
+    bvh->getSandAABB(body, bl, tr);
+
+    int bl_x, bl_y, tr_x, tr_y;
+    cellBuffer->worldToPixel(bl, bl_x, bl_y);
+    cellBuffer->worldToPixel(tr, tr_x, tr_y);
+
+    if (bl_x > tr_x) std::swap(bl_x, tr_x);
+    if (bl_y > tr_y) std::swap(bl_y, tr_y);
+
+    bl_x = glm::clamp(bl_x, 0, cellBuffer->getWidth() - 1);
+    tr_x = glm::clamp(tr_x, 0, cellBuffer->getWidth() - 1);
+    bl_y = glm::clamp(bl_y, 0, cellBuffer->getHeight() - 1);
+    tr_y = glm::clamp(tr_y, 0, cellBuffer->getHeight() - 1);
+
+    if (bl_x > tr_x || bl_y > tr_y) {
+        return std::nullopt;
+    }
+
+    sand.assign(static_cast<std::size_t>(tr_x - bl_x + 1), std::vector<int>(static_cast<std::size_t>(tr_y - bl_y + 1), 0));
+    for (int x = bl_x; x <= tr_x; x++) {
+        for (int y = bl_y; y <= tr_y; y++) {
+            const Color color = cellBuffer->getActivePixel(x, y);
+            if (color.mat_id != 0 && (includeFluid || is_fluid(color) == false)) {
+                sand[static_cast<std::size_t>(x - bl_x)][static_cast<std::size_t>(y - bl_y)] = 1;
+            }
+        }
+    }
+    return glm::ivec2(bl_x, bl_y);
+}
 
 std::unique_ptr<ColliderTable> Solver::colliderTable(new ColliderTable(64));
 
@@ -274,34 +329,13 @@ void Solver::step(float dtIncoming) {
     for (Rigid* body = bodies; body != nullptr; body = body->getNext()) {
         if (body->getMass() <= 0.0f) continue;
 
-        // get pixel-space AABB
-        glm::vec2 bl, tr;
-        bodyTable->getBVH()->getSandAABB(body, bl, tr);
-
-        int bl_x, bl_y, tr_x, tr_y;
-        cellBuffer->worldToPixel(bl, bl_x, bl_y);
-        cellBuffer->worldToPixel(tr, tr_x, tr_y);
-
-        if (bl_x > tr_x) std::swap(bl_x, tr_x);
-        if (bl_y > tr_y) std::swap(bl_y, tr_y);
-
-        bl_x = glm::clamp(bl_x, 0, cellBuffer->getWidth() - 1);
-        tr_x = glm::clamp(tr_x, 0, cellBuffer->getWidth() - 1);
-        bl_y = glm::clamp(bl_y, 0, cellBuffer->getHeight() - 1);
-        tr_y = glm::clamp(tr_y, 0, cellBuffer->getHeight() - 1);
-
-        if (bl_x > tr_x || bl_y > tr_y) continue;
-
-        // collect sand from AABB
-        std::vector<std::vector<int>> sand(tr_x - bl_x + 1, std::vector<int>(tr_y - bl_y + 1, 0));
-        for (int x = bl_x; x <= tr_x; x++) {
-            for (int y = bl_y; y <= tr_y; y++) {
-                Color color = cellBuffer->getActivePixel(x, y);
-                if (color.mat_id != 0 && is_fluid(color) == false) {
-                    sand[x - bl_x][y - bl_y] = 1;
-                }
-            }
+        std::vector<std::vector<int>> sand;
+        const std::optional<glm::ivec2> aabbOrigin = fillSandGridFromRigidAABB(body, sand, false);
+        if (!aabbOrigin) {
+            continue;
         }
+        const int bl_x = aabbOrigin->x;
+        const int bl_y = aabbOrigin->y;
 
         MarchingGrid grid(std::move(sand));
         grid.bfs();
@@ -542,6 +576,111 @@ void Solver::rebuildVelocityShader() {
         },
         sizeof(VelocityUniforms)
     );
+}
+
+bool Solver::isTouching(Rigid* rigid, int materialId) {
+    if (rigid == nullptr || cellBuffer == nullptr) {
+        return false;
+    }
+    return isTouchingSand(rigid, materialId) || isTouchingParticle(rigid, materialId);
+}
+
+bool Solver::isTouchingSand(Rigid* rigid, int materialId) {
+    if (rigid == nullptr || cellBuffer == nullptr) {
+        return false;
+    }
+    std::vector<std::vector<int>> sand;
+    const std::optional<glm::ivec2> origin = fillSandGridFromRigidAABB(rigid, sand, true);
+    if (!origin) {
+        return false;
+    }
+    const int bl_x = origin->x;
+    const int bl_y = origin->y;
+
+    for (std::size_t ix = 0; ix < sand.size(); ++ix) {
+        for (std::size_t iy = 0; iy < sand[ix].size(); ++iy) {
+            if (sand[ix][iy] == 0) {
+                continue;
+            }
+            const int px = bl_x + static_cast<int>(ix);
+            const int py = bl_y + static_cast<int>(iy);
+            const Color c = cellBuffer->getActivePixel(px, py);
+            if (c.getMatId() == 0) {
+                continue;
+            }
+            if (materialId != -1 && static_cast<int>(c.getMatId()) != materialId) {
+                continue;
+            }
+
+            const glm::vec2 world = sandCellCenterWorld(cellBuffer, px, py);
+            glm::vec2 local;
+            if (rigid->pointCollision(world, local)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Solver::isTouchingParticle(Rigid* rigid, int materialId) {
+    if (rigid == nullptr || cellBuffer == nullptr) {
+        return false;
+    }
+    const std::vector<Particle>& particles = cellBuffer->getParticles();
+    for (const Particle& particle : particles) {
+        if ((particle._pad & 1u) == 0u) {
+            continue;
+        }
+        const Color pColor = unpackCell(particle.color);
+        const int mid = static_cast<int>(pColor.mat_id);
+        if (materialId == -1) {
+            if (mid == 0) {
+                continue;
+            }
+        } else if (mid != materialId) {
+            continue;
+        }
+
+        const glm::vec2 world = gridPixelToWorld(cellBuffer, particle.pos.x, particle.pos.y);
+        glm::vec2 local;
+        if (!rigid->pointCollision(world, local)) {
+            continue;
+        }
+
+        return true;
+    }
+    return false;
+}
+
+std::vector<CellParticle> Solver::getTouchedParticles(Rigid* rigid, int materialId) {
+    std::vector<CellParticle> touchedParticles;
+    if (rigid == nullptr || cellBuffer == nullptr) {
+        return touchedParticles;
+    }
+    const std::vector<Particle>& particles = cellBuffer->getParticles();
+    for (const Particle& particle : particles) {
+        if ((particle._pad & 1u) == 0u) {
+            continue;
+        }
+        const Color pColor = unpackCell(particle.color);
+        const int mid = static_cast<int>(pColor.mat_id);
+        if (materialId == -1) {
+            if (mid == 0) {
+                continue;
+            }
+        } else if (mid != materialId) {
+            continue;
+        }
+
+        const glm::vec2 world = gridPixelToWorld(cellBuffer, particle.pos.x, particle.pos.y);
+        glm::vec2 local;
+        if (!rigid->pointCollision(world, local)) {
+            continue;
+        }
+
+        touchedParticles.emplace_back(world, particle.vel, pColor);
+    }
+    return touchedParticles;
 }
 
 }

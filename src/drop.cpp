@@ -66,7 +66,7 @@
              delete drag;
              drag = nullptr;
          }
- 
+
          // --- Spawn / Delete ---
          if (keyboard->getPressed(bsk::Key::K_SPACE)) {
              bsk::Node2D* hovered = scene->pick(mousePos);

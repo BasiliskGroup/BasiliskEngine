@@ -42,5 +42,10 @@ void bind_solver(py::module_& m) {
         .def("setAlpha", &Solver::setAlpha)
         .def("setBeta", &Solver::setBeta)
         .def("setGamma", &Solver::setGamma)
-        .def("setPostStabilize", &Solver::setPostStabilize);
+        .def("setPostStabilize", &Solver::setPostStabilize)
+
+        .def("is_touching", &Solver::isTouching, py::arg("rigid"), py::arg("material_id") = -1)
+        .def("is_touching_sand", &Solver::isTouchingSand, py::arg("rigid"), py::arg("material_id") = -1)
+        .def("is_touching_particle", &Solver::isTouchingParticle, py::arg("rigid"), py::arg("material_id") = -1)
+        .def("get_touched_particles", &Solver::getTouchedParticles, py::arg("rigid"), py::arg("material_id") = -1);
 }
