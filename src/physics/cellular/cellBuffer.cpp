@@ -238,8 +238,17 @@ void CellBuffer::updateTexture() {
 }
 
 void CellBuffer::setActivePixel(int x, int y, const Color& color) {
-    if (x >= 0 && x < width && y >= 0 && y < height)
-        getActiveBuffer()[y * width + x] = color;
+    if (x < 0 || x >= width || y < 0 || y >= height) {
+        return;
+    }
+
+    markChunkDirty(x, y);
+    if (computeInitialized) {
+        pendingBrushPixels.push_back({y * width + x, color});
+        return;
+    }
+
+    getActiveBuffer()[y * width + x] = color;
 }
 
 void CellBuffer::setActivePixel(int x, int y, char r, char g, char b, int mat_id, bool on_fire, bool is_static) {

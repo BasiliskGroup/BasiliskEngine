@@ -171,7 +171,8 @@ int main() {
                 bsk::Color brushColor = rainbowBrushColor(mat_id, fireMode);
                 brushColor.mat_id = static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
                 if (particleMode) cellBuffer->applyParticleBrush(pixelX, pixelY, bufferHeight / 50, 64, brushColor);
-                else cellBuffer->applyBrush(pixelX, pixelY, bufferHeight / 100, brushColor);
+                // else cellBuffer->applyBrush(pixelX, pixelY, bufferHeight / 100, brushColor);
+                else cellBuffer->setActivePixel(pixelX, pixelY, brushColor);
             }
         }
 
@@ -189,6 +190,8 @@ int main() {
         sandShader->setUniform("cameraScale", cameraScale);
         sandShader->setUniform("bufferSize", glm::vec2(bufferWidth, bufferHeight));
         sandShader->setUniform("cellScale", cellBuffer->getCellScale());
+
+        std::cout << engine->getDeltaTime() << std::endl;
 
         // TODO check if this works on all OS
         sandFrame->render(cellBuffer->getRenderTexture(), 0, 0, engine->getWindow()->getWidth(), engine->getWindow()->getHeight());
