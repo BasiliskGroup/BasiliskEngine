@@ -192,6 +192,12 @@ public:
     void addSandManifoldForceIndex(uint32_t forceIndex);
     void remapSandManifoldForceIndices(const std::vector<uint32_t>& forceIndexMap, uint32_t oldForceCount);
 
+    // rigid -> sand/particle collisions
+    bool isTouching(Rigid* rigid, int materialId=-1);
+    bool isTouchingSand(Rigid* rigid, int materialId=-1);
+    bool isTouchingParticle(Rigid* rigid, int materialId=-1);
+    // Particle* 
+
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);
 };

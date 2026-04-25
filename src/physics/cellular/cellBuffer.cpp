@@ -14,11 +14,6 @@
 using namespace bsk::internal;
 
 namespace {
-struct ParticleVertex {
-    glm::vec2 pos;
-    glm::vec3 color;
-};
-
 inline uint32_t packCell(const Color& c, uint32_t momentum = 0u) {
     const uint32_t mat = static_cast<uint32_t>(c.mat_id) & 0x1Fu;
     const uint32_t fire = static_cast<uint32_t>(c.on_fire) & 1u;

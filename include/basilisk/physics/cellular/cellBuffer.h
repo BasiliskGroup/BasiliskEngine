@@ -136,7 +136,9 @@ public:
 
     int getWidth()  const { return width; }
     int getHeight() const { return height; }
+
     float getCellScale() const { return cellScale; }
+    void setCellScale(float value) { cellScale = value; }
 
     std::vector<Color>& getData() { return getActiveBuffer(); }
 

@@ -45,6 +45,7 @@
 #include "physics/forces/manifold.h"
 #include "physics/collision/collider.h"
 #include "physics/cellular/cellBuffer.h"
+#include "physics/cellular/color.h"
 
 namespace bsk {
     // render
@@ -71,6 +72,8 @@ namespace bsk {
     using Motor = internal::Motor;
     using Collider = internal::Collider;
     using CellBuffer = internal::CellBuffer;
+
+    using Color = internal::Color;
 
     // render
     using Mesh = internal::Mesh;

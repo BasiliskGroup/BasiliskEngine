@@ -3,6 +3,8 @@
 
 #include <array>
 
+namespace bsk::internal {
+
 // NOTE these values are copied from intent.wgsl, you must update both at the same time
 enum class MaterialIDs {
     EMPTY = 0,
@@ -84,6 +86,8 @@ inline bool is_fluid(const Color& color) {
         default:
             return false;
     }
+}
+
 }
 
 #endif

@@ -7,6 +7,8 @@
 #include <chrono>
 #include <basilisk/basilisk.h>
 
+
+
 // Rainbow color with uneven sine curves, full cycle every 10 seconds
 static std::array<unsigned char, 3> baseBrushColorForMaterial(unsigned char mat_id) {
     switch (mat_id) {
@@ -29,7 +31,7 @@ static std::array<unsigned char, 3> baseBrushColorForMaterial(unsigned char mat_
     }
 }
 
-static Color rainbowBrushColor(unsigned char mat_id, bool on_fire) {
+static bsk::Color rainbowBrushColor(unsigned char mat_id, bool on_fire) {
     const double t = glfwGetTime() / 0.5;  // 0..1 over 10 seconds
     const auto base = baseBrushColorForMaterial(mat_id);
     auto waveChannel = [](unsigned char baseChannel, double phase) -> unsigned char {
@@ -37,7 +39,7 @@ static Color rainbowBrushColor(unsigned char mat_id, bool on_fire) {
         return static_cast<unsigned char>(std::clamp(v, 0, 255));
     };
 
-    return Color(
+    return bsk::Color(
         waveChannel(base[0], t),
         waveChannel(base[1], t),
         waveChannel(base[2], t),
@@ -165,7 +167,7 @@ int main() {
             cellBuffer->worldToPixel(mouseWorld, pixelX, pixelY);
             
             if (pixelX >= 0 && pixelX < bufferWidth && pixelY >= 0 && pixelY < bufferHeight) {
-                Color brushColor = rainbowBrushColor(mat_id, fireMode);
+                bsk::Color brushColor = rainbowBrushColor(mat_id, fireMode);
                 brushColor.mat_id = static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
                 if (particleMode) cellBuffer->applyParticleBrush(pixelX, pixelY, bufferHeight / 50, 64, brushColor);
                 else cellBuffer->applyBrush(pixelX, pixelY, bufferHeight / 100, brushColor);
