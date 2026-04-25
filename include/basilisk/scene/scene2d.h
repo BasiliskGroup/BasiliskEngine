@@ -26,8 +26,8 @@ class Scene2D : public VirtualScene<Node2D, glm::vec2, float, glm::vec2> {
         bool customShader = false;
 
     public:
-        Scene2D(Engine* engine);
-        Scene2D(Engine* engine, Shader* shader);
+        Scene2D(Engine* engin, int cellWidth=800, int cellHeight=800, float cellScale=0.2f);
+        Scene2D(Engine* engine, Shader* shader, int cellWidth=800, int cellHeight=800, float cellScale=0.2f);
         ~Scene2D();
 
         void update();

@@ -84,6 +84,7 @@ void CellBuffer::initializeCompute() {
 
     const size_t cellCount  = width * height;
     gpuCellScratch.resize(cellCount);
+    gpuRenderScratch.resize(cellCount);
 
     // Storage buffers
     cellsA             = new GpuBufferU32(cellCount);
@@ -209,8 +210,14 @@ void CellBuffer::markChunkDirty(int px, int py) {
 // ---------------------------------------------------------------------------
 
 void CellBuffer::updateTexture() {
+    if (gpuRenderScratch.size() != gpuCellScratch.size()) {
+        gpuRenderScratch.resize(gpuCellScratch.size());
+    }
 
-    // Add the particles to the gpuCellScratch
+    // Start from authoritative sand cells; keep physics readback untouched.
+    gpuRenderScratch = gpuCellScratch;
+
+    // Add particles only to the render copy.
     for (uint32_t i = 0; i < nextParticleIndex; ++i) {
         // Skip inactive particles
         if ((particleCpu[i]._pad & 1u) == 0u) { continue; }
@@ -220,14 +227,14 @@ void CellBuffer::updateTexture() {
         int y = (int)(particleCpu[i].pos.y);
         if (x < 0 || x >= width || y < 0 || y >= height) { continue; }
 
-        // Write the particle to the gpuCellScratch
+        // Write the particle to the render scratch
         unsigned int index = static_cast<unsigned int>(y * width + x);
-        gpuCellScratch[index] = particleCpu[i].color;
+        gpuRenderScratch[index] = particleCpu[i].color;
     }
 
     // Write buffer data to texture
     glBindTexture(GL_TEXTURE_2D, renderTexture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED_INTEGER, GL_UNSIGNED_INT, gpuCellScratch.data());
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED_INTEGER, GL_UNSIGNED_INT, gpuRenderScratch.data());
 }
 
 void CellBuffer::setActivePixel(int x, int y, const Color& color) {

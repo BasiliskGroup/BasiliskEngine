@@ -76,7 +76,7 @@ std::optional<glm::ivec2> Solver::fillSandGridFromRigidAABB(Rigid* body, std::ve
 
 std::unique_ptr<ColliderTable> Solver::colliderTable(new ColliderTable(64));
 
-Solver::Solver() : 
+Solver::Solver(int cellWidth, int cellHeight, float cellScale) : 
     bodies(nullptr), 
     forces(nullptr),
     numRigids(0),
@@ -98,7 +98,7 @@ Solver::Solver() :
     this->forceTable = new ForceTable(128);
     this->forceTable->setSolver(this);
 
-    this->cellBuffer = new CellBuffer(800, 800, 0.2f);
+    this->cellBuffer = new CellBuffer(cellWidth, cellHeight, cellScale);
     this->cellBuffer->initialize("shaders/physics/vertex.glsl", "shaders/physics/fragment.glsl");
     this->cellBuffer->initializeCompute();
 

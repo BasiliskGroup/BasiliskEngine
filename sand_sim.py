@@ -41,7 +41,7 @@ def rainbow_brush_color(engine: bsk.Engine, mat_id: int, on_fire: bool) -> bsk.C
 
 def main() -> None:
     engine = bsk.Engine(WINDOW_WIDTH, WINDOW_HEIGHT, "Sand Simulation", False, False)
-    scene = bsk.Scene2D(engine)
+    scene = bsk.Scene2D(engine, 20, 20, 0.5)
     scene.camera = bsk.Camera2D(engine, glm.vec2(0.0, 0.0), 30.0)
     scene.camera.speed = 30.0
 
@@ -89,7 +89,7 @@ def main() -> None:
                 brush.mat_id = (brush.mat_id & 0x0F) | (STATIC_MAT_BIT if static_mode else 0)
                 if particle_mode:
                     cell_buffer.add_particle(mouse_pos, glm.vec2(0.0, 0.0), brush)
-                    # cell_buffer.apply_particle_brush(pixel_x, pixel_y, buffer_height // 50, 64, brush)
+                    cell_buffer.apply_particle_brush(pixel_x, pixel_y, buffer_height // 50, 64, brush)
                 else:
                     cell_buffer.apply_brush(pixel_x, pixel_y, buffer_height // 100, brush)
 

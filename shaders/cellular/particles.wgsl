@@ -111,25 +111,33 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
     let before_cell = cell_coords_from_pos(p.pos);
 
-    // if we are currently in a cell, forcefully terminate particle
-    if (in_bounds(before_cell.x, before_cell.y) &&
-        material(cells[cell_idx(before_cell.x, before_cell.y)]) != 0u) {
-        p.pos = vec2<f32>(-1000.0, -1000.0);
-        p.vel = vec2<f32>(0.0, 0.0);
-        p._pad = 0u;
-    }
-
     // Velocity/gravity are in world units per second; positions are in cell units.
     // Convert world displacement to cell displacement via cell_width.
     p.vel.y -= uniforms.gravity * uniforms.dt;
     p.pos += (p.vel * uniforms.dt) / uniforms.cell_width;
 
-    // Simple robust prototype: attempt deposit at post-integrated cell,
-    // then also try the previous cell to reduce missed landings.
     let after_cell = cell_coords_from_pos(p.pos);
-    let landed_after = try_deposit_particle_cell(&p, after_cell.x, after_cell.y);
-    if (!landed_after) {
+
+    // End-of-frame overlap check: if the new position is inside a filled cell,
+    // deposit sand at the previous cell position instead of the new one.
+    let after_in_sand = in_bounds(after_cell.x, after_cell.y) &&
+        material(cells[cell_idx(after_cell.x, after_cell.y)]) != 0u;
+    if (after_in_sand) {
+        // Try to place sand where the particle was before moving.
         let _landed_before = try_deposit_particle_cell(&p, before_cell.x, before_cell.y);
+        // If that also failed (e.g. before_cell is occupied too), just deactivate.
+        if ((p._pad & 1u) != 0u) {
+            p.pos = vec2<f32>(-1000.0, -1000.0);
+            p.vel = vec2<f32>(0.0, 0.0);
+            p._pad = 0u;
+        }
+    } else {
+        // Normal landing: attempt deposit at post-integrated cell,
+        // then also try the previous cell to reduce missed landings.
+        let landed_after = try_deposit_particle_cell(&p, after_cell.x, after_cell.y);
+        if (!landed_after) {
+            let _landed_before = try_deposit_particle_cell(&p, before_cell.x, before_cell.y);
+        }
     }
 
     // If particle became inactive this step, publish index to free stack.

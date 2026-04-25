@@ -91,7 +91,7 @@ private:
     std::optional<glm::ivec2> fillSandGridFromRigidAABB(Rigid* body, std::vector<std::vector<int>>& sand, bool includeFluid=true) const;
 
 public:
-    Solver();
+    Solver(int cellWidth=800, int cellHeight=800, float cellScale=0.2f);
     ~Solver();
 
     // Linked list management

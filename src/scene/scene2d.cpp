@@ -8,20 +8,20 @@ namespace bsk::internal {
  * 
  * @param engine 
  */
-Scene2D::Scene2D(Engine* engine) : VirtualScene(engine) {
+Scene2D::Scene2D(Engine* engine, int cellWidth, int cellHeight, float cellScale) : VirtualScene(engine) {
     camera = new Camera2D(engine);
     internalCamera = camera;
     shader = new Shader(internalPath("shaders/instance2D.vert").c_str(), internalPath("shaders/instance2D.frag").c_str());
-    solver = new Solver();
+    solver = new Solver(cellWidth, cellHeight, cellScale);
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
     customShader = false;
 }
 
-Scene2D::Scene2D(Engine* engine, Shader* shader) : VirtualScene(engine) {
+Scene2D::Scene2D(Engine* engine, Shader* shader, int cellWidth, int cellHeight, float cellScale) : VirtualScene(engine) {
     camera = new Camera2D(engine);
     internalCamera = camera;
     this->shader = shader;
-    solver = new Solver();
+    solver = new Solver(cellWidth, cellHeight, cellScale);
     engine->getResourceServer()->write(shader, "textureArrays", "materials");
     customShader = true;
 }

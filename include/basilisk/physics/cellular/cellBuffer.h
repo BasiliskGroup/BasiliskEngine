@@ -66,7 +66,8 @@ private:
     // CPU-side chunk state
     std::vector<uint32_t> chunkActive;    // fed to GPU each frame
     std::vector<uint32_t> chunkActiveOut; // staging readback lands here
-    std::vector<uint32_t> gpuCellScratch; // temporary packed cell storage for GPU I/O
+    std::vector<uint32_t> gpuCellScratch;   // authoritative packed cells mirrored from GPU
+    std::vector<uint32_t> gpuRenderScratch; // render staging (cells + particle overlay)
 
     // Pipelining: track whether an async readback is in flight
     bool pendingCellsReadback = false;

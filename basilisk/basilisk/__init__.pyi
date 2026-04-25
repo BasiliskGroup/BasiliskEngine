@@ -1053,10 +1053,10 @@ class Scene:
 class Scene2D:
     camera: StaticCamera2D
     @typing.overload
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self, engine: Engine, cell_width: typing.SupportsInt = 800, cell_height: typing.SupportsInt = 800, cell_scale: typing.SupportsFloat = 0.2) -> None:
         ...
     @typing.overload
-    def __init__(self, engine: Engine, shader: Shader) -> None:
+    def __init__(self, engine: Engine, shader: Shader, cell_width: typing.SupportsInt = 800, cell_height: typing.SupportsInt = 800, cell_scale: typing.SupportsFloat = 0.2) -> None:
         ...
     def add(self, node: ...) -> None:
         ...
