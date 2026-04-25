@@ -73,5 +73,6 @@ void bind_cellular(py::module_& m) {
         .def("get_width", &CellBuffer::getWidth)
         .def("get_height", &CellBuffer::getHeight)
         .def("get_cell_scale", &CellBuffer::getCellScale)
+        .def("set_cell_scale", &CellBuffer::setCellScale, py::arg("value"))
         .def("get_render_texture", &CellBuffer::getRenderTexture);
 }

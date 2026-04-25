@@ -1,6 +1,7 @@
 #ifndef BSK_PHYSICS_CELLULAR_COLOR_H
 #define BSK_PHYSICS_CELLULAR_COLOR_H
 
+#include <basilisk/util/includes.h>
 #include <array>
 
 namespace bsk::internal {
@@ -72,6 +73,12 @@ struct Color {
                mat_id == other.mat_id &&
                on_fire == other.on_fire;
     }
+};
+
+struct CellParticle {
+    glm::vec2 pos;
+    glm::vec2 vel;
+    Color color;
 };
 
 // NOTE these values are copied from intent.wgsl, you must update both at the same time

@@ -32,6 +32,7 @@ class CellBuffer;
 template<typename T> class ForceTypeTable;
 struct ThreadScratch;
 struct WorkRange;
+struct CellParticle;
 
 // Core solver class which holds all the rigid bodies and forces, and has logic to step the simulation forward in time
 class Solver {
@@ -196,7 +197,7 @@ public:
     bool isTouching(Rigid* rigid, int materialId=-1);
     bool isTouchingSand(Rigid* rigid, int materialId=-1);
     bool isTouchingParticle(Rigid* rigid, int materialId=-1);
-    // Particle* 
+    std::vector<CellParticle> getTouchedParticles(Rigid* rigid, int materialId=-1);
 
     // Picking
     Rigid* pick(glm::vec2 at, glm::vec2& local);
