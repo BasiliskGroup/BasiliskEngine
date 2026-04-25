@@ -78,6 +78,42 @@ void bind_cellular(py::module_& m) {
         .def("apply_brush", &CellBuffer::applyBrush, py::arg("pixel_x"), py::arg("pixel_y"), py::arg("radius"), py::arg("color"))
         .def("apply_particle_brush", &CellBuffer::applyParticleBrush, py::arg("pixel_x"), py::arg("pixel_y"), py::arg("radius"), py::arg("spawn_count"), py::arg("color"))
         .def("explode", &CellBuffer::explode, py::arg("pixel_x"), py::arg("pixel_y"), py::arg("radius"), py::arg("fire_chance"))
+        .def("blit_rgba_buffer", [](CellBuffer& self,
+                                    py::bytes rgba_bytes,
+                                    int image_width,
+                                    int image_height,
+                                    int offset_x,
+                                    int offset_y,
+                                    unsigned int material_id,
+                                    bool on_fire,
+                                    bool is_static,
+                                    bool flip_y_to_buffer_space,
+                                    unsigned int alpha_threshold) {
+            std::string raw = rgba_bytes;
+            std::vector<uint8_t> rgba(raw.begin(), raw.end());
+            return self.blitRgbaBuffer(
+                rgba,
+                image_width,
+                image_height,
+                offset_x,
+                offset_y,
+                static_cast<uint8_t>(material_id & 0xFFu),
+                on_fire,
+                is_static,
+                flip_y_to_buffer_space,
+                static_cast<uint8_t>(alpha_threshold & 0xFFu)
+            );
+        },
+        py::arg("rgba_bytes"),
+        py::arg("image_width"),
+        py::arg("image_height"),
+        py::arg("offset_x"),
+        py::arg("offset_y"),
+        py::arg("material_id"),
+        py::arg("on_fire") = false,
+        py::arg("is_static") = false,
+        py::arg("flip_y_to_buffer_space") = true,
+        py::arg("alpha_threshold") = 1u)
         .def("add_particle", static_cast<AddParticleColor>(&CellBuffer::addParticle),
             py::arg("pos"), py::arg("vel"), py::arg("color"), py::arg("forced_lifetime") = 0.0f, py::arg("explode_radius") = 0u, py::arg("explode_fire_chance") = 0.0f)
         .def("add_particle", [](CellBuffer& self, const glm::vec2& pos, const glm::vec2& vel, unsigned char r, unsigned char g, unsigned char b, int mat_id, bool on_fire, bool is_static, float forced_lifetime, uint32_t explode_radius, float explode_fire_chance) {

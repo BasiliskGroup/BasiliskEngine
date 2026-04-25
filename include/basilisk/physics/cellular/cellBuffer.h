@@ -193,6 +193,18 @@ public:
     void applyBrush(int pixelX, int pixelY, int radius, const Color& color);
     void applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t spawnCount, const Color& color);
     void explode(int pixelX, int pixelY, int radius, float fireChance);
+    bool blitRgbaBuffer(
+        const std::vector<uint8_t>& rgba,
+        int imageWidth,
+        int imageHeight,
+        int offsetX,
+        int offsetY,
+        uint8_t materialId,
+        bool onFire = false,
+        bool isStatic = false,
+        bool flipYToBufferSpace = true,
+        uint8_t alphaThreshold = 1
+    );
 
     // basically what we're gonna do is dance
     bool addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime = 0.0f, uint32_t explodeRadius = 0u, float explodeFireChance = 0.0f);

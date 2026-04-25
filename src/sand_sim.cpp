@@ -179,7 +179,8 @@ int main() {
             if (pixelX >= 0 && pixelX < bufferWidth && pixelY >= 0 && pixelY < bufferHeight) {
                 bsk::Color brushColor = rainbowBrushColor(mat_id, fireMode);
                 brushColor.mat_id = static_cast<unsigned char>((brushColor.mat_id & 0x0Fu) | (staticMode ? STATIC_MAT_BIT : 0u));
-                if (particleMode) cellBuffer->applyParticleBrush(pixelX, pixelY, bufferHeight / 50, 64, brushColor);
+                // if (particleMode) cellBuffer->applyParticleBrush(pixelX, pixelY, bufferHeight / 50, 64, brushColor);
+                if (particleMode) cellBuffer->addParticle(glm::vec2(pixelX, pixelY), glm::vec2(0.0f, 0.0f), brushColor, 0.1f, 5u, 0.0f);
                 else cellBuffer->applyBrush(pixelX, pixelY, bufferHeight / 100, brushColor);
             }
         }

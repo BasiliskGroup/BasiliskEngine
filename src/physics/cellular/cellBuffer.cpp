@@ -436,6 +436,52 @@ void CellBuffer::applyParticleBrush(int pixelX, int pixelY, int radius, uint32_t
     }
 }
 
+bool CellBuffer::blitRgbaBuffer(
+    const std::vector<uint8_t>& rgba,
+    int imageWidth,
+    int imageHeight,
+    int offsetX,
+    int offsetY,
+    uint8_t materialId,
+    bool onFire,
+    bool isStatic,
+    bool flipYToBufferSpace,
+    uint8_t alphaThreshold
+) {
+    if (imageWidth <= 0 || imageHeight <= 0) {
+        return false;
+    }
+    const size_t expectedBytes = static_cast<size_t>(imageWidth) * static_cast<size_t>(imageHeight) * 4u;
+    if (rgba.size() < expectedBytes) {
+        return false;
+    }
+
+    for (int y = 0; y < imageHeight; ++y) {
+        for (int x = 0; x < imageWidth; ++x) {
+            const size_t idx = (static_cast<size_t>(y) * static_cast<size_t>(imageWidth) + static_cast<size_t>(x)) * 4u;
+            const uint8_t a = rgba[idx + 3u];
+            if (a < alphaThreshold) {
+                continue;
+            }
+
+            const Color c(
+                rgba[idx + 0u],
+                rgba[idx + 1u],
+                rgba[idx + 2u],
+                materialId,
+                onFire ? 1u : 0u,
+                isStatic
+            );
+
+            const int px = x + offsetX;
+            const int py = flipYToBufferSpace ? (height - y + offsetY) : (y + offsetY);
+            setActivePixel(px, py, c);
+        }
+    }
+
+    return true;
+}
+
 bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, const Color& color, float forcedLifetime, uint32_t explodeRadius, float explodeFireChance) {
     if (!computeInitialized || !particlesA) {
         return false;
