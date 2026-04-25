@@ -86,7 +86,7 @@ std::optional<glm::ivec2> Solver::fillSandGridFromRigidAABB(
                 continue;
             }
 
-            if (skipSparseNonStatic && !color.getIsStatic()) {
+            if (skipSparseNonStatic) {
                 int neighbors = 0;
                 if (x > bl_x && is_occupied_for_mask(x - 1, y)) { neighbors++; }
                 if (x < tr_x && is_occupied_for_mask(x + 1, y)) { neighbors++; }

@@ -539,6 +539,7 @@ bool CellBuffer::addParticle(const glm::vec2& pos, const glm::vec2& vel, char co
 // ---------------------------------------------------------------------------
 
 void CellBuffer::simulate(float deltaTime) {
+    explosionHappened = false;
     if (!computeInitialized) return;
     const float frameDt = std::clamp(std::max(0.0f, deltaTime), 1.0f / 240.0f, 1.0f / 15.0f);
     const float fixedStep = 1.0f / std::max(cellUpdatesPerSecond, 1.0f);
@@ -602,6 +603,7 @@ void CellBuffer::simulate(float deltaTime) {
             }
             // GPU-origin explosion processing always uses zero ignition chance.
             explode(ex, ey, static_cast<int>(ev.radius), 0.0f);
+            explosionHappened = true;
         }
     }
 

@@ -134,6 +134,8 @@ private:
     ComputeShader* applyShader    = nullptr;
     ComputeShader* particleShader = nullptr;
 
+    bool explosionHappened = false;
+
     // Chunk helpers
     void markChunkDirty(int px, int py);
     void markChunkAndNeighborsDirty(int cx, int cy);
@@ -214,6 +216,8 @@ public:
 
     // particle getter
     const std::vector<Particle>& getParticles() const { return particleCpu; }
+
+    bool getExplosionHappened() const { return explosionHappened; }
 };
 
 }

@@ -122,6 +122,7 @@ void bind_cellular(py::module_& m) {
         }, py::arg("pos"), py::arg("vel"), py::arg("r"), py::arg("g"), py::arg("b"), py::arg("mat_id"), py::arg("on_fire") = false, py::arg("is_static") = false, py::arg("forced_lifetime") = 0.0f, py::arg("explode_radius") = 0u, py::arg("explode_fire_chance") = 0.0f)
         .def("get_width", &CellBuffer::getWidth)
         .def("get_height", &CellBuffer::getHeight)
+        .def("get_explosion_happened", &CellBuffer::getExplosionHappened)
         .def("get_cell_scale", &CellBuffer::getCellScale)
         .def("set_cell_scale", &CellBuffer::setCellScale, py::arg("value"))
         .def("set_cell_updates_per_second", &CellBuffer::setCellUpdatesPerSecond, py::arg("value"))
